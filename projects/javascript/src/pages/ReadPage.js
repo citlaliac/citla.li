@@ -19,18 +19,6 @@ function ReadPage() {
         <div className="poetry-section">
           <h3>Screaming and Chatter Collection</h3>
           <div className="poem-item">
-            <div className="poem-header" onClick={() => toggleSection('screaming')}>
-              <h4>Screaming and Chatter</h4>
-              <span className="expand-icon">{expandedSection === 'screaming' ? '−' : '+'}</span>
-            </div>
-            {expandedSection === 'screaming' && (
-              <div className="poem-content">
-                <p>Poetry content coming soon...</p>
-              </div>
-            )}
-          </div>
-
-          <div className="poem-item">
             <div className="poem-header" onClick={() => toggleSection('cat-haiku-1')}>
               <h4>Cat Haiku One - Cat's Dance</h4>
               <span className="expand-icon">{expandedSection === 'cat-haiku-1' ? '−' : '+'}</span>
@@ -93,7 +81,7 @@ function ReadPage() {
                 <p>And my black thieve's mask</p>
                 <p>The ice cream becomes closer?</p>
                 <p>Two great flaps and a mighty webbed step later</p>
-                <p>I appreciate your ice cream</p>
+                <p>I appreciate your ice cream.</p>
               </div>
             )}
           </div>
@@ -139,12 +127,21 @@ function ReadPage() {
           <h3>Winsome Wetlands</h3>
           <div className="poem-item">
             <div className="poem-header" onClick={() => toggleSection('wetlands')}>
-              <h4>Winsome Wetlands</h4>
+              <h4>Lightningbug Land</h4>
               <span className="expand-icon">{expandedSection === 'wetlands' ? '−' : '+'}</span>
             </div>
             {expandedSection === 'wetlands' && (
               <div className="poem-content">
-                <p>Poetry content coming soon...</p>
+                <p>Lead laced lashes limp lower</p>
+                <p>  Lower</p>
+                <p>   Lower</p>
+                <p>Lenses lided</p>
+                <p> Listening</p>
+                <p>Loon’s lowly loo lands loftily, lingering</p>
+                <p>Lover’s lute-like laughs lavishly leaking life</p>
+                <p>Lush leaves lay laden</p>
+                <p>Lukewarm light leisurely lusters</p>
+                <p>Luscious little lowlands litter lakelocked Louisiana.</p>
               </div>
             )}
           </div>
