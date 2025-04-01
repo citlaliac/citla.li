@@ -9,11 +9,13 @@ function Header() {
           <div className="icon-wrapper small">
             <img src="/assets/gifs/home.gif" alt="Home" />
           </div>
+          <span>HOME</span>
         </Link>
         <Link to="/contact" className="nav-icon">
           <div className="icon-wrapper small">
             <img src="/assets/gifs/contact.gif" alt="Contact" />
           </div>
+          <span>CONTACT</span>
         </Link>
       </div>
     </header>

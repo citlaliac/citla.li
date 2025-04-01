@@ -17,9 +17,18 @@ Step 4: To try out cursor on your own projects, go to the file menu (top left) a
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import ListenPage from './pages/ListenPage';
+import LaughPage from './pages/LaughPage';
+import ReadPage from './pages/ReadPage';
+import SeePage from './pages/SeePage';
+import TechPage from './pages/TechPage';
+import ShopPage from './pages/ShopPage';
+import TourPage from './pages/TourPage';
+import SurprisePage from './pages/SurprisePage';
+import ContactPage from './pages/ContactPage';
 import './styles.css';
 
 // Main page component
@@ -79,7 +88,7 @@ function MainPage() {
             <div className="icon-wrapper">
               <img src="/assets/gifs/surprise.gif" alt="Surprise" />
             </div>
-            <span>SURPRISE ME</span>
+            <span>SURPRISE</span>
           </Link>
         </div>
       </main>
@@ -88,97 +97,7 @@ function MainPage() {
   );
 }
 
-// Placeholder pages
-function ListenPage() {
-  return (
-    <div className="app-container">
-      <Header />
-      <div className="page-container">Listen Page</div>
-      <Footer />
-    </div>
-  );
-}
-
-function LaughPage() {
-  return (
-    <div className="app-container">
-      <Header />
-      <div className="page-container">Laugh Page</div>
-      <Footer />
-    </div>
-  );
-}
-
-function ReadPage() {
-  return (
-    <div className="app-container">
-      <Header />
-      <div className="page-container">Read Page</div>
-      <Footer />
-    </div>
-  );
-}
-
-function SeePage() {
-  return (
-    <div className="app-container">
-      <Header />
-      <div className="page-container">See Page</div>
-      <Footer />
-    </div>
-  );
-}
-
-function TechPage() {
-  return (
-    <div className="app-container">
-      <Header />
-      <div className="page-container">Tech Page</div>
-      <Footer />
-    </div>
-  );
-}
-
-function ShopPage() {
-  return (
-    <div className="app-container">
-      <Header />
-      <div className="page-container">Shop Page</div>
-      <Footer />
-    </div>
-  );
-}
-
-function TourPage() {
-  return (
-    <div className="app-container">
-      <Header />
-      <div className="page-container">Tour Page</div>
-      <Footer />
-    </div>
-  );
-}
-
-function SurprisePage() {
-  return (
-    <div className="app-container">
-      <Header />
-      <div className="page-container">Surprise Page</div>
-      <Footer />
-    </div>
-  );
-}
-
-function ContactPage() {
-  return (
-    <div className="app-container">
-      <Header />
-      <div className="page-container">Contact Page</div>
-      <Footer />
-    </div>
-  );
-}
-
+// Root component with routing
 function App() {
   return (
     <Router>
@@ -198,6 +117,7 @@ function App() {
   );
 }
 
+// Render the app
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>

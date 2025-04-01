@@ -1,35 +1,27 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 function Footer() {
-  const today = new Date();
-  const formattedDate = today.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  });
-
   return (
     <footer className="footer">
       <div className="social-icons">
-        <a href="#" className="social-icon">
-          <div className="icon-wrapper small">
-            <img src="/assets/imgs/linkedin.png" alt="LinkedIn" />
+        <a href="https://www.instagram.com/citlali/" target="_blank" rel="noopener noreferrer" className="social-icon">
+          <div className="icon-wrapper">
+            <img src="/assets/icons/instagram.svg" alt="Instagram" />
           </div>
         </a>
-        <a href="#" className="social-icon">
-          <div className="icon-wrapper small">
-            <img src="/assets/imgs/instagram.png" alt="Instagram" />
+        <a href="https://www.youtube.com/@citlali" target="_blank" rel="noopener noreferrer" className="social-icon">
+          <div className="icon-wrapper">
+            <img src="/assets/icons/youtube.svg" alt="YouTube" />
           </div>
         </a>
-        <a href="#" className="social-icon">
-          <div className="icon-wrapper small">
-            <img src="/assets/imgs/tiktok.png" alt="TikTok" />
+        <a href="https://www.tiktok.com/@citlali" target="_blank" rel="noopener noreferrer" className="social-icon">
+          <div className="icon-wrapper">
+            <img src="/assets/icons/tiktok.svg" alt="TikTok" />
           </div>
         </a>
       </div>
-      <div className="last-updated">
-        Last updated: {formattedDate}
-      </div>
+      <div className="last-updated">Last updated: {new Date().toLocaleDateString()}</div>
     </footer>
   );
 }
