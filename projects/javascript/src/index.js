@@ -18,67 +18,165 @@ Step 4: To try out cursor on your own projects, go to the file menu (top left) a
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import Header from './components/Header';
+import Footer from './components/Footer';
 import './styles.css';
 
 // Main page component
 function MainPage() {
   return (
-    <div className="main-container">
-      <div className="icon-grid">
-        <Link to="/listen" className="icon-item">
-          <div className="icon-wrapper">
-            <img src="/assets/gifs/listen.gif" alt="Listen" />
-          </div>
-          <span>LISTEN</span>
-        </Link>
-        <Link to="/laugh" className="icon-item">
-          <div className="icon-wrapper">
-            <img src="/assets/gifs/laugh.gif" alt="laugh" />
-          </div>
-          <span>LAUGH</span>
-        </Link>
-        <Link to="/read" className="icon-item">
-          <div className="icon-wrapper">
-            <img src="/assets/gifs/read.gif" alt="read" />
-          </div>
-          <span>READ</span>
-        </Link>
-        <Link to="/see" className="icon-item">
-          <div className="icon-wrapper">
-            <img src="/assets/gifs/see.gif" alt="see" />
-          </div>
-          <span>SEE</span>
-        </Link>
-        <Link to="/tech" className="icon-item">
-          <div className="icon-wrapper">
-            <img src="/assets/gifs/tech.gif" alt="tech" />
-          </div>
-          <span>TECH</span>
-        </Link>
-      </div>
+    <div className="app-container">
+      <Header />
+      <main className="main-content">
+        <div className="title-section">
+          <h1 className="main-title">Hi, I'm Citlali</h1>
+          <p className="welcome-text">Welcome to my website. Click around and get to know me.</p>
+        </div>
+        <div className="icon-grid">
+          <Link to="/listen" className="icon-item">
+            <div className="icon-wrapper">
+              <img src="/assets/gifs/listen.gif" alt="Listen" />
+            </div>
+            <span>LISTEN</span>
+          </Link>
+          <Link to="/laugh" className="icon-item">
+            <div className="icon-wrapper">
+              <img src="/assets/gifs/laugh.gif" alt="Laugh" />
+            </div>
+            <span>LAUGH</span>
+          </Link>
+          <Link to="/read" className="icon-item">
+            <div className="icon-wrapper">
+              <img src="/assets/gifs/read.gif" alt="Read" />
+            </div>
+            <span>READ</span>
+          </Link>
+          <Link to="/see" className="icon-item">
+            <div className="icon-wrapper">
+              <img src="/assets/gifs/see.gif" alt="See" />
+            </div>
+            <span>SEE</span>
+          </Link>
+          <Link to="/tech" className="icon-item">
+            <div className="icon-wrapper">
+              <img src="/assets/gifs/tech.gif" alt="Tech" />
+            </div>
+            <span>TECH</span>
+          </Link>
+          <Link to="/shop" className="icon-item">
+            <div className="icon-wrapper">
+              <img src="/assets/gifs/shop.gif" alt="Shop" />
+            </div>
+            <span>SHOP</span>
+          </Link>
+          <Link to="/tour" className="icon-item">
+            <div className="icon-wrapper">
+              <img src="/assets/gifs/tour.gif" alt="Tour" />
+            </div>
+            <span>TOUR</span>
+          </Link>
+          <Link to="/surprise" className="icon-item">
+            <div className="icon-wrapper">
+              <img src="/assets/gifs/surprise.gif" alt="Surprise" />
+            </div>
+            <span>SURPRISE ME</span>
+          </Link>
+        </div>
+      </main>
+      <Footer />
     </div>
   );
 }
 
 // Placeholder pages
 function ListenPage() {
-  return <div className="page-container">Listen Page</div>;
+  return (
+    <div className="app-container">
+      <Header />
+      <div className="page-container">Listen Page</div>
+      <Footer />
+    </div>
+  );
 }
 
 function LaughPage() {
-  return <div className="page-container">Laugh Page</div>;
+  return (
+    <div className="app-container">
+      <Header />
+      <div className="page-container">Laugh Page</div>
+      <Footer />
+    </div>
+  );
 }
 
 function ReadPage() {
-  return <div className="page-container">Read Page</div>;
+  return (
+    <div className="app-container">
+      <Header />
+      <div className="page-container">Read Page</div>
+      <Footer />
+    </div>
+  );
 }
 
 function SeePage() {
-  return <div className="page-container">See Page</div>;
+  return (
+    <div className="app-container">
+      <Header />
+      <div className="page-container">See Page</div>
+      <Footer />
+    </div>
+  );
 }
 
 function TechPage() {
-  return <div className="page-container">Tech Page</div>;
+  return (
+    <div className="app-container">
+      <Header />
+      <div className="page-container">Tech Page</div>
+      <Footer />
+    </div>
+  );
+}
+
+function ShopPage() {
+  return (
+    <div className="app-container">
+      <Header />
+      <div className="page-container">Shop Page</div>
+      <Footer />
+    </div>
+  );
+}
+
+function TourPage() {
+  return (
+    <div className="app-container">
+      <Header />
+      <div className="page-container">Tour Page</div>
+      <Footer />
+    </div>
+  );
+}
+
+function SurprisePage() {
+  return (
+    <div className="app-container">
+      <Header />
+      <div className="page-container">Surprise Page</div>
+      <Footer />
+    </div>
+  );
+}
+
+function ContactPage() {
+  return (
+    <div className="app-container">
+      <Header />
+      <div className="page-container">Contact Page</div>
+      <Footer />
+    </div>
+  );
 }
 
 function App() {
@@ -91,6 +189,10 @@ function App() {
         <Route path="/read" element={<ReadPage />} />
         <Route path="/see" element={<SeePage />} />
         <Route path="/tech" element={<TechPage />} />
+        <Route path="/shop" element={<ShopPage />} />
+        <Route path="/tour" element={<TourPage />} />
+        <Route path="/surprise" element={<SurprisePage />} />
+        <Route path="/contact" element={<ContactPage />} />
       </Routes>
     </Router>
   );
