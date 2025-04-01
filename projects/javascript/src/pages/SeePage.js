@@ -12,14 +12,46 @@ import Footer from '../components/Footer';
 function SeePage() {
   // Define the available photography collections
   const collections = [
-    { id: 'nature', title: 'Nature', path: '/see/nature' },
-    { id: 'urban', title: 'Urban', path: '/see/urban' },
-    { id: 'portraits', title: 'Portraits', path: '/see/portraits' },
-    { id: 'street', title: 'Street', path: '/see/street' },
-    { id: 'abstract', title: 'Abstract', path: '/see/abstract' },
-    { id: 'travel', title: 'Travel', path: '/see/travel' },
-    { id: 'events', title: 'Events', path: '/see/events' },
-    { id: 'experimental', title: 'Experimental', path: '/see/experimental' }
+    {
+      title: "summer 2023 - islands",
+      path: "/collection/summer-2023",
+      image: "/assets/imgs/collections/summer-2023.jpg"
+    },
+    {
+      title: "spring 2023 - sakura, cherry blossoms",
+      path: "/collection/spring-2023",
+      image: "/assets/imgs/collections/spring-2023.jpg"
+    },
+    {
+      title: "spring 2024 - the sunshine",
+      path: "/collection/spring-2024",
+      image: "/assets/imgs/collections/spring-2024.jpg"
+    },
+    {
+      title: "espionner",
+      path: "/collection/espionner",
+      image: "/assets/imgs/collections/espionner.jpg"
+    },
+    {
+      title: "urban",
+      path: "/collection/urban",
+      image: "/assets/imgs/collections/urban.jpg"
+    },
+    {
+      title: "natural",
+      path: "/collection/natural",
+      image: "/assets/imgs/collections/natural.jpg"
+    },
+    {
+      title: "moody",
+      path: "/collection/moody",
+      image: "/assets/imgs/collections/moody.jpg"
+    },
+    {
+      title: "portrait",
+      path: "/collection/portrait",
+      image: "/assets/imgs/collections/portrait.jpg"
+    }
   ];
 
   return (
@@ -27,21 +59,19 @@ function SeePage() {
       <Header />
       <div className="page-container">
         <div className="content-section">
-          <h2>Photography Collections</h2>
-          <p className="subtitle">Explore my visual stories through different lenses</p>
-          
+          <h2>Click an image below to explore ✨</h2>
           <div className="photo-collections-grid">
-            {collections.map(collection => (
-              <Link to={collection.path} key={collection.id} className="collection-item">
+            {collections.map((collection, index) => (
+              <Link 
+                key={index} 
+                to={collection.path} 
+                className="collection-item"
+              >
                 <div className="collection-image">
-                  <img 
-                    src={`/assets/photos/${collection.id}/cover.jpg`} 
-                    alt={collection.title}
-                    loading="lazy"
-                  />
-                  <div className="collection-overlay">
-                    <h3>{collection.title}</h3>
-                  </div>
+                  <img src={collection.image} alt={collection.title} />
+                </div>
+                <div className="collection-overlay">
+                  <h3>{collection.title}</h3>
                 </div>
               </Link>
             ))}

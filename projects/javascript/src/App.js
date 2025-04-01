@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import ListenPage from './pages/ListenPage';
 import LaughPage from './pages/LaughPage';
@@ -14,6 +14,35 @@ import PhotoCollectionPage from './pages/PhotoCollectionPage';
 import GitHubPage from './pages/tech/GitHubPage';
 import AIPage from './pages/tech/AIPage';
 import ResumePage from './pages/tech/ResumePage';
+
+// Function to handle random page navigation
+function RandomPageNavigator() {
+  const navigate = useNavigate();
+  const pages = [
+    '/see',
+    '/hear',
+    '/read',
+    '/laugh',
+    '/tech',
+    '/shop',
+    '/tour',
+    '/contact'
+  ];
+
+  const navigateToRandomPage = () => {
+    const randomPage = pages[Math.floor(Math.random() * pages.length)];
+    navigate(randomPage);
+  };
+
+  return (
+    <div className="icon-item" onClick={navigateToRandomPage}>
+      <div className="icon-wrapper">
+        <img src="/assets/imgs/surprise.gif" alt="Surprise Me" />
+      </div>
+      <span>Surprise Me</span>
+    </div>
+  );
+}
 
 function App() {
   return (

@@ -1,61 +1,71 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
+/**
+ * LaughPage Component
+ * Displays comedy content in retro TV and iPhone containers
+ * Features a background gif and embedded YouTube content
+ */
 function LaughPage() {
+  const videoRef = useRef(null);
+
+  const handlePhoneClick = () => {
+    if (videoRef.current) {
+      videoRef.current.play();
+    }
+  };
+
   return (
-    <div className="app-container">
+    <div className="app-container laugh-page">
+      {/* Background gif */}
+      <div className="background-gif">
+        <img src="/assets/gifs/laugh_bkg_gif.gif" alt="Background" />
+      </div>
+
       <Header />
       <div className="page-container">
-        <div className="content-section">
-          <h2>Funny Moments</h2>
-          <div className="comedy-content">
-            <div className="comedy-item">
-              <div className="comedy-media">
-                <img src="/assets/comedy/sketch1.jpg" alt="Comedy Sketch" />
-                <div className="media-overlay">
-                  <span className="play-icon">▶</span>
+        {/* <div className="content-section"> */}
+        <div>
+          <h2 className="page-title">laugh</h2>
+          <div className="video-container">
+            {/* Retro TV Container */}
+            <div className="retro-tv">
+              <div className="tv-body">
+                <div className="tv-screen">
+                  <iframe
+                    src="https://www.youtube.com/embed/iGM18sfsqrk?"
+                    title="YouTube Video"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
                 </div>
-              </div>
-              <div className="comedy-info">
-                <h3>Sketch Title</h3>
-                <p>Description of the funny moment</p>
-                <div className="comedy-meta">
-                  <span className="date">2024</span>
-                  <span className="duration">2:30</span>
+                <div className="tv-controls">
+                  <div className="tv-button"></div>
+                  <div className="tv-button"></div>
                 </div>
-              </div>
-            </div>
-            <div className="comedy-item">
-              <div className="comedy-media">
-                <img src="/assets/comedy/sketch2.jpg" alt="Comedy Sketch" />
-                <div className="media-overlay">
-                  <span className="play-icon">▶</span>
-                </div>
-              </div>
-              <div className="comedy-info">
-                <h3>Sketch Title</h3>
-                <p>Description of the funny moment</p>
-                <div className="comedy-meta">
-                  <span className="date">2024</span>
-                  <span className="duration">3:15</span>
+                <div className="tv-antennas">
+                  <div className="tv-antenna"></div>
+                  <div className="tv-antenna"></div>
                 </div>
               </div>
             </div>
-            <div className="comedy-item">
-              <div className="comedy-media">
-                <img src="/assets/comedy/sketch3.jpg" alt="Comedy Sketch" />
-                <div className="media-overlay">
-                  <span className="play-icon">▶</span>
+
+            {/* iPhone Container */}
+            <div className="iphone-container" onClick={handlePhoneClick}>
+              <div className="iphone">
+                <div className="iphone-screen">
+                  <video
+                    ref={videoRef}
+                    className="iphone-video"
+                    controls
+                    poster="/assets/imgs/nycc_video-poster.jpg"
+                  >
+                    <source src="/assets/videos/nycc_video.MOV" type="video/quicktime" />
+                  </video>
                 </div>
-              </div>
-              <div className="comedy-info">
-                <h3>Sketch Title</h3>
-                <p>Description of the funny moment</p>
-                <div className="comedy-meta">
-                  <span className="date">2024</span>
-                  <span className="duration">1:45</span>
-                </div>
+                <div className="iphone-home-button"></div>
               </div>
             </div>
           </div>

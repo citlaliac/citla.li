@@ -991,7 +991,7 @@ body {
 .photo-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 2rem;
+  gap: 1rem;
   padding: 1rem;
 }
 
@@ -999,13 +999,13 @@ body {
   position: relative;
   aspect-ratio: 1;
   overflow: hidden;
-  border-radius: 15px;
+  border-radius: 10px;
   cursor: pointer;
   transition: transform 0.3s ease;
 }
 
 .photo-item:hover {
-  transform: translateY(-5px);
+  transform: scale(1.02);
 }
 
 .photo-item img {
@@ -1319,5 +1319,453 @@ body {
   .tech-intro {
     font-size: 1rem;
     padding: 0 1rem;
+  }
+}
+
+/* Laugh Page Styles */
+.laugh-page {
+  position: relative;
+  overflow: hidden;
+}
+
+.background-gif {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.background-gif img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.page-title {
+  text-align: center;
+  font-size: 3rem;
+  margin: 2rem 0;
+  color: #fff;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.video-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4rem;
+  margin: 4rem 0;
+  perspective: 1000px;
+}
+
+/* Retro TV Styles */
+.retro-tv {
+  transform: rotateX(10deg) rotateY(10deg);
+  transform-style: preserve-3d;
+  transition: transform 0.3s ease;
+}
+
+.retro-tv:hover {
+  transform: rotateX(15deg) rotateY(15deg);
+}
+
+.tv-body {
+  position: relative;
+  width: 600px;
+  height: 450px;
+  background: #8B4513;
+  border-radius: 20px;
+  box-shadow: 
+    0 0 20px rgba(0, 0, 0, 0.5),
+    inset 0 0 20px rgba(0, 0, 0, 0.8);
+  padding: 20px;
+}
+
+.tv-screen {
+  width: 100%;
+  height: 100%;
+  background: #000;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.tv-screen iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.tv-controls {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 20px;
+}
+
+.tv-button {
+  width: 30px;
+  height: 30px;
+  background: #444;
+  border-radius: 50%;
+  border: 2px solid #666;
+}
+
+.tv-antennas {
+  position: absolute;
+  top: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 40px;
+}
+
+.tv-antenna {
+  width: 4px;
+  height: 60px;
+  background: #666;
+  transform: rotate(-30deg);
+}
+
+.tv-antenna:last-child {
+  transform: rotate(30deg);
+}
+
+/* iPhone Container Styles */
+.iphone-container {
+  transform: rotateX(-10deg) rotateY(-10deg);
+  transform-style: preserve-3d;
+  transition: transform 0.3s ease;
+  cursor: pointer;
+}
+
+.iphone-container:hover {
+  transform: rotateX(-15deg) rotateY(-15deg);
+}
+
+.iphone {
+  position: relative;
+  width: 300px;
+  height: 600px;
+  background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
+  border-radius: 40px;
+  box-shadow: 
+    0 0 20px rgba(0, 0, 0, 0.5),
+    inset 0 0 20px rgba(0, 0, 0, 0.8);
+  padding: 20px;
+  overflow: hidden;
+}
+
+.iphone-screen {
+  width: 100%;
+  height: 100%;
+  background: #000;
+  border-radius: 30px;
+  overflow: hidden;
+}
+
+.iphone-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.iphone-home-button {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 40px;
+  background: #333;
+  border-radius: 50%;
+  border: 2px solid #444;
+}
+
+@media (max-width: 1200px) {
+  .video-container {
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .retro-tv,
+  .iphone-container {
+    transform: none;
+  }
+
+  .retro-tv:hover,
+  .iphone-container:hover {
+    transform: none;
+  }
+
+  .tv-body {
+    width: 400px;
+    height: 300px;
+  }
+}
+
+@media (max-width: 768px) {
+  .tv-body {
+    width: 300px;
+    height: 225px;
+  }
+
+  .iphone {
+    width: 250px;
+    height: 500px;
+  }
+
+  .page-title {
+    font-size: 2.5rem;
+  }
+}
+
+/* Tour Page Styles */
+.tour-page {
+  background: #ff6b6b;
+  color: white;
+}
+
+.tour-header {
+  text-align: center;
+  margin-bottom: 4rem;
+  padding: 2rem;
+}
+
+.tour-header .main-title {
+  font-size: 3rem;
+  margin-bottom: 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: white;
+}
+
+.tour-header .subtitle {
+  font-size: 1.2rem;
+  max-width: 800px;
+  margin: 0 auto;
+  line-height: 1.6;
+  opacity: 0.9;
+}
+
+.tours-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 4rem;
+}
+
+.tour-item {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+  height: 600px;
+  display: flex;
+  flex-direction: column;
+}
+
+.tour-item:hover {
+  transform: translateY(-5px);
+}
+
+.tour-image {
+  width: 100%;
+  height: 70%;
+  overflow: hidden;
+}
+
+.tour-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.tour-item:hover .tour-image img {
+  transform: scale(1.1);
+}
+
+.tour-content {
+  padding: 1.5rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.tour-content h2 {
+  font-size: 1.4rem;
+  margin-bottom: 1rem;
+  color: white;
+  min-height: 2.8em;
+  display: flex;
+  align-items: center;
+}
+
+.tour-content p {
+  line-height: 1.6;
+  opacity: 0.9;
+  font-size: 0.9rem;
+}
+
+.reviews-section {
+  text-align: center;
+  padding: 4rem 0;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+.reviews-section h2 {
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  color: white;
+}
+
+.reviews-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+  padding: 0 2rem;
+  max-height: 600px;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.reviews-container::-webkit-scrollbar {
+  display: none;
+}
+
+.review-card {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2rem;
+  border-radius: 10px;
+  transition: opacity 0.5s ease;
+}
+
+.review-text {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  font-style: italic;
+}
+
+.review-author {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.author-name {
+  font-weight: bold;
+  color: white;
+}
+
+.review-date {
+  opacity: 0.7;
+}
+
+@media (max-width: 1200px) {
+  .tours-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .tours-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tour-header .main-title {
+    font-size: 2.5rem;
+  }
+
+  .tour-header .subtitle {
+    font-size: 1rem;
+  }
+
+  .tour-item {
+    height: 500px;
+  }
+
+  .reviews-container {
+    grid-template-columns: 1fr;
+  }
+
+  .review-card {
+    padding: 1.5rem;
+  }
+
+  .review-text {
+    font-size: 1rem;
+  }
+}
+
+.collection-title {
+  text-align: center;
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  text-transform: none;
+  letter-spacing: 1px;
+}
+
+.collection-subtitle {
+  text-align: center;
+  font-size: 1.2rem;
+  margin-bottom: 3rem;
+  opacity: 0.9;
+}
+
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.photo-item {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.photo-item:hover {
+  transform: scale(1.02);
+}
+
+.photo-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.photo-item:hover img {
+  transform: scale(1.1);
+}
+
+@media (max-width: 768px) {
+  .photo-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .collection-title {
+    font-size: 2rem;
+  }
+
+  .collection-subtitle {
+    font-size: 1rem;
   }
 } 
