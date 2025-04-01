@@ -29,6 +29,10 @@ import ShopPage from './pages/ShopPage';
 import TourPage from './pages/TourPage';
 import SurprisePage from './pages/SurprisePage';
 import ContactPage from './pages/ContactPage';
+import PhotoCollectionPage from './pages/PhotoCollectionPage';
+import GitHubPage from './pages/tech/GitHubPage';
+import AIPage from './pages/tech/AIPage';
+import ResumePage from './pages/tech/ResumePage';
 import './styles.css';
 
 // Main page component
@@ -112,6 +116,10 @@ function App() {
         <Route path="/tour" element={<TourPage />} />
         <Route path="/surprise" element={<SurprisePage />} />
         <Route path="/contact" element={<ContactPage />} />
+        <Route path="/collection/:collectionName" element={<PhotoCollectionPage />} />
+        <Route path="/tech/github" element={<GitHubPage />} />
+        <Route path="/tech/ai" element={<AIPage />} />
+        <Route path="/tech/resume" element={<ResumePage />} />
       </Routes>
     </Router>
   );
