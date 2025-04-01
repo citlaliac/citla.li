@@ -1,5 +1,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&display=swap');
 
+/* Temporarily removing BlurBold font until we have the proper font files */
+/* @font-face {
+  font-family: 'Blur Bold';
+  src: url('/assets/fonts/BlurBold.woff2') format('woff2'),
+       url('/assets/fonts/BlurBold.woff') format('woff');
+  font-weight: bold;
+  font-style: normal;
+} */
+
 * {
   margin: 0;
   padding: 0;
@@ -33,9 +42,19 @@ body {
   gap: 1rem;
 }
 
-.nav-icon .icon-wrapper {
-  width: 40px;
-  height: 40px;
+.nav-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  color: white;
+}
+
+.nav-icon span {
+  font-size: 0.8rem;
+  margin-top: 0.3rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 /* Main Content Styles */
@@ -77,6 +96,16 @@ body {
   margin: 0 auto;
 }
 
+/* Icon Animation */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
 .icon-item {
   display: flex;
   flex-direction: column;
@@ -84,10 +113,12 @@ body {
   text-decoration: none;
   color: white;
   transition: transform 0.3s ease;
+  animation: float 3s ease-in-out infinite;
 }
 
 .icon-item:hover {
   transform: scale(1.20);
+  animation: none;
 }
 
 .icon-wrapper {
@@ -122,38 +153,370 @@ body {
 
 /* Footer Styles */
 .footer {
-  padding: 2rem;
-  text-align: center;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   background: rgba(0, 0, 0, 0.1);
 }
 
 .social-icons {
   display: flex;
-  justify-content: center;
-  gap: 2rem;
-  margin-bottom: 1rem;
+  gap: 1.5rem;
 }
 
 .social-icon .icon-wrapper {
-  width: 40px;
-  height: 40px;
+  width: 30px;
+  height: 30px;
 }
 
 .last-updated {
   font-size: 0.8rem;
   opacity: 0.7;
+  text-align: right;
 }
 
 /* Page Container Styles */
 .page-container {
   flex: 1;
+  padding: 6rem 2rem 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.content-section {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.content-section h2 {
+  font-size: 2.5rem;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  margin-bottom: 2rem;
+  position: relative;
+  display: inline-block;
+}
+
+.content-section h2::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 0;
+  width: 60px;
+  height: 3px;
+  background: white;
+}
+
+/* Art Gallery Styles */
+.art-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  padding: 1rem;
+}
+
+.art-item {
+  position: relative;
+  overflow: hidden;
+  border-radius: 10px;
+  aspect-ratio: 1;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.art-item:hover {
+  transform: scale(1.02);
+}
+
+.art-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.art-item:hover img {
+  transform: scale(1.1);
+}
+
+/* Music Player Styles */
+.music-player {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 15px;
+  padding: 2rem;
+  margin-top: 2rem;
+}
+
+.music-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  padding: 1rem;
+}
+
+.music-item {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 15px;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.music-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.music-cover {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+}
+
+.music-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.music-item:hover .music-cover img {
+  transform: scale(1.1);
+}
+
+.play-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.music-item:hover .play-overlay {
+  opacity: 1;
+}
+
+.play-icon {
   font-size: 2rem;
+  color: white;
+  transform: scale(0.8);
+  transition: transform 0.3s ease;
+}
+
+.music-item:hover .play-icon {
+  transform: scale(1);
+}
+
+.music-info {
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.music-info h3 {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
   text-transform: uppercase;
-  letter-spacing: 2px;
-  padding: 6rem 2rem 2rem;
+  letter-spacing: 1px;
+}
+
+.music-info p {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+/* Comedy Content Styles */
+.comedy-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  padding: 1rem;
+}
+
+.comedy-item {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 15px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+.comedy-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.comedy-media {
+  position: relative;
+  aspect-ratio: 16/9;
+  overflow: hidden;
+}
+
+.comedy-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.comedy-item:hover .comedy-media img {
+  transform: scale(1.1);
+}
+
+.media-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.comedy-item:hover .media-overlay {
+  opacity: 1;
+}
+
+.play-icon {
+  font-size: 2rem;
+  color: white;
+  transform: scale(0.8);
+  transition: transform 0.3s ease;
+}
+
+.comedy-item:hover .play-icon {
+  transform: scale(1);
+}
+
+.comedy-info {
+  padding: 1.5rem;
+}
+
+.comedy-info h3 {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.comedy-info p {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.comedy-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  opacity: 0.6;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Add a subtle gradient overlay to the comedy items */
+.comedy-item::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.1) 100%
+  );
+  pointer-events: none;
+}
+
+/* Tech Projects Styles */
+.tech-projects {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  padding: 1rem;
+}
+
+.tech-item {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 15px;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.tech-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Shop Items Styles */
+.shop-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  padding: 1rem;
+}
+
+.shop-item {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 15px;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.shop-item:hover {
+  transform: translateY(-5px);
+}
+
+.shop-item img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.shop-item-content {
+  padding: 1.5rem;
+}
+
+/* Tour Dates Styles */
+.tour-dates {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.tour-date {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 15px;
+  padding: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: transform 0.3s ease;
+}
+
+.tour-date:hover {
+  transform: translateX(10px);
 }
 
 /* Mobile Responsive Styles */
@@ -178,6 +541,21 @@ body {
   .icon-item span {
     font-size: 0.9rem;
   }
+
+  .content-section {
+    padding: 1.5rem;
+  }
+
+  .content-section h2 {
+    font-size: 2rem;
+  }
+
+  .art-gallery,
+  .comedy-content,
+  .tech-projects,
+  .shop-items {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Small Mobile Styles */
@@ -194,4 +572,178 @@ body {
   .icon-item span {
     font-size: 0.8rem;
   }
+}
+
+/* Contact Form Styles */
+.contact-container {
+  flex: 1;
+  padding: 6rem 2rem 2rem;
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.contact-container h2 {
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 2rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.contact-form {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2rem;
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  font-family: inherit;
+}
+
+.form-group textarea {
+  min-height: 150px;
+  resize: vertical;
+}
+
+.submit-button {
+  width: 100%;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 5px;
+  color: white;
+  font-family: inherit;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.submit-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Loading Text Animation */
+.loading-text {
+  font-size: 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Read Page Styles */
+.read-container {
+  flex: 1;
+  padding: 6rem 2rem 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.read-container h2 {
+  text-align: center;
+  margin-bottom: 1rem;
+  font-size: 2.5rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.read-container .subtitle {
+  text-align: center;
+  margin-bottom: 3rem;
+  font-size: 1.2rem;
+  opacity: 0.9;
+}
+
+.poetry-section {
+  margin-bottom: 4rem;
+}
+
+.poetry-section h3 {
+  font-size: 1.8rem;
+  margin-bottom: 2rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.poem-item {
+  margin-bottom: 2rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.poem-header {
+  padding: 1.5rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.3s ease;
+}
+
+.poem-header:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.poem-header h4 {
+  font-size: 1.2rem;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.expand-icon {
+  font-size: 1.5rem;
+  font-weight: bold;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.poem-content {
+  padding: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.poem-content p {
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.poem-content p:last-child {
+  margin-bottom: 0;
 } 
