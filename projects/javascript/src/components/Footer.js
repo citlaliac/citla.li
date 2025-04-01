@@ -7,17 +7,17 @@ function Footer() {
       <div className="social-icons">
         <a href="https://www.instagram.com/citlali/" target="_blank" rel="noopener noreferrer" className="social-icon">
           <div className="icon-wrapper">
-            <img src="/assets/icons/instagram.svg" alt="Instagram" />
+            <img src="/assets/imgs/instagram.png" alt="Instagram" />
           </div>
         </a>
-        <a href="https://www.youtube.com/@citlali" target="_blank" rel="noopener noreferrer" className="social-icon">
+        <a href="https://www.linkedin.com/in/citlali/" target="_blank" rel="noopener noreferrer" className="social-icon">
           <div className="icon-wrapper">
-            <img src="/assets/icons/youtube.svg" alt="YouTube" />
+            <img src="/assets/imgs/linkedin.png" alt="LinkedIn" />
           </div>
         </a>
         <a href="https://www.tiktok.com/@citlali" target="_blank" rel="noopener noreferrer" className="social-icon">
           <div className="icon-wrapper">
-            <img src="/assets/icons/tiktok.svg" alt="TikTok" />
+            <img src="/assets/imgs/tiktok.png" alt="TikTok" />
           </div>
         </a>
       </div>
