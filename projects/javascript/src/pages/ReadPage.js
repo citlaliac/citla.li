@@ -13,7 +13,7 @@ function ReadPage() {
     <div className="app-container">
       <Header />
       <div className="read-container">
-        <h2>My Poetry</h2>
+        <h2>read</h2>
         <p className="subtitle">A collection of my thoughts and feelings</p>
         
         <div className="poetry-section">

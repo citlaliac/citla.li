@@ -7,31 +7,41 @@ import Footer from '../components/Footer';
  * Displays available tours and customer reviews
  */
 function TourPage() {
+  const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
   const reviewsRef = useRef(null);
 
+  // Auto-scroll effect
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentReviewIndex((prev) => (prev + 1) % reviews.length);
+    }, 5000); // Change review every 5 seconds
+
+    return () => clearInterval(timer);
+  }, []);
+
   const tours = [
     {
       title: "Daughter for a Day",
-      description: "Experience NYC through the eyes of a local! Let me show you the hidden gems, share stories, and make you feel like family in the city that never sleeps.",
-      image: "/assets/imgs/daughter-tour.jpg"
+      description: "Brand New Tour! Click here for more info. We'll walk around Manhattan for up to 3 hours, I can hold your hand (if it is of normal human moisture/stickiness levels) and generally pretend to be your child. We can take pictures, walk the Highline, you can buy me things, and even give me up to three (3) life lessons. You are not obligated to call me 'sweetheart', but I will call you 'pops'; for an added fee of $14.99 I will call you 'the dadster'.",
+      image: "/assets/imgs/daughter-tour.png"
     },
     {
-      title: "Ellis Island",
-      description: "Walk in the footsteps of millions of immigrants who arrived at America's gateway. Discover the stories of hope, struggle, and new beginnings that shaped our nation.",
-      image: "/assets/imgs/ellis-island.jpg"
+      title: "Liberty & Ellis Island",
+      description: "Learn about Lady Liberty, Ellis Island, and how the contributed to America today! Note: This tour does not include tickets to climb the Statue of Liberty (crown/pedestal) but does include your ticket to the ferry. Meeting point: Castle Clinton. Ending Location: Ellis Island, where you can explore the museum and then ferry back to Battery Park, Manhattan.",
+      image: "/assets/imgs/statue-liberty.png"
     },
     {
-      title: "Statue of Liberty",
-      description: "Visit the iconic symbol of freedom and democracy. Learn about Lady Liberty's history, symbolism, and the incredible engineering behind this world-famous monument.",
-      image: "/assets/imgs/statue-liberty.jpg"
+      title: "Hudson Yards",
+      description: " Learn about how this massive development came to be, what it's used for, and what it could have been— plus what you can do and eat while you're there! Meeting point: 20 Hudson Yards, beneath the Vessel, in front of the Shops at Hudson yards. Ending Location: The Shed at Hudson Yards",
+      image: "/assets/imgs/hudson-yards.png"
     },
     {
       title: "Greenwich Village",
-      description: "Explore the historic heart of NYC's artistic and cultural scene. From Washington Square Park to the charming brownstones, discover the village's rich history and vibrant present.",
-      image: "/assets/imgs/greenwich-village.jpg"
+      description: "Sights new and old, like Cherry Lane Theatre, Stonewall Inn, the Friends Apartment, and more! Meeting point: Just outside Waverly Diner at 385 6th Ave, New York, NY 10014. Ending Location: 32 Morton St, New York, NY 10014.",
+      image: "/assets/imgs/greenwich-village.png"
     }
   ];
 
@@ -58,6 +68,14 @@ function TourPage() {
     }
   ];
 
+  const handleNextReview = () => {
+    setCurrentReviewIndex((prev) => (prev + 1) % reviews.length);
+  };
+
+  const handlePrevReview = () => {
+    setCurrentReviewIndex((prev) => (prev - 1 + reviews.length) % reviews.length);
+  };
+
   const handleMouseDown = (e) => {
     setIsDragging(true);
     setStartX(e.pageX - reviewsRef.current.offsetLeft);
@@ -81,7 +99,7 @@ function TourPage() {
       <Header />
       <div className="page-container">
         <div className="tour-header">
-          <h1 className="main-title">Citlali Guides YOU in NYC!</h1>
+          <h1 className="main-title">citlali guides you in nyc!</h1>
           <p className="subtitle">
             As a licensed NYC tour guide, I'm passionate about sharing the city's rich history and vibrant culture. 
             Whether you're interested in iconic landmarks or hidden gems, I'll create an unforgettable experience 
@@ -103,26 +121,25 @@ function TourPage() {
           ))}
         </div>
 
-        <div className="reviews-section" style={{ maxHeight: '20vh' }}>
-          <h2>What People Are Saying</h2>
-          <div 
-            className="reviews-container"
-            ref={reviewsRef}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
-            style={{ display: 'flex', flexDirection: 'row', overflowX: 'auto', gap: '1rem', padding: '1rem' }}
-          >
-            {reviews.map((review, index) => (
-              <div key={index} className="review-card" style={{ minWidth: '300px', maxWidth: '400px', padding: '0.5rem' }}>
-                <p className="review-text" style={{ margin: '0', lineHeight: '1.2', maxHeight: '2.4em', overflow: 'hidden' }}>{review.text}</p>
-                <div className="review-author" style={{ fontSize: '0.8em', marginTop: '0.5rem' }}>
-                  <span className="author-name">{review.author}</span>
-                  <span className="review-date">{review.date}</span>
-                </div>
+        <div className="reviews-section">
+          <h2>what people are saying</h2>
+          <div className="review-slideshow">
+            <div className="review-card">
+              <p className="review-text">{reviews[currentReviewIndex].text}</p>
+              <div className="review-author">
+                <span className="author-name">{reviews[currentReviewIndex].author}</span>
+                <span className="review-date">{reviews[currentReviewIndex].date}</span>
               </div>
-            ))}
+            </div>
+            <div className="review-dots">
+              {reviews.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentReviewIndex(index)}
+                  className={`review-dot ${index === currentReviewIndex ? 'active' : ''}`}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </div>

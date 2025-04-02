@@ -33,23 +33,29 @@ function TechPage() {
   return (
     <div className="app-container">
       <Header />
-      <div className="page-container">
-        <div className="content-section">
-          <h2>Tech & Projects</h2>
-          <p className="subtitle">Explore my technical work and experience</p>
-
-          <div className="icon-grid">
-            {techItems.map(item => (
-              <Link to={item.path} key={item.id} className="icon-item">
-                <div className="icon-wrapper">
-                  <img src={item.icon} alt={item.title} />
-                </div>
-                <span>{item.title}</span>
-              </Link>
-            ))}
-          </div>
+      <main className="main-content" style={{ background: 'linear-gradient(to right, #FF0000, #FF69B4)' }}>
+        <div className="title-section">
+          <h1 className="main-title">tech</h1>
+          <p className="welcome-text">Explore my technical work and experience</p>
         </div>
-      </div>
+        <div className="icon-grid" style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(3, 1fr)', 
+          gap: '2rem', 
+          maxWidth: '1200px', 
+          width: '100%', 
+          margin: '0 auto' 
+        }}>
+          {techItems.map(item => (
+            <Link to={item.path} key={item.id} className="icon-item">
+              <div className="icon-wrapper">
+                <img src={item.icon} alt={item.title} />
+              </div>
+              <span>{item.title}</span>
+            </Link>
+          ))}
+        </div>
+      </main>
       <Footer />
     </div>
   );

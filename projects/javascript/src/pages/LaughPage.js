@@ -55,11 +55,18 @@ function LaughPage() {
             {/* iPhone Container */}
             <div className="iphone-container" onClick={handlePhoneClick}>
               <div className="iphone">
-                <div className="iphone-screen">
+                <div className="iphone-screen" style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
                   <iframe
                     src="https://www.youtube.com/embed/-_r7kPaaa08?si=YYa0sU6puUrtgja2"
                     title="YouTube Video"
-                    frameBorder="0"
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '100%',
+                      border: 'none'
+                    }}
                     allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
                   />

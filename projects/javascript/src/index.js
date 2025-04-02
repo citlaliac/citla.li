@@ -15,7 +15,7 @@ Step 4: To try out cursor on your own projects, go to the file menu (top left) a
 */
 
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
 import Header from './components/Header';
@@ -40,9 +40,9 @@ function MainPage() {
   return (
     <div className="app-container">
       <Header />
-      <main className="main-content">
+      <main className="main-content" style={{ background: 'linear-gradient(to right, #FF0000, #FF69B4)' }}>
         <div className="title-section">
-          <h1 className="main-title">Hi, I'm Citlali</h1>
+          <h1 className="main-title">hi I'm</h1>
           <p className="welcome-text">Welcome to my website. Click around and get to know me.</p>
         </div>
         <div className="icon-grid">
@@ -103,24 +103,46 @@ function MainPage() {
 
 // Root component with routing
 function App() {
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      setMousePosition({
+        x: e.clientX / window.innerWidth,
+        y: e.clientY / window.innerHeight
+      });
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  const backgroundStyle = {
+    background: `radial-gradient(circle at ${mousePosition.x * 100}% ${mousePosition.y * 100}%, #FF0000 0%, #FF69B4 100%)`,
+    transition: 'background 0.8s ease'
+  };
+
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<MainPage />} />
-        <Route path="/listen" element={<ListenPage />} />
-        <Route path="/laugh" element={<LaughPage />} />
-        <Route path="/read" element={<ReadPage />} />
-        <Route path="/see" element={<SeePage />} />
-        <Route path="/tech" element={<TechPage />} />
-        <Route path="/shop" element={<ShopPage />} />
-        <Route path="/tour" element={<TourPage />} />
-        <Route path="/surprise" element={<SurprisePage />} />
-        <Route path="/contact" element={<ContactPage />} />
-        <Route path="/collection/:collectionName" element={<PhotoCollectionPage />} />
-        <Route path="/tech/github" element={<GitHubPage />} />
-        <Route path="/tech/ai" element={<AIPage />} />
-        <Route path="/tech/resume" element={<ResumePage />} />
-      </Routes>
+      <div className="app-container" style={backgroundStyle}>
+        <Routes>
+          <Route path="/" element={<MainPage />} />
+          <Route path="/listen" element={<ListenPage />} />
+          <Route path="/laugh" element={<LaughPage />} />
+          <Route path="/read" element={<ReadPage />} />
+          <Route path="/see" element={<SeePage />} />
+          <Route path="/tech" element={<TechPage />} />
+          <Route path="/shop" element={<ShopPage />} />
+          <Route path="/tour" element={<TourPage />} />
+          <Route path="/surprise" element={<SurprisePage />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/collection/:collectionName" element={<PhotoCollectionPage />} />
+          <Route path="/tech/github" element={<GitHubPage />} />
+          <Route path="/tech/ai" element={<AIPage />} />
+          <Route path="/tech/resume" element={<ResumePage />} />
+        </Routes>
+        <Footer />
+      </div>
     </Router>
   );
 }
