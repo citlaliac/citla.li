@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
@@ -8,16 +8,11 @@ import Footer from '../components/Footer';
  */
 function TourPage() {
   const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
-  const reviewsRef = useRef(null);
 
-  // Auto-scroll effect
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentReviewIndex((prev) => (prev + 1) % reviews.length);
-    }, 5000); // Change review every 5 seconds
+    }, 5000);
 
     return () => clearInterval(timer);
   }, []);
@@ -35,7 +30,7 @@ function TourPage() {
     },
     {
       title: "Hudson Yards",
-      description: " Learn about how this massive development came to be, what it's used for, and what it could have been— plus what you can do and eat while you're there! Meeting point: 20 Hudson Yards, beneath the Vessel, in front of the Shops at Hudson yards. Ending Location: The Shed at Hudson Yards",
+      description: "Learn about how this massive development came to be, what it's used for, and what it could have been— plus what you can do and eat while you're there! Meeting point: 20 Hudson Yards, beneath the Vessel, in front of the Shops at Hudson yards. Ending Location: The Shed at Hudson Yards",
       image: "/assets/imgs/hudson-yards.png"
     },
     {
@@ -68,38 +63,12 @@ function TourPage() {
     }
   ];
 
-  const handleNextReview = () => {
-    setCurrentReviewIndex((prev) => (prev + 1) % reviews.length);
-  };
-
-  const handlePrevReview = () => {
-    setCurrentReviewIndex((prev) => (prev - 1 + reviews.length) % reviews.length);
-  };
-
-  const handleMouseDown = (e) => {
-    setIsDragging(true);
-    setStartX(e.pageX - reviewsRef.current.offsetLeft);
-    setScrollLeft(reviewsRef.current.scrollLeft);
-  };
-
-  const handleMouseMove = (e) => {
-    if (!isDragging) return;
-    e.preventDefault();
-    const x = e.pageX - reviewsRef.current.offsetLeft;
-    const walk = (x - startX) * 2;
-    reviewsRef.current.scrollLeft = scrollLeft - walk;
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
   return (
     <div className="app-container tour-page">
       <Header />
       <div className="page-container">
         <div className="tour-header">
-          <h1 className="main-title">citlali guides you in nyc!</h1>
+          <h1 className="main-title">tour</h1>
           <p className="subtitle">
             As a licensed NYC tour guide, I'm passionate about sharing the city's rich history and vibrant culture. 
             Whether you're interested in iconic landmarks or hidden gems, I'll create an unforgettable experience 
@@ -111,7 +80,7 @@ function TourPage() {
           {tours.map((tour, index) => (
             <div key={index} className="tour-item">
               <div className="tour-image">
-                <img src={tour.image} alt={tour.title} />
+                <img src={tour.image} alt={tour.title} style={{ height: '400px', objectFit: 'cover' }} />
               </div>
               <div className="tour-content">
                 <h2>{tour.title}</h2>

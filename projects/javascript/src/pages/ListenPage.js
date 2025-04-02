@@ -24,7 +24,7 @@ function ListenPage() {
 
   const backgroundStyle = {
     background: `radial-gradient(circle at ${mousePosition.x * 100}% ${mousePosition.y * 100}%, #1DB954 0%, #191414 100%)`,
-    transition: 'background 0.8s ease'
+    transition: 'background 1.5s ease'
   };
 
   return (
@@ -37,7 +37,7 @@ function ListenPage() {
           
           <div className="playlist-container">
             {/* Babysitter's Minivan */}
-            <div className="playlist-item" style={{ '--rotation': '-2deg' }}>
+            <div className="playlist-item" style={{ '--rotation': '-3deg', marginLeft: '5%' }}>
               <div className="playlist-description">
                 <h3>babysitter's minivan</h3>
                 <p>Wind blowing on your wispy, oily, bangs, not a thought in your mind. <em>Stuck in the Suburbs</em> just came out and it's like it spoke directly to you. You're cruising the suburbs stuck in your babysitter's minivan, carefree.</p>
@@ -56,7 +56,7 @@ function ListenPage() {
             </div>
 
             {/* This is Your Brain */}
-            <div className="playlist-item" style={{ '--rotation': '3deg' }}>
+            <div className="playlist-item" style={{ '--rotation': '4deg', marginLeft: '15%' }}>
               <div className="playlist-description">
                 <h3>this is your brain</h3>
                 <p>This delicious, synthy, psychedelic pop envelops you like a thick haze. Let these sizzling tunes pan across your brain— no consumables needed. Any questions?</p>
@@ -75,7 +75,7 @@ function ListenPage() {
             </div>
 
             {/* Brad and Jen Breakup Mix */}
-            <div className="playlist-item" style={{ '--rotation': '-1.5deg' }}>
+            <div className="playlist-item" style={{ '--rotation': '-2deg', marginLeft: '10%' }}>
               <div className="playlist-description">
                 <h3>brad and jen breakup mix</h3>
                 <p>Did you have a break up in 2005? Now you've got the playlist to imagine you did. There's no love hangover Michelle Branch and Dido can't get us through. Pity yourself and get drunk on your own sadness.</p>
@@ -94,7 +94,7 @@ function ListenPage() {
             </div>
 
             {/* Bus Radio */}
-            <div className="playlist-item" style={{ '--rotation': '2.5deg' }}>
+            <div className="playlist-item" style={{ '--rotation': '3.5deg', marginLeft: '20%' }}>
               <div className="playlist-description">
                 <h3>bus radio</h3>
                 <p>The hot, humid, metallic stink of other kids fills your snotty nose. You're not even in 6th grade, but your sciatica aches from your heavy book bag. Time to stare out the window and disassociate to the inspired sounds of Bus Radio™️.</p>
@@ -113,7 +113,7 @@ function ListenPage() {
             </div>
 
             {/* Saccharine */}
-            <div className="playlist-item" style={{ '--rotation': '-3deg' }}>
+            <div className="playlist-item" style={{ '--rotation': '-4deg', marginLeft: '5%' }}>
               <div className="playlist-description">
                 <h3>saccharine</h3>
                 <p>I's a sunny spring day. It's almost sickeningly sweet. It's saccharine and it's rotting your teeth. But you can't stop listening to these mellow, poppy tunes and dreaming of sitting poolside, watermelon aguafresca in hand, a lover's text pinging your phone. Indulge.</p>

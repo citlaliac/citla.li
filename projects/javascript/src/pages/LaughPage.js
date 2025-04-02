@@ -20,8 +20,8 @@ function LaughPage() {
     <div className="app-container laugh-page">
       {/* Background gif */}
       <div className="background-gif">
-        <img src="/assets/gifs/laugh_bkg_gif.gif" alt="Background" />
-      </div>
+        <img src="/assets/gifs/laugh_bkg.gif" alt="Background" />
+      {/* </div> */}
 
       <Header />
       <div className="page-container">
@@ -55,21 +55,15 @@ function LaughPage() {
             {/* iPhone Container */}
             <div className="iphone-container" onClick={handlePhoneClick}>
               <div className="iphone">
-                <div className="iphone-screen" style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
-                  <iframe
-                    src="https://www.youtube.com/embed/-_r7kPaaa08?si=YYa0sU6puUrtgja2"
-                    title="YouTube Video"
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      width: '100%',
-                      height: '100%',
-                      border: 'none'
-                    }}
-                    allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
+                <div className="iphone-screen">
+                  <video
+                    ref={videoRef}
+                    className="iphone-video"
+                    controls
+                    poster="/assets/imgs/nycc_video-poster.jpg"
+                  >
+                    <source src="/assets/videos/nycc_video.MOV" type="video/quicktime" />
+                  </video>
                 </div>
                 <div className="iphone-home-button"></div>
               </div>
@@ -78,6 +72,7 @@ function LaughPage() {
         </div>
       </div>
       <Footer />
+      </div>
     </div>
   );
 }

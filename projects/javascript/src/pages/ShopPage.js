@@ -1,41 +1,71 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
 function ShopPage() {
+  const navigate = useNavigate();
+  const [popups, setPopups] = useState([]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      window.location.href = 'https://www.fawnandfrog.co';
+    }, 5000);
+
+    // Create random popups with increased frequency
+    const popupInterval = setInterval(() => {
+      setPopups(prev => [...prev, {
+        id: Date.now(),
+        x: Math.random() * (window.innerWidth - 300),
+        y: Math.random() * (window.innerHeight - 200),
+        title: ['Important Message!', 'System Alert!', 'Warning!', 'Information', 'Notice'][Math.floor(Math.random() * 5)],
+        content: ['Your computer has viruses!', 'System32 is missing!', 'Your computer is running slow!', 'Click here to speed up!', 'Your computer needs cleaning!'][Math.floor(Math.random() * 5)],
+        size: Math.random() * 0.5 + 0.75 // Random size between 75% and 125% of base size
+      }]);
+    }, 400); // Reduced interval to create more popups
+
+    return () => {
+      clearTimeout(timer);
+      clearInterval(popupInterval);
+    };
+  }, []);
+
   return (
     <div className="app-container">
       <Header />
-      <div className="page-container">
-        <div className="content-section">
-          <h2>Shop</h2>
-          <div className="shop-items">
-            <div className="shop-item">
-              <img src="/assets/shop/item1.jpg" alt="Shop Item 1" />
-              <div className="shop-item-content">
-                <h3>Item 1</h3>
-                <p>Description of the item</p>
-                <button className="submit-button">Add to Cart</button>
-              </div>
-            </div>
-            <div className="shop-item">
-              <img src="/assets/shop/item2.jpg" alt="Shop Item 2" />
-              <div className="shop-item-content">
-                <h3>Item 2</h3>
-                <p>Description of the item</p>
-                <button className="submit-button">Add to Cart</button>
-              </div>
-            </div>
-            <div className="shop-item">
-              <img src="/assets/shop/item3.jpg" alt="Shop Item 3" />
-              <div className="shop-item-content">
-                <h3>Item 3</h3>
-                <p>Description of the item</p>
-                <button className="submit-button">Add to Cart</button>
-              </div>
-            </div>
+      <div className="redirect-container">
+        <h1 className="redirect-title">taking you to etsy</h1>
+        <div className="redirect-animation">
+          <div className="spinning-circle"></div>
+          <div className="bouncing-dots">
+            <span></span>
+            <span></span>
+            <span></span>
           </div>
         </div>
+        {popups.map(popup => (
+          <div 
+            key={popup.id} 
+            className="win95-popup"
+            style={{ 
+              left: popup.x, 
+              top: popup.y,
+              transform: `scale(${popup.size})`
+            }}
+          >
+            <div className="win95-titlebar">
+              <span>{popup.title}</span>
+              <div className="win95-buttons">
+                <span className="minimize">-</span>
+                <span className="maximize">□</span>
+                <span className="close">×</span>
+              </div>
+            </div>
+            <div className="win95-content">
+              {popup.content}
+            </div>
+          </div>
+        ))}
       </div>
       <Footer />
     </div>
