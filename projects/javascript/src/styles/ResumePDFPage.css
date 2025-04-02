@@ -1,0 +1,34 @@
+.resume-pdf-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.resume-pdf-container h2 {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.pdf-embed {
+  width: 100%;
+  height: 800px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.pdf-embed iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+@media (max-width: 768px) {
+  .resume-pdf-container {
+    padding: 1rem;
+  }
+
+  .pdf-embed {
+    height: 600px;
+  }
+} 

@@ -59,7 +59,7 @@ function SeePage() {
       <Header />
       <div className="page-container">
         <div className="content-section">
-          <h2>Click an image below to explore ✨</h2>
+          <h2>click an image below to explore ✨</h2>
           <div className="photo-collections-grid">
             {collections.map((collection, index) => (
               <Link 

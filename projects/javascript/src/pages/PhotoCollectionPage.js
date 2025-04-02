@@ -113,7 +113,6 @@ function PhotoCollectionPage() {
             <p>Sorry, this collection doesn't exist.</p>
           </div>
         </div>
-        <Footer />
       </div>
     );
   }
@@ -138,7 +137,6 @@ function PhotoCollectionPage() {
           </div>
         </div>
       </div>
-      <Footer />
     </div>
   );
 }

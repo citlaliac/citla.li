@@ -32,7 +32,7 @@ function ContactPage() {
 
     try {
       // Send POST request to backend API
-      const response = await fetch('http://localhost:5000/api/contact', {
+      const response = await fetch('http://localhost:5000/api/submit-contact', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -48,7 +48,7 @@ function ContactPage() {
       // Update status with success message
       setStatus({
         type: 'success',
-        message: 'Message sent successfully!',
+        message: 'Thank you! Your message has been sent.',
       });
       
       // Clear form data

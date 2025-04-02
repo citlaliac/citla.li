@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import '../styles/TourPage.css';
 
 /**
  * TourPage Component
@@ -65,49 +66,56 @@ function TourPage() {
 
   return (
     <div className="app-container tour-page">
+      {/* Background gif */}
+      <div className="background-gif">
+        <img src="/assets/gifs/tour_bkg.gif" alt="Background" />
+      </div>
+
       <Header />
       <div className="page-container">
-        <div className="tour-header">
-          <h1 className="main-title">tour</h1>
-          <p className="subtitle">
-            As a licensed NYC tour guide, I'm passionate about sharing the city's rich history and vibrant culture. 
-            Whether you're interested in iconic landmarks or hidden gems, I'll create an unforgettable experience 
-            tailored to your interests. Contact me to schedule your perfect NYC adventure!
-          </p>
-        </div>
+        <div className="content-section">
+          <h2 className="page-title">tour</h2>
+          <div className="tour-header">
+            <p className="subtitle">
+              As a licensed NYC tour guide, I'm passionate about sharing the city's rich history and vibrant culture. 
+              Whether you're interested in iconic landmarks or hidden gems, I'll create an unforgettable experience 
+              tailored to your interests. Contact me to schedule your perfect NYC adventure!
+            </p>
+          </div>
 
-        <div className="tours-grid">
-          {tours.map((tour, index) => (
-            <div key={index} className="tour-item">
-              <div className="tour-image">
-                <img src={tour.image} alt={tour.title} style={{ height: '400px', objectFit: 'cover' }} />
+          <div className="tours-grid">
+            {tours.map((tour, index) => (
+              <div key={index} className="tour-item">
+                <div className="tour-image">
+                  <img src={tour.image} alt={tour.title} style={{ height: '400px', objectFit: 'cover' }} />
+                </div>
+                <div className="tour-content">
+                  <h2>{tour.title}</h2>
+                  <p>{tour.description}</p>
+                </div>
               </div>
-              <div className="tour-content">
-                <h2>{tour.title}</h2>
-                <p>{tour.description}</p>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
 
-        <div className="reviews-section">
-          <h2>what people are saying</h2>
-          <div className="review-slideshow">
-            <div className="review-card">
-              <p className="review-text">{reviews[currentReviewIndex].text}</p>
-              <div className="review-author">
-                <span className="author-name">{reviews[currentReviewIndex].author}</span>
-                <span className="review-date">{reviews[currentReviewIndex].date}</span>
+          <div className="reviews-section">
+            <h2>what people are saying</h2>
+            <div className="review-slideshow">
+              <div className="review-card">
+                <p className="review-text">{reviews[currentReviewIndex].text}</p>
+                <div className="review-author">
+                  <span className="author-name">{reviews[currentReviewIndex].author}</span>
+                  <span className="review-date">{reviews[currentReviewIndex].date}</span>
+                </div>
               </div>
-            </div>
-            <div className="review-dots">
-              {reviews.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentReviewIndex(index)}
-                  className={`review-dot ${index === currentReviewIndex ? 'active' : ''}`}
-                />
-              ))}
+              <div className="review-dots">
+                {reviews.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentReviewIndex(index)}
+                    className={`review-dot ${index === currentReviewIndex ? 'active' : ''}`}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         </div>

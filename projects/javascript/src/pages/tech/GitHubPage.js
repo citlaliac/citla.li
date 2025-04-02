@@ -57,7 +57,6 @@ function GitHubPage() {
           </div>
         </div>
       </div>
-      <Footer />
     </div>
   );
 }

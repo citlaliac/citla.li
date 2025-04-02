@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import '../styles/TechPage.css';
 
 /**
  * TechPage Component
@@ -13,13 +14,13 @@ function TechPage() {
     {
       id: 'github',
       title: 'GitHub',
-      path: '/tech/github',
+      path: '/tech/GitHubPage',
       icon: '/assets/gifs/github.gif'
     },
     {
       id: 'ai',
       title: 'Ethical Trust & Safety AI',
-      path: '/tech/ai',
+      path: '/tech/AIPage',
       icon: '/assets/gifs/ai.gif'
     },
     {
@@ -33,25 +34,24 @@ function TechPage() {
   return (
     <div className="app-container">
       <Header />
-      <main className="main-content" style={{ background: 'linear-gradient(to right, #FF0000, #FF69B4)' }}>
+      <main className="main-content">
         <div className="title-section">
           <h1 className="main-title">tech</h1>
           <p className="welcome-text">Explore my technical work and experience</p>
         </div>
-        <div className="icon-grid" style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(3, 1fr)', 
-          gap: '2rem', 
-          maxWidth: '1200px', 
-          width: '100%', 
-          margin: '0 auto' 
-        }}>
+        <div className="icon-grid-tech">
           {techItems.map(item => (
-            <Link to={item.path} key={item.id} className="icon-item">
+            <Link 
+              to={item.path} 
+              key={item.id} 
+              className="icon-item"
+              target={item.path.startsWith('http') ? '_blank' : undefined}
+              rel={item.path.startsWith('http') ? 'noopener noreferrer' : undefined}
+            >
               <div className="icon-wrapper">
                 <img src={item.icon} alt={item.title} />
               </div>
-              <span>{item.title}</span>
+              <h2>{item.title}</h2>
             </Link>
           ))}
         </div>

@@ -8,13 +8,15 @@ import LaughPage from './pages/LaughPage';
 import ReadPage from './pages/ReadPage';
 import SeePage from './pages/SeePage';
 import TechPage from './pages/TechPage';
-import ShopPage from './pages/ShopPage';
+import ShopRedirectPage from './pages/ShopRedirectPage';
 import TourPage from './pages/TourPage';
 import ContactPage from './pages/ContactPage';
 import SurprisePage from './pages/SurprisePage';
-import CollectionPage from './pages/CollectionPage';
-import ResumePage from './pages/ResumePage';
-import ResumeSuccessPage from './pages/ResumeSuccessPage';
+import PhotoCollectionPage from './pages/PhotoCollectionPage';
+import ResumePage from './pages/tech/ResumePage';
+import GitHubPage from './pages/tech/GitHubPage';
+import AIPage from './pages/tech/AIPage';
+import ResumePDFPage from './pages/ResumePDFPage';
 import './styles.css';
 
 function App() {
@@ -31,12 +33,14 @@ function App() {
             <Route path="/read" element={<ReadPage />} />
             <Route path="/see" element={<SeePage />} />
             <Route path="/tech" element={<TechPage />} />
-            <Route path="/shop" element={<ShopPage />} />
+            <Route path="/tech/resume" element={<ResumePage />} />
+            <Route path="/tech/GitHubPage" element={<GitHubPage />} />
+            <Route path="/tech/AIPage" element={<AIPage />} />
+            <Route path="/shop" element={<ShopRedirectPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/surprise" element={<SurprisePage />} />
-            <Route path="/collection/:id" element={<CollectionPage />} />
-            <Route path="/resume" element={<ResumePage />} />
-            <Route path="/resume-success" element={<ResumeSuccessPage />} />
+            <Route path="/collection/:id" element={<PhotoCollectionPage />} />
+            <Route path="/resume-pdf" element={<ResumePDFPage />} />
           </Routes>
         </div>
         <Footer />

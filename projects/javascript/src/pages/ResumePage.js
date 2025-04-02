@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * ResumePage Component
@@ -20,7 +20,7 @@ function ResumePage() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    company: '',
+    phone: '',
     message: '',
   });
   const [status, setStatus] = useState({ type: '', message: '' });
@@ -33,11 +33,11 @@ function ResumePage() {
    */
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setStatus({ type: 'loading', message: 'Processing...' });
+    setStatus({ type: 'loading', message: 'Submitting...' });
 
     try {
-      // Send POST request to backend API
-      const response = await fetch('http://localhost:5000/api/resume', {
+      console.log('Submitting form data:', formData);
+      const response = await fetch('http://localhost:5000/api/submit-resume', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -45,18 +45,27 @@ function ResumePage() {
         body: JSON.stringify(formData),
       });
 
-      // Check if request was successful
+      const data = await response.json();
+      console.log('Server response:', data);
+
       if (!response.ok) {
-        throw new Error('Failed to process request');
+        throw new Error(data.details || data.error || 'Failed to submit form');
       }
 
-      // Redirect to success page after successful submission
-      navigate('/resume-success');
+      setStatus({
+        type: 'success',
+        message: 'Success! Redirecting to resume...',
+      });
+
+      // Redirect to resume PDF after a short delay
+      setTimeout(() => {
+        navigate('/resume-pdf');
+      }, 1500);
     } catch (error) {
-      // Update status with error message
+      console.error('Submission error:', error);
       setStatus({
         type: 'error',
-        message: 'Failed to process request. Please try again.',
+        message: error.message || 'Failed to submit form. Please try again.',
       });
     }
   };
@@ -76,9 +85,9 @@ function ResumePage() {
     <div className="app-container">
       <Header />
       <div className="resume-container">
-        <h2>resume</h2>
+        <h2>request resume</h2>
         <p className="resume-intro">
-          Please fill out the form below to view my resume.
+          Please fill out the form below to request my resume.
         </p>
         {/* Resume Request Form */}
         <form className="resume-form" onSubmit={handleSubmit}>
@@ -106,31 +115,32 @@ function ResumePage() {
               required
             />
           </div>
-          {/* Company Input Field */}
+          {/* Phone Input Field */}
           <div className="form-group">
-            <label htmlFor="company">Company</label>
+            <label htmlFor="phone">Phone</label>
             <input
-              type="text"
-              id="company"
-              name="company"
-              value={formData.company}
+              type="tel"
+              id="phone"
+              name="phone"
+              value={formData.phone}
               onChange={handleChange}
               required
             />
           </div>
           {/* Optional Message Textarea Field */}
           <div className="form-group">
-            <label htmlFor="message">Message (Optional)</label>
+            <label htmlFor="message">Message</label>
             <textarea
               id="message"
               name="message"
               value={formData.message}
               onChange={handleChange}
+              required
             />
           </div>
           {/* Submit Button */}
           <button type="submit" className="submit-button">
-            View Resume
+            Submit
           </button>
           {/* Status Message Display */}
           {status.message && (
