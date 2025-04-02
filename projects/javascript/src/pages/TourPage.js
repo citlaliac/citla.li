@@ -103,7 +103,7 @@ function TourPage() {
           ))}
         </div>
 
-        <div className="reviews-section">
+        <div className="reviews-section" style={{ maxHeight: '20vh' }}>
           <h2>What People Are Saying</h2>
           <div 
             className="reviews-container"
@@ -112,11 +112,12 @@ function TourPage() {
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
+            style={{ display: 'flex', flexDirection: 'row', overflowX: 'auto', gap: '1rem', padding: '1rem' }}
           >
             {reviews.map((review, index) => (
-              <div key={index} className="review-card">
-                <p className="review-text">{review.text}</p>
-                <div className="review-author">
+              <div key={index} className="review-card" style={{ minWidth: '300px', maxWidth: '400px', padding: '0.5rem' }}>
+                <p className="review-text" style={{ margin: '0', lineHeight: '1.2', maxHeight: '2.4em', overflow: 'hidden' }}>{review.text}</p>
+                <div className="review-author" style={{ fontSize: '0.8em', marginTop: '0.5rem' }}>
                   <span className="author-name">{review.author}</span>
                   <span className="review-date">{review.date}</span>
                 </div>

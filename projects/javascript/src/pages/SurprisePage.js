@@ -9,23 +9,10 @@ function SurprisePage() {
 
   React.useEffect(() => {
     const randomPage = pages[Math.floor(Math.random() * pages.length)];
-    const timer = setTimeout(() => {
-      navigate(randomPage);
-    }, 2000);
-    return () => clearTimeout(timer);
+    navigate(randomPage);
   }, [navigate]);
 
-  return (
-    <div className="app-container">
-      <Header />
-      <div className="page-container">
-        <div className="content-section">
-          <div className="loading-text">Taking you somewhere special...</div>
-        </div>
-      </div>
-      <Footer />
-    </div>
-  );
+  return null;
 }
 
 export default SurprisePage; 

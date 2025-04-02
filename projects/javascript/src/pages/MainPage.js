@@ -8,9 +8,9 @@ function MainPage() {
   return (
     <div className="app-container">
       <Header />
-      <main className="main-content">
+      <main className="main-content" style={{ background: 'linear-gradient(to right, #FF0000, #FF69B4)' }}>
         <div className="title-section">
-          <h1 className="main-title">Citlali</h1>
+          <h1 className="main-title">hi I'm</h1>
           <p className="welcome-text">Welcome to my digital space! Explore my world through photos, music, poetry, and more.</p>
         </div>
         <div className="icon-grid">

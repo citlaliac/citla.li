@@ -56,14 +56,13 @@ function LaughPage() {
             <div className="iphone-container" onClick={handlePhoneClick}>
               <div className="iphone">
                 <div className="iphone-screen">
-                  <video
-                    ref={videoRef}
-                    className="iphone-video"
-                    controls
-                    poster="/assets/imgs/nycc_video-poster.jpg"
-                  >
-                    <source src="/assets/videos/nycc_video.MOV" type="video/quicktime" />
-                  </video>
+                  <iframe
+                    src="https://www.youtube.com/embed/-_r7kPaaa08?si=YYa0sU6puUrtgja2"
+                    title="YouTube Video"
+                    frameBorder="0"
+                    allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
                 </div>
                 <div className="iphone-home-button"></div>
               </div>

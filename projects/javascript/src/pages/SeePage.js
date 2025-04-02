@@ -15,42 +15,42 @@ function SeePage() {
     {
       title: "summer 2023 - islands",
       path: "/collection/summer-2023",
-      image: "/assets/imgs/collections/summer-2023.jpg"
+      image: "/assets/photos/summer-2023/DSC_0549.jpg"
     },
     {
       title: "spring 2023 - sakura, cherry blossoms",
       path: "/collection/spring-2023",
-      image: "/assets/imgs/collections/spring-2023.jpg"
+      image: "/assets/photos/summer-2023/DSC_0634.jpg"
     },
     {
       title: "spring 2024 - the sunshine",
       path: "/collection/spring-2024",
-      image: "/assets/imgs/collections/spring-2024.jpg"
+      image: "/assets/photos/summer-2023/DSC_0708.jpg"
     },
     {
       title: "espionner",
       path: "/collection/espionner",
-      image: "/assets/imgs/collections/espionner.jpg"
+      image: "/assets/photos/summer-2023/DSC_0597.jpg"
     },
     {
       title: "urban",
       path: "/collection/urban",
-      image: "/assets/imgs/collections/urban.jpg"
+      image: "/assets/photos/summer-2023/DSC_0565.jpg"
     },
     {
       title: "natural",
       path: "/collection/natural",
-      image: "/assets/imgs/collections/natural.jpg"
+      image: "/assets/photos/summer-2023/DSC_0523.jpg"
     },
     {
       title: "moody",
       path: "/collection/moody",
-      image: "/assets/imgs/collections/moody.jpg"
+      image: "/assets/photos/summer-2023/DSC_0605.jpg"
     },
     {
       title: "portrait",
       path: "/collection/portrait",
-      image: "/assets/imgs/collections/portrait.jpg"
+      image: "/assets/photos/summer-2023/DSC_0641.jpg"
     }
   ];
 
