@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import '../styles/LaughPage.css';
 
 /**
  * LaughPage Component
@@ -21,12 +22,11 @@ function LaughPage() {
       {/* Background gif */}
       <div className="background-gif">
         <img src="/assets/gifs/laugh_bkg.gif" alt="Background" />
-      {/* </div> */}
+      </div>
 
       <Header />
       <div className="page-container">
-        {/* <div className="content-section"> */}
-        <div>
+        <div className="content-section">
           <h2 className="page-title">laugh</h2>
           <div className="video-container">
             {/* Retro TV Container */}
@@ -53,17 +53,16 @@ function LaughPage() {
             </div>
 
             {/* iPhone Container */}
-            <div className="iphone-container" onClick={handlePhoneClick}>
+            <div className="iphone-container">
               <div className="iphone">
                 <div className="iphone-screen">
-                  <video
-                    ref={videoRef}
-                    className="iphone-video"
-                    controls
-                    poster="/assets/imgs/nycc_video-poster.jpg"
-                  >
-                    <source src="/assets/videos/nycc_video.MOV" type="video/quicktime" />
-                  </video>
+                  <iframe
+                    src="https://www.youtube.com/embed/-_r7kPaaa08"
+                    title="YouTube Video"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
                 </div>
                 <div className="iphone-home-button"></div>
               </div>
@@ -72,7 +71,6 @@ function LaughPage() {
         </div>
       </div>
       <Footer />
-      </div>
     </div>
   );
 }
