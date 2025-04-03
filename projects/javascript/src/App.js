@@ -1,49 +1,57 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Header from './components/Header';
-import Footer from './components/Footer';
-import MainPage from './pages/MainPage';
+import HomePage from './pages/MainPage';
+import SeePage from './pages/SeePage';
 import ListenPage from './pages/ListenPage';
 import LaughPage from './pages/LaughPage';
-import ReadPage from './pages/ReadPage';
-import SeePage from './pages/SeePage';
-import TechPage from './pages/TechPage';
-import ShopRedirectPage from './pages/ShopRedirectPage';
 import TourPage from './pages/TourPage';
+import TechPage from './pages/TechPage';
 import ContactPage from './pages/ContactPage';
-import SurprisePage from './pages/SurprisePage';
-import PhotoCollectionPage from './pages/PhotoCollectionPage';
+import ReadPage from './pages/ReadPage';
 import ResumePage from './pages/tech/ResumePage';
+import ResumePDFPage from './pages/tech/ResumePDFPage';
+import ResumeSuccessPage from './pages/tech/ResumeSuccessPage';
 import GitHubPage from './pages/tech/GitHubPage';
 import AIPage from './pages/tech/AIPage';
-import ResumePDFPage from './pages/ResumePDFPage';
+import ShopRedirectPage from './pages/ShopRedirectPage';
+import Summer2023Page from './pages/Summer2023Page';
+import Spring2023Page from './pages/Spring2023Page';
+import Spring2024Page from './pages/Spring2024Page';
+import PortraitPage from './pages/PortraitPage';
+import MoodyPage from './pages/MoodyPage';
+import NaturalPage from './pages/NaturalPage';
+import UrbanPage from './pages/UrbanPage';
+import EspionnerPage from './pages/EspionnerPage';
 import './styles.css';
 
 function App() {
   return (
     <Router>
-      <div className="app-container">
-        <Header />
-        <div className="router-container">
-          <Routes>
-            <Route path="/" element={<MainPage />} />
-            <Route path="/tour" element={<TourPage />} />
-            <Route path="/listen" element={<ListenPage />} />
-            <Route path="/laugh" element={<LaughPage />} />
-            <Route path="/read" element={<ReadPage />} />
-            <Route path="/see" element={<SeePage />} />
-            <Route path="/tech" element={<TechPage />} />
-            <Route path="/tech/resume" element={<ResumePage />} />
-            <Route path="/tech/GitHubPage" element={<GitHubPage />} />
-            <Route path="/tech/AIPage" element={<AIPage />} />
-            <Route path="/shop" element={<ShopRedirectPage />} />
-            <Route path="/contact" element={<ContactPage />} />
-            <Route path="/surprise" element={<SurprisePage />} />
-            <Route path="/collection/:id" element={<PhotoCollectionPage />} />
-            <Route path="/resume-pdf" element={<ResumePDFPage />} />
-          </Routes>
-        </div>
-        <Footer />
+      <div className="app">
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/see" element={<SeePage />} />
+          <Route path="/listen" element={<ListenPage />} />
+          <Route path="/laugh" element={<LaughPage />} />
+          <Route path="/tour" element={<TourPage />} />
+          <Route path="/tech" element={<TechPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/read" element={<ReadPage />} />
+          <Route path="/tech/resume" element={<ResumePage />} />
+          <Route path="/tech/resume-pdf" element={<ResumePDFPage />} />
+          <Route path="/tech/resume-success" element={<ResumeSuccessPage />} />
+          <Route path="/tech/GitHubPage" element={<GitHubPage />} />
+          <Route path="/tech/AIPage" element={<AIPage />} />
+          <Route path="/shop" element={<ShopRedirectPage />} />
+          <Route path="/photos/summer-2023" element={<Summer2023Page />} />
+          <Route path="/photos/spring-2023" element={<Spring2023Page />} />
+          <Route path="/photos/spring-2024" element={<Spring2024Page />} />
+          <Route path="/photos/portrait" element={<PortraitPage />} />
+          <Route path="/photos/moody" element={<MoodyPage />} />
+          <Route path="/photos/natural" element={<NaturalPage />} />
+          <Route path="/photos/urban" element={<UrbanPage />} />
+          <Route path="/photos/espionner" element={<EspionnerPage />} />
+        </Routes>
       </div>
     </Router>
   );

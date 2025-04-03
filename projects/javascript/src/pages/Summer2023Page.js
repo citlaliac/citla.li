@@ -1,4 +1,6 @@
 import React from 'react';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 import '../styles/PhotoCollectionPage.css';
 
 const Summer2023Page = () => {
@@ -19,6 +21,7 @@ const Summer2023Page = () => {
 
   return (
     <div className="photo-collection-page">
+      <Header />
       <h1 className="collection-title">Summer 2023</h1>
       <div className="photo-grid">
         {photos.map((photo, index) => (
@@ -35,6 +38,7 @@ const Summer2023Page = () => {
           </div>
         ))}
       </div>
+      <Footer />
     </div>
   );
 };

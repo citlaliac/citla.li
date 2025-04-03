@@ -1,4 +1,6 @@
 import React from 'react';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 import '../styles/PhotoCollectionPage.css';
 
 const PortraitPage = () => {
@@ -20,6 +22,7 @@ const PortraitPage = () => {
 
   return (
     <div className="photo-collection-page">
+      <Header />
       <h1 className="collection-title">Portrait</h1>
       <div className="photo-grid">
         {photos.map((photo, index) => (
@@ -36,6 +39,7 @@ const PortraitPage = () => {
           </div>
         ))}
       </div>
+      <Footer />
     </div>
   );
 };

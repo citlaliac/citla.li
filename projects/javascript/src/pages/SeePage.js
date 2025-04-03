@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import '../styles/SeePage.css';
 
 /**
  * SeePage Component
@@ -9,77 +10,72 @@ import Footer from '../components/Footer';
  * Each collection is represented by a large image with an overlay title
  * Clicking a collection navigates to its dedicated page
  */
-function SeePage() {
+const SeePage = () => {
   // Define the available photography collections
   const collections = [
     {
-      title: "summer 2023 - islands",
-      path: "/collection/summer-2023",
-      image: "/assets/photos/summer-2023/DSC_0549.jpg"
+      title: 'Summer 2023',
+      path: '/photos/summer-2023',
+      image: '/assets/photos/summer-2023/DSC_0708.jpg'
     },
     {
-      title: "spring 2023 - sakura, cherry blossoms",
-      path: "/collection/spring-2023",
-      image: "/assets/photos/summer-2023/DSC_0634.jpg"
+      title: 'Spring 2023',
+      path: '/photos/spring-2023',
+      image: '/assets/photos/spring-2023/DSC_0535.jpg'
     },
     {
-      title: "spring 2024 - the sunshine",
-      path: "/collection/spring-2024",
-      image: "/assets/photos/summer-2023/DSC_0708.jpg"
+      title: 'Spring 2024',
+      path: '/photos/spring-2024',
+      image: '/assets/photos/spring-2024/DSC_0616.jpg'
     },
     {
-      title: "espionner",
-      path: "/collection/espionner",
-      image: "/assets/photos/summer-2023/DSC_0597.jpg"
+      title: 'Portrait',
+      path: '/photos/portrait',
+      image: '/assets/photos/portrait/DSC_0194.jpg'
     },
     {
-      title: "urban",
-      path: "/collection/urban",
-      image: "/assets/photos/summer-2023/DSC_0565.jpg"
+      title: 'Moody',
+      path: '/photos/moody',
+      image: '/assets/photos/moody/DSC_0378.jpg'
     },
     {
-      title: "natural",
-      path: "/collection/natural",
-      image: "/assets/photos/summer-2023/DSC_0523.jpg"
+      title: 'Natural',
+      path: '/photos/natural',
+      image: '/assets/photos/natural/DSC_0522.jpg'
     },
     {
-      title: "moody",
-      path: "/collection/moody",
-      image: "/assets/photos/summer-2023/DSC_0605.jpg"
+      title: 'Urban',
+      path: '/photos/urban',
+      image: '/assets/photos/urban/DSC_0609.jpg'
     },
     {
-      title: "portrait",
-      path: "/collection/portrait",
-      image: "/assets/photos/summer-2023/DSC_0641.jpg"
+      title: 'Espionner',
+      path: '/photos/espionner',
+      image: '/assets/photos/espionner/DSC_0621.jpg'
     }
   ];
 
   return (
-    <div className="app-container">
+    <div className="see-page">
       <Header />
-      <div className="page-container">
-        <div className="content-section">
-          <h2>click an image below to explore ✨</h2>
-          <div className="photo-collections-grid">
-            {collections.map((collection, index) => (
-              <Link 
-                key={index} 
-                to={collection.path} 
-                className="collection-item"
-              >
-                <div className="collection-image">
-                  <img src={collection.image} alt={collection.title} />
-                </div>
-                <div className="collection-overlay">
-                  <h3>{collection.title}</h3>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
+      <h1 className="page-title">See</h1>
+      <div className="collections-grid">
+        {collections.map((collection, index) => (
+          <Link to={collection.path} key={index} className="collection-item">
+            <div className="collection-image">
+              <img
+                src={collection.image}
+                alt={collection.title}
+                loading="lazy"
+              />
+            </div>
+            <h2 className="collection-title">{collection.title}</h2>
+          </Link>
+        ))}
       </div>
+      <Footer />
     </div>
   );
-}
+};
 
 export default SeePage; 

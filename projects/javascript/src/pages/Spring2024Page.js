@@ -1,4 +1,6 @@
 import React from 'react';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 import '../styles/PhotoCollectionPage.css';
 
 const Spring2024Page = () => {
@@ -14,6 +16,7 @@ const Spring2024Page = () => {
 
   return (
     <div className="photo-collection-page">
+      <Header />
       <h1 className="collection-title">Spring 2024</h1>
       <div className="photo-grid">
         {photos.map((photo, index) => (
@@ -30,6 +33,7 @@ const Spring2024Page = () => {
           </div>
         ))}
       </div>
+      <Footer />
     </div>
   );
 };

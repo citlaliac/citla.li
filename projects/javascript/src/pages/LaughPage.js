@@ -70,7 +70,6 @@ function LaughPage() {
           </div>
         </div>
       </div>
-      {/* <Footer /> */}
     </div>
   );
 }

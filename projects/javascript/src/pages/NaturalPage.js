@@ -3,22 +3,27 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import '../styles/PhotoCollectionPage.css';
 
-const Spring2023Page = () => {
+const NaturalPage = () => {
   const photos = [
-    'DSC_0535.jpg', 'DSC_0328.jpg', 'DSC_0537.jpg', 'DSC_0331.jpg',
-    'DSC_0528.jpg', 'DSC_0336.jpg', 'DSC_0554.jpg'
+    'DSC_0522.jpg', 'DSC_0517.jpg', 'DSC_0472.jpg', 'DSC_0566.jpg',
+    'DSC_0362+2.jpg', 'DSC_0345.jpg', 'DSC_0336.jpg', 'DSC_0344.jpg',
+    'DSC_0419.jpg', 'DSC_0473.jpg', 'DSC_0499.jpg', 'DSC_0234.jpg',
+    'DSC_0554.jpg', 'DSC_0425.jpg', 'DSC_0233.jpg', 'DSC_0647.jpg',
+    'DSC_0636.jpg', 'DSC_0624.jpg', 'DSC_0581.jpg', 'DSC_0611.jpg',
+    'DSC_0593.jpg', 'DSC_0535.jpg', 'DSC_0557.jpg', 'DSC_0592.jpg',
+    'DSC_0588.jpg', 'DSC_0646.jpg'
   ];
 
   return (
     <div className="photo-collection-page">
       <Header />
-      <h1 className="collection-title">Spring 2023</h1>
+      <h1 className="collection-title">Natural</h1>
       <div className="photo-grid">
         {photos.map((photo, index) => (
           <div key={index} className="photo-item">
             <img
-              src={`/assets/photos/spring-2023/${photo}`}
-              alt={`Photo ${index + 1} from Spring 2023`}
+              src={`/assets/photos/natural/${photo}`}
+              alt={`Photo ${index + 1} from Natural Collection`}
               loading="lazy"
               onError={(e) => {
                 console.error(`Error loading image: ${photo}`);
@@ -33,4 +38,4 @@ const Spring2023Page = () => {
   );
 };
 
-export default Spring2023Page; 
+export default NaturalPage; 
