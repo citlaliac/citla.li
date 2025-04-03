@@ -61,7 +61,7 @@ const SeePage = () => {
         <img src="/assets/gifs/see-bkg.gif" alt="Background" />
       </div>
       <Header />
-      <h1 className="page-title">See</h1>
+      <h1 className="page-title">see</h1>
       <div className="collections-grid">
         {collections.map((collection, index) => (
           <Link to={collection.path} key={index} className="collection-item">

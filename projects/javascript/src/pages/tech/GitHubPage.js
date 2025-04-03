@@ -37,7 +37,7 @@ const GitHubPage = () => {
               <span className="terminal-command">ls ~/projects</span>
             </div>
             <div className="terminal-line terminal-output">
-              <a href="https://github.com/citlali" target="_blank" rel="noopener noreferrer" className="terminal-link">
+              <a href="https://github.com/citlaliac" target="_blank" rel="noopener noreferrer" className="terminal-link">
                 github.com/citlali
               </a>
             </div>

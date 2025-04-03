@@ -12,13 +12,13 @@
   height: 300px;
   background: radial-gradient(
     circle at center,
-    rgba(255, 255, 255, 0.8) 0%,
-    rgba(255, 255, 255, 0.4) 30%,
+    /* rgba(255, 255, 195, 0.535) 20%, */
+    rgba(255, 255, 255, 0.854) 20%,
     rgba(255, 255, 255, 0) 70%
   );
   pointer-events: none;
   z-index: 1;
-  mix-blend-mode: overlay;
+  mix-blend-mode: exclusion;
 }
 
 .content {
@@ -48,7 +48,7 @@
   margin: 1rem 0;
   opacity: 0;
   animation: fadeIn 0.5s ease forwards;
-  color: #fff;
+  color: #000000;
 }
 
 .ai-text p:nth-child(1) { animation-delay: 0.2s; }
