@@ -17,8 +17,8 @@ function Header() {
     <header className="header">
       {!isMainPage && (
         <a href="#" className="back-button" onClick={handleBack}>
-          <div className="icon-wrapper">
-            {/* Placeholder for future gif icon */}
+          <div className="icon-wrapper small">
+            <img src="/assets/gifs/back_dog.gif" alt="Back" />
           </div>
           <span>back</span>
         </a>
