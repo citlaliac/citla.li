@@ -71,7 +71,6 @@ function ShopRedirectPage() {
           </div>
         ))}
       </div>
-      <Footer />
     </div>
   );
 }

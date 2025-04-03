@@ -1,21 +1,22 @@
 .back-button {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 1.2rem;
-  cursor: pointer;
-  padding: 0.5rem;
-  text-decoration: none;
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  text-decoration: none;
+  color: white;
+  font-size: 1.2rem;
+  padding: 0.5rem;
+  transition: transform 0.3s ease;
 }
 
 .back-button:hover {
-  opacity: 0.8;
+  transform: translateX(-5px);
 }
 
-.back-button svg {
-  width: 20px;
-  height: 20px;
+.back-button img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  margin: 0;
+  vertical-align: middle;
 } 

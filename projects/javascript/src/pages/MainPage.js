@@ -62,7 +62,7 @@ function MainPage() {
             </div>
             <span>tech</span>
           </Link>
-          <Link to="/shop" className="icon-item">
+          <Link to="/shop" className="icon-item" target="_blank" rel="noopener noreferrer">
             <div className="icon-wrapper">
               <img src="/assets/gifs/shop.gif" alt="Shop" />
             </div>
@@ -82,7 +82,6 @@ function MainPage() {
           </Link>
         </div>
       </main>
-      {/* <Footer /> */}
     </div>
   );
 }

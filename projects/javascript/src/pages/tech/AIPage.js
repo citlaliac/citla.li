@@ -63,7 +63,6 @@ function AIPage() {
           </div>
         </div>
       </div>
-      <Footer />
     </div>
   );
 }

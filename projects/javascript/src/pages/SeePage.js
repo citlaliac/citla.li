@@ -78,7 +78,6 @@ function SeePage() {
           </div>
         </div>
       </div>
-      <Footer />
     </div>
   );
 }
