@@ -5,12 +5,17 @@ function Header() {
   const location = useLocation();
   const navigate = useNavigate();
   const isMainPage = location.pathname === '/';
+  const isPhotoPage = location.pathname.startsWith('/photos/');
 
   const handleBack = (e) => {
     e.preventDefault();
-    // Get the parent path by removing the last segment
-    const parentPath = location.pathname.split('/').slice(0, -1).join('/') || '/';
-    navigate(parentPath);
+    if (isPhotoPage) {
+      navigate('/see');
+    } else {
+      // Get the parent path by removing the last segment
+      const parentPath = location.pathname.split('/').slice(0, -1).join('/') || '/';
+      navigate(parentPath);
+    }
   };
 
   return (

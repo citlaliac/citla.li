@@ -59,6 +59,9 @@ function ResumePage() {
 
   return (
     <div className="app-container">
+      <div className="background-gif" >
+        <img src="/assets/gifs/resume-bkg.gif" alt="Background"/>
+      </div>
       <Header />
       <div className="resume-container">
         <h2>request resume</h2>

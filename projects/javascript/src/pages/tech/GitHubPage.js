@@ -10,11 +10,14 @@ import Footer from '../../components/Footer';
 function GitHubPage() {
   return (
     <div className="app-container">
+      <div className="background-gif" >
+        <img src="/assets/gifs/github-bkg.gif" alt="Background"/>
+      </div>
       <Header />
       <div className="page-container">
         <div className="content-section">
           <h2>What is tech if not kinda magic?</h2>
-          <p className="subtitle">Scrying this crystal ball, I can see that this part of the website is under construction and… there's more coming soon 🔮</p>
+          <p className="subtitle">what does your future hold? click to see 🔮</p>
 
           <div className="tech-projects-grid">
             {/* Coin-Boy Project */}
