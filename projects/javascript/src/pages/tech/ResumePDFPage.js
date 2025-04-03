@@ -9,7 +9,7 @@ function ResumePDFPage() {
         <h2>Resume</h2>
         <div className="pdf-embed">
           <iframe
-            src="/assets/pdfs/CitlaliAguilarCanamar_Task.pdf"
+            src="/assets/pdfs/CAC_resume.pdf"
             title="Resume PDF"
             width="100%"
             height="800px"

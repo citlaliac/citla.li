@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import '../styles/Header.css';
 
 function Header() {
   const location = useLocation();
@@ -20,14 +21,16 @@ function Header() {
 
   return (
     <header className="header">
-      {!isMainPage && (
-        <a href="#" className="back-button" onClick={handleBack}>
-          <div className="icon-wrapper small">
-            <img src="/assets/gifs/back_dog.gif" alt="Back" />
-          </div>
-          <span>back</span>
-        </a>
-      )}
+      <div className="header-left">
+        {!isMainPage && (
+          <a href="#" className="nav-icon" style={{ alignItems: 'left' }} onClick={handleBack}>
+            <div className=".back-button img">
+              <img src="/assets/gifs/back_dog.gif" alt="Back" />
+            </div>
+            <span>BACK</span>
+          </a>
+        )}
+      </div>
       <nav className="header-nav">
         <a href="/" className="nav-icon">
           <div className="icon-wrapper small">

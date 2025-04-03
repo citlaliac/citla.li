@@ -14,6 +14,7 @@ import ResumeSuccessPage from './pages/tech/ResumeSuccessPage';
 import GitHubPage from './pages/tech/GitHubPage';
 import AIPage from './pages/tech/AIPage';
 import ShopRedirectPage from './pages/ShopRedirectPage';
+import SurprisePage from './pages/SurprisePage';
 import Summer2023Page from './pages/Summer2023Page';
 import Spring2023Page from './pages/Spring2023Page';
 import Spring2024Page from './pages/Spring2024Page';
@@ -43,6 +44,7 @@ function App() {
           <Route path="/tech/GitHubPage" element={<GitHubPage />} />
           <Route path="/tech/AIPage" element={<AIPage />} />
           <Route path="/shop" element={<ShopRedirectPage />} />
+          <Route path="/surprise" element={<SurprisePage />} />
           <Route path="/photos/summer-2023" element={<Summer2023Page />} />
           <Route path="/photos/spring-2023" element={<Spring2023Page />} />
           <Route path="/photos/spring-2024" element={<Spring2024Page />} />

@@ -7,7 +7,6 @@ function ResumePage() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    message: '',
   });
   const [status, setStatus] = useState({ type: '', message: '' });
 
@@ -39,7 +38,7 @@ function ResumePage() {
 
       // Redirect to resume PDF after a short delay
       setTimeout(() => {
-        navigate('/resume-pdf');
+        navigate('/tech/resume-pdf');
       }, 1500);
     } catch (error) {
       console.error('Submission error:', error);
@@ -64,7 +63,6 @@ function ResumePage() {
       </div>
       <Header />
       <div className="resume-container">
-        <h2>request resume</h2>
         <p className="resume-intro">
           Please fill out the form below to request my resume.
         </p>
@@ -87,16 +85,6 @@ function ResumePage() {
               id="email"
               name="email"
               value={formData.email}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="message">Message</label>
-            <textarea
-              id="message"
-              name="message"
-              value={formData.message}
               onChange={handleChange}
               required
             />

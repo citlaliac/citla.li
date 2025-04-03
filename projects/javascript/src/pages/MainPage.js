@@ -82,6 +82,7 @@ function MainPage() {
           </Link>
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

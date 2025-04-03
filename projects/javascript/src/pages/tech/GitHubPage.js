@@ -1,67 +1,80 @@
 import React from 'react';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
+import '../../styles/GitHubPage.css';
 
 /**
  * GitHubPage Component
  * Displays a collection of tech projects and experiments
  * Includes interactive elements and project descriptions
  */
-function GitHubPage() {
+const GitHubPage = () => {
   return (
-    <div className="app-container">
-      <div className="background-gif" >
-        <img src="/assets/gifs/github-bkg.gif" alt="Background"/>
-      </div>
+    <div className="github-page">
       <Header />
-      <div className="page-container">
-        <div className="content-section">
-          <h2>What is tech if not kinda magic?</h2>
-          <p className="subtitle">what does your future hold? click to see 🔮</p>
-
-          <div className="tech-projects-grid">
-            {/* Coin-Boy Project */}
-            <div className="tech-project">
-              <h3>Are you a Coin-Boy?</h3>
-              <p>Grab your phone and get flippy!</p>
-              <a href="#" className="project-link">Try it out →</a>
+      <div className="terminal-container">
+        <div className="terminal-header">
+          <h1 className="terminal-title">Tech Stuff</h1>
+          <div className="terminal-controls">
+            <button className="terminal-button close"></button>
+            <button className="terminal-button minimize"></button>
+            <button className="terminal-button maximize"></button>
+          </div>
+        </div>
+        <div className="terminal-content">
+          <div className="terminal-line">
+            <span className="terminal-prompt">$</span>
+            <span className="terminal-command">cat README.md</span>
+          </div>
+          <div className="terminal-line terminal-output">
+            What is tech if not kinda magic?
+          </div>
+          
+          <div className="terminal-section">
+            <div className="terminal-section-title">Projects</div>
+            <div className="terminal-line">
+              <span className="terminal-prompt">$</span>
+              <span className="terminal-command">ls ~/projects</span>
             </div>
-
-            {/* Sexist Robot Project */}
-            <div className="tech-project">
-              <h3>Want to make a sexist robot rewrite songs for you?</h3>
-              <p>Click the link!</p>
-              <a href="#" className="project-link">Try it out →</a>
+            <div className="terminal-line terminal-output">
+              <a href="https://github.com/citlali" target="_blank" rel="noopener noreferrer" className="terminal-link">
+                github.com/citlali
+              </a>
             </div>
-
-            {/* Past Lover Project */}
-            <div className="tech-project">
-              <h3>Tell off a past lover, give them a hint.</h3>
-              <a href="#" className="project-link">Try it out →</a>
-            </div>
-
-            {/* Song Categorization Project */}
-            <div className="tech-project">
-              <h3>Categorize a song with Hugging Face transformers.</h3>
-              <a href="#" className="project-link">Try it out →</a>
+            <div className="terminal-line terminal-output">
+              • Coin-Boy: Grab your phone and <a href="https://github.com/citlaliac/coin-boys" target="_blank">get flippy!</a>
+              <br />
+              • Want to make a sexist robot rewrite songs for you? <a href="https://github.com/citlaliac/sexist-robot" target="_blank">Click this link!</a>
+              <br />
+              • Tell off a past lover, <a href="https://www.citla.li/hintgiver" target="_blank">Give them a hint.</a>. 
+              <br />
+              • <a href="https://github.com/citlaliac/song-classifier" target="_blank">Categorize</a> a song with Hugging Face transformers.
             </div>
           </div>
 
-          <div className="github-section">
-            <h3>Take a minute and click around my public Github.</h3>
-            <a href="https://github.com/yourusername" target="_blank" rel="noopener noreferrer" className="github-link">
-              Visit GitHub →
-            </a>
+          <div className="terminal-section">
+            <div className="terminal-section-title">Portfolio</div>
+            <div className="terminal-line">
+              <span className="terminal-prompt">$</span>
+              <span className="terminal-command">cat portfolio/README.md</span>
+            </div>
+            <div className="terminal-line terminal-output">
+              Want to see my password protected portfolio? Assets I've created and the like?
+              <br />
+              Ask for the password and then go here: ✨_portfolio_✨
+            </div>
           </div>
 
-          <div className="portfolio-section">
-            <h3>Check out these projects</h3>
-            <p>Want to see my password protected portfolio? Assets I've created and the like? Ask for the password and then go here: ✨_portfolio_✨</p>
+          <div className="terminal-line">
+            <span className="terminal-prompt">$</span>
+            <span className="terminal-command"></span>
+            <span className="cursor"></span>
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
-}
+};
 
 export default GitHubPage; 

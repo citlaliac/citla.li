@@ -9,7 +9,7 @@ function ResumeSuccessPage() {
         <h2>thank you for your interest</h2>
         <div className="pdf-container">
           <iframe
-            src="/assets/pdfs/resume.pdf"
+            src="/assets/pdfs/CAC_resume.pdf"
             title="Resume PDF"
             width="100%"
             height="800px"

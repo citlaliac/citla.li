@@ -147,6 +147,7 @@ function ReadPage() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

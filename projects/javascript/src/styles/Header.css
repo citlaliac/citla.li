@@ -19,4 +19,60 @@
   object-fit: contain;
   margin: 0;
   vertical-align: middle;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: none;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+}
+
+.header-nav {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.nav-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  color: white;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.icon-wrapper {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 0.5rem;
+}
+
+.icon-wrapper.small {
+  width: 30px;
+  height: 30px;
+}
+
+.icon-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.nav-icon span {
+  margin-top: 0.25rem;
 } 

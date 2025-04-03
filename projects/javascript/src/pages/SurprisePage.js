@@ -1,18 +1,62 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Header from '../components/Header'; 
-import Footer from '../components/Footer';
 
-function SurprisePage() {
+
+const SurprisePage = () => {
   const navigate = useNavigate();
-  const pages = ['/listen', '/laugh', '/read', '/see', '/tech', '/shop', '/tour'];
 
-  React.useEffect(() => {
+  useEffect(() => {
+    const pages = [
+      '/about',
+      '/tech',
+      '/laugh',
+      '/listen',
+      '/see',
+      '/read',
+      '/tour',
+      '/shop',
+      '/contact',
+      '/tech/github',
+      '/tech/AIPage',
+      '/tech/resume',
+      '/photos/summer-2023',
+      '/photos/spring-2023',
+      '/photos/spring-2024',
+      '/photos/portrait',
+      '/photos/moody',
+      '/photos/natural',
+      '/photos/urban',
+      '/photos/espionner'
+    ];
+
     const randomPage = pages[Math.floor(Math.random() * pages.length)];
-    navigate(randomPage);
+    
+    // Special handling for shop pages
+    if (randomPage === '/shop' || randomPage === '/shop/redirect') {
+      window.open('http://localhost:3000/shop', '_blank');
+      setTimeout(() => {
+        navigate('/');
+      }, 1000);
+    } else {
+      navigate(randomPage);
+    }
   }, [navigate]);
 
-  return null;
-}
+  return (
+    <div className="surprise-page">
+      <div className="surprise-content">
+        <h1>Surprise!</h1>
+        <div className="loading-animation">
+          <div className="spinning-circle"></div>
+          <div className="bouncing-dots">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default SurprisePage; 

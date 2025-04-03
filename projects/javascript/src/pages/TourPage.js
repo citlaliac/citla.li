@@ -77,9 +77,7 @@ function TourPage() {
           <h2 className="page-title">tour</h2>
           <div className="tour-header">
             <p className="subtitle">
-              As a licensed NYC tour guide, I'm passionate about sharing the city's rich history and vibrant culture. 
-              Whether you're interested in iconic landmarks or hidden gems, I'll create an unforgettable experience 
-              tailored to your interests. Contact me to schedule your perfect NYC adventure!
+              As a licensed NYC tour guide, I love showing YOU crazy stuff in a cool, non-touristy way. Take a tour, bring a camelback full of wine. I won't tell.
             </p>
           </div>
 
