@@ -1,7 +1,7 @@
 .ai-page {
   min-height: 100vh;
-  background-color: #000;
-  color: #000;
+  background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+  color: #fff;
   position: relative;
   overflow: hidden;
 }
@@ -35,6 +35,7 @@
   text-align: center;
   opacity: 0;
   animation: fadeIn 1s ease forwards;
+  color: #fff;
 }
 
 .ai-text {
@@ -47,6 +48,7 @@
   margin: 1rem 0;
   opacity: 0;
   animation: fadeIn 0.5s ease forwards;
+  color: #fff;
 }
 
 .ai-text p:nth-child(1) { animation-delay: 0.2s; }

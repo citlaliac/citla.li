@@ -14,42 +14,42 @@ const SeePage = () => {
   // Define the available photography collections
   const collections = [
     {
-      title: 'Summer 2023',
+      title: 'summer 2023',
       path: '/photos/summer-2023',
       image: '/assets/photos/summer-2023/DSC_0708.jpg'
     },
     {
-      title: 'Spring 2023',
+      title: 'spring 2023',
       path: '/photos/spring-2023',
       image: '/assets/photos/spring-2023/DSC_0535.jpg'
     },
     {
-      title: 'Spring 2024',
+      title: 'spring 2024',
       path: '/photos/spring-2024',
       image: '/assets/photos/spring-2024/DSC_0616.jpg'
     },
     {
-      title: 'Portrait',
+      title: 'portrait',
       path: '/photos/portrait',
       image: '/assets/photos/portrait/DSC_0194.jpg'
     },
     {
-      title: 'Moody',
+      title: 'moody',
       path: '/photos/moody',
       image: '/assets/photos/moody/DSC_0378.jpg'
     },
     {
-      title: 'Natural',
+      title: 'natural',
       path: '/photos/natural',
       image: '/assets/photos/natural/DSC_0522.jpg'
     },
     {
-      title: 'Urban',
+      title: 'urban',
       path: '/photos/urban',
       image: '/assets/photos/urban/DSC_0609.jpg'
     },
     {
-      title: 'Espionner',
+      title: 'espionner',
       path: '/photos/espionner',
       image: '/assets/photos/espionner/DSC_0621.jpg'
     }
@@ -57,6 +57,9 @@ const SeePage = () => {
 
   return (
     <div className="see-page">
+      <div className="background-gif">
+        <img src="/assets/gifs/see-bkg.gif" alt="Background" />
+      </div>
       <Header />
       <h1 className="page-title">See</h1>
       <div className="collections-grid">
