@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import '../styles/ListenPage.css';
@@ -10,7 +10,8 @@ import '../styles/ListenPage.css';
  */
 function ListenPage() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-
+  const smoothPosition = useRef({ x: 0, y: 0 });
+  
   useEffect(() => {
     const handleMouseMove = (e) => {
       setMousePosition({
@@ -18,14 +19,24 @@ function ListenPage() {
         y: e.clientY / window.innerHeight
       });
     };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+  
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
-
+  
+  useEffect(() => {
+    const updatePosition = () => {
+      smoothPosition.current.x += (mousePosition.x - smoothPosition.current.x) * 0.05; // Adjust speed here
+      smoothPosition.current.y += (mousePosition.y - smoothPosition.current.y) * 0.05;
+      
+      requestAnimationFrame(updatePosition);
+    };
+  
+    requestAnimationFrame(updatePosition);
+  }, [mousePosition]);
+  
   const backgroundStyle = {
-    background: `radial-gradient(circle at ${mousePosition.x * 100}% ${mousePosition.y * 100}%, #1DB954 0%, #191414 100%)`,
-    transition: 'background 1.5s ease'
+    background: `radial-gradient(circle at ${smoothPosition.current.x * 100}% ${smoothPosition.current.y * 100}%, #1DB954 0%, #191414 100%)`,
   };
 
   return (

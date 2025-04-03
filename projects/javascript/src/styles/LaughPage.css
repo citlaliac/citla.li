@@ -93,17 +93,38 @@
 
 .tv-antennas {
   position: absolute;
-  top: -30px;
+  top: -100px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  gap: 20px;
+  gap: 40px;
 }
 
 .tv-antenna {
-  width: 5px;
-  height: 30px;
+  width: 4px;
+  height: 100px;
   background: #2c2c2c;
+  border-radius: 2px;
+  position: relative;
+}
+
+.tv-antenna::before {
+  content: '';
+  position: absolute;
+  top: -40px;
+  width: 60px;
+  height: 4px;
+  background: #2c2c2c;
+  border-radius: 2px;
+  transform-origin: right center;
+}
+
+.tv-antenna:first-child::before {
+  transform: rotate(-30deg);
+}
+
+.tv-antenna:last-child::before {
+  transform: rotate(30deg);
 }
 
 /* iPhone Container Styles */
@@ -115,11 +136,18 @@
 }
 
 .iphone {
-  background: #1a1a1a;
+  background: white;
   border-radius: 40px;
   padding: 10px;
   position: relative;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+  box-shadow: 
+    0 0 0 2px #e0e0e0,
+    0 0 0 4px #f5f5f5,
+    0 0 0 6px #e0e0e0,
+    0 0 20px rgba(0,0,0,0.2);
+  overflow: hidden;
+  transform-style: preserve-3d;
+  transition: transform 0.3s ease;
 }
 
 .iphone-screen {
@@ -129,6 +157,7 @@
   aspect-ratio: 9/16;
   width: 100%;
   height: 100%;
+  position: relative;
 }
 
 .iphone-screen iframe {
@@ -155,6 +184,19 @@
   bottom: 10px;
   left: 50%;
   transform: translateX(-50%);
+  box-shadow: 0 0 0 2px #e0e0e0;
+}
+
+.iphone-notch {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 150px;
+  height: 30px;
+  background: #1a1a1a;
+  border-radius: 15px 15px 0 0;
+  z-index: 2;
 }
 
 /* Responsive Design */

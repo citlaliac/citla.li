@@ -17,7 +17,7 @@
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  /* background: linear-gradient(135deg, #ff0000 0%, #ff6b6b 100%); */
+  background: none; 
   min-height: 100vh;
   color: white;
 }
@@ -1306,13 +1306,34 @@ body {
 }
 
 .tv-antenna {
-  width: 5px;
-  height: 60px;
-  background: #666;
+  position: absolute;
+  top: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 80px;
+  background: #333;
+  border-radius: 2px;
+}
+
+.tv-antenna::before,
+.tv-antenna::after {
+  content: '';
+  position: absolute;
+  top: -20px;
+  width: 30px;
+  height: 4px;
+  background: #333;
+  border-radius: 2px;
+}
+
+.tv-antenna::before {
+  left: -13px;
   transform: rotate(-30deg);
 }
 
-.tv-antenna:last-child {
+.tv-antenna::after {
+  right: -13px;
   transform: rotate(30deg);
 }
 
@@ -1328,25 +1349,41 @@ body {
   transform: rotateX(-15deg) rotateY(-15deg);
 }
 
-.iphone {
-  position: relative;
-  width: 300px;
-  height: 600px;
-  background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
+.iphone-frame {
+  width: 280px;
+  height: 580px;
+  background: white;
   border-radius: 40px;
+  position: relative;
   box-shadow: 
-    0 0 20px rgba(0, 0, 0, 0.5),
-    inset 0 0 20px rgba(0, 0, 0, 0.8);
-  padding: 20px;
+    0 0 0 2px #e0e0e0,
+    0 0 0 4px #f5f5f5,
+    0 0 0 6px #e0e0e0,
+    0 0 20px rgba(0,0,0,0.2);
   overflow: hidden;
+  transform-style: preserve-3d;
+  transition: transform 0.3s ease;
+}
+
+.iphone-notch {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 150px;
+  height: 30px;
+  background: #1a1a1a;
+  border-radius: 15px 15px 0 0;
+  z-index: 2;
 }
 
 .iphone-screen {
   width: 100%;
   height: 100%;
   background: #000;
-  border-radius: 30px;
+  position: relative;
   overflow: hidden;
+  border-radius: 40px;
 }
 
 .iphone-video {

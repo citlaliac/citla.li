@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
 function MainPage() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-
+  const smoothPosition = useRef({ x: 0, y: 0 });
+  
   useEffect(() => {
     const handleMouseMove = (e) => {
       setMousePosition({
@@ -13,14 +14,24 @@ function MainPage() {
         y: e.clientY / window.innerHeight
       });
     };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+  
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
-
+  
+  useEffect(() => {
+    const updatePosition = () => {
+      smoothPosition.current.x += (mousePosition.x - smoothPosition.current.x) * 0.05; // Adjust speed here
+      smoothPosition.current.y += (mousePosition.y - smoothPosition.current.y) * 0.05;
+      
+      requestAnimationFrame(updatePosition);
+    };
+  
+    requestAnimationFrame(updatePosition);
+  }, [mousePosition]);
+  
   const backgroundStyle = {
-    background: `radial-gradient(circle at ${mousePosition.x * 90}% ${mousePosition.y * 90}%, #FF0000 10%,rgb(191, 7, 99) 90%)`,
-    transition: 'background 15.5s ease'
+    background: `radial-gradient(circle at ${smoothPosition.current.x * 100}% ${smoothPosition.current.y * 100}%,rgb(255, 0, 0) 0%,rgb(194, 0, 145) 90%)`,
   };
 
   return (
@@ -28,7 +39,7 @@ function MainPage() {
       <Header />
       <main className="main-content" >
         <div className="title-section">
-          <h1 className="main-title">hi I'm</h1>
+          <h1 className="main-title">hi I'm citlali</h1>
           <p className="welcome-text">Welcome to my website. Click around and get to know me.</p>
         </div>
         <div className="icon-grid">

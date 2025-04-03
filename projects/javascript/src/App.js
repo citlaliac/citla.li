@@ -23,6 +23,7 @@ import MoodyPage from './pages/MoodyPage';
 import NaturalPage from './pages/NaturalPage';
 import UrbanPage from './pages/UrbanPage';
 import EspionnerPage from './pages/EspionnerPage';
+import HintGiverPage from './pages/HintGiverPage';
 import './styles.css';
 
 function App() {
@@ -53,6 +54,7 @@ function App() {
           <Route path="/photos/natural" element={<NaturalPage />} />
           <Route path="/photos/urban" element={<UrbanPage />} />
           <Route path="/photos/espionner" element={<EspionnerPage />} />
+          <Route path="/hintgiver" element={<HintGiverPage />} />
         </Routes>
       </div>
     </Router>
