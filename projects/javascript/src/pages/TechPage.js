@@ -33,10 +33,6 @@ function TechPage() {
 
   return (
     <div className="app-container">
-    {/* Background gif */}
-      <div className="background-gif">
-        <img src="/assets/gifs/tech-bkg.gif" alt="Background" />
-      </div>
       <Header />
       <main className="main-content">
         <div className="title-section">

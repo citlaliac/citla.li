@@ -116,8 +116,8 @@ const PhotoCollectionPage = () => {
 
   const getCollectionTitle = () => {
     switch (collection) {
-      case 'Summer 2023':
-        return 'summer-2023';
+      case 'summer-2023':
+        return 'Summer 2023';
       case 'spring-2023':
         return 'Spring 2023';
       case 'spring-2024':
@@ -143,15 +143,10 @@ const PhotoCollectionPage = () => {
       <div className="photo-grid">
         {getPhotos().map((photo, index) => (
           <div key={index} className="photo-item">
-            <p>"photo"</p>
             <img
               src={`/assets/photos/${collection}/${photo}`}
-              alt={`Photo ${index + 1} from ${getCollectionTitle()}`}
+              alt={`Photo ${index + 1}`}
               loading="lazy"
-              onError={(e) => {
-                console.error(`Error loading image: ${photo}`);
-                e.target.style.display = 'none';
-              }}
             />
           </div>
         ))}
