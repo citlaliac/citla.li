@@ -60,6 +60,7 @@ function TechPage() {
           ))}
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

@@ -118,6 +118,7 @@ function TourPage() {
           </div>
         </div>
       </div>
+      <Footer />  
     </div>
   );
 }

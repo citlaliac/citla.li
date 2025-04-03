@@ -19,14 +19,14 @@ function MainPage() {
   }, []);
 
   const backgroundStyle = {
-    background: `radial-gradient(circle at ${mousePosition.x * 100}% ${mousePosition.y * 100}%, #FF0000 0%, #FF69B4 100%)`,
-    transition: 'background 15s ease'
+    background: `radial-gradient(circle at ${mousePosition.x * 90}% ${mousePosition.y * 90}%, #FF0000 10%,rgb(191, 7, 99) 90%)`,
+    transition: 'background 15.5s ease'
   };
 
   return (
-    <div className="app-container">
+    <div className="app-container" style={backgroundStyle}>
       <Header />
-      <main className="main-content" style={backgroundStyle}>
+      <main className="main-content" >
         <div className="title-section">
           <h1 className="main-title">hi I'm</h1>
           <p className="welcome-text">Welcome to my website. Click around and get to know me.</p>
