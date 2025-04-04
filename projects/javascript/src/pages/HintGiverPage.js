@@ -6,7 +6,7 @@ import Footer from '../components/Footer';
 
 const HintGiverPage = () => {
   const [showEnvelope, setShowEnvelope] = useState(true);
-  const [showVideo, setShowVideo] = useState(false);
+  const [showGif, setShowGif] = useState(false);
   const [backgroundGif, setBackgroundGif] = useState('');
   
   // Select a random background GIF on component mount
@@ -35,7 +35,7 @@ const HintGiverPage = () => {
   // Show video after 30 seconds
   useEffect(() => {
     const videoTimer = setTimeout(() => {
-      setShowVideo(true);
+      setShowGif(true);
     }, 30000);
 
     return () => clearTimeout(videoTimer);
@@ -79,17 +79,9 @@ const HintGiverPage = () => {
         </div>
         
         
-        {showVideo && (
-          <div className="video-container">
-            <iframe
-              width="100%"
-              height="100%"
-              src="https://youtu.be/iGM18sfsqrk?si=N7BrZB2nGesSRq1D&t=58"
-              title="Hint Giver Video"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            ></iframe>
+        {showGif && (
+          <div className="pop-up-gif-container">
+            <img src="/assets/gifs/hint-buh-bye.gif" alt="Hint Giver Video" />
           </div>
         )}
       </div>
