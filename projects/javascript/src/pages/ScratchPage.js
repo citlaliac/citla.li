@@ -23,14 +23,9 @@ const ScratchPage = () => {
 
   const poems = [
     {
-      title: "CAT HAIKU ONE - CAT'S DANCE",
-      content: "I do not feel good\nI wretch, writhe, paws out stretched\nDance of the hair ball",
-      position: { x: 50, y: 100, rotation: -5 }
-    },
-    {
-      title: "CAT HAIKU TWO - CAT'S VENGEANCE",
-      content: "You left me alone\n\nI'm gonna piss everywhere\n\nAnd shit in the tub",
-      position: { x: 400, y: 150, rotation: 3 }
+      title: "WINSOME WETLANDS",
+      content: "Lead laced lashes limp lower\n\nLower\n\nLower\n\nLenses lided\n\nListening\n\nLoon's lowly loo lands loftily, lingering\n\nLover's lute-like laughs lavishly leaking life\n\nLush leaves lay laden\n\nLukewarm light leisurely lusters\n\nLuscious little lowlands litter lakelocked Louisiana.",
+      position: { x: 500, y: 450, rotation: -4 }
     },
     {
       title: "RAY",
@@ -53,9 +48,14 @@ const ScratchPage = () => {
       position: { x: 150, y: 500, rotation: 2 }
     },
     {
-      title: "WINSOME WETLANDS",
-      content: "Lead laced lashes limp lower\n\nLower\n\nLower\n\nLenses lided\n\nListening\n\nLoon's lowly loo lands loftily, lingering\n\nLover's lute-like laughs lavishly leaking life\n\nLush leaves lay laden\n\nLukewarm light leisurely lusters\n\nLuscious little lowlands litter lakelocked Louisiana.",
-      position: { x: 500, y: 450, rotation: -4 }
+      title: "CAT HAIKU ONE - CAT'S DANCE",
+      content: "I do not feel good\nI wretch, writhe, paws out stretched\nDance of the hair ball",
+      position: { x: 50, y: 100, rotation: -5 }
+    },
+    {
+      title: "CAT HAIKU TWO - CAT'S VENGEANCE",
+      content: "You left me alone\n\nI'm gonna piss everywhere\n\nAnd shit in the tub",
+      position: { x: 400, y: 150, rotation: 3 }
     }
   ];
 
@@ -66,7 +66,7 @@ const ScratchPage = () => {
       </div>
       <Header />
       <div className="scratch-container">
-        <h1 className="scratch-page-title">Every Poem's a Winner</h1>
+        <h1 className="scratch-page-title"><mark>Every Poem's a Winner</mark></h1>
         <div className="scratch-cards-container">
           {poems.map((poem, index) => (
             <ScratchCard

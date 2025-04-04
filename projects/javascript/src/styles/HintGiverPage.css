@@ -32,7 +32,7 @@
   font-size: 3rem;
   margin-bottom: 3rem;
   color: #333;
-  text-transform: uppercase;
+  text-transform: lowercase;
   letter-spacing: 2px;
   position: relative;
   z-index: 10;

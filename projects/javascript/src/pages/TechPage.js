@@ -40,7 +40,7 @@ function TechPage() {
       <Header />
       <main className="main-content">
         <div className="title-section">
-          <h1 className="main-title">tech</h1>
+          <h1 className="page-title">tech</h1>
           <p className="welcome-text">Explore my technical work and experience</p>
         </div>
         <div className="icon-grid-tech">

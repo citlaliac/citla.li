@@ -44,7 +44,7 @@ function ListenPage() {
       <Header />
       <div className="page-container">
         <div className="content-section">
-          <h2>listen</h2>
+          <h2 className="page-title">listen</h2>
           <p className="subtitle">Whether its a tropical vacation, a devastating 2005 pop culture break-up, or the back of your babysitter's minivan, these thoughtfully curated playlists <em>take you places.</em></p>
           
           <div className="playlist-container">
