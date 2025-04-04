@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
+import '../styles/ScratchCard.css';
 
 const ScratchCard = ({ title, content, position }) => {
   const canvasRef = useRef(null);
@@ -15,34 +16,43 @@ const ScratchCard = ({ title, content, position }) => {
   const [dragStartY, setDragStartY] = useState(0);
   const [currentPosition, setCurrentPosition] = useState(position);
   const [isScratchMode, setIsScratchMode] = useState(false);
+  const [isScratched, setIsScratched] = useState(false);
+  const [lastPoint, setLastPoint] = useState(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     
-    // Set canvas dimensions
+    // Set canvas size
     canvas.width = canvas.offsetWidth;
     canvas.height = canvas.offsetHeight;
-    
+
+    // Create shiny gradient overlay
+    const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    gradient.addColorStop(0, 'rgba(255, 255, 255, 0.1)');
+    gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.3)');
+    gradient.addColorStop(1, 'rgba(255, 255, 255, 0.1)');
+
+    // Draw the scratch surface
+    ctx.fillStyle = '#2a2a2a';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Add shiny gradient overlay
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Add light reflection
+    const reflection = ctx.createRadialGradient(
+      canvas.width * 0.7, canvas.height * 0.3, 0,
+      canvas.width * 0.7, canvas.height * 0.3, canvas.width * 0.5
+    );
+    reflection.addColorStop(0, 'rgba(255, 255, 255, 0.2)');
+    reflection.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    ctx.fillStyle = reflection;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
     // Calculate total pixels for reveal percentage
     setTotalPixels(canvas.width * canvas.height);
-    
-    // Draw the scratch layer
-    ctx.fillStyle = '#888888';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    // Add some texture to the scratch layer
-    for (let i = 0; i < 1000; i++) {
-      const x = Math.random() * canvas.width;
-      const y = Math.random() * canvas.height;
-      const size = Math.random() * 2 + 1;
-      const opacity = Math.random() * 0.5 + 0.5;
-      
-      ctx.fillStyle = `rgba(0, 0, 0, ${opacity})`;
-      ctx.beginPath();
-      ctx.arc(x, y, size, 0, Math.PI * 2);
-      ctx.fill();
-    }
     
     // Add "Scratch to reveal" text
     ctx.font = '16px Arial';
@@ -82,7 +92,7 @@ const ScratchCard = ({ title, content, position }) => {
     
     // Draw the scratch effect
     ctx.globalCompositeOperation = 'destination-out';
-    ctx.lineWidth = 30;
+    ctx.lineWidth = 60;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
     
@@ -110,8 +120,8 @@ const ScratchCard = ({ title, content, position }) => {
     const percentage = (scratched / totalPixels) * 100;
     setRevealPercentage(percentage);
     
-    // If more than 50% is scratched, reveal the content
-    if (percentage > 50 && !isRevealed) {
+    // If more than 30% is scratched, reveal the content
+    if (percentage > 30 && !isRevealed) {
       setIsRevealed(true);
     }
   };
@@ -157,6 +167,50 @@ const ScratchCard = ({ title, content, position }) => {
     setIsScratchMode(!isScratchMode);
   };
 
+  const handleMouseDown = (e) => {
+    setIsScratching(true);
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    setLastPoint({ x, y });
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isScratching) return;
+
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    if (lastPoint) {
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.lineWidth = 60; // Increased from 20 to 60
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(lastPoint.x, lastPoint.y);
+      ctx.lineTo(x, y);
+      ctx.stroke();
+    }
+
+    setLastPoint({ x, y });
+
+    // Check if enough has been scratched
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const scratchedPixels = Array.from(imageData.data).filter((pixel, index) => 
+      index % 4 === 3 && pixel === 0
+    ).length;
+    const totalPixels = canvas.width * canvas.height;
+    const scratchedPercentage = (scratchedPixels / totalPixels) * 100;
+
+    if (scratchedPercentage > 30) {
+      setIsScratched(true);
+    }
+  };
+
   return (
     <div 
       ref={cardRef}
@@ -192,18 +246,10 @@ const ScratchCard = ({ title, content, position }) => {
       <canvas
         ref={canvasRef}
         className="scratch-canvas"
-        onMouseDown={(e) => {
-          if (isScratchMode) {
-            startScratching(e);
-          }
-        }}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
         onMouseUp={stopScratching}
         onMouseLeave={stopScratching}
-        onMouseMove={(e) => {
-          if (isScratchMode) {
-            scratch(e);
-          }
-        }}
         onTouchStart={(e) => {
           e.preventDefault();
           if (isScratchMode) {

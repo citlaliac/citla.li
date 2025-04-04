@@ -8,18 +8,18 @@ import '../styles/ScratchPage.css';
 const ScratchPage = () => {
   const [backgroundGif, setBackgroundGif] = useState('');
   
-  useEffect(() => {
-    // Select a random background GIF
-    const gifs = [
-      'hintgiver1.gif',
-      'hintgiver2.gif',
-      'hintgiver3.gif',
-      'hintgiver4.gif',
-      'hintgiver5.gif'
-    ];
-    const randomGif = gifs[Math.floor(Math.random() * gifs.length)];
-    setBackgroundGif(`/assets/gifs/hintgiverGifs/${randomGif}`);
-  }, []);
+  // useEffect(() => {
+  //   // Select a random background GIF
+  //   const gifs = [
+  //     'hint-bkg1.gif',
+  //     'hint-bkg2.gif',
+  //     'hint-bkg3.gif',
+  //     'hint-bkg4.gif',
+  //     'hint-bkg5.gif'
+  //   ];
+  //   const randomGif = gifs[Math.floor(Math.random() * gifs.length)];
+  //   setBackgroundGif(`/assets/gifs/hintgiverGifs/${randomGif}`);
+  // }, []);
 
   const poems = [
     {
@@ -61,7 +61,9 @@ const ScratchPage = () => {
 
   return (
     <div className="scratch-page">
-      {backgroundGif && <img src={backgroundGif} alt="Background" className="background-gif" />}
+      <div className="background-gif">
+        <img src="/assets/imgs/scratch-bkg.jpg" alt="Background" />
+      </div>
       <Header />
       <div className="scratch-container">
         <h1 className="page-title">Scratch</h1>
