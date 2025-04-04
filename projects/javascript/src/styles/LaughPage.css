@@ -156,6 +156,8 @@
   max-width: 300px;
   margin: 0 auto;
   cursor: pointer;
+  position: relative;
+  left: 0;
 }
 
 .iphone {
@@ -234,6 +236,10 @@
   .iphone-container {
     width: 100%;
     max-width: 100%;
+  }
+
+  .iphone-container {
+    left: 10px; /* Move slightly to the right on mobile */
   }
 
   .page-container {
