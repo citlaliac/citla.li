@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -10,6 +10,10 @@ import '../styles/TechPage.css';
  * Matches the style of the main page with floating animation and hover effects
  */
 function TechPage() {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const techItems = [
     {
       id: 'github',

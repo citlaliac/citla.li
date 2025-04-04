@@ -7,7 +7,6 @@ const SurprisePage = () => {
 
   useEffect(() => {
     const pages = [
-      '/about',
       '/tech',
       '/laugh',
       '/listen',
@@ -15,6 +14,7 @@ const SurprisePage = () => {
       '/read',
       '/tour',
       '/shop',
+      '/tech',
       '/contact',
       '/tech/github',
       '/tech/AIPage',

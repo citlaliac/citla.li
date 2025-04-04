@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import '../styles/TourPage.css';
@@ -16,6 +17,10 @@ function TourPage() {
     }, 5000);
 
     return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
   }, []);
 
   const tours = [
