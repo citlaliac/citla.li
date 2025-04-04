@@ -7,7 +7,7 @@ import LaughPage from './pages/LaughPage';
 import TourPage from './pages/TourPage';
 import TechPage from './pages/TechPage';
 import ContactPage from './pages/ContactPage';
-import ReadPage from './pages/ReadPage';
+import ScratchPage from './pages/ScratchPage';
 import ResumePage from './pages/tech/ResumePage';
 import ResumePDFPage from './pages/tech/ResumePDFPage';
 import ResumeSuccessPage from './pages/tech/ResumeSuccessPage';
@@ -38,7 +38,7 @@ function App() {
           <Route path="/tour" element={<TourPage />} />
           <Route path="/tech" element={<TechPage />} />
           <Route path="/contact" element={<ContactPage />} />
-          <Route path="/read" element={<ReadPage />} />
+          <Route path="/scratch" element={<ScratchPage />} />
           <Route path="/tech/resume" element={<ResumePage />} />
           <Route path="/tech/resume-pdf" element={<ResumePDFPage />} />
           <Route path="/tech/resume-success" element={<ResumeSuccessPage />} />

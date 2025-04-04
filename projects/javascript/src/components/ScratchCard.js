@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 
 const ScratchCard = ({ title, content, position }) => {
   const canvasRef = useRef(null);
+  const cardRef = useRef(null);
   const [isScratching, setIsScratching] = useState(false);
   const [isRevealed, setIsRevealed] = useState(false);
   const [revealPercentage, setRevealPercentage] = useState(0);
@@ -9,6 +10,11 @@ const ScratchCard = ({ title, content, position }) => {
   const [lastY, setLastY] = useState(0);
   const [totalPixels, setTotalPixels] = useState(0);
   const [scratchedPixels, setScratchedPixels] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStartX, setDragStartX] = useState(0);
+  const [dragStartY, setDragStartY] = useState(0);
+  const [currentPosition, setCurrentPosition] = useState(position);
+  const [isScratchMode, setIsScratchMode] = useState(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -51,6 +57,7 @@ const ScratchCard = ({ title, content, position }) => {
   }, []);
 
   const startScratching = (e) => {
+    if (isDragging) return;
     setIsScratching(true);
     const rect = canvasRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -65,7 +72,7 @@ const ScratchCard = ({ title, content, position }) => {
   };
 
   const scratch = (e) => {
-    if (!isScratching) return;
+    if (!isScratching || isDragging) return;
     
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
@@ -109,12 +116,73 @@ const ScratchCard = ({ title, content, position }) => {
     }
   };
 
+  const startDragging = (e) => {
+    // Only start dragging if we're not in scratch mode
+    if (isScratchMode) return;
+    
+    setIsDragging(true);
+    setDragStartX(e.clientX - currentPosition.x);
+    setDragStartY(e.clientY - currentPosition.y);
+    
+    // Bring card to front when dragging
+    if (cardRef.current) {
+      cardRef.current.style.zIndex = 20;
+    }
+  };
+
+  const drag = (e) => {
+    if (!isDragging) return;
+    
+    const newX = e.clientX - dragStartX;
+    const newY = e.clientY - dragStartY;
+    
+    setCurrentPosition({
+      ...currentPosition,
+      x: newX,
+      y: newY
+    });
+  };
+
+  const stopDragging = () => {
+    setIsDragging(false);
+    
+    // Reset z-index after dragging
+    if (cardRef.current) {
+      cardRef.current.style.zIndex = isRevealed ? 10 : 5;
+    }
+  };
+
+  const toggleScratchMode = (e) => {
+    e.stopPropagation();
+    setIsScratchMode(!isScratchMode);
+  };
+
   return (
     <div 
-      className="scratch-card"
+      ref={cardRef}
+      className={`scratch-card ${isDragging ? 'dragging' : ''}`}
       style={{
-        transform: `translate(${position.x}px, ${position.y}px) rotate(${position.rotation}deg)`,
-        zIndex: isRevealed ? 10 : 5
+        transform: `translate(${currentPosition.x}px, ${currentPosition.y}px) rotate(${currentPosition.rotation}deg)`,
+        zIndex: isDragging ? 20 : (isRevealed ? 10 : 5),
+        cursor: isDragging ? 'grabbing' : (isScratchMode ? 'url("/assets/gifs/cursor.gif") 16 16, auto' : 'grab')
+      }}
+      onMouseDown={startDragging}
+      onMouseMove={drag}
+      onMouseUp={stopDragging}
+      onMouseLeave={stopDragging}
+      onTouchStart={(e) => {
+        e.preventDefault();
+        const touch = e.touches[0];
+        startDragging(touch);
+      }}
+      onTouchMove={(e) => {
+        e.preventDefault();
+        const touch = e.touches[0];
+        drag(touch);
+      }}
+      onTouchEnd={(e) => {
+        e.preventDefault();
+        stopDragging();
       }}
     >
       <div className="scratch-content">
@@ -124,14 +192,24 @@ const ScratchCard = ({ title, content, position }) => {
       <canvas
         ref={canvasRef}
         className="scratch-canvas"
-        onMouseDown={startScratching}
+        onMouseDown={(e) => {
+          if (isScratchMode) {
+            startScratching(e);
+          }
+        }}
         onMouseUp={stopScratching}
         onMouseLeave={stopScratching}
-        onMouseMove={scratch}
+        onMouseMove={(e) => {
+          if (isScratchMode) {
+            scratch(e);
+          }
+        }}
         onTouchStart={(e) => {
           e.preventDefault();
-          const touch = e.touches[0];
-          startScratching(touch);
+          if (isScratchMode) {
+            const touch = e.touches[0];
+            startScratching(touch);
+          }
         }}
         onTouchEnd={(e) => {
           e.preventDefault();
@@ -139,10 +217,31 @@ const ScratchCard = ({ title, content, position }) => {
         }}
         onTouchMove={(e) => {
           e.preventDefault();
-          const touch = e.touches[0];
-          scratch(touch);
+          if (isScratchMode) {
+            const touch = e.touches[0];
+            scratch(touch);
+          }
         }}
       />
+      <button 
+        className="mode-toggle"
+        onClick={toggleScratchMode}
+        style={{
+          position: 'absolute',
+          bottom: '10px',
+          right: '10px',
+          background: isScratchMode ? '#4CAF50' : '#2196F3',
+          color: 'white',
+          border: 'none',
+          borderRadius: '20px',
+          padding: '5px 10px',
+          fontSize: '12px',
+          cursor: 'pointer',
+          zIndex: 4
+        }}
+      >
+        {isScratchMode ? 'Scratching' : 'Move'}
+      </button>
     </div>
   );
 };
