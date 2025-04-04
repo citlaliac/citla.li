@@ -118,6 +118,7 @@
 
 .reviews-section {
   text-align: center;
+  padding: 3rem 0 0 0;
 }
 
 .reviews-section h2 {
@@ -126,7 +127,7 @@
 }
 
 .review-slideshow {
-  max-width: 800px;
+  max-width: 100%;
   margin: 0 auto;
 }
 

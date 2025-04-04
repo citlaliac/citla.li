@@ -12,7 +12,7 @@ const Spring2023Page = () => {
   return (
     <div className="photo-collection-page">
       <Header />
-      <h1 className="collection-title">Spring 2023</h1>
+      <h1 className="collection-title">spring 2023</h1>
       <div className="photo-grid">
         {photos.map((photo, index) => (
           <div key={index} className="photo-item">

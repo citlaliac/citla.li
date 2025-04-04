@@ -1,0 +1,32 @@
+.main-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  font-family: 'Averia Libre', cursive;
+}
+
+.main-title-image {
+  max-width: 600px;
+  width: 100%;
+  height: auto;
+  margin-bottom: 2rem;
+}
+
+.welcome-text {
+  font-size: 1.2rem;
+  text-align: center;
+  color: #fff;
+  margin-bottom: 3rem;
+  opacity: 0.9;
+}
+
+.page-title {
+  font-size: 3rem;
+  margin-bottom: 2rem;
+  text-align: center;
+  color: #fff;
+  font-family: 'Averia Libre', cursive;
+} 

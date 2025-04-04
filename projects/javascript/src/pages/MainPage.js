@@ -39,7 +39,11 @@ function MainPage() {
       <Header />
       <main className="main-content" >
         <div className="title-section">
-          <h1 className="main-title">hi I'm citlali</h1>
+          <img 
+            src="/assets/imgs/hiImCitlali.png" 
+            alt="hi I'm citlali" 
+            className="main-title-image"
+          />
           <p className="welcome-text">Welcome to my website. Click around and get to know me.</p>
         </div>
         <div className="icon-grid">

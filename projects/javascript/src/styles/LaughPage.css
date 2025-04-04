@@ -2,6 +2,8 @@
   position: relative;
   min-height: 100vh;
   overflow: hidden;
+  color: white;
+  font-family: 'Averia Libre', cursive;
 }
 
 .background-gif {
@@ -36,6 +38,7 @@
   margin-bottom: 2rem;
   font-size: 2.5rem;
   color: #fff;
+  font-family: 'Averia Libre', cursive;
 }
 
 .video-container {

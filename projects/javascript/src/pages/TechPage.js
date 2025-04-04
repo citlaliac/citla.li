@@ -13,19 +13,19 @@ function TechPage() {
   const techItems = [
     {
       id: 'github',
-      title: 'GitHub',
+      title: 'github',
       path: '/tech/GitHubPage',
       icon: '/assets/gifs/github.gif'
     },
     {
       id: 'ai',
-      title: 'Ethical Trust & Safety AI',
+      title: 'trust & safety AI',
       path: '/tech/AIPage',
       icon: '/assets/gifs/ai.gif'
     },
     {
       id: 'resume',
-      title: 'Resume',
+      title: 'resume',
       path: '/tech/resume',
       icon: '/assets/gifs/resume.gif'
     }

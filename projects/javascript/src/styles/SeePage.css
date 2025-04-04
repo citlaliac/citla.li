@@ -2,6 +2,7 @@
   min-height: 100vh;
   color: white;
   transition: background 1.5s ease;
+  font-family: 'Averia Libre', cursive;
 }
 
 .page-container {
@@ -73,6 +74,7 @@
   font-size: 1.25rem;
   text-align: center;
   color: #c2c2c2;
+  font-family: 'Averia Libre', cursive;
 }
 
 .photo-collection {

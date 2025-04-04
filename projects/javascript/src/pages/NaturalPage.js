@@ -17,7 +17,7 @@ const NaturalPage = () => {
   return (
     <div className="photo-collection-page">
       <Header />
-      <h1 className="collection-title">Natural</h1>
+      <h1 className="collection-title">natural</h1>
       <div className="photo-grid">
         {photos.map((photo, index) => (
           <div key={index} className="photo-item">

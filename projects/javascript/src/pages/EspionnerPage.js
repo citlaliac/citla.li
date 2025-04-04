@@ -19,7 +19,7 @@ const EspionnerPage = () => {
   return (
     <div className="photo-collection-page">
       <Header />
-      <h1 className="collection-title">Espionner</h1>
+      <h1 className="collection-title">espionner</h1>
       <div className="photo-grid">
         {photos.map((photo, index) => (
           <div key={index} className="photo-item">
