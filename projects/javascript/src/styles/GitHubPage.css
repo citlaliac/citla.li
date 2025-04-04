@@ -79,6 +79,11 @@
   margin: 1rem 0;
 }
 
+.terminal-line .terminal-output a {
+  background-color: #000;
+  color: #4463ff;
+}
+
 .terminal-prompt {
   color: #00ff00;
   margin-right: 0.8rem;
