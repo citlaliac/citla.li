@@ -26,9 +26,10 @@
 }
 
 .content-section {
+  background: rgba(0, 0, 0, 0.7);
   padding: 2rem;
   border-radius: 10px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
 }
 
 .page-title {
@@ -57,10 +58,9 @@
 }
 
 .tour-item {
-  padding: 1.5rem;
-  border-radius: 10px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
   background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
   backdrop-filter: blur(10px);
   display: flex;
   flex-direction: column;
@@ -163,12 +163,6 @@
 
 .review-dot.active {
   background: white;
-}
-
-.tour-description {
-  padding: 1.5rem;
-  border-radius: 10px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
 }
 
 @media (max-width: 1200px) {
