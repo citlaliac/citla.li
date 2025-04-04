@@ -35,7 +35,7 @@
   text-align: center;
   margin-bottom: 2rem;
   font-size: 2.5rem;
-  color: #333;
+  color: #fff;
 }
 
 .video-container {
@@ -95,35 +95,29 @@
   top: -100px;
   left: 50%;
   transform: translateX(-50%);
-  display: flex;
-  gap: 40px;
+  width: 100px;
+  height: 100px;
 }
 
 .tv-antenna {
+  position: absolute;
   width: 4px;
   height: 100px;
   background: #2c2c2c;
   border-radius: 2px;
-  position: relative;
+  bottom: 0;
 }
 
-.tv-antenna::before {
-  content: '';
-  position: absolute;
-  top: -40px;
-  width: 60px;
-  height: 4px;
-  background: #2c2c2c;
-  border-radius: 2px;
-  transform-origin: right center;
-}
-
-.tv-antenna:first-child::before {
+.tv-antenna:first-child {
+  left: 0;
   transform: rotate(-45deg);
+  transform-origin: bottom center;
 }
 
-.tv-antenna:last-child::before {
+.tv-antenna:last-child {
+  right: 0;
   transform: rotate(45deg);
+  transform-origin: bottom center;
 }
 
 /* iPhone Container Styles */
