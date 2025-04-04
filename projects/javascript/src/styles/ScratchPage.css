@@ -43,6 +43,14 @@
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
+.scratch-page-title {
+  text-align: center;
+  font-size: 3rem;
+  margin: 6% 0;
+  color: #fff;
+  text-transform: lowercase;
+}
+
 .scratch-cards-container {
   position: absolute;
   top: 0;
@@ -114,7 +122,7 @@
 
 .scratch-content p {
   font-size: 0.85rem;
-  line-height: 1.4;
+  line-height: 1;
   white-space: pre-line;
   color: #ddd;
   margin: 0;

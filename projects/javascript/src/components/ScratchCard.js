@@ -59,7 +59,7 @@ const ScratchCard = ({ title, content, position }) => {
     ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('Scratch to reveal', canvas.width / 2, canvas.height / 2);
+    ctx.fillText('Scratch to reveal a poem', canvas.width / 2, canvas.height / 2);
     
     return () => {
       // Cleanup if needed
@@ -239,6 +239,13 @@ const ScratchCard = ({ title, content, position }) => {
         stopDragging();
       }}
     >
+      {!isScratched && (
+        <>
+          <div className="scratch-header">
+            <div className="scratch-header-decoration" />
+          </div>
+        </>
+      )}
       <div className="scratch-content">
         <h3 className="scratch-title">{title}</h3>
         <p className="scratch-text">{content}</p>
@@ -269,6 +276,7 @@ const ScratchCard = ({ title, content, position }) => {
           }
         }}
       />
+      {!isScratched && <div className="shiny-overlay" />}
       <button 
         className="mode-toggle"
         onClick={toggleScratchMode}

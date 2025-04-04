@@ -62,11 +62,11 @@ const ScratchPage = () => {
   return (
     <div className="scratch-page">
       <div className="background-gif">
-        <img src="/assets/imgs/scratch-bkg.jpg" alt="Background" />
+        <img src="/assets/imgs/scratch-bkg3.png" alt="Background" />
       </div>
       <Header />
       <div className="scratch-container">
-        <h1 className="page-title">Scratch</h1>
+        <h1 className="scratch-page-title">Every Poem's a Winner</h1>
         <div className="scratch-cards-container">
           {poems.map((poem, index) => (
             <ScratchCard
