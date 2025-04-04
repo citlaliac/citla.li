@@ -66,12 +66,36 @@
   color: #fff;
   font-size: 2.5rem;
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: 1rem;
   font-family: 'Georgia', serif;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
   position: relative;
   z-index: 2;
   margin-top: 2rem;
+}
+
+.bookshelf-title mark {
+    background: radial-gradient(
+            circle at center,
+            rgba(89, 60, 17, 0.832) 0%,
+            rgba(88, 49, 3, 0.84) 70%
+          );
+      color: #232323;
+      padding: 0 5px;
+      border-radius: 5px;
+    }
+
+.instructions {
+  color: #fff;
+  font-size: 1.2rem;
+  text-align: center;
+  margin-bottom: 2rem;
+  font-family: 'Georgia', serif;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  position: relative;
+  z-index: 2;
+  font-style: italic;
+  opacity: 0.9;
 }
 
 .books {
@@ -85,7 +109,7 @@
 }
 
 .book-item {
-  width: 200px;
+  width: 240px;
   height: 280px;
   perspective: 1000px;
   cursor: pointer;
@@ -242,7 +266,7 @@
 
 @media (max-width: 1200px) {
   .book-item {
-    width: 180px;
+    width: 220px;
     height: 250px;
   }
 }
@@ -254,7 +278,7 @@
   }
 
   .book-item {
-    width: 150px;
+    width: 180px;
     height: 220px;
   }
 
@@ -265,6 +289,10 @@
   .book-author {
     font-size: 0.9rem;
   }
+
+  .instructions {
+    font-size: 1.1rem;
+  }
 }
 
 @media (max-width: 480px) {
@@ -274,7 +302,7 @@
   }
 
   .book-item {
-    width: 130px;
+    width: 160px;
     height: 200px;
   }
 
@@ -284,6 +312,10 @@
 
   .book-author {
     font-size: 0.8rem;
+  }
+
+  .instructions {
+    font-size: 1rem;
   }
 
   .poem-content {

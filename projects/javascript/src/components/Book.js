@@ -8,6 +8,22 @@ const Book = () => {
 
   const poems = [
     {
+        title: "CAT HAIKU 1: CAT'S DANCE",
+        author: "Catlali",
+        content: `I do not feel good
+  I wretch, writhe, paws out stretched
+  Dance of the hair ball`
+      },
+      {
+        title: "CAT HAIKU 2: CAT'S VENGEANCE",
+        author: "Catlali",
+        content: `You left me alone
+  
+  I'm gonna piss everywhere
+  
+  And shit in the tub`
+      },
+    {
       title: "WINSOME WETLANDS",
       author: "Dr. Citlali, PhD (Wetland Studies)",
       content: `Lead laced lashes limp lower
@@ -105,22 +121,6 @@ I know
 I will start to sort of chatter
 
 And scream`
-    },
-    {
-      title: "CAT HAIKU ONE - CAT'S DANCE",
-      author: "Catlali",
-      content: `I do not feel good
-I wretch, writhe, paws out stretched
-Dance of the hair ball`
-    },
-    {
-      title: "CAT HAIKU TWO - CAT'S VENGEANCE",
-      author: "Catlali",
-      content: `You left me alone
-
-I'm gonna piss everywhere
-
-And shit in the tub`
     }
   ];
 
@@ -134,7 +134,7 @@ And shit in the tub`
 
   return (
     <div className="book-container">
-        <div className="background-gif">
+      <div className="background-gif">
         <img src="/assets/imgs/book-bkg.jpg" alt="Background" />
       </div>
       <Header />
@@ -142,7 +142,8 @@ And shit in the tub`
       <div className="background-gif">
         <img src="/assets/imgs/book-bkg.jpg" alt="Background" />
       </div>
-        <div className="bookshelf-title">Poetry Collection</div>
+        <div className="bookshelf-title"><mark>Poetry Collection</mark></div>
+        <div className="instructions">Click a book to read</div>
         <div className="books">
           {poems.map((poem, index) => (
             <div 
