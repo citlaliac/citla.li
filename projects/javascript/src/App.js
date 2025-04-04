@@ -8,6 +8,7 @@ import TourPage from './pages/TourPage';
 import TechPage from './pages/TechPage';
 import ContactPage from './pages/ContactPage';
 import ScratchPage from './pages/ScratchPage';
+import BookPage from './pages/BookPage';
 import ResumePage from './pages/tech/ResumePage';
 import ResumePDFPage from './pages/tech/ResumePDFPage';
 import ResumeSuccessPage from './pages/tech/ResumeSuccessPage';
@@ -27,6 +28,8 @@ import HintGiverPage from './pages/HintGiverPage';
 import './styles.css';
 
 function App() {
+  const isMobile = window.innerWidth <= 768;
+
   return (
     <Router>
       <div className="app">
@@ -38,7 +41,8 @@ function App() {
           <Route path="/tour" element={<TourPage />} />
           <Route path="/tech" element={<TechPage />} />
           <Route path="/contact" element={<ContactPage />} />
-          <Route path="/read" element={<ScratchPage />} />
+          <Route path="/read" element={isMobile ? <BookPage /> : <ScratchPage />} />
+          <Route path="/book" element={<BookPage />} />
           <Route path="/tech/resume" element={<ResumePage />} />
           <Route path="/tech/resume-pdf" element={<ResumePDFPage />} />
           <Route path="/tech/resume-success" element={<ResumeSuccessPage />} />
