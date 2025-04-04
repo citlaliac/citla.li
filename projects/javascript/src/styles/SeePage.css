@@ -3,7 +3,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 2rem;
+  padding: 1rem;
   position: relative;
   overflow: hidden;
   font-family: 'Kodchasan', sans-serif;
@@ -24,26 +24,27 @@
 .page-title {
   text-align: center;
   color: #fff;
-  font-size: 2.5rem;
+  font-size: 2rem;
   margin-bottom: 1rem;
-  text-transform: lowercase;
-  letter-spacing: 3px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 10;
-  padding: 1rem 0;
+  padding: 0.5rem 0;
   font-family: 'Kodchasan', sans-serif;
 }
 
 .collections-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(300px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 2rem;
   max-width: 1600px;
-  margin: 0 auto;
-  padding: 0 1rem;
+  margin: 4rem auto 2rem;
+  padding: 1rem;
+  width: 100%;
 }
 
 .collection-item {
@@ -61,7 +62,7 @@
 
 .collection-image {
   position: relative;
-  padding-top: 75%; /* 4:3 aspect ratio */
+  padding-top: 75%;
   overflow: hidden;
 }
 
@@ -136,20 +137,54 @@
   opacity: 0.9;
 }
 
-/* Responsive Design */
+/* Media Queries for different screen sizes */
+@media (max-width: 1200px) {
+  .collections-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    padding: 0.75rem;
+  }
+}
+
 @media (max-width: 768px) {
   .see-page {
-    padding: 1rem;
+    padding: 0.5rem;
   }
 
-
-  .see-page-title {
-    font-size: 2rem;
-    color: #fff;
+  .page-title {
+    font-size: 1.5rem;
   }
 
   .collections-grid {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: 1fr;
     gap: 1rem;
+    margin: 3rem auto 1rem;
+    padding: 0.5rem;
+  }
+
+  .collection-title {
+    font-size: 1.5rem;
+    margin: 1.5rem 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-title {
+    font-size: 1.2rem;
+  }
+
+  .collection-title {
+    font-size: 1.2rem;
+  }
+
+  .collections-grid {
+    gap: 0.75rem;
+  }
+}
+
+/* Orientation-specific styles */
+@media (max-width: 768px) and (orientation: landscape) {
+  .collections-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 } 
