@@ -103,10 +103,9 @@
 
 .main-page-title-image {
   width: 100%;
-  max-width: 400px;
+  max-width: 600px;
   height: auto;
   margin: 0 auto;
-  padding-bottom: 1rem;
   display: block;
   border-radius: 10px;
 }
@@ -128,7 +127,6 @@
 
   .main-page-title-image {
     max-width: 300px;
-    margin: 0 auto;
   }
 
   .main-page-icon-grid {
@@ -159,7 +157,6 @@
 
   .main-page-title-image {
     max-width: 250px;
-    margin: 0 auto;
   }
 
   .main-page-icon-wrapper {
