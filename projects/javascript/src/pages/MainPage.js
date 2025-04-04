@@ -55,11 +55,11 @@ function MainPage() {
             </div>
             <span>laugh</span>
           </Link>
-          <Link to="/scratch" className="icon-item">
+          <Link to="/read" className="icon-item">
             <div className="icon-wrapper">
-              <img src="/assets/gifs/read.gif" alt="Scratch" />
+              <img src="/assets/gifs/read.gif" alt="read" />
             </div>
-            <span>scratch</span>
+            <span>read</span>
           </Link>
           <Link to="/see" className="icon-item">
             <div className="icon-wrapper">

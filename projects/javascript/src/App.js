@@ -38,7 +38,7 @@ function App() {
           <Route path="/tour" element={<TourPage />} />
           <Route path="/tech" element={<TechPage />} />
           <Route path="/contact" element={<ContactPage />} />
-          <Route path="/scratch" element={<ScratchPage />} />
+          <Route path="/read" element={<ScratchPage />} />
           <Route path="/tech/resume" element={<ResumePage />} />
           <Route path="/tech/resume-pdf" element={<ResumePDFPage />} />
           <Route path="/tech/resume-success" element={<ResumeSuccessPage />} />

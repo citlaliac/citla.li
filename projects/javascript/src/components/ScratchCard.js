@@ -218,7 +218,7 @@ const ScratchCard = ({ title, content, position }) => {
       style={{
         transform: `translate(${currentPosition.x}px, ${currentPosition.y}px) rotate(${currentPosition.rotation}deg)`,
         zIndex: isDragging ? 20 : (isRevealed ? 10 : 5),
-        cursor: isDragging ? 'grabbing' : (isScratchMode ? 'url("/assets/gifs/cursor.gif") 16 16, auto' : 'grab')
+        cursor: isDragging ? 'grabbing' : (isScratchMode ? 'url("../assets/gifs/cursor.gif") 16 16, auto' : 'grab')
       }}
       onMouseDown={startDragging}
       onMouseMove={drag}

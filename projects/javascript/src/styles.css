@@ -280,38 +280,6 @@ body {
   display: none;
 }
 
-/* Art Gallery Styles */
-.art-gallery {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-  padding: 1rem;
-}
-
-.art-item {
-  position: relative;
-  overflow: hidden;
-  border-radius: 10px;
-  aspect-ratio: 1;
-  cursor: pointer;
-  transition: transform 0.3s ease;
-}
-
-.art-item:hover {
-  transform: scale(1.02);
-}
-
-.art-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease;
-}
-
-.art-item:hover img {
-  transform: scale(1.1);
-}
-
 
 /* Comedy Content Styles */
 .comedy-content {
@@ -326,7 +294,6 @@ body {
   border-radius: 15px;
   overflow: hidden;
   transition: all 0.3s ease;
-  cursor: pointer;
   position: relative;
 }
 
@@ -661,7 +628,7 @@ body {
 
 .poem-header {
   padding: 1.5rem;
-  cursor: pointer;
+  /* cursor: pointer; */
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -821,66 +788,6 @@ body {
   }
 }
 
-/* Photo Grid Styles
-.photo-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-  padding: 1rem;
-}
-
-.photo-item {
-  position: relative;
-  aspect-ratio: 1;
-  overflow: hidden;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: transform 0.3s ease;
-}
-
-.photo-item:hover {
-  transform: scale(1.02);
-}
-
-.photo-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease;
-}
-
-.photo-item:hover img {
-  transform: scale(1.1);
-}
-
-.photo-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 1.5rem;
-  background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-  color: white;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.photo-item:hover .photo-overlay {
-  opacity: 1;
-}
-
-.photo-overlay h3 {
-  font-size: 1.2rem;
-  margin: 0;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-@media (max-width: 768px) {
-  .photo-grid {
-    grid-template-columns: 1fr;
-  }
-} */
 
 /* AI Page Styles */
 .ai-intro {
