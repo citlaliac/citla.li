@@ -19,6 +19,7 @@ function ContactPage() {
     message: '',
   });
   const [status, setStatus] = useState({ type: '', message: '' });
+  const [showPopup, setShowPopup] = useState(false);
 
   /**
    * Handles form submission
@@ -48,7 +49,7 @@ function ContactPage() {
       // Update status with success message
       setStatus({
         type: 'success',
-        message: 'Thank you! Your message has been sent.',
+        message: 'Message sent successfully!',
       });
       
       // Clear form data
@@ -73,60 +74,82 @@ function ContactPage() {
     });
   };
 
+  const handleCloseClick = () => {
+    setShowPopup(true);
+    setTimeout(() => {
+      setShowPopup(false);
+    }, 3000); // Hide popup after 3 seconds
+  };
+
   return (
     <div className="app-container">
       <Header />
-      <div className="contact-container">
-        <h2>Get in Touch</h2>
-        {/* Contact Form */}
-        <form className="contact-form" onSubmit={handleSubmit}>
-          {/* Name Input Field */}
-          <div className="form-group">
-            <label htmlFor="name">Name</label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          {/* Email Input Field */}
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          {/* Message Textarea Field */}
-          <div className="form-group">
-            <label htmlFor="message">Message</label>
-            <textarea
-              id="message"
-              name="message"
-              value={formData.message}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          {/* Submit Button */}
-          <button type="submit" className="submit-button">
-            Send Message
-          </button>
-          {/* Status Message Display */}
-          {status.message && (
-            <div className={`${status.type}-message`}>
-              {status.message}
+      <main className="aim-container">
+        <div className="aim-window">
+          <div className="aim-titlebar">
+            <div className="aim-title">AIM - Contact Form</div>
+            <div className="aim-buttons">
+              <span className="aim-minimize">_</span>
+              <span className="aim-maximize">□</span>
+              <span className="aim-close" onClick={handleCloseClick}>×</span>
             </div>
-          )}
-        </form>
-      </div>
+          </div>
+          <div className="aim-content">
+            <div className="aim-chat">
+              <div className="aim-message aim-buddy">
+                <span className="aim-buddy-name">Buddy:</span> Hey there! Want to send me a message?
+              </div>
+              <div className="aim-message aim-you">
+                <span className="aim-you-name">You:</span> Sure! Let me fill out this form...
+              </div>
+            </div>
+            <form className="aim-form" onSubmit={handleSubmit}>
+              <div className="aim-form-group">
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="Your Screen Name"
+                  required
+                />
+              </div>
+              <div className="aim-form-group">
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="Your Email"
+                  required
+                />
+              </div>
+              <div className="aim-form-group">
+                <textarea
+                  name="message"
+                  value={formData.message}
+                  onChange={handleChange}
+                  placeholder="Type your message here..."
+                  required
+                />
+              </div>
+              <button type="submit" className="aim-send-button">
+                Send Message
+              </button>
+              {status.message && (
+                <div className={`aim-status ${status.type}`}>
+                  {status.message}
+                </div>
+              )}
+            </form>
+          </div>
+        </div>
+        {showPopup && (
+          <div className="aim-popup">
+            <img src="/assets/gifs/x-click.gif" alt="AIM Away Message" />
+          </div>
+        )}
+      </main>
       <Footer />
     </div>
   );
