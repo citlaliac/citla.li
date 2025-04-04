@@ -5,7 +5,7 @@
   overflow: hidden;
 }
 
-.background-gif {
+/* .background-gif {
   position: fixed;
   top: 0;
   left: 0;
@@ -15,7 +15,7 @@
   opacity: 0.3;
   z-index: 0;
   pointer-events: none;
-}
+} */
 
 .scratch-container {
   position: relative;
@@ -106,17 +106,19 @@
 }
 
 .scratch-content h3 {
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
   color: #fff;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .scratch-content p {
-  font-size: 1rem;
-  line-height: 1.6;
+  font-size: 0.85rem;
+  line-height: 1.4;
   white-space: pre-line;
   color: #ddd;
+  margin: 0;
+  padding: 0 0.5rem;
 }
 
 .scratch-canvas {

@@ -26,7 +26,6 @@
 }
 
 .content-section {
-  background: rgba(255, 255, 255, 0.9);
   padding: 2rem;
   border-radius: 10px;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
@@ -36,7 +35,7 @@
   text-align: center;
   margin-bottom: 2rem;
   font-size: 2.5rem;
-  color: #333;
+  color: #fff;
 }
 
 .video-container {
@@ -91,9 +90,26 @@
   border-radius: 50%;
 }
 
-.tv-antennas {
+/* .tv-antennas {
   position: absolute;
   top: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 100px;
+} */
+
+/* .tv-antenna {
+  position: absolute;
+  width: 4px;
+  height: 100px;
+  background: #2c2c2c;
+  border-radius: 2px;
+  bottom: 0;
+} */
+.tv-antennas {
+  position: absolute;
+  top: -60px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -101,30 +117,26 @@
 }
 
 .tv-antenna {
-  width: 4px;
-  height: 100px;
-  background: #2c2c2c;
-  border-radius: 2px;
-  position: relative;
-}
-
-.tv-antenna::before {
-  content: '';
   position: absolute;
-  top: -40px;
-  width: 60px;
-  height: 4px;
-  background: #2c2c2c;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 80px;
+  background: #333;
   border-radius: 2px;
-  transform-origin: right center;
 }
 
-.tv-antenna:first-child::before {
-  transform: rotate(-30deg);
+.tv-antenna:first-child {
+  left: 0;
+  transform: rotate(-45deg);
+  transform-origin: bottom center;
 }
 
-.tv-antenna:last-child::before {
-  transform: rotate(30deg);
+.tv-antenna:last-child {
+  right: 0;
+  transform: rotate(45deg);
+  transform-origin: bottom center;
 }
 
 /* iPhone Container Styles */
@@ -161,12 +173,13 @@
 }
 
 .iphone-screen iframe {
-  width: 100%;
-  height: 100%;
-  border: none;
   position: absolute;
   top: 0;
   left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  object-fit: cover;
 }
 
 .iphone-video {

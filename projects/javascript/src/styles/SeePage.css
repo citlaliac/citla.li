@@ -1,14 +1,27 @@
 .see-page {
-  padding: 2rem;
   min-height: 100vh;
-  background-color: none;
+  color: white;
+  transition: background 1.5s ease;
 }
 
-.page-title {
+.page-container {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.content-section {
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+.see-page-title {
   text-align: center;
-  margin-bottom: 2rem;
-  font-size: 2.5rem;
-  color: #333;
+  font-size: 3rem;
+  margin: 6% 0;
+  color: #fff;
+  text-transform: lowercase;
 }
 
 .collections-grid {

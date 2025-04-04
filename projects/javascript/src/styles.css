@@ -56,6 +56,7 @@ body {
   margin-top: 0.3rem;
   text-transform: uppercase;
   letter-spacing: 1px;
+  color: #cdcdcd;
 }
 
 /* Main Content Styles */
@@ -1294,46 +1295,7 @@ body {
   border: 2px solid #666;
 }
 
-.tv-antennas {
-  position: absolute;
-  top: -60px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 40px;
-}
 
-.tv-antenna {
-  position: absolute;
-  top: -60px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 4px;
-  height: 80px;
-  background: #333;
-  border-radius: 2px;
-}
-
-.tv-antenna::before,
-.tv-antenna::after {
-  content: '';
-  position: absolute;
-  top: -20px;
-  width: 30px;
-  height: 4px;
-  background: #333;
-  border-radius: 2px;
-}
-
-.tv-antenna::before {
-  left: -13px;
-  transform: rotate(-30deg);
-}
-
-.tv-antenna::after {
-  right: -13px;
-  transform: rotate(30deg);
-}
 
 /* iPhone Container Styles */
 .iphone-container {

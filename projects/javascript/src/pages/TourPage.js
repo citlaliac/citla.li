@@ -26,17 +26,17 @@ function TourPage() {
     },
     {
       title: "Liberty & Ellis Island",
-      description: "Learn about Lady Liberty, Ellis Island, and how the contributed to America today! Note: This tour does not include tickets to climb the Statue of Liberty (crown/pedestal) but does include your ticket to the ferry. Meeting point: Castle Clinton. Ending Location: Ellis Island, where you can explore the museum and then ferry back to Battery Park, Manhattan.",
+      description: "Learn about Lady Liberty, Ellis Island, and how the contributed to America today! Note: This tour does not include tickets to climb the Statue of Liberty (crown/pedestal) but does include your ticket to the ferry. [Meeting point: Castle Clinton. \nEnding Location: Ellis Island, where you can explore the museum and then ferry back to Battery Park, Manhattan.]",
       image: "/assets/imgs/statue-liberty.jpg"
     },
     {
       title: "Hudson Yards",
-      description: "Learn about how this massive development came to be, what it's used for, and what it could have been— plus what you can do and eat while you're there! Meeting point: 20 Hudson Yards, beneath the Vessel, in front of the Shops at Hudson yards. Ending Location: The Shed at Hudson Yards",
+      description: "Learn about how this massive development came to be, what it's used for, and what it could have been— plus what you can do and eat while you're there! [Meeting point: 20 Hudson Yards, beneath the Vessel, in front of the Shops at Hudson yards. \nEnding Location: The Shed at Hudson Yards.]",
       image: "/assets/imgs/hudson-yards.jpg"
     },
     {
       title: "Greenwich Village",
-      description: "Sights new and old, like Cherry Lane Theatre, Stonewall Inn, the Friends Apartment, and more! Meeting point: Just outside Waverly Diner at 385 6th Ave, New York, NY 10014. Ending Location: 32 Morton St, New York, NY 10014.",
+      description: "Sights new and old, like Cherry Lane Theatre, Stonewall Inn, the Friends Apartment, and more! [Meeting point: Just outside Waverly Diner at 385 6th Ave, New York, NY 10014. Ending Location: 32 Morton St, New York, NY 10014.]",
       image: "/assets/imgs/greenwich-village.jpg"
     }
   ];

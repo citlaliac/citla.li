@@ -61,7 +61,7 @@ const SeePage = () => {
         <img src="/assets/imgs/see-bkg.jpg" alt="Background" />
       </div>
       <Header />
-      <h1 className="page-title">see</h1>
+      <h1 className="see-page-title">see</h1>
       <div className="collections-grid">
         {collections.map((collection, index) => (
           <Link to={collection.path} key={index} className="collection-item">
