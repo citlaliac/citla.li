@@ -43,16 +43,16 @@ function TechPage() {
           <h1 className="page-title">tech</h1>
           <p className="welcome-text">Explore my technical work and experience</p>
         </div>
-        <div className="icon-grid-tech">
+        <div className="tech-page-icon-grid">
           {techItems.map(item => (
             <Link 
               to={item.path} 
               key={item.id} 
-              className="icon-item"
+              className="tech-page-icon-item"
               target={item.path.startsWith('http') ? '_blank' : undefined}
               rel={item.path.startsWith('http') ? 'noopener noreferrer' : undefined}
             >
-              <div className="icon-wrapper">
+              <div className="tech-page-icon-wrapper">
                 <img src={item.icon} alt={item.title} />
               </div>
               <h2>{item.title}</h2>
