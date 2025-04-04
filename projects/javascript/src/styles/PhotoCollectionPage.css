@@ -43,6 +43,12 @@
   transform: scale(1.05);
 } */
 
+.photo-collection-title-section {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding-top: 2rem;
+}
+
 @media (max-width: 768px) {
   .photo-grid {
     columns: 1;
@@ -51,5 +57,17 @@
   
   .photo-collection-page {
     padding: 1rem;
+  }
+
+  .photo-collection-title-section {
+    padding-top: 4rem;
+    margin-bottom: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .photo-collection-title-section {
+    padding-top: 5rem;
+    margin-bottom: 1rem;
   }
 } 
