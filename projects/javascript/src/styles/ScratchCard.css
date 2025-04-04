@@ -7,7 +7,7 @@
   border-radius: 15px;
   overflow: hidden;
   box-shadow: 
-    0 0 20px rgba(0, 0, 0, 0.3),
+    0 0 20px rgba(133, 133, 133, 0.353),
     0 0 40px rgba(0, 0, 0, 0.2);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   cursor: pointer;
@@ -26,13 +26,13 @@
   left: 0;
   width: 100%;
   height: 100%;
-  /* cursor: url('/assets/gifs/cursor.gif'), auto; */
   background: linear-gradient(
     135deg,
     rgba(255, 255, 255, 0.1) 0%,
     rgba(255, 255, 255, 0.2) 50%,
     rgba(255, 255, 255, 0.1) 100%
   );
+  z-index: 2;
 }
 
 .scratch-content {
@@ -48,7 +48,7 @@
   padding: 2rem;
   color: white;
   text-align: center;
-  z-index: 1;
+  z-index: 3;
 }
 
 .scratch-title {
@@ -79,7 +79,7 @@
     rgba(255, 255, 255, 0.3) 50%,
     rgba(255, 255, 255, 0.1) 100%
   );
-  z-index: 2;
+  z-index: 1;
   pointer-events: none;
 }
 
@@ -93,8 +93,8 @@
   height: 200%;
   background: radial-gradient(
     circle at center,
-    rgba(255, 255, 255, 0.2) 0%,
-    rgba(255, 255, 255, 0) 70%
+    rgba(192, 192, 192, 0.256) 0%,
+    rgba(133, 133, 133, 0) 70%
   );
   transform: rotate(45deg);
   z-index: 2;

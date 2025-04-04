@@ -240,8 +240,8 @@ const ScratchCard = ({ title, content, position }) => {
       }}
     >
       <div className="scratch-content">
-        <h3>{title}</h3>
-        <p>{content}</p>
+        <h3 className="scratch-title">{title}</h3>
+        <p className="scratch-text">{content}</p>
       </div>
       <canvas
         ref={canvasRef}
