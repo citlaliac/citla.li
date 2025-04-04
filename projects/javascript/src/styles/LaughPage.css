@@ -26,7 +26,6 @@
 }
 
 .content-section {
-  background: rgba(255, 255, 255, 0.9);
   padding: 2rem;
   border-radius: 10px;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
@@ -120,11 +119,11 @@
 }
 
 .tv-antenna:first-child::before {
-  transform: rotate(-30deg);
+  transform: rotate(-45deg);
 }
 
 .tv-antenna:last-child::before {
-  transform: rotate(30deg);
+  transform: rotate(45deg);
 }
 
 /* iPhone Container Styles */
