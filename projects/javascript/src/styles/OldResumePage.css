@@ -1,0 +1,90 @@
+.resume-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 6rem 2rem 2rem;
+  color: white;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.resume-intro {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+}
+
+.resume-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  text-align: left;
+  position: relative;
+  z-index: 1;
+}
+
+.form-group label {
+  font-size: 1rem;
+}
+
+.form-group input {
+  padding: 0.8rem;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  background-color: #fff;
+  color: #333;
+  z-index: 1;
+  position: relative;
+}
+
+.submit-button {
+  padding: 1rem;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s;
+  z-index: 1;
+  position: relative;
+}
+
+.submit-button:hover {
+  background-color: #45a049;
+}
+
+.success-message {
+  color: #4CAF50;
+  margin-top: 1rem;
+}
+
+.error-message {
+  color: #f44336;
+  margin-top: 1rem;
+}
+
+.loading-message {
+  color: #ff9800;
+  margin-top: 1rem;
+}
+
+@media (max-width: 768px) {
+  .resume-container {
+    padding: 7rem 1.5rem 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .resume-container {
+    padding: 8rem 1rem 1rem;
+  }
+} 
