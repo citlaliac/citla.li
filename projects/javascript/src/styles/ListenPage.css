@@ -1,7 +1,12 @@
 .listen-page {
   min-height: 100vh;
-  color: white;
-  transition: background 1.5s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+  font-family: 'Kodchasan', sans-serif;
 }
 
 .page-container {
@@ -16,12 +21,28 @@
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
 }
 
+.page-title {
+  text-align: center;
+  color: #fff;
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  padding: 1rem 0;
+  font-family: 'Kodchasan', sans-serif;
+}
+
 .subtitle {
   text-align: center;
-  font-size: 1.2rem;
-  margin-bottom: 3rem;
-  line-height: 1.6;
-  color: white;
+  color: #fff;
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+  font-family: 'Kodchasan', sans-serif;
 }
 
 .playlist-container {

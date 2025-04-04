@@ -5,7 +5,7 @@
   align-items: center;
   justify-content: center;
   padding: 2rem;
-  font-family: 'Averia Libre', cursive;
+  font-family: 'Kodchasan', sans-serif;
 }
 
 .main-title-image {
@@ -21,6 +21,7 @@
   color: #fff;
   margin-bottom: 3rem;
   opacity: 0.9;
+  font-family: 'Kodchasan', sans-serif;
 }
 
 .page-title {
@@ -28,5 +29,29 @@
   margin-bottom: 2rem;
   text-align: center;
   color: #fff;
+  font-family: 'Averia Libre', cursive;
+}
+
+.icon-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 2rem;
+  max-width: 1200px;
+  width: 100%;
+  padding: 2rem;
+}
+
+.icon-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  color: #fff;
+  transition: transform 0.3s ease;
+}
+
+.icon-item span {
+  margin-top: 1rem;
+  font-size: 1.2rem;
   font-family: 'Averia Libre', cursive;
 } 
