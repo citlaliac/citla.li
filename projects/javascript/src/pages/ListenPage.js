@@ -43,7 +43,7 @@ function ListenPage() {
     <div className="app-container listen-page" style={backgroundStyle}>
       <Header />
       <div className="page-container">
-        <div className="content-section">
+        <div className="content-section-listen">
           <h2 className="page-title">listen</h2>
           <p className="subtitle">Whether its a tropical vacation, a devastating 2005 pop culture break-up, or the back of your babysitter's minivan, these thoughtfully curated playlists <em>take you places.</em></p>
           

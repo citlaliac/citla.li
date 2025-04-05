@@ -15,7 +15,7 @@
   margin: 0 auto;
 }
 
-.content-section {
+.content-section-listen {
   padding: 2rem;
   border-radius: 10px;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
@@ -113,6 +113,7 @@
   height: 100%;
   z-index: -1;
   border-radius: 15px;
+  overflow: hidden;
 }
 
 .background-img img {
@@ -147,6 +148,10 @@
   .subtitle {
     font-size: 1.2rem;
     margin-bottom: 1.5rem;
+  }
+
+  .content-section-listen {
+    padding: 1rem;
   }
 
   .playlist-container {
@@ -199,6 +204,10 @@
   .subtitle {
     font-size: 1rem;
     margin-bottom: 1rem;
+  }
+
+  .content-section-listen {
+    padding: 1rem;
   }
 
   .playlist-container {
