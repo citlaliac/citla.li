@@ -96,11 +96,14 @@ function ContactPage() {
           </div>
           <div className="aim-content">
             <div className="aim-chat">
-              <div className="aim-message aim-buddy">
-                <span className="aim-buddy-name">Buddy:</span> Hey there! Want to send me a message?
+              <div className="aim-message aim-you">
+                <span className="aim-you-name">You:</span> Hey queen! Let's chat 😍
               </div>
               <div className="aim-message aim-you">
-                <span className="aim-you-name">You:</span> Sure! Let me fill out this form...
+                <span className="aim-buddy-name">Citlali:</span> Hmm... maybe, tell me about yourself first.
+              </div>
+              <div className="aim-message aim-you">
+                <span className="aim-you-name">You:</span>  <em style={{ }}>typing...</em>
               </div>
             </div>
             <form className="aim-form" onSubmit={handleSubmit}>

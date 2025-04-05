@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
-import '../../styles/ResumePage.css';
+import '../../styles/tech/ResumePage.css';
 
 function ResumePage() {
   const navigate = useNavigate();

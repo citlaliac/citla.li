@@ -1111,50 +1111,6 @@ body {
   perspective: 1000px;
 }
 
-.tv-screen video,
-.iphone-screen video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  background: #000;
-}
-
-.tv-screen {
-  width: 100%;
-  height: 100%;
-  background: #000;
-  border-radius: 10px;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.iphone-screen {
-  width: 100%;
-  border-radius: 30px;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.page-title {
-  text-align: center;
-  font-size: 3rem;
-  margin: 2rem 0;
-  color: #fff;
-}
-
-.video-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 4rem;
-  margin: 4rem 0;
-  perspective: 1000px;
-}
-
 /* Retro TV Styles */
 .retro-tv {
   transform: rotateX(10deg) rotateY(10deg);

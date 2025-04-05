@@ -79,7 +79,7 @@ function TourPage() {
       <Header />
       <div className="page-container">
         <div className="content-section">
-          <h2 className="page-title">tour</h2>
+          <h2 className="tour-page-title">tour</h2>
           <div className="tour-header">
             <p className="subtitle">
               As a licensed NYC tour guide, I love showing YOU crazy stuff in a cool, non-touristy way. Take a tour, bring a camelback full of wine. I won't tell.
