@@ -32,33 +32,33 @@ function ContactPage() {
     setStatus({ type: 'loading', message: 'Sending...' });
 
     try {
-      // Send POST request to backend API
       const response = await fetch('https://citla.li/api/submit-contact', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify(formData),
       });
 
-      // Check if request was successful
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error('Failed to send message');
+        throw new Error(data.error || 'Failed to send message');
       }
 
-      // Update status with success message
       setStatus({
         type: 'success',
         message: 'Message sent successfully!',
       });
       
-      // Clear form data
       setFormData({ name: '', email: '', message: '' });
     } catch (error) {
-      // Update status with error message
+      console.error('Contact form error:', error);
       setStatus({
         type: 'error',
-        message: 'Failed to send message. Please try again.',
+        message: error.message || 'Failed to send message. Please try again.',
       });
     }
   };

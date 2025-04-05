@@ -12,17 +12,20 @@ const port = process.env.PORT || 5000;
 // Middleware Configuration
 // Enable CORS for your domain
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? 'https://citla.li' 
-    : 'http://localhost:3000',
-  methods: ['GET', 'POST'],
+  origin: 'https://citla.li',
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Accept'],
   credentials: true
 }));
+
+// Handle preflight requests
+app.options('*', cors());
+
 // Parse JSON request bodies
 app.use(express.json());
 
 // Serve static files from the React app
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, '../public_html')));
 
 // Google Sheets API Configuration
 // Set up authentication using service account credentials
@@ -91,7 +94,7 @@ app.post('/api/submit-contact', async (req, res) => {
     await appendToSheet(process.env.CONTACT_SPREADSHEET_ID, values);
     res.json({ success: true });
   } catch (error) {
-    console.error('Error in contact submission:', error.message);
+    console.error('Error in contact submission:', error);
     res.status(500).json({ 
       error: 'Failed to submit contact form',
       details: error.message 
@@ -129,7 +132,7 @@ app.post('/api/submit-resume', async (req, res) => {
 
 // Handle all other routes by serving index.html
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, '../public_html', 'index.html'));
 });
 
 // Start the server
