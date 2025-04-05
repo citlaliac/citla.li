@@ -45,7 +45,6 @@ function TechPage() {
       <main className="main-content">
         <div className="title-section">
           <h1 className="tech-page-title">tech</h1>
-          <p className="welcome-text">Explore my technical work and experience</p>
         </div>
         <div className="tech-page-icon-grid">
           {techItems.map(item => (
