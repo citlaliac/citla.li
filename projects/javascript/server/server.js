@@ -3,16 +3,24 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { google } = require('googleapis');
+const path = require('path');
 
 // Initialize Express app and set port (default to 5000 if not specified)
 const app = express();
 const port = process.env.PORT || 5000;
 
 // Middleware Configuration
-// Enable CORS for all routes to allow frontend requests
-app.use(cors());
+// Enable CORS for all routes
+app.use(cors({
+  origin: process.env.FRONTEND_URL || '*',
+  methods: ['GET', 'POST'],
+  credentials: true
+}));
 // Parse JSON request bodies
 app.use(express.json());
+
+// Serve static files from the React app
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Google Sheets API Configuration
 // Set up authentication using service account credentials
@@ -62,7 +70,16 @@ async function appendToSheet(spreadsheetId, values) {
 app.post('/api/submit-contact', async (req, res) => {
   try {
     console.log('Received contact submission:', req.body);
+    
+    // Validate required fields
     const { name, email, message } = req.body;
+    if (!name || !email || !message) {
+      return res.status(400).json({ 
+        error: 'Missing required fields',
+        details: 'Name, email, and message are required'
+      });
+    }
+
     const values = [
       new Date().toISOString(),
       name,
@@ -107,6 +124,11 @@ app.post('/api/submit-resume', async (req, res) => {
       details: error.message 
     });
   }
+});
+
+// Handle all other routes by serving index.html
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // Start the server
