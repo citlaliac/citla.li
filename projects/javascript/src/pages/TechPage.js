@@ -18,13 +18,13 @@ function TechPage() {
     {
       id: 'github',
       title: 'github',
-      path: '/tech/GitHubPage',
+      path: '/tech/github',
       icon: '/assets/gifs/github.gif'
     },
     {
       id: 'ai',
       title: 'trust & safety AI',
-      path: '/tech/AIPage',
+      path: '/tech/ts',
       icon: '/assets/gifs/ai.gif'
     },
     {
@@ -44,7 +44,7 @@ function TechPage() {
       <Header />
       <main className="main-content">
         <div className="title-section">
-          <h1 className="page-title">tech</h1>
+          <h1 className="tech-page-title">tech</h1>
           <p className="welcome-text">Explore my technical work and experience</p>
         </div>
         <div className="tech-page-icon-grid">

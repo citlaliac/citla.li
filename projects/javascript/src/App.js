@@ -1,5 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+
+// Main navigation pages
 import HomePage from './pages/MainPage';
 import SeePage from './pages/SeePage';
 import ListenPage from './pages/ListenPage';
@@ -9,23 +11,27 @@ import TechPage from './pages/TechPage';
 import ContactPage from './pages/ContactPage';
 import ScratchPage from './pages/ScratchPage';
 import BookPage from './pages/BookPage';
-// import ResumePage from './pages/tech/OldResumePage';
+import ShopRedirectPage from './pages/ShopRedirectPage';
+import SurprisePage from './pages/SurprisePage';
+
+// Tech section pages
 import ResumePage from './pages/tech/ResumePage';
 import ResumePDFPage from './pages/tech/ResumePDFPage';
 import ResumeSuccessPage from './pages/tech/ResumeSuccessPage';
 import GitHubPage from './pages/tech/GitHubPage';
 import AIPage from './pages/tech/AIPage';
-import ShopRedirectPage from './pages/ShopRedirectPage';
-import SurprisePage from './pages/SurprisePage';
-import Summer2023Page from './pages/Summer2023Page';
-import Spring2023Page from './pages/Spring2023Page';
-import Spring2024Page from './pages/Spring2024Page';
-import PortraitPage from './pages/PortraitPage';
-import MoodyPage from './pages/MoodyPage';
-import NaturalPage from './pages/NaturalPage';
-import UrbanPage from './pages/UrbanPage';
-import EspionnerPage from './pages/EspionnerPage';
 import HintGiverPage from './pages/HintGiverPage';
+
+// Photo collection pages
+import Summer2023Page from './pages/photos/Summer2023Page';
+import Spring2023Page from './pages/photos/Spring2023Page';
+import Spring2024Page from './pages/photos/Spring2024Page';
+import PortraitPage from './pages/photos/PortraitPage';
+import MoodyPage from './pages/photos/MoodyPage';
+import NaturalPage from './pages/photos/NaturalPage';
+import UrbanPage from './pages/photos/UrbanPage';
+import EspionnerPage from './pages/photos/EspionnerPage';
+
 import './styles.css';
 
 function App() {
@@ -35,6 +41,7 @@ function App() {
     <Router>
       <div className="app">
         <Routes>
+          {/* Main navigation routes */}
           <Route path="/" element={<HomePage />} />
           <Route path="/see" element={<SeePage />} />
           <Route path="/listen" element={<ListenPage />} />
@@ -44,14 +51,19 @@ function App() {
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/read" element={isMobile ? <BookPage /> : <ScratchPage />} />
           <Route path="/book" element={<BookPage />} />
-          {/* <Route path="/tech/resume" element={<OldResumePage />} /> */}
+          <Route path="/shop" element={<ShopRedirectPage />} />
+          <Route path="/surprise" element={<SurprisePage />} />
+
+          {/* Tech section routes */}
           <Route path="/tech/resume" element={<ResumePage />} />
           <Route path="/tech/resume-pdf" element={<ResumePDFPage />} />
           <Route path="/tech/resume-success" element={<ResumeSuccessPage />} />
-          <Route path="/tech/GitHubPage" element={<GitHubPage />} />
-          <Route path="/tech/AIPage" element={<AIPage />} />
-          <Route path="/shop" element={<ShopRedirectPage />} />
-          <Route path="/surprise" element={<SurprisePage />} />
+          <Route path="/tech/github" element={<GitHubPage />} />
+          <Route path="/tech/ts" element={<AIPage />} />
+          <Route path="/hintgiver" element={<HintGiverPage />} />
+
+          {/* Photo collection routes */}
+
           <Route path="/photos/summer-2023" element={<Summer2023Page />} />
           <Route path="/photos/spring-2023" element={<Spring2023Page />} />
           <Route path="/photos/spring-2024" element={<Spring2024Page />} />
@@ -60,7 +72,6 @@ function App() {
           <Route path="/photos/natural" element={<NaturalPage />} />
           <Route path="/photos/urban" element={<UrbanPage />} />
           <Route path="/photos/espionner" element={<EspionnerPage />} />
-          <Route path="/hintgiver" element={<HintGiverPage />} />
         </Routes>
       </div>
     </Router>

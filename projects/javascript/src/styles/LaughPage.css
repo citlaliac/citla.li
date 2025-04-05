@@ -1,91 +1,110 @@
 .laugh-page {
   position: relative;
-  min-height: 100vh;
   overflow: hidden;
+  min-height: 100vh;
   color: white;
   font-family: 'Kodchasan', sans-serif;
 }
 
-.background-gif {
+.laugh-page .background-gif {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   z-index: -1;
+  pointer-events: none;
 }
 
-.background-gif img {
+.laugh-page .background-gif img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
 }
 
-.page-container {
-  padding: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.content-section {
-  padding: 2rem;
-  border-radius: 10px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-}
-
-.page-title {
-  text-align: center;
-  color: #fff;
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
-  text-transform: lowercase;
-  letter-spacing: 3px;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 10;
-  padding: 1rem 0;
-  font-family: 'Kodchasan', sans-serif;
-}
-
-.video-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2rem;
-  justify-content: center;
-  align-items: flex-start;
-}
-
-/* Retro TV Styles */
-.retro-tv {
-  width: 100%;
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.tv-body {
-  background: #2c2c2c;
-  border-radius: 20px;
-  padding: 20px;
+.laugh-page .page-container {
   position: relative;
-  box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+  z-index: 1;
+  background: transparent;
 }
 
-.tv-screen {
+.laugh-page .video-container {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4rem;
+  margin: 4rem 0;
+  perspective: 1000px;
+}
+
+.laugh-page .tv-screen video,
+.laugh-page .iphone-screen video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #000;
+}
+
+.laugh-page .tv-screen {
+  width: 100%;
+  height: 100%;
   background: #000;
   border-radius: 10px;
   overflow: hidden;
-  padding-top: 56.25%; /* 16:9 Aspect Ratio */
-  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.tv-screen iframe {
-  position: absolute;
-  top: 0;
-  left: 0;
+.laugh-page .iphone-screen {
   width: 100%;
-  height: 100%;
+  border-radius: 30px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.laugh-page .page-title {
+  text-align: center;
+  font-size: 3rem;
+  margin: 2rem 0;
+  color: #fff;
+}
+
+.laugh-page .video-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4rem;
+  margin: 4rem 0;
+  perspective: 1000px;
+}
+
+/* Retro TV Styles */
+.laugh-page .retro-tv {
+  transform: rotateX(10deg) rotateY(10deg);
+  transform-style: preserve-3d;
+  transition: transform 0.3s ease;
+}
+
+.laugh-page .retro-tv:hover {
+  transform: rotateX(15deg) rotateY(15deg);
+}
+
+.laugh-page .tv-body {
+  position: relative;
+  width: 600px;
+  height: 450px;
+  background: #8B4513;
+  border-radius: 20px;
+  box-shadow: 
+    0 0 20px rgba(0, 0, 0, 0.5),
+    inset 0 0 20px rgba(0, 0, 0, 0.8);
+  padding: 20px;
 }
 
 .tv-controls {
@@ -227,6 +246,22 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
+  .laugh-page .tv-body {
+    width: 300px;
+    height: 225px;
+  }
+
+  .laugh-page .iphone {
+    width: 250px;
+    height: 500px;
+  }
+
+  .laugh-page .page-title {
+    font-size: 2.5rem;
+    padding: .5rem 0;
+    margin-top: 6rem;
+  }
+
   .video-container {
     flex-direction: column;
     align-items: center;

@@ -5,14 +5,16 @@ import Footer from '../components/Footer';
 import '../styles/MainPage.css';
 
 function MainPage() {
+  // Track mouse position for the cool gradient effect
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const smoothPosition = useRef({ x: 0, y: 0 });
   
+  // Listen for mouse movement and update position
   useEffect(() => {
     const handleMouseMove = (e) => {
       setMousePosition({
-        x: e.clientX / window.innerWidth,
-        y: e.clientY / window.innerHeight
+        x: e.clientX / window.innerWidth,  // Normalize to 0-1 range
+        y: e.clientY / window.innerHeight  // Normalize to 0-1 range
       });
     };
   
@@ -20,8 +22,10 @@ function MainPage() {
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
   
+  // Smooth out the mouse movement for a more fluid effect
   useEffect(() => {
     const updatePosition = () => {
+      // Use a smoothing factor of 0.05 for a nice, smooth transition
       smoothPosition.current.x += (mousePosition.x - smoothPosition.current.x) * 0.05;
       smoothPosition.current.y += (mousePosition.y - smoothPosition.current.y) * 0.05;
       
@@ -31,6 +35,7 @@ function MainPage() {
     requestAnimationFrame(updatePosition);
   }, [mousePosition]);
   
+  // Create the dynamic background gradient based on mouse position
   const backgroundStyle = {
     background: `radial-gradient(circle at ${smoothPosition.current.x * 100}% ${smoothPosition.current.y * 100}%,rgb(255, 0, 0) 0%,rgb(194, 0, 145) 90%)`,
   };
@@ -48,6 +53,7 @@ function MainPage() {
           <p className="main-page-welcome-text">Welcome to my website. Click around and get to know me.</p>
         </div>
         <div className="main-page-icon-grid">
+          {/* Navigation links with floating animation */}
           <Link to="/listen" className="main-page-icon-item">
             <div className="main-page-icon-wrapper">
               <img src="/assets/gifs/listen.gif" alt="Listen" />

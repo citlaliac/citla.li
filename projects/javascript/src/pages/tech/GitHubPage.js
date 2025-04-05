@@ -1,7 +1,7 @@
 import React from 'react';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
-import '../../styles/GitHubPage.css';
+import '../../styles/tech/GitHubPage.css';
 
 /**
  * GitHubPage Component

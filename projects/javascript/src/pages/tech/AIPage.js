@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import '../../styles/AIPage.css';
+import '../../styles/tech/AIPage.css';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 
