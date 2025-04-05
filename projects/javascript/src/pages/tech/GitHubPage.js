@@ -44,11 +44,11 @@ const GitHubPage = () => {
             <div className="terminal-line terminal-output">
               • Coin-Boy: Grab your phone and <a href="https://github.com/citlaliac/coin-boys" target="_blank">get flippy!</a>
               <br />
-              • Want to make a sexist robot rewrite songs for you? <a href="https://github.com/citlaliac/sexist-robot" target="_blank">Click this link!</a>
+              • Want to make a sexist robot rewrite songs for you? <a href="https://github.com/citlaliac/misoBot" target="_blank">Click this link!</a>
               <br />
               • Tell off a past lover, <a href="https://www.citla.li/hintgiver" target="_blank">Give them a hint.</a>. 
               <br />
-              • <a href="https://github.com/citlaliac/song-classifier" target="_blank">Categorize</a> a song with Hugging Face transformers.
+              • <a href="https://github.com/citlaliac/SentimentAnalysisOfMusic" target="_blank">Categorize</a> a song with Hugging Face transformers.
             </div>
           </div>
 

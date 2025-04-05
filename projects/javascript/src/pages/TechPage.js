@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -10,49 +10,53 @@ import '../styles/TechPage.css';
  * Matches the style of the main page with floating animation and hover effects
  */
 function TechPage() {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const techItems = [
     {
       id: 'github',
-      title: 'GitHub',
+      title: 'github',
       path: '/tech/GitHubPage',
       icon: '/assets/gifs/github.gif'
     },
     {
       id: 'ai',
-      title: 'Ethical Trust & Safety AI',
+      title: 'trust & safety AI',
       path: '/tech/AIPage',
       icon: '/assets/gifs/ai.gif'
     },
     {
       id: 'resume',
-      title: 'Resume',
+      title: 'resume',
       path: '/tech/resume',
       icon: '/assets/gifs/resume.gif'
     }
   ];
 
   return (
-    <div className="app-container">
-    {/* Background gif */}
+    <div className="tech-page">
+      {/* Background gif */}
       <div className="background-gif">
         <img src="/assets/gifs/tech-bkg.gif" alt="Background" />
       </div>
       <Header />
       <main className="main-content">
         <div className="title-section">
-          <h1 className="main-title">tech</h1>
+          <h1 className="page-title">tech</h1>
           <p className="welcome-text">Explore my technical work and experience</p>
         </div>
-        <div className="icon-grid-tech">
+        <div className="tech-page-icon-grid">
           {techItems.map(item => (
             <Link 
               to={item.path} 
               key={item.id} 
-              className="icon-item"
+              className="tech-page-icon-item"
               target={item.path.startsWith('http') ? '_blank' : undefined}
               rel={item.path.startsWith('http') ? 'noopener noreferrer' : undefined}
             >
-              <div className="icon-wrapper">
+              <div className="tech-page-icon-wrapper">
                 <img src={item.icon} alt={item.title} />
               </div>
               <h2>{item.title}</h2>
@@ -60,6 +64,7 @@ function TechPage() {
           ))}
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

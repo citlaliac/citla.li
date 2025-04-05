@@ -1,4 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Kodchasan:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;1,200;1,300;1,400;1,500;1,600;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Averia+Libre:wght@300&display=swap');
 
 /* Temporarily removing BlurBold font until we have the proper font files */
 /* @font-face {
@@ -13,13 +14,16 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-family: 'Kodchasan', sans-serif;
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  /* background: linear-gradient(135deg, #ff0000 0%, #ff6b6b 100%); */
+  margin: 0;
+  padding: 0;
   min-height: 100vh;
-  color: white;
+  background: none;
+  font-family: 'Kodchasan', sans-serif;
+  opacity: 0.9;
 }
 
 .app-container {
@@ -56,6 +60,7 @@ body {
   margin-top: 0.3rem;
   text-transform: uppercase;
   letter-spacing: 1px;
+  color: #cdcdcd;
 }
 
 /* Main Content Styles */
@@ -73,7 +78,7 @@ body {
 }
 
 .main-title {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Averia Libre', cursive;
   font-size: 3.5rem;
   margin-bottom: 1rem;
   letter-spacing: 4px;
@@ -85,6 +90,7 @@ body {
   opacity: 0.9;
   max-width: 600px;
   margin: 0 auto;
+  color: #fff;
 }
 
 /* Icon Grid Styles */
@@ -123,8 +129,8 @@ body {
 }
 
 .icon-wrapper {
-  width: 150px;
-  height: 150px;
+  width: 180px;
+  height: 180px;
   background: none;
   border-radius: 10px;
   display: flex;
@@ -148,13 +154,15 @@ body {
 .icon-item span {
   font-size: 1rem;
   text-align: center;
-  text-transform: uppercase;
+  text-transform: lowercase;
   letter-spacing: 2px;
+  font-weight: bold;
 }
 
 /* Footer Styles */
 .footer {
   padding: 1rem 2rem;
+  position:absolute;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -234,6 +242,7 @@ body {
   font-size: 0.8rem;
   opacity: 0.7;
   text-align: right;
+  color: #7e7e7ee6;
 }
 
 /* Page Container Styles */
@@ -278,38 +287,6 @@ body {
   display: none;
 }
 
-/* Art Gallery Styles */
-.art-gallery {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-  padding: 1rem;
-}
-
-.art-item {
-  position: relative;
-  overflow: hidden;
-  border-radius: 10px;
-  aspect-ratio: 1;
-  cursor: pointer;
-  transition: transform 0.3s ease;
-}
-
-.art-item:hover {
-  transform: scale(1.02);
-}
-
-.art-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease;
-}
-
-.art-item:hover img {
-  transform: scale(1.1);
-}
-
 
 /* Comedy Content Styles */
 .comedy-content {
@@ -324,7 +301,6 @@ body {
   border-radius: 15px;
   overflow: hidden;
   transition: all 0.3s ease;
-  cursor: pointer;
   position: relative;
 }
 
@@ -570,7 +546,7 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 5px;
   background: rgba(255, 255, 255, 0.1);
-  color: white;
+  color: rgb(97, 91, 91);
   font-family: inherit;
 }
 
@@ -659,7 +635,7 @@ body {
 
 .poem-header {
   padding: 1.5rem;
-  cursor: pointer;
+  /* cursor: pointer; */
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -819,66 +795,6 @@ body {
   }
 }
 
-/* Photo Grid Styles
-.photo-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-  padding: 1rem;
-}
-
-.photo-item {
-  position: relative;
-  aspect-ratio: 1;
-  overflow: hidden;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: transform 0.3s ease;
-}
-
-.photo-item:hover {
-  transform: scale(1.02);
-}
-
-.photo-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease;
-}
-
-.photo-item:hover img {
-  transform: scale(1.1);
-}
-
-.photo-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 1.5rem;
-  background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-  color: white;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.photo-item:hover .photo-overlay {
-  opacity: 1;
-}
-
-.photo-overlay h3 {
-  font-size: 1.2rem;
-  margin: 0;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-@media (max-width: 768px) {
-  .photo-grid {
-    grid-template-columns: 1fr;
-  }
-} */
 
 /* AI Page Styles */
 .ai-intro {
@@ -1216,8 +1132,6 @@ body {
 
 .iphone-screen {
   width: 100%;
-  height: 100%;
-  background: #000;
   border-radius: 30px;
   overflow: hidden;
   display: flex;
@@ -1295,25 +1209,7 @@ body {
   border: 2px solid #666;
 }
 
-.tv-antennas {
-  position: absolute;
-  top: -60px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 40px;
-}
 
-.tv-antenna {
-  width: 4px;
-  height: 60px;
-  background: #666;
-  transform: rotate(-30deg);
-}
-
-.tv-antenna:last-child {
-  transform: rotate(30deg);
-}
 
 /* iPhone Container Styles */
 .iphone-container {
@@ -1327,25 +1223,41 @@ body {
   transform: rotateX(-15deg) rotateY(-15deg);
 }
 
-.iphone {
-  position: relative;
-  width: 300px;
-  height: 600px;
-  background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
+.iphone-frame {
+  width: 280px;
+  height: 580px;
+  background: white;
   border-radius: 40px;
+  position: relative;
   box-shadow: 
-    0 0 20px rgba(0, 0, 0, 0.5),
-    inset 0 0 20px rgba(0, 0, 0, 0.8);
-  padding: 20px;
+    0 0 0 2px #e0e0e0,
+    0 0 0 4px #f5f5f5,
+    0 0 0 6px #e0e0e0,
+    0 0 20px rgba(0,0,0,0.2);
   overflow: hidden;
+  transform-style: preserve-3d;
+  transition: transform 0.3s ease;
+}
+
+.iphone-notch {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 150px;
+  height: 30px;
+  background: #1a1a1a;
+  border-radius: 15px 15px 0 0;
+  z-index: 2;
 }
 
 .iphone-screen {
   width: 100%;
   height: 100%;
   background: #000;
-  border-radius: 30px;
+  position: relative;
   overflow: hidden;
+  border-radius: 40px;
 }
 
 .iphone-video {
@@ -1401,21 +1313,23 @@ body {
 
   .page-title {
     font-size: 2.5rem;
+    padding: .5rem 0;
+    margin-top: 6rem;
   }
 }
 
 /* Update mouse-following background transition */
 .listen-page, .main-content {
-  transition: background 1.5s ease;
+  transition: background 2.5s ease;
 }
 
-/* Remove footer from Router component */
+/* Remove footer from Router component
 .router-container {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   position: relative;
-}
+} */
 
 
 /* Windows 95 Popup Styles */
@@ -1488,4 +1402,218 @@ body {
 /* Random sizes for popups */
 .win95-popup:nth-child(3n) { width: 250px; }
 .win95-popup:nth-child(3n+1) { width: 350px; }
-.win95-popup:nth-child(3n+2) { width: 300px; } 
+.win95-popup:nth-child(3n+2) { width: 300px; }
+
+/* AIM Contact Form Styles */
+.aim-container {
+  flex: 1;
+  padding: 6rem 2rem 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 12rem);
+  position: relative;
+  z-index: 1;
+}
+
+.aim-window {
+  width: 100%;
+  max-width: 600px;
+  background: #f0f0f0;
+  border: 1px solid #999;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+  font-family: 'Arial', sans-serif;
+}
+
+.aim-titlebar {
+  background: linear-gradient(to right, #000080, #1084d0);
+  color: white;
+  padding: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.aim-title {
+  padding-left: 4px;
+}
+
+.aim-buttons {
+  display: flex;
+  gap: 4px;
+}
+
+.aim-minimize,
+.aim-maximize,
+.aim-close {
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: #f0f0f0;
+  color: #000;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.aim-content {
+  padding: 16px;
+  background: #fff;
+}
+
+.aim-chat {
+  background: #f0f0f0;
+  padding: 12px;
+  margin-bottom: 16px;
+  border: 1px solid #999;
+  min-height: 100px;
+}
+
+.aim-message {
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+
+.aim-buddy-name {
+  color: #000080;
+  font-weight: bold;
+}
+
+.aim-you-name {
+  color: #008000;
+  font-weight: bold;
+}
+
+.aim-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.aim-form-group input,
+.aim-form-group textarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #999;
+  background: #fff;
+  font-family: 'Arial', sans-serif;
+  font-size: 12px;
+}
+
+.aim-form-group textarea {
+  height: 120px;
+  resize: vertical;
+}
+
+.aim-send-button {
+  background: linear-gradient(to right, #000080, #1084d0);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-weight: bold;
+  align-self: flex-end;
+}
+
+.aim-send-button:hover {
+  background: linear-gradient(to right, #1084d0, #000080);
+}
+
+.aim-status {
+  padding: 8px;
+  margin-top: 8px;
+  font-size: 12px;
+  text-align: center;
+}
+
+.aim-status.success {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.aim-status.error {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.aim-status.loading {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeeba;
+}
+
+/* Remove old contact form styles */
+.contact-container,
+.contact-form,
+.form-group,
+.submit-button {
+  display: none;
+}
+
+/* Ensure the app container has proper layout */
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* Make sure the aim container takes up proper space */
+.aim-container {
+  flex: 1;
+  padding: 6rem 2rem 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 12rem);
+  position: relative;
+  z-index: 1;
+}
+
+/* AIM Popup Styles */
+.aim-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  animation: popupAppear 0.5s ease-out;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+  border: 2px solid #000080;
+  background: #f0f0f0;
+  padding: 10px;
+}
+
+.aim-popup img {
+  max-width: 300px;
+  height: auto;
+  display: block;
+}
+
+@keyframes popupAppear {
+  0% {
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}
+
+/* Update aim-close button to be more clickable */
+.aim-close {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.aim-close:hover {
+  background-color: #ff4444;
+  color: white;
+} 

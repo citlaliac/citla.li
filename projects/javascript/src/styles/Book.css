@@ -1,0 +1,336 @@
+.book-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+.book-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /* background: rgba(0, 0, 0, 0.4); */
+  z-index: 0;
+}
+
+.bookshelf {
+  width: 100%;
+  max-width: 1400px;
+  background: rgba(74, 44, 10, 0.8);
+  padding: 3rem;
+  border-radius: 15px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  position: relative;
+  z-index: 1;
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  margin-top: 6rem;
+  backdrop-filter: blur(5px);
+}
+
+.bookshelf::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 30px;
+  /* background: linear-gradient(90deg, rgba(90, 60, 26, 0.8), rgba(74, 44, 10, 0.8)); */
+  border-radius: 15px 15px 0 0;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.bookshelf::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 30px;
+  /* background: linear-gradient(90deg, rgba(90, 60, 26, 0.8), rgba(74, 44, 10, 0.8)); */
+  border-radius: 0 0 15px 15px;
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.bookshelf-title {
+  color: #fff;
+  font-size: 2.5rem;
+  text-align: center;
+  margin-bottom: 1rem;
+  font-family: 'Georgia', serif;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  position: relative;
+  z-index: 2;
+  margin-top: 2rem;
+}
+
+.bookshelf-title mark {
+    background: radial-gradient(
+            circle at center,
+            rgba(89, 60, 17, 0.832) 0%,
+            rgba(88, 49, 3, 0.84) 70%
+          );
+      color: #232323;
+      padding: 0 5px;
+      border-radius: 5px;
+    }
+
+.instructions {
+  color: #fff;
+  font-size: 1.2rem;
+  text-align: center;
+  margin-bottom: 2rem;
+  font-family: 'Georgia', serif;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  position: relative;
+  z-index: 2;
+  font-style: italic;
+  opacity: 0.9;
+}
+
+.books {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: center;
+  align-items: flex-start;
+  position: relative;
+  z-index: 2;
+}
+
+.book-item {
+  width: 240px;
+  height: 280px;
+  perspective: 1000px;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  position: relative;
+}
+
+.book-item:hover {
+  transform: translateY(-15px) rotate(5deg);
+}
+
+.book-cover {
+  width: 100%;
+  height: 100%;
+  background: #f8f1e5;
+  color: #333;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  transform: rotateY(0deg);
+  transition: transform 0.3s ease;
+  box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3);
+  border-radius: 5px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #d0c6b2;
+  opacity: 1;
+}
+
+.book-cover::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 15px;
+  background: linear-gradient(90deg, rgba(0,0,0,0.1), rgba(0,0,0,0.05));
+  border-right: 1px solid rgba(0,0,0,0.1);
+}
+
+.book-cover::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 5px;
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(0,0,0,0.1) 0px,
+    rgba(0,0,0,0.1) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+}
+
+.book-title {
+  font-size: 1.4rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: #333;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+  font-family: 'Georgia', serif;
+  position: relative;
+  z-index: 2;
+}
+
+.book-author {
+  font-size: 1rem;
+  color: #666;
+  font-family: 'Georgia', serif;
+  position: relative;
+  z-index: 2;
+}
+
+.poem-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.poem-content {
+  background: #f8f1e5;
+  padding: 3rem;
+  border-radius: 15px;
+  max-width: 800px;
+  width: 90%;
+  position: relative;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+  border: 1px solid #e0d6c2;
+}
+
+.poem-content h2 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  color: #333;
+  font-family: 'Georgia', serif;
+  text-align: center;
+}
+
+.poem-content h3 {
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+  color: #666;
+  font-family: 'Georgia', serif;
+  text-align: center;
+}
+
+.poem-text {
+  font-size: 1.2rem;
+  line-height: 1.8;
+  color: #333;
+  font-family: 'Georgia', serif;
+  text-align: center;
+}
+
+.poem-text p {
+  margin: 1rem 0;
+}
+
+.close-button {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 2.5rem;
+  cursor: pointer;
+  color: #666;
+  transition: color 0.3s ease;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.close-button:hover {
+  color: #333;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 1200px) {
+  .book-item {
+    width: 220px;
+    height: 250px;
+  }
+}
+
+@media (max-width: 768px) {
+  .bookshelf {
+    padding: 2rem;
+    margin-top: 4rem;
+  }
+
+  .book-item {
+    width: 180px;
+    height: 220px;
+  }
+
+  .book-title {
+    font-size: 1.2rem;
+  }
+
+  .book-author {
+    font-size: 0.9rem;
+  }
+
+  .instructions {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .bookshelf {
+    padding: 1.5rem;
+    margin-top: 3rem;
+  }
+
+  .book-item {
+    width: 160px;
+    height: 200px;
+  }
+
+  .book-title {
+    font-size: 1.1rem;
+  }
+
+  .book-author {
+    font-size: 0.8rem;
+  }
+
+  .instructions {
+    font-size: 1rem;
+  }
+
+  .poem-content {
+    padding: 2rem;
+  }
+
+  .poem-content h2 {
+    font-size: 2rem;
+  }
+
+  .poem-content h3 {
+    font-size: 1.2rem;
+  }
+
+  .poem-text {
+    font-size: 1.1rem;
+  }
+} 

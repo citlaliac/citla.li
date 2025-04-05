@@ -1,21 +1,20 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../../components/Header';
+import Footer from '../../components/Footer';
+import '../../styles/ResumePage.css';
 
 function ResumePage() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
-    email: '',
+    email: ''
   });
-  const [status, setStatus] = useState({ type: '', message: '' });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setStatus({ type: 'loading', message: 'Submitting...' });
-
+    
     try {
-      console.log('Submitting form data:', formData);
       const response = await fetch('http://localhost:5000/api/submit-resume', {
         method: 'POST',
         headers: {
@@ -24,81 +23,51 @@ function ResumePage() {
         body: JSON.stringify(formData),
       });
 
-      const data = await response.json();
-      console.log('Server response:', data);
-
-      if (!response.ok) {
-        throw new Error(data.details || data.error || 'Failed to submit form');
-      }
-
-      setStatus({
-        type: 'success',
-        message: 'Success! Redirecting to resume...',
-      });
-
-      // Redirect to resume PDF after a short delay
-      setTimeout(() => {
+      if (response.ok) {
         navigate('/tech/resume-pdf');
-      }, 1500);
+      }
     } catch (error) {
-      console.error('Submission error:', error);
-      setStatus({
-        type: 'error',
-        message: error.message || 'Failed to submit form. Please try again.',
-      });
+      console.error('Error:', error);
     }
   };
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
-
   return (
-    <div className="app-container">
-      <div className="background-gif" >
+    <div className="resume-page">
+            <div className="background-gif" >
         <img src="/assets/gifs/resume-bkg.gif" alt="Background"/>
       </div>
       <Header />
-      <div className="resume-container">
-        <p className="resume-intro">
-          Please fill out the form below to request my resume.
-        </p>
-        <form className="resume-form" onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="name">Name</label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <button type="submit" className="submit-button">
-            Submit
-          </button>
-          {status.message && (
-            <div className={`${status.type}-message`}>
-              {status.message}
+      <div className="resume-content">
+        <div className="resume-form-container">
+          <h2>View Resume</h2>
+          <form onSubmit={handleSubmit}>
+            <div className="input-group">
+              <input
+                type="text"
+                name="name"
+                placeholder="Your Name"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                required
+              />
             </div>
-          )}
-        </form>
+            <div className="input-group">
+              <input
+                type="email"
+                name="email"
+                placeholder="Your Email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                required
+              />
+            </div>
+            <button type="submit">
+              View Resume
+            </button>
+          </form>
+        </div>
       </div>
+      <Footer />
     </div>
   );
 }

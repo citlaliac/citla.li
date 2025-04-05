@@ -58,7 +58,7 @@ const SeePage = () => {
   return (
     <div className="see-page">
       <div className="background-gif">
-        <img src="/assets/gifs/see-bkg.gif" alt="Background" />
+        <img src="/assets/imgs/see-bkg.jpg" alt="Background" />
       </div>
       <Header />
       <h1 className="page-title">see</h1>

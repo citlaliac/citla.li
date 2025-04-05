@@ -27,7 +27,7 @@ function LaughPage() {
       <Header />
       <div className="page-container">
         <div className="content-section">
-          <h2 className="page-title">laugh</h2>
+          <h2>laugh</h2>
           <div className="video-container">
             {/* Retro TV Container */}
             <div className="retro-tv">

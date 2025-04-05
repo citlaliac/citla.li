@@ -7,7 +7,9 @@ import LaughPage from './pages/LaughPage';
 import TourPage from './pages/TourPage';
 import TechPage from './pages/TechPage';
 import ContactPage from './pages/ContactPage';
-import ReadPage from './pages/ReadPage';
+import ScratchPage from './pages/ScratchPage';
+import BookPage from './pages/BookPage';
+// import ResumePage from './pages/tech/OldResumePage';
 import ResumePage from './pages/tech/ResumePage';
 import ResumePDFPage from './pages/tech/ResumePDFPage';
 import ResumeSuccessPage from './pages/tech/ResumeSuccessPage';
@@ -23,9 +25,12 @@ import MoodyPage from './pages/MoodyPage';
 import NaturalPage from './pages/NaturalPage';
 import UrbanPage from './pages/UrbanPage';
 import EspionnerPage from './pages/EspionnerPage';
+import HintGiverPage from './pages/HintGiverPage';
 import './styles.css';
 
 function App() {
+  const isMobile = window.innerWidth <= 768;
+
   return (
     <Router>
       <div className="app">
@@ -37,7 +42,9 @@ function App() {
           <Route path="/tour" element={<TourPage />} />
           <Route path="/tech" element={<TechPage />} />
           <Route path="/contact" element={<ContactPage />} />
-          <Route path="/read" element={<ReadPage />} />
+          <Route path="/read" element={isMobile ? <BookPage /> : <ScratchPage />} />
+          <Route path="/book" element={<BookPage />} />
+          {/* <Route path="/tech/resume" element={<OldResumePage />} /> */}
           <Route path="/tech/resume" element={<ResumePage />} />
           <Route path="/tech/resume-pdf" element={<ResumePDFPage />} />
           <Route path="/tech/resume-success" element={<ResumeSuccessPage />} />
@@ -53,6 +60,7 @@ function App() {
           <Route path="/photos/natural" element={<NaturalPage />} />
           <Route path="/photos/urban" element={<UrbanPage />} />
           <Route path="/photos/espionner" element={<EspionnerPage />} />
+          <Route path="/hintgiver" element={<HintGiverPage />} />
         </Routes>
       </div>
     </Router>

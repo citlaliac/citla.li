@@ -61,4 +61,101 @@
     width: 150px;
     height: 150px;
   }
+}
+
+.tech-page {
+  min-height: 100vh;
+  color: white;
+  font-family: 'Kodchasan', sans-serif;
+}
+
+.page-title {
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 2.5rem;
+  color: #fff;
+  font-family: 'Kodchasan', sans-serif;
+}
+
+.tech-content h2 {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+  color: #fff;
+  font-family: 'Kodchasan', sans-serif;
+}
+
+.tech-content p {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: #fff;
+  font-family: 'Kodchasan', sans-serif;
+}
+
+.tech-page-icon-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 9rem;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.tech-page-icon-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: white;
+    transition: transform 0.3s ease;
+    animation: main-page-float 3s ease-in-out infinite;
+}
+  
+
+.tech-page-icon-item:hover {
+  transform: translateY(-10px);
+}
+
+.tech-page-icon-wrapper {
+  width: 200px;
+  height: 200px;
+  margin-bottom: 1rem;
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+.tech-page-icon-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.tech-page-icon-item h2 {
+  font-size: 1.5rem;
+  text-align: center;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .tech-page-icon-grid {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+    padding: 1rem;
+  }
+
+  .tech-page-icon-wrapper {
+    width: 150px;
+    height: 150px;
+  }
+}
+
+@media (max-width: 480px) {
+  .tech-page-icon-grid {
+    gap: 2rem;
+    padding: 0.5rem;
+  }
+
+  .tech-page-icon-wrapper {
+    width: 120px;
+    height: 120px;
+  }
 } 
