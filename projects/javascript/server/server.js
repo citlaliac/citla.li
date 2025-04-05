@@ -10,9 +10,11 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 // Middleware Configuration
-// Enable CORS for all routes
+// Enable CORS for your domain
 app.use(cors({
-  origin: process.env.FRONTEND_URL || '*',
+  origin: process.env.NODE_ENV === 'production' 
+    ? 'https://citla.li' 
+    : 'http://localhost:3000',
   methods: ['GET', 'POST'],
   credentials: true
 }));
@@ -70,9 +72,8 @@ async function appendToSheet(spreadsheetId, values) {
 app.post('/api/submit-contact', async (req, res) => {
   try {
     console.log('Received contact submission:', req.body);
-    
-    // Validate required fields
     const { name, email, message } = req.body;
+    
     if (!name || !email || !message) {
       return res.status(400).json({ 
         error: 'Missing required fields',
@@ -134,6 +135,7 @@ app.get('*', (req, res) => {
 // Start the server
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
+  console.log('Server is ready to serve https://citla.li');
   console.log('Google Sheets API configured with:');
   console.log('Service Account Email:', process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL);
   console.log('Resume Spreadsheet ID:', process.env.RESUME_SPREADSHEET_ID);

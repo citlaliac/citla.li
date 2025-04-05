@@ -1,18 +1,18 @@
 #!/bin/bash
 
-# Build the React application
-echo "Building React application..."
+# Build the React app
+echo "Building React app..."
 npm run build
 
-# Copy the build files to the server directory
-echo "Copying build files..."
+# Create public directory if it doesn't exist
+mkdir -p server/public
+
+# Copy build files to server's public directory
+echo "Copying build files to server directory..."
 cp -r build/* server/public/
 
-# Install server dependencies if needed
-echo "Installing server dependencies..."
-cd server
-npm install
-
-# Start the server
-echo "Starting server..."
-node server.js 
+echo "Deployment files are ready!"
+echo "Next steps:"
+echo "1. Upload the contents of the 'server' directory to your PlanetHoster server"
+echo "2. Make sure your .env file is properly configured on the server"
+echo "3. Start the server with: node server.js" 

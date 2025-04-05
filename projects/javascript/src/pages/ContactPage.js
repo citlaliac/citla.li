@@ -33,7 +33,7 @@ function ContactPage() {
 
     try {
       // Send POST request to backend API
-      const response = await fetch('http://localhost:5000/api/submit-contact', {
+      const response = await fetch('https://citla.li/api/submit-contact', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
