@@ -45,11 +45,18 @@ function MainPage() {
       <Header />
       <main className="main-page-content">
         <div className="main-page-title-section">
-          <img 
-            src="/assets/imgs/hiImCitlali.png" 
-            alt="hi I'm citlali" 
-            className="main-page-title-image"
-          />
+          <div className="title-image-container">
+            <img 
+              src="/assets/imgs/hiImCitlali.png" 
+              alt="hi I'm citlali" 
+              className="main-page-title-image"
+            />
+            <img 
+              src="/assets/gifs/og-image.gif" 
+              alt="Decorative GIF" 
+              className="title-decorative-gif"
+            />
+          </div>
           <p className="main-page-welcome-text">Welcome to my website. Click around and get to know me.</p>
         </div>
         <div className="main-page-icon-grid">
