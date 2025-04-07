@@ -1,4 +1,8 @@
 <?php
+// Enable error reporting for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: https://citla.li');
 header('Access-Control-Allow-Methods: POST, OPTIONS');
@@ -13,16 +17,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 // Database configuration
 $db_host = '127.0.0.1';
 $db_user = 'citlwqfk_submissions';
-$db_pass = 'ThisIsNotSecure1!'; // Replace with your actual password
+$db_pass = 'ThisIsNotSecure1!';
 $db_name = 'citlwqfk_submissions';
 $db_charset = 'latin1';
 
 try {
     // Get POST data
-    $data = json_decode(file_get_contents('php://input'), true);
+    $rawData = file_get_contents('php://input');
+    error_log("Received data: " . $rawData);
+    
+    $data = json_decode($rawData, true);
     
     if (!$data) {
-        throw new Exception('Invalid input data');
+        error_log("JSON decode error: " . json_last_error_msg());
+        throw new Exception('Invalid input data: ' . json_last_error_msg());
     }
 
     $name = $data['name'] ?? '';
@@ -43,14 +51,27 @@ try {
     $conn->set_charset($db_charset);
 
     if ($conn->connect_error) {
+        error_log("Database connection error: " . $conn->connect_error);
         throw new Exception('Database connection failed: ' . $conn->connect_error);
+    }
+
+    // Check if table exists
+    $tableCheck = $conn->query("SHOW TABLES LIKE 'resume_requests'");
+    if ($tableCheck->num_rows == 0) {
+        throw new Exception('Table resume_requests does not exist');
     }
 
     // Prepare and execute the insert statement
     $stmt = $conn->prepare("INSERT INTO resume_requests (name, email, created_at) VALUES (?, ?, NOW())");
+    if (!$stmt) {
+        error_log("Prepare statement error: " . $conn->error);
+        throw new Exception('Failed to prepare statement: ' . $conn->error);
+    }
+
     $stmt->bind_param("ss", $name, $email);
     
     if (!$stmt->execute()) {
+        error_log("Execute error: " . $stmt->error);
         throw new Exception('Failed to insert data: ' . $stmt->error);
     }
 
@@ -59,16 +80,19 @@ try {
     $conn->close();
 
     // Return success response
-    echo json_encode([
+    $response = [
         'success' => true,
         'message' => 'Resume request submitted successfully'
-    ]);
+    ];
+    echo json_encode($response);
 
 } catch (Exception $e) {
+    error_log("Error in submit-resume.php: " . $e->getMessage());
     http_response_code(500);
-    echo json_encode([
+    $response = [
         'success' => false,
         'error' => $e->getMessage()
-    ]);
+    ];
+    echo json_encode($response);
 }
 ?> 

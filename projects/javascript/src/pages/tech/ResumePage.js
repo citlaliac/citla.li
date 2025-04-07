@@ -21,6 +21,7 @@ function ResumePage() {
       : 'http://localhost:4201/submit-resume.php';
 
     try {
+      console.log('Submitting form data:', formData);
       const response = await fetch(API_URL, {
         method: 'POST',
         headers: {
@@ -30,12 +31,16 @@ function ResumePage() {
         body: JSON.stringify(formData),
       });
 
+      console.log('Response status:', response.status);
+      const responseText = await response.text();
+      console.log('Raw response:', responseText);
+
       let data;
       try {
-        data = await response.json();
+        data = JSON.parse(responseText);
       } catch (error) {
         console.error('Error parsing JSON:', error);
-        throw new Error('Invalid response from server');
+        throw new Error(`Invalid response from server: ${responseText}`);
       }
 
       if (!response.ok) {
