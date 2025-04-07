@@ -11,7 +11,7 @@ function ShopRedirectPage() {
   useEffect(() => {
     const timer = setTimeout(() => {
       window.location.href = 'https://www.fawnandfrog.co';
-    }, 5000);
+    }, 4201);
 
     // Create random popups with increased frequency
     const popupInterval = setInterval(() => {

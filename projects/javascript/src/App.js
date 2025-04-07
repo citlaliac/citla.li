@@ -32,6 +32,9 @@ import NaturalPage from './pages/photos/NaturalPage';
 import UrbanPage from './pages/photos/UrbanPage';
 import EspionnerPage from './pages/photos/EspionnerPage';
 
+//Other pages
+import BirthdayPage from './pages/BirthdayPage';
+
 import './styles.css';
 
 function App() {
@@ -72,6 +75,9 @@ function App() {
           <Route path="/photos/natural" element={<NaturalPage />} />
           <Route path="/photos/urban" element={<UrbanPage />} />
           <Route path="/photos/espionner" element={<EspionnerPage />} />
+
+          {/* Other pages */}
+          <Route path="/birthday" element={<BirthdayPage />} />
         </Routes>
       </div>
     </Router>

@@ -1,0 +1,279 @@
+.birthday-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #ff69b4, #ffb6c1);
+  position: relative;
+  overflow: hidden;
+}
+
+.birthday-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  position: relative;
+}
+
+.cake-container {
+  position: relative;
+  margin: 2rem 0;
+  animation: float 3s ease-in-out infinite;
+}
+
+.cake {
+  width: 300px;
+  height: 150px;
+  background: #f5deb3;
+  border-radius: 150px 150px 0 0;
+  position: relative;
+  box-shadow: 
+    0 10px 20px rgba(0, 0, 0, 0.2),
+    inset 0 -10px 20px rgba(0, 0, 0, 0.1);
+  transform-style: preserve-3d;
+}
+
+.cake::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    linear-gradient(45deg, transparent 45%, rgba(255,255,255,0.1) 50%, transparent 55%),
+    linear-gradient(-45deg, transparent 45%, rgba(255,255,255,0.1) 50%, transparent 55%);
+  background-size: 20px 20px;
+  border-radius: 150px 150px 0 0;
+  opacity: 0.5;
+}
+
+.frosting {
+  position: absolute;
+  top: -20px;
+  left: 0;
+  width: 100%;
+  height: 40px;
+  background: #fff;
+  border-radius: 150px 150px 0 0;
+  box-shadow: 
+    0 5px 15px rgba(0, 0, 0, 0.1),
+    inset 0 0 20px rgba(255, 255, 255, 0.8);
+  overflow: hidden;
+}
+
+.frosting::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 20%, rgba(255,255,255,0.8) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(255,255,255,0.8) 0%, transparent 50%);
+  border-radius: 150px 150px 0 0;
+}
+
+.frosting::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    linear-gradient(90deg, 
+      rgba(255,255,255,0) 0%, 
+      rgba(255,255,255,0.3) 50%, 
+      rgba(255,255,255,0) 100%);
+  animation: frosting-shine 3s infinite;
+}
+
+.candle {
+  position: absolute;
+  top: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 60px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 
+    0 0 10px rgba(0,0,0,0.1),
+    inset 0 0 10px rgba(0,0,0,0.1);
+}
+
+.candle::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, 
+    rgba(255,255,255,0.8) 0%, 
+    rgba(255,255,255,0.4) 50%, 
+    rgba(255,255,255,0.8) 100%);
+  border-radius: 10px;
+}
+
+.flame {
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 40px;
+  background: #ff4500;
+  border-radius: 50% 50% 20% 20%;
+  box-shadow: 
+    0 0 20px #ff4500,
+    0 0 40px #ff4500,
+    0 0 60px #ff4500;
+  animation: flicker 0.5s ease-in-out infinite;
+  filter: blur(1px);
+}
+
+.flame.out {
+  animation: blow-out 0.5s forwards;
+  opacity: 0;
+}
+
+.text-container {
+  text-align: center;
+  margin: 1rem 0;
+  animation: fade-in 0.5s ease-in-out;
+}
+
+.initial-text {
+  animation: fade-in-out 20s forwards;
+}
+
+.blow-text {
+  animation: fade-in-out 2s forwards;
+}
+
+.really-blow-text {
+  animation: shake 0.5s ease-in-out infinite;
+}
+
+.happy-birthday-text h1 {
+  font-size: 4rem;
+  color: #fff;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  animation: bounce 1s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes flicker {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+@keyframes blow-out {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0);
+    opacity: 0;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in-out {
+  0% {
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes frosting-shine {
+  0%, 100% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(100%);
+  }
+}
+
+/* Mobile Styles */
+@media (max-width: 768px) {
+  .cake {
+    width: 200px;
+    height: 100px;
+  }
+
+  .happy-birthday-text h1 {
+    font-size: 3rem;
+  }
+}
+
+/* Small Mobile Styles */
+@media (max-width: 480px) {
+  .cake {
+    width: 150px;
+    height: 75px;
+  }
+
+  .happy-birthday-text h1 {
+    font-size: 2.5rem;
+  }
+} 

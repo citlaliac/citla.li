@@ -31,18 +31,27 @@ function ContactPage() {
     e.preventDefault();
     setStatus({ type: 'loading', message: 'Sending...' });
 
+    const API_URL = process.env.NODE_ENV === 'production' 
+      ? 'https://citla.li/submit-contact.php'
+      : 'http://localhost:4201/submit-contact.php';
+
     try {
-      const response = await fetch('https://citla.li/api/submit-contact', {
+      const response = await fetch(API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        credentials: 'include',
         body: JSON.stringify(formData),
       });
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch (error) {
+        console.error('Error parsing JSON:', error);
+        throw new Error('Invalid response from server');
+      }
 
       if (!response.ok) {
         throw new Error(data.error || 'Failed to send message');

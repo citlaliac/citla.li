@@ -10,24 +10,51 @@ function ResumePage() {
     name: '',
     email: ''
   });
+  const [status, setStatus] = useState({ type: null, message: '' });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+    setStatus({ type: 'loading', message: 'Sending...' });
+
+    const API_URL = process.env.NODE_ENV === 'production' 
+      ? 'https://citla.li/submit-resume.php'
+      : 'http://localhost:4201/submit-resume.php';
+
     try {
-      const response = await fetch('http://localhost:5000/api/submit-resume', {
+      const response = await fetch(API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
         body: JSON.stringify(formData),
       });
 
-      if (response.ok) {
-        navigate('/tech/resume-pdf');
+      let data;
+      try {
+        data = await response.json();
+      } catch (error) {
+        console.error('Error parsing JSON:', error);
+        throw new Error('Invalid response from server');
       }
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to send request');
+      }
+
+      setStatus({
+        type: 'success',
+        message: 'Request sent successfully!',
+      });
+      
+      // Redirect to PDF page after successful submission
+      navigate('/tech/resume-pdf');
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Resume request error:', error);
+      setStatus({
+        type: 'error',
+        message: error.message || 'Failed to send request. Please try again.',
+      });
     }
   };
 

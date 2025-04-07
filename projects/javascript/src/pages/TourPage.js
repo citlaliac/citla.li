@@ -14,7 +14,7 @@ function TourPage() {
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentReviewIndex((prev) => (prev + 1) % reviews.length);
-    }, 5000);
+    }, 4201);
 
     return () => clearInterval(timer);
   }, []);

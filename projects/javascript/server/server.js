@@ -1,18 +1,32 @@
 // Load environment variables from .env file
-require('dotenv').config();
+const path = require('path');
+const dotenv = require('dotenv');
 const express = require('express');
 const cors = require('cors');
-const { google } = require('googleapis');
-const path = require('path');
+const mysql = require('mysql2/promise');
 
-// Initialize Express app and set port (default to 5000 if not specified)
+// Load environment variables
+dotenv.config({ path: path.join(__dirname, '.env') });
+
+// Initialize Express app and set port (default to 4201 if not specified)
 const app = express();
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 4201;
+
+// MySQL Connection Configuration
+const dbConfig = {
+  host: '127.0.0.1',
+  user: 'citlwqfk_citlaliac',
+  password: process.env.MYSQL_PASSWORD,
+  database: 'citlwqfk_submissions',
+  charset: 'latin1'
+};
 
 // Middleware Configuration
 // Enable CORS for your domain
 app.use(cors({
-  origin: 'https://citla.li',
+  origin: process.env.NODE_ENV === 'production' 
+    ? 'https://citla.li' 
+    : 'http://localhost:3000',
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Accept'],
   credentials: true
@@ -21,45 +35,19 @@ app.use(cors({
 // Handle preflight requests
 app.options('*', cors());
 
-// Parse JSON request bodies
+// Parse JSON bodies
 app.use(express.json());
 
-// Serve static files from the React app
-app.use(express.static(path.join(__dirname, '../public_html')));
+// Serve static files from the public_html directory
+app.use(express.static(path.join(__dirname, '..')));
 
-// Google Sheets API Configuration
-// Set up authentication using service account credentials
-const auth = new google.auth.GoogleAuth({
-  credentials: {
-    client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-    private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-  },
-  scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-});
-
-// Initialize Google Sheets API client
-const sheets = google.sheets({ version: 'v4', auth });
-const SPREADSHEET_ID = process.env.SPREADSHEET_ID;
-
-// Helper function to append data to a spreadsheet
-async function appendToSheet(spreadsheetId, values) {
+// Helper function to get database connection
+async function getConnection() {
   try {
-    console.log('Attempting to append to sheet:', spreadsheetId);
-    console.log('Values to append:', values);
-    
-    const response = await sheets.spreadsheets.values.append({
-      spreadsheetId,
-      range: 'Sheet1!A:Z',
-      valueInputOption: 'USER_ENTERED',
-      requestBody: {
-        values: [values],
-      },
-    });
-    
-    console.log('Successfully appended to sheet');
-    return response.data;
+    const connection = await mysql.createConnection(dbConfig);
+    return connection;
   } catch (error) {
-    console.error('Error appending to sheet:', error.message);
+    console.error('Error connecting to MySQL:', error);
     throw error;
   }
 }
@@ -73,6 +61,7 @@ async function appendToSheet(spreadsheetId, values) {
  * Appends submission to Sheet1 of the Google Spreadsheet
  */
 app.post('/api/submit-contact', async (req, res) => {
+  let connection;
   try {
     console.log('Received contact submission:', req.body);
     const { name, email, message } = req.body;
@@ -84,21 +73,27 @@ app.post('/api/submit-contact', async (req, res) => {
       });
     }
 
-    const values = [
-      new Date().toISOString(),
-      name,
-      email,
-      message,
-    ];
+    connection = await getConnection();
     
-    await appendToSheet(process.env.CONTACT_SPREADSHEET_ID, values);
-    res.json({ success: true });
+    // Insert into contacts table
+    const [result] = await connection.execute(
+      'INSERT INTO contacts (name, email, message, created_at) VALUES (?, ?, ?, ?)',
+      [name, email, message, new Date()]
+    );
+
+    res.setHeader('Content-Type', 'application/json');
+    res.json({ success: true, id: result.insertId });
   } catch (error) {
     console.error('Error in contact submission:', error);
+    res.setHeader('Content-Type', 'application/json');
     res.status(500).json({ 
       error: 'Failed to submit contact form',
       details: error.message 
     });
+  } finally {
+    if (connection) {
+      await connection.end();
+    }
   }
 });
 
@@ -109,38 +104,50 @@ app.post('/api/submit-contact', async (req, res) => {
  * Appends submission to Sheet2 of the Google Spreadsheet
  */
 app.post('/api/submit-resume', async (req, res) => {
+  let connection;
   try {
     console.log('Received resume submission:', req.body);
-    const { name, email, message } = req.body;
-    const values = [
-      new Date().toISOString(),
-      name,
-      email,
-      message,
-    ];
+    const { name, email } = req.body;
     
-    await appendToSheet(process.env.RESUME_SPREADSHEET_ID, values);
-    res.json({ success: true });
+    if (!name || !email) {
+      return res.status(400).json({ 
+        error: 'Missing required fields',
+        details: 'Name and email are required'
+      });
+    }
+
+    connection = await getConnection();
+    
+    // Insert into resume_requests table
+    const [result] = await connection.execute(
+      'INSERT INTO resume_requests (name, email, created_at) VALUES (?, ?, ?)',
+      [name, email, new Date()]
+    );
+
+    res.setHeader('Content-Type', 'application/json');
+    res.json({ success: true, id: result.insertId });
   } catch (error) {
-    console.error('Error in resume submission:', error.message);
+    console.error('Error in resume submission:', error);
+    res.setHeader('Content-Type', 'application/json');
     res.status(500).json({ 
-      error: 'Failed to submit resume',
+      error: 'Failed to submit resume form',
       details: error.message 
     });
+  } finally {
+    if (connection) {
+      await connection.end();
+    }
   }
 });
 
 // Handle all other routes by serving index.html
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public_html', 'index.html'));
+  res.sendFile(path.join(__dirname, '..', 'index.html'));
 });
 
 // Start the server
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
   console.log('Server is ready to serve https://citla.li');
-  console.log('Google Sheets API configured with:');
-  console.log('Service Account Email:', process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL);
-  console.log('Resume Spreadsheet ID:', process.env.RESUME_SPREADSHEET_ID);
-  console.log('Contact Spreadsheet ID:', process.env.CONTACT_SPREADSHEET_ID);
+  console.log('Current environment:', process.env.NODE_ENV);
 }); 
