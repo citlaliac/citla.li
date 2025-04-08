@@ -17,11 +17,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 // Log the request method
 error_log("Request method: " . $_SERVER['REQUEST_METHOD']);
 
+
+// Load environment variables
+$envFile = __DIR__ . '/.env';
+if (file_exists($envFile)) {
+    $envVars = parse_ini_file($envFile);
+    if ($envVars === false) {
+        error_log("Failed to parse .env file");
+    }
+} else {
+    error_log(".env file not found at: " . $envFile);
+}
+
 try {
     // Database configuration
     $db_host = '127.0.0.1';
     $db_user = 'citlwqfk_submissions';
-    $db_pass = 'ThisIsNotSecure1!';
+    $db_pass = $envVars['MYSQL_PASSWORD'];
     $db_name = 'citlwqfk_visitors';
     $db_charset = 'latin1';
 
