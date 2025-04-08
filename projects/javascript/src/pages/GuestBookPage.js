@@ -80,7 +80,7 @@ function GuestBookPage() {
       <Header />
       <div className="guestbook-content">
         <div className="guestbook-form-container">
-          <h2>Sign My Guestbook</h2>
+          {/* <h2>Sign My Guestbook</h2> */}
           <form onSubmit={handleSubmit}>
             <div className="input-group">
               <input
@@ -111,7 +111,7 @@ function GuestBookPage() {
                 rows="4"
               />
             </div>
-            <button type="submit">
+            <button type="guestbook-submit">
               Sign Guestbook
             </button>
             {status.type && (
