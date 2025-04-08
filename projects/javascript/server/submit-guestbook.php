@@ -41,17 +41,12 @@ try {
     }
 
     $name = $data['name'] ?? '';
-    $email = $data['email'] ?? '';
+    $location = $data['location'] ?? '';
     $message = $data['message'] ?? '';
 
     // Validate required fields
-    if (empty($name) || empty($email)) {
-        throw new Exception('Name and email are required');
-    }
-
-    // Validate email format
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        throw new Exception('Invalid email format');
+    if (empty($name) || empty($location)) {
+        throw new Exception('Name and location are required');
     }
 
     // Create database connection
@@ -64,13 +59,13 @@ try {
     }
 
     // Prepare and execute the insert statement
-    $stmt = $conn->prepare("INSERT INTO contacts (name, email, message, created_at) VALUES (?, ?, ?, NOW())");
+    $stmt = $conn->prepare("INSERT INTO guestbook (name, location, message, created_at) VALUES (?, ?, ?, NOW())");
     if (!$stmt) {
         error_log("Prepare statement error: " . $conn->error);
         throw new Exception('Failed to prepare statement: ' . $conn->error);
     }
 
-    $stmt->bind_param("sss", $name, $email, $message);
+    $stmt->bind_param("sss", $name, $location, $message);
     
     if (!$stmt->execute()) {
         error_log("Execute error: " . $stmt->error);
@@ -84,12 +79,12 @@ try {
     // Return success response
     $response = [
         'success' => true,
-        'message' => 'Contact form submitted successfully'
+        'message' => 'Guestbook entry submitted successfully'
     ];
     echo json_encode($response);
 
 } catch (Exception $e) {
-    error_log("Error in submit-contact.php: " . $e->getMessage());
+    error_log("Error in submit-guestbook.php: " . $e->getMessage());
     http_response_code(500);
     $response = [
         'success' => false,
