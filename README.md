@@ -1,22 +1,27 @@
-# playingWithCursor
+# Citlali's Website!
 
 ## What
-This is a place for me to mess around with Cursor.
+This is honestly where the magic happens. Using conventional and artificial intelligence, I'll have you wondering WHAT is going on at www.citla.li
 
 ## Goals
-I'm hoping to make a little TV app at somepoint, and maybe some assets for my website. Let's see if I do.
+Keep this as a space to learn and try new things.
 
 ## Getting set up
-- Clone the repo
-- Run `npx react-scripts start`
-- Run `npm run build` to build and then copy to web
-- Run `node server.js` to serve locally 
+- In r\projects\javascript\build"
+    - Run in  `npx react-scripts start`
+- In /server Run `node server.js` to serve locally (if using node apps, I don't think this version is)
 - Check out your changes in localhost
 
 ## Deployment
 To deploy to https://citla.li:
 
-1. Make sure you're in the `projects/javascript` directory
+- Make sure you're in the `projects/javascript` directory
+- Run `npm run build` to build and then copy to web
+    - the build folder, .htaccess, and php files must be in the main public_html
+    - the server folder in server
+- Set up your DBs and tables, add the access creds to the project
+
+____???____
 2. Run the deployment script:
    ```bash
    ./deploy.sh
@@ -27,6 +32,4 @@ To deploy to https://citla.li:
    ```bash
    node server.js
    ```
-
-The server will automatically serve your React app and handle API requests for the contact form and resume submissions.
 

@@ -21,14 +21,14 @@ function BirthdayPage() {
     const blowTimer = setTimeout(() => {
       setShowBlowText(false);
       setShowReallyBlowText(true);
-    }, 12000);
+    }, 2000);
 
     // "Really blow!" text triggers candle blow out
     const reallyBlowTimer = setTimeout(() => {
       setShowReallyBlowText(false);
       setCandleLit(false);
       setShowHappyBirthday(true);
-    }, 14000);
+    }, 4000);
 
     return () => {
       clearTimeout(initialTimer);
