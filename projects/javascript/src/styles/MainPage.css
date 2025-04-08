@@ -155,15 +155,12 @@
   }
 
   .title-image-container {
-    flex-direction: row;
+    flex-direction: column;
     gap: 0.5rem;
-    justify-content: center;
-    align-items: center;
   }
 
   .title-decorative-gif {
     max-height: 150px;
-    width: auto;
   }
 }
 
@@ -183,7 +180,7 @@
   }
 
   .main-page-title-image {
-    max-width: 200px;
+    max-width: 250px;
   }
 
   .main-page-icon-wrapper {
@@ -191,15 +188,7 @@
     height: 100px;
   }
 
-  .title-image-container {
-    flex-direction: row;
-    gap: 0.5rem;
-    justify-content: center;
-    align-items: center;
-  }
-
   .title-decorative-gif {
-    max-height: 40px;
-    width: auto;
+    max-height: 120px;
   }
 } 

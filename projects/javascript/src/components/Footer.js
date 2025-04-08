@@ -1,7 +1,11 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+import '../styles/Footer.css';
 
 function Footer() {
+  const location = useLocation();
+  const isHomePage = location.pathname === '/';
+
   return (
     <footer className="footer">
       <div className="social-icons">
@@ -21,6 +25,13 @@ function Footer() {
           </div>
         </a>
       </div>
+      {isHomePage && (
+          <Link to="/guestbook" className="footer-guestbook">
+            <div className="footer-guestbook-icon">
+              <img src="/assets/gifs/guestbook.gif" alt="Sign My Guestbook" />
+            </div>
+          </Link>
+        )}
       <div className="last-updated">Last updated: {new Date().toLocaleDateString()}</div>
     </footer>
   );

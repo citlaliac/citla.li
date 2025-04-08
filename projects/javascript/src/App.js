@@ -34,6 +34,7 @@ import EspionnerPage from './pages/photos/EspionnerPage';
 
 //Other pages
 import BirthdayPage from './pages/BirthdayPage';
+import GuestBookPage from './pages/GuestBookPage';
 
 import './styles.css';
 
@@ -75,6 +76,7 @@ function App() {
           <Route path="/photos/natural" element={<NaturalPage />} />
           <Route path="/photos/urban" element={<UrbanPage />} />
           <Route path="/photos/espionner" element={<EspionnerPage />} />
+          <Route path="/guestbook" element={<GuestBookPage />} />
 
           {/* Other pages */}
           <Route path="/birthday" element={<BirthdayPage />} />
