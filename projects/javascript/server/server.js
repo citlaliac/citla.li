@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 const express = require('express');
 const cors = require('cors');
 const mysql = require('mysql2/promise');
+const geoip = require('geoip-lite');
 
 // Load environment variables
 dotenv.config({ path: path.join(__dirname, '.env') });
@@ -15,7 +16,7 @@ const port = process.env.PORT || 4201;
 // MySQL Connection Configuration
 const dbConfig = {
   host: '127.0.0.1',
-  user: 'citlwqfk_citlaliac',
+  user: 'citlwqfk_submissions',
   password: process.env.MYSQL_PASSWORD,
   database: 'citlwqfk_submissions',
   charset: 'latin1'
@@ -131,6 +132,49 @@ app.post('/api/submit-resume', async (req, res) => {
     res.setHeader('Content-Type', 'application/json');
     res.status(500).json({ 
       error: 'Failed to submit resume form',
+      details: error.message 
+    });
+  } finally {
+    if (connection) {
+      await connection.end();
+    }
+  }
+});
+
+/**
+ * Track visitor information
+ * POST /api/track-visitor
+ * Expected body: { page_url }
+ * Tracks visitor information including IP, user agent, referrer, and location
+ */
+app.post('/api/track-visitor', async (req, res) => {
+  let connection;
+  try {
+    const { page_url } = req.body;
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    const userAgent = req.headers['user-agent'];
+    const referrer = req.headers['referer'] || req.headers['referrer'];
+    
+    // Get location data from IP
+    const geo = geoip.lookup(ip);
+    const country = geo ? geo.country : null;
+    const city = geo ? geo.city : null;
+
+    connection = await getConnection();
+    
+    // Insert into visitors table
+    const [result] = await connection.execute(
+      'INSERT INTO visitors (ip_address, user_agent, referrer, page_url, country, city) VALUES (?, ?, ?, ?, ?, ?)',
+      [ip, userAgent, referrer, page_url, country, city]
+    );
+
+    res.setHeader('Content-Type', 'application/json');
+    res.json({ success: true, id: result.insertId });
+  } catch (error) {
+    console.error('Error in visitor tracking:', error);
+    res.setHeader('Content-Type', 'application/json');
+    res.status(500).json({ 
+      error: 'Failed to track visitor',
       details: error.message 
     });
   } finally {
