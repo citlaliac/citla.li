@@ -34,4 +34,6 @@ yarn-error.log*
 
 # Server
 /server/node_modules/
-/server/.env 
+
+# .env
+projects/javascript/server/.env 
