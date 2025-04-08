@@ -92,6 +92,9 @@ function ContactPage() {
 
   return (
     <div className="app-container">
+      <div className="background-gif">
+        <img src="/assets/imgs/contact-bkg.png" alt="Background" />
+      </div>
       <Header />
       <main className="aim-container">
         <div className="aim-window">
