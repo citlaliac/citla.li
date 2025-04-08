@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import './visitor-tracking';
 
 // Main navigation pages
 import HomePage from './pages/MainPage';

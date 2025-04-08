@@ -1,7 +1,7 @@
 {
-  "name": "contact-form-server",
+  "name": "citla-li-server",
   "version": "1.0.0",
-  "description": "Backend server for contact form submissions",
+  "description": "Server for citla.li",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -9,10 +9,10 @@
   },
   "dependencies": {
     "cors": "^2.8.5",
-    "dotenv": "^16.4.7",
-    "express": "^4.21.2",
-    "googleapis": "^118.0.0",
-    "mysql2": "^3.14.0"
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "geoip-lite": "^1.4.7",
+    "mysql2": "^3.2.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.22"

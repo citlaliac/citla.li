@@ -37,3 +37,4 @@ yarn-error.log*
 
 # .env
 projects/javascript/server/.env 
+.env
