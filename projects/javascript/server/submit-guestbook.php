@@ -24,7 +24,7 @@ if (file_exists($envFile)) {
 // Database configuration
 $db_host = '127.0.0.1';
 $db_user = 'citlwqfk_submissions';
-$db_pass = $envVars['MYSQL_PASSWORD'] //?? 'ThisIsNotSecure1!'; // Fallback to default if not found
+$db_pass = $envVars['MYSQL_PASSWORD']; //?? 'ThisIsNotSecure1!'; // Fallback to default if not found
 $db_name = 'citlwqfk_submissions';
 $db_charset = 'latin1';
 
