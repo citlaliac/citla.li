@@ -11,7 +11,7 @@ const Spring2024Page = () => {
     'DSC_0347.jpg', 'DSC_0547.jpg', 'DSC_0462.jpg', 'DSC_0526.jpg',
     'DSC_0388.jpg', 'DSC_0285.jpg', 'DSC_0465.jpg', 'DSC_0516.jpg',
     'DSC_0303.jpg', 'DSC_0325.jpg', 'DSC_0285+2.jpg', 'DSC_0351.jpg',
-    'DSC_0387+2.jpg'
+    'DSC_0387.jpg'
   ];
 
   return (
