@@ -21,37 +21,37 @@ const SeePage = () => {
     {
       title: 'spring 2023',
       path: '/photos/spring-2023',
-      image: '/assets/photos/spring-2023/DSC_0535.jpg'
+      image: '/assets/photos/spring-2023/DSC_0311.jpg'
     },
     {
       title: 'spring 2024',
       path: '/photos/spring-2024',
-      image: '/assets/photos/spring-2024/DSC_0616.jpg'
+      image: '/assets/photos/spring-2024/DSC_0387.jpg'
     },
     {
       title: 'portrait',
       path: '/photos/portrait',
-      image: '/assets/photos/portrait/DSC_0194.jpg'
+      image: '/assets/photos/portrait/DSC_0544.jpg'
     },
     {
       title: 'moody',
       path: '/photos/moody',
-      image: '/assets/photos/moody/DSC_0378.jpg'
+      image: '/assets/photos/moody/DSC_0552.jpg'
     },
     {
       title: 'natural',
       path: '/photos/natural',
-      image: '/assets/photos/natural/DSC_0522.jpg'
+      image: '/assets/photos/natural/DSC_0646.jpg'
     },
     {
       title: 'urban',
       path: '/photos/urban',
-      image: '/assets/photos/urban/DSC_0609.jpg'
+      image: '/assets/photos/urban/DSC_0565.jpg'
     },
     {
       title: 'espionner',
       path: '/photos/espionner',
-      image: '/assets/photos/espionner/DSC_0621.jpg'
+      image: '/assets/photos/espionner/DSC_0462.jpg'
     }
   ];
 
