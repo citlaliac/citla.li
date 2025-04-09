@@ -1,4 +1,7 @@
 <?php
+// Set timezone to Eastern Time
+date_default_timezone_set('America/New_York');
+
 // Log that the script was accessed
 error_log("Track visitor script accessed at " . date('Y-m-d H:i:s'));
 
@@ -79,6 +82,9 @@ try {
     }
     $conn->set_charset($db_charset);
 
+    // Get current time in ET
+    $current_time = date('Y-m-d H:i:s');
+
     // Prepare and execute the insert statement
     $stmt = $conn->prepare("
         INSERT INTO visitors (
@@ -89,14 +95,14 @@ try {
             country, 
             city,
             created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, NOW())
+        ) VALUES (?, ?, ?, ?, ?, ?, ?)
     ");
 
     if (!$stmt) {
         throw new Exception('Failed to prepare statement: ' . $conn->error);
     }
 
-    $stmt->bind_param("ssssss", $ip_address, $user_agent, $referrer, $page_url, $country, $city);
+    $stmt->bind_param("sssssss", $ip_address, $user_agent, $referrer, $page_url, $country, $city, $current_time);
     
     if (!$stmt->execute()) {
         throw new Exception('Failed to insert data: ' . $stmt->error);
@@ -109,7 +115,8 @@ try {
     // Return success response
     echo json_encode([
         'success' => true,
-        'message' => 'Visitor tracked successfully'
+        'message' => 'Visitor tracked successfully',
+        'timestamp' => $current_time . ' ET'
     ]);
 
 } catch (Exception $e) {

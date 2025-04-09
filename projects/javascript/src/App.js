@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import './visitor-tracking';
+import { initializeTracking } from './visitor-tracking';
 
 // Main navigation pages
 import HomePage from './pages/MainPage';
@@ -42,6 +42,11 @@ import './styles.css';
 function App() {
   const isMobile = window.innerWidth <= 768;
 
+  useEffect(() => {
+    // Initialize visitor tracking
+    initializeTracking();
+  }, []);
+
   return (
     <Router>
       <div className="app">
@@ -68,7 +73,6 @@ function App() {
           <Route path="/hintgiver" element={<HintGiverPage />} />
 
           {/* Photo collection routes */}
-
           <Route path="/photos/summer-2023" element={<Summer2023Page />} />
           <Route path="/photos/spring-2023" element={<Spring2023Page />} />
           <Route path="/photos/spring-2024" element={<Spring2024Page />} />

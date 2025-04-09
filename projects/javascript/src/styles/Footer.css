@@ -72,6 +72,12 @@
     width: 105px;  /* 3 times wider than social icons */
     height: 35px;
   }
+
+  .last-updated {
+    color: #fff;
+    font-size: 0.6rem;
+    opacity: 0.7;
+  }
 }
 
 @media (max-width: 480px) {
@@ -87,5 +93,11 @@
   .footer-guestbook {
     width: 90px;  /* 3 times wider than social icons */
     height: 30px;
+  }
+
+  .last-updated {
+    color: #fff;
+    font-size: 0.6rem;
+    opacity: 0.7;
   }
 }

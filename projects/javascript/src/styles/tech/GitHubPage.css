@@ -223,7 +223,17 @@
 
   .github-page-content {
     padding: 1.5rem;
-    padding: 3rem 1.5rem 1.5rem;
+  }
+
+  .terminal-button {
+    width: 12px;
+    height: 12px;
+    border-width: 1.5px;
+  }
+
+  .terminal-controls {
+    gap: 0.5rem;
+    margin-left: 0.5rem;
   }
 
   .github-page-title {
@@ -266,6 +276,16 @@
 
   .github-page-content {
     padding: 1rem;
+  }
+
+  .terminal-button {
+    width: 10px;
+    height: 10px;
+    border-width: 1px;
+  }
+
+  .terminal-controls {
+    gap: 0.4rem;
   }
 
   .github-page-title {
