@@ -21,12 +21,12 @@ const SeePage = () => {
     {
       title: 'spring 2023',
       path: '/photos/spring-2023',
-      image: '/assets/photos/spring-2023/DSC_0311.jpg'
+      image: '/assets/photos/spring-2023/DSC_0353.jpg'
     },
     {
       title: 'spring 2024',
       path: '/photos/spring-2024',
-      image: '/assets/photos/spring-2024/DSC_0387.jpg'
+      image: '/assets/photos/spring-2024/DSC_0387+2.jpg'
     },
     {
       title: 'portrait',
