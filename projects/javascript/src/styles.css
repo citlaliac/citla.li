@@ -1572,4 +1572,172 @@ body {
 .aim-close:hover {
   background-color: #ff4444;
   color: white;
+}
+
+.title-decorative-gif {
+    display: inline-block;
+    width: 160px;
+    height: 160px;
+    margin: 0;
+    padding: 0;
+    vertical-align: middle;
+}
+
+.title-decorative-gif img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    margin: 0;
+    padding: 0;
+}
+
+/* Remove grid-related styles */
+.photo-grid {
+    display: none;
+}
+
+.main-page-title-section {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.title-image-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+    gap: 0;
+    width: 1760px; /* 1600px + 160px */
+}
+
+.main-page-title-image {
+    width: 1600px;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    display: inline-block;
+    object-fit: contain;
+}
+
+.title-decorative-gif {
+    display: inline-block;
+    width: 160px;
+    height: 160px;
+    margin: 0;
+    padding: 0;
+    vertical-align: middle;
+}
+
+.title-decorative-gif img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    margin: 0;
+    padding: 0;
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+    .title-image-container {
+        width: 340px; /* 180px + 160px */
+    }
+    
+    .main-page-title-image {
+        width: 180px;
+        height: auto;
+    }
+    
+    .title-decorative-gif {
+        width: 140px;
+        height: 140px;
+    }
+}
+
+/* Remove all title image and grid-related styles */
+.title-image-container,
+.main-page-title-image,
+.title-decorative-gif,
+.photo-grid,
+.main-page-title-section {
+    /* Remove all existing styles */
+}
+
+.title-images {
+    display: flex;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+}
+
+.title-images img {
+    display: block;
+    margin: 0;
+    padding: 0;
+}
+
+.title-images .hi-im {
+    max-width: 1600px;
+    width: 100%;
+    height: auto;
+}
+
+.title-images .guestbook {
+    width: auto;
+    height: 140px;
+    margin: .5rem;
+}
+
+@media (max-width: 768px) {
+  .main-page-title-section {
+    padding: 2rem;
+  }
+
+  .main-page-welcome-text {
+    font-size: 1rem;
+    margin: .5rem
+  }
+  
+    .title-images .hi-im {
+        max-width: 180px;
+    }
+    
+    .title-images .guestbook {
+        height: 50px;
+        margin: .5rem;
+    }
+}
+
+.footer-guestbook-icon {
+    width: 600px;
+    height: 600px;
+    margin: 0;
+    padding: 0;
+}
+
+.footer-guestbook-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+@media (max-width: 768px) {
+    .footer {
+        flex-direction: column;
+        align-items: center;
+        gap: 0;
+    }
+    
+    .social-icons {
+        margin-bottom: 0;
+    }
+    
+    .footer-guestbook-icon {
+        width: 400px;
+        height: 400px;
+        margin: 0;
+    }
 } 
