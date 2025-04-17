@@ -1740,4 +1740,200 @@ body {
         height: 400px;
         margin: 0;
     }
+}
+
+.visitor-map-container {
+    margin: 2rem 0;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+}
+
+.visitor-map-container h2 {
+    text-align: center;
+    margin-bottom: 1rem;
+    color: white;
+    font-size: 1.5rem;
+}
+
+.leaflet-container {
+    background: transparent !important;
+}
+
+.leaflet-popup-content {
+    color: #333;
+    font-size: 0.9rem;
+}
+
+.leaflet-popup-content strong {
+    color: #000080;
+}
+
+@media (max-width: 768px) {
+    .visitor-map-container {
+        margin: 1rem 0;
+        padding: 0.5rem;
+    }
+    
+    .visitor-map-container h2 {
+        font-size: 1.2rem;
+    }
+}
+
+.guestbook-form-container {
+    margin: 2rem 0;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+}
+
+.guestbook-form {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.guestbook-form .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.guestbook-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: white;
+    font-size: 1rem;
+}
+
+.guestbook-form input,
+.guestbook-form textarea {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 1rem;
+}
+
+.guestbook-form textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.guestbook-form .submit-button {
+    width: 100%;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: 5px;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.guestbook-form .submit-button:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.guestbook-form .submit-button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.success-message,
+.error-message {
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.success-message {
+    background: rgba(0, 255, 0, 0.1);
+    color: #00ff00;
+}
+
+.error-message {
+    background: rgba(255, 0, 0, 0.1);
+    color: #ff0000;
+}
+
+.guestbook-entries {
+    margin: 2rem 0;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+    background: rgba(59, 11, 204, 0.576);
+}
+
+.guestbook-entries h2 {
+    text-align: center;
+    color: white;
+    margin-bottom: 1.5rem;
+}
+
+.entries-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.entry {
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 5px;
+    border-left: 3px solid rgba(255, 255, 255, 0.2);
+}
+
+.entry-header {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    color: white;
+}
+
+.entry-name {
+    font-weight: bold;
+}
+
+.entry-location {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.entry-date {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+}
+
+.entry-message {
+    color: white;
+    line-height: 1.5;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.loading,
+.error,
+.no-entries {
+    text-align: center;
+    color: white;
+    padding: 2rem;
+    font-size: 1.1rem;
+}
+
+@media (max-width: 768px) {
+    .guestbook-form-container,
+    .guestbook-entries {
+        margin: 1rem 0;
+        padding: 0.5rem;
+    }
+    
+    .entry-header {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
 } 
