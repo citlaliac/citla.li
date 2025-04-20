@@ -248,40 +248,16 @@
     .guestbook-title::before {
         left: 10%;
     }
-
-    .guestbook-title::after {
-        right: 10%;
-    }
-
-    .guestbook-form {
-        padding: 15px;
-    }
-
-    .guestbook-input,
-    .guestbook-textarea {
-        font-size: 14px;
-        padding: 8px;
-    }
-
-    .guestbook-submit {
-        padding: 8px 15px;
-        font-size: 14px;
-    }
-
-    .guestbook-message {
-        padding: 12px;
-    }
-
     .guestbook-message-header {
         font-size: 0.8em;
     }
-
     .guestbook-message-content {
         font-size: 1em;
     }
-
-    .guestbook-visitor-count {
-        font-size: 1.2rem;
+    .guestbook-entries-section,
+    .visitor-map-section {
+        width: 100%;
+        margin-bottom: 2rem;
     }
 }
 

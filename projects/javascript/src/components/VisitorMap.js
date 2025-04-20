@@ -12,6 +12,15 @@ L.Icon.Default.mergeOptions({
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
+/**
+ * VisitorMap Component
+ * 
+ * Displays a map showing visitor locations using the Google Maps API.
+ * Fetches visitor location data from the server and plots markers on the map.
+ * Includes a loading state while data is being fetched.
+ * 
+ * @returns {JSX.Element} The rendered visitor map component
+ */
 const VisitorMap = () => {
     const [visitors, setVisitors] = useState([]);
     const [loading, setLoading] = useState(true);

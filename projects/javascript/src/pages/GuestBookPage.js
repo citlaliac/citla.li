@@ -5,11 +5,23 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import '../styles/GuestBook.css';
 
+/**
+ * GuestBookPage Component
+ * 
+ * Displays a guestbook with entries, visitor count, and a visitor map.
+ * Features pagination for guestbook entries and real-time visitor tracking.
+ * 
+ * @returns {JSX.Element} The rendered guestbook page
+ */
 const GuestBookPage = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalVisitors, setTotalVisitors] = useState(0);
 
+    /**
+     * Fetches the total number of visitors from the server
+     * Updates the totalVisitors state with the count
+     */
     useEffect(() => {
         const fetchTotalVisitors = async () => {
             try {
