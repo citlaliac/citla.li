@@ -31,13 +31,17 @@ const GuestBookPage = () => {
 
     return (
         <div className="guestbook-page">
+                            <div className="background-gif">
+                    <img src="/assets/gifs/space.gif" alt="Background" />
+                </div>
             <Header />
             <div className="guestbook-container">
-            <div className="background-gif">
-        <img src="/assets/gifs/space.gif" alt="Background" />
-      </div>
-                <h1 className="guestbook-title">✧･ﾟ: *✧･ﾟ:* guest book *:･ﾟ✧*:･ﾟ✧</h1>
-                
+
+                <h1 className="guestbook-title">･ﾟ:✧･ guest book *:･ﾟ✧</h1>
+                <div className="guestbook-visitor-count">
+                    <p>Thanks for visiting! ✧･ﾟ:</p>
+                    <p>*✧･ﾟ:* you're visitor #{totalVisitors}</p>
+                </div>
                 <div className="guestbook-content">
                     <div className="guestbook-entries-section">
                         <GuestBookEntries 
@@ -57,11 +61,10 @@ const GuestBookPage = () => {
                 </div>
 
                 <div className="guestbook-footer">
-                    <p>Thanks for visiting! ✧･ﾟ: *✧･ﾟ:*</p>
-                    <p className="page-counter">you're visitor #{totalVisitors}</p>
+                    <p>✧･ﾟ: *✧･ﾟ:*</p>
                 </div>
+                <Footer />
             </div>
-            <Footer />
         </div>
     );
 };

@@ -57,12 +57,12 @@ function GuestBookPage() {
   };
 
   return (
-    <div className="guestbook-page">
+    <div className="sign-guestbook-page">
       <div className="background-gif">
         <img src="/assets/imgs/guestbook.jpg" alt="Background" />
       </div>
       <Header />
-      <div className="guestbook-content">
+      <div className="sign-guestbook-content">
         <div className="guestbook-form-container">
           {/* <h2>Sign My Guestbook</h2> */}
           <form onSubmit={handleSubmit}>

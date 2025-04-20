@@ -1,12 +1,5 @@
 .guestbook-page {
-    min-height: 100vh;
-    /* background-color: #000;
-    background-image: 
-        /* url('/assets/gifs/star.gif'), */
-        /* linear-gradient(to bottom, #000000, #1a0033); */ 
-    color: #fff;
     font-family: 'Comic Sans MS', cursive, sans-serif;
-    padding: 20px;
 }
 
 .guestbook-container {
@@ -20,31 +13,32 @@
     position: relative;
     margin-top: 20px;
     margin-bottom: 20px;
+    transform: translateZ(0);
 }
 
-.guestbook-container::before {
-    content: "★";
-    position: absolute;
-    top: -15px;
-    left: -15px;
-    font-size: 24px;
-    color: #ff69b4;
-    text-shadow: 2px 2px 0 #000;
-}
-
+.guestbook-container::before,
 .guestbook-container::after {
     content: "★";
     position: absolute;
-    bottom: -15px;
-    right: -15px;
     font-size: 24px;
     color: #ff69b4;
     text-shadow: 2px 2px 0 #000;
+}
+
+.guestbook-container::before {
+    top: -15px;
+    left: -15px;
+}
+
+.guestbook-container::after {
+    bottom: -15px;
+    right: -15px;
 }
 
 .guestbook-title {
     text-align: center;
     color: #ff69b4;
+    padding-top: 2.5rem;
     margin-bottom: 30px;
     font-size: 2.5em;
     text-shadow: 2px 2px 0 #000, 4px 4px 0 #ff69b4;
@@ -83,36 +77,25 @@
     border-radius: 0;
 }
 
-.guestbook-input {
-    padding: 10px;
-    border: 2px solid #ff69b4;
-    border-radius: 0;
-    font-size: 16px;
-    font-family: 'Comic Sans MS', cursive, sans-serif;
-    background-color: #fff;
-    box-shadow: 3px 3px 0 #000;
-    transition: all 0.3s ease;
-}
-
-.guestbook-input:focus {
-    outline: none;
-    border-color: #ff1493;
-    box-shadow: 3px 3px 0 #ff1493;
-}
-
+.guestbook-input,
 .guestbook-textarea {
     padding: 10px;
     border: 2px solid #ff69b4;
     border-radius: 0;
     font-size: 16px;
-    min-height: 100px;
-    resize: vertical;
     font-family: 'Comic Sans MS', cursive, sans-serif;
     background-color: #fff;
     box-shadow: 3px 3px 0 #000;
     transition: all 0.3s ease;
+    width: 100%;
 }
 
+.guestbook-textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.guestbook-input:focus,
 .guestbook-textarea:focus {
     outline: none;
     border-color: #ff1493;
@@ -133,6 +116,7 @@
     letter-spacing: 1px;
     box-shadow: 3px 3px 0 #000;
     transition: all 0.3s ease;
+    width: 100%;
 }
 
 .guestbook-submit:hover {
@@ -178,12 +162,11 @@
     font-size: 1.1em;
 }
 
-.guestbook-message-footer {
+.guestbook-visitor-count {
+    color: #6f40ff;
+    font-size: 1.5rem;
     margin-top: 10px;
-    font-size: 0.8em;
-    color: #999;
-    text-align: right;
-    font-style: italic;
+    text-align: center;
 }
 
 .guestbook-error {
@@ -224,6 +207,7 @@
     justify-content: center;
     gap: 10px;
     margin-top: 20px;
+    flex-wrap: wrap;
 }
 
 .guestbook-pagination-button {
@@ -246,86 +230,111 @@
     color: #000;
 }
 
-/* Responsive styles */
-@media (max-width: 1200px) {
-    .guestbook-container {
-        max-width: 95%;
-        padding: 25px;
-    }
-}
-
+/* Mobile Optimizations */
 @media (max-width: 768px) {
-    .guestbook-page {
-        padding: 10px;
-    }
 
     .guestbook-container {
-        padding: 20px;
-        margin: 10px 0;
+        padding: 15px;
+        margin-top: 10px;
+        margin-bottom: 10px;
     }
 
     .guestbook-title {
-        font-size: 2em;
-    }
-
-    .guestbook-content {
-        gap: 30px;
-    }
-
-    .guestbook-entries-section,
-    .visitor-map-container {
-        padding: 20px;
-    }
-
-    .map-title {
         font-size: 1.8em;
+        padding-top: 6rem;
+        margin-bottom: 20px;
     }
 
-    .visitor-map-container {
-        min-height: 400px;
-        padding: 20px;
+    .guestbook-title::before {
+        left: 10%;
     }
 
-    .guestbook-entry-header {
-        flex-direction: column;
-        gap: 5px;
+    .guestbook-title::after {
+        right: 10%;
     }
 
-    .guestbook-pagination {
-        flex-wrap: wrap;
+    .guestbook-form {
+        padding: 15px;
     }
 
-    .guestbook-pagination-button {
-        padding: 8px 12px;
-        font-size: 1.1em;
+    .guestbook-input,
+    .guestbook-textarea {
+        font-size: 14px;
+        padding: 8px;
+    }
+
+    .guestbook-submit {
+        padding: 8px 15px;
+        font-size: 14px;
+    }
+
+    .guestbook-message {
+        padding: 12px;
+    }
+
+    .guestbook-message-header {
+        font-size: 0.8em;
+    }
+
+    .guestbook-message-content {
+        font-size: 1em;
+    }
+
+    .guestbook-visitor-count {
+        font-size: 1.2rem;
     }
 }
 
 @media (max-width: 480px) {
     .guestbook-container {
-        padding: 15px;
+        padding: 10px;
     }
 
     .guestbook-title {
-        font-size: 1.8em;
-    }
-
-    .guestbook-entries-section,
-    .visitor-map-container {
-        padding: 15px;
-    }
-
-    .map-title {
         font-size: 1.5em;
+        padding-top: 6rem;
     }
 
-    .visitor-map-container {
-        min-height: 300px;
-        padding: 15px;
+    .guestbook-title::before,
+    .guestbook-title::after {
+        font-size: 1.2em;
     }
 
-    .guestbook-footer p {
-        font-size: 1em;
+    .guestbook-form {
+        padding: 10px;
+    }
+
+    .guestbook-input,
+    .guestbook-textarea {
+        font-size: 13px;
+        padding: 6px;
+    }
+
+    .guestbook-submit {
+        padding: 6px 12px;
+        font-size: 13px;
+    }
+
+    .guestbook-message {
+        padding: 10px;
+    }
+
+    .guestbook-message-header {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .guestbook-message-content {
+        font-size: 0.9em;
+    }
+
+    .guestbook-pagination {
+        gap: 5px;
+    }
+
+    .guestbook-pagination-button {
+        padding: 4px 8px;
+        font-size: 0.9em;
     }
 }
 
@@ -353,10 +362,10 @@
 }
 
 .guestbook-entries-section {
-    background-color: rgba(255, 255, 255, 0.1);
+    /* background-color: rgba(255, 255, 255, 0.1);
     padding: 30px;
     border: 2px dashed #ff69b4;
-    border-radius: 0;
+    border-radius: 0; */
 }
 
 .visitor-map-section {
@@ -368,17 +377,18 @@
     color: #ff69b4;
     text-align: center;
     margin-bottom: 20px;
-    font-size: 2.2em;
+    font-size: 1.5rem;
     text-shadow: 2px 2px 0 #000;
+    font-family: 'Comic Sans MS', cursive, sans-serif;
 }
 
 .visitor-map-container {
-    background-color: rgba(255, 255, 255, 0.1);
+    /* background-color: rgba(255, 255, 255, 0.1);
     padding: 30px;
     border: 2px dashed #ff69b4;
     border-radius: 0;
     box-shadow: 3px 3px 0 #ff69b4;
-    min-height: 500px;
+    min-height: 500px; */
     width: 100%;
 }
 

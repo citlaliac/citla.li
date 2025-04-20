@@ -1,4 +1,4 @@
-.guestbook-page {
+.sign-guestbook-page {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -21,7 +21,7 @@
   object-fit: cover;
 }
 
-.guestbook-content {
+.sign-guestbook-content {
   flex: 1;
   padding: 6rem 2rem 2rem;
   display: flex;
@@ -103,7 +103,7 @@ button:hover {
 }
 
 @media (max-width: 768px) {
-  .guestbook-content {
+  .sign-guestbook-content {
     padding: 5rem 1rem 1rem;
   }
 
@@ -113,7 +113,7 @@ button:hover {
 }
 
 @media (max-width: 480px) {
-  .guestbook-content {
+  .sign-guestbook-content {
     padding: 4rem 1rem 1rem;
   }
 
