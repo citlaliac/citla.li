@@ -5,18 +5,26 @@ import '../styles/GuestBookPopup.css';
 const GuestBookPopup = () => {
     const [showPopup, setShowPopup] = useState(false);
     const [actionGif, setActionGif] = useState(null);
+    const [dontShowAgain, setDontShowAgain] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            setShowPopup(true);
-        }, 10000);
-
-        return () => clearTimeout(timer);
+        // Check if user has chosen to not show the popup
+        const hasSeenPopup = localStorage.getItem('hasSeenGuestbookPopup');
+        
+        if (!hasSeenPopup) {
+            const timer = setTimeout(() => {
+                setShowPopup(true);
+            }, 10000);
+            return () => clearTimeout(timer);
+        }
     }, []);
 
     const handleClose = () => {
         setShowPopup(false);
+        if (dontShowAgain) {
+            localStorage.setItem('hasSeenGuestbookPopup', 'true');
+        }
     };
 
     const handleMinimize = () => {
@@ -34,7 +42,14 @@ const GuestBookPopup = () => {
     };
 
     const handleSign = () => {
+        if (dontShowAgain) {
+            localStorage.setItem('hasSeenGuestbookPopup', 'true');
+        }
         navigate('/signGuestbook');
+    };
+
+    const handleCheckboxChange = (e) => {
+        setDontShowAgain(e.target.checked);
     };
 
     if (!showPopup) return null;
@@ -61,8 +76,12 @@ const GuestBookPopup = () => {
                                 <p>Wait Traveler, Sign the Guestbook!</p>
                                 <p>Leave your mark in our digital realm.</p>
                                 <label className="guestbookpopup-checkbox">
-                                    <input type="checkbox" />
-                                    <span>You can click this check box if you want</span>
+                                    <input 
+                                        type="checkbox" 
+                                        checked={dontShowAgain}
+                                        onChange={handleCheckboxChange}
+                                    />
+                                    <span>Don't show this message again</span>
                                 </label>
                             </div>
                         </div>
