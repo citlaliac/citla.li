@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import GuestBookPopup from '../components/GuestBookPopup';
 import '../styles/MainPage.css';
 
 function MainPage() {
@@ -42,6 +43,7 @@ function MainPage() {
 
   return (
     <div className="main-page-container" style={backgroundStyle}>
+      <GuestBookPopup />
       <Header />
       <main className="main-page-content">
         <div className="main-page-title-section">

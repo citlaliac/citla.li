@@ -1,0 +1,255 @@
+.guestbookpopup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: guestbookpopup-fadeIn 0.2s ease-out;
+}
+
+.guestbookpopup-window {
+    background: #F1F1F1;
+    border: 1px solid #0055E5;
+    width: 436px;
+    box-shadow: 2px 2px 16px rgba(0, 0, 0, 0.1);
+    animation: guestbookpopup-windowAppear 0.2s ease-out;
+    border-radius: 5px;
+}
+
+.guestbookpopup-titlebar {
+    background: linear-gradient(180deg, #0777e0e4 3%, #01429c 40%, #0f69e9 40%, #054181 5%);
+    height: 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 3px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+
+.guestbookpopup-titlebar-left {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding-left: 3px;
+}
+
+.guestbookpopup-windows-icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
+}
+
+.guestbookpopup-title {
+    color: white;
+    font-family: 'Tahoma', sans-serif;
+    font-size: 13px;
+    font-weight: bold;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.7);
+}
+
+.guestbookpopup-titlebar-buttons {
+    display: flex;
+    height: 100%;
+    margin-left: auto;
+}
+
+.guestbookpopup-titlebar-button {
+    width: 21px;
+    height: 21px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: white;
+    font-family: 'Tahoma', sans-serif;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 1px;
+    cursor: pointer;
+    position: relative;
+    padding: 0;
+}
+
+.guestbookpopup-titlebar-button { 
+    background: linear-gradient(180deg, #66A6E7 3%, #1C4FB2 40%, #2B64DC 40%, #1C4FB2 93%);
+    border: 1px solid #bbbbbb;
+}
+
+.guestbookpopup-titlebar-button.popup-close { 
+    background: linear-gradient(180deg, #F5A3A3 3%, #B02222 40%, #E71616 40%, #B02222 93%);
+    border: 1px solid #7D1B1B;
+}
+
+
+.guestbookpopup-titlebar-button.popup-minimize:hover {
+    background-color: #ffbd2e;
+    border: 1px solid #bbbbbb;
+}
+
+.guestbookpopup-titlebar-button.popup-maximize:hover {
+    background-color: #27c93f;;
+    border: 1px solid #bbbbbb;
+}
+
+.guestbookpopup-titlebar-button.popup-close:hover {
+    background: linear-gradient(180deg, #c57b7b 3%, #8d1616 40%, #bb0a0a 40%, #821111 93%);
+    border: 1px solid #450e0e;
+}
+
+
+.guestbookpopup-titlebar-button.popup-minimize::before {
+    content: '';
+    width: 10px;
+    height: 2px;
+    background: white;
+    position: absolute;
+    bottom: 5px;
+}
+
+.guestbookpopup-titlebar-button.popup-maximize::before {
+    content: '';
+    width: 9px;
+    height: 9px;
+    border: 1px solid white;
+    position: absolute;
+}
+
+.guestbookpopup-titlebar-button.close {
+    font-size: 14px;
+    margin-left: 2px;
+}
+
+.guestbookpopup-content {
+    padding: 13px 11px 11px;
+    font-family: 'Tahoma', sans-serif;
+    font-size: 11px;
+    color: #000000;
+    background: #F1F1F1;
+}
+
+.guestbookpopup-message {
+    display: flex;
+    align-items: flex-start;
+    gap: 13px;
+    margin-bottom: 11px;
+}
+
+.guestbookpopup-pen-icon {
+    width: 5rem;
+    height: 5rem;
+    margin-top: 5px;
+}
+
+.guestbookpopup-text {
+    flex: 1;
+    font-family: 'Tahoma', sans-serif;
+    color: #000000;
+}
+
+.guestbookpopup-text p {
+    line-height: 2rem;
+    font-family: 'Tahoma', sans-serif;
+    color: #000000;
+}
+
+.guestbookpopup-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    user-select: none;
+    font-family: 'Tahoma', sans-serif;
+    color: #000000;
+}
+.guestbookpopup-checkbox span {
+    font-family: 'Tahoma', sans-serif;
+    color: #000000;
+}
+
+.guestbookpopup-checkbox input {
+    margin: 0;
+    width: 13px;
+    height: 13px;
+}
+
+.guestbookpopup-buttons {
+    display: flex;
+    justify-content: center;
+    padding: .5rem;
+}
+
+.guestbookpopup-button {
+    width: fit-content;
+    height: 23px;
+    padding: 0 12px;
+    background: linear-gradient(180deg, #FFFFFF 0%, #ECE9D8 100%);
+    border: 1px solid #ffffff;
+    color: #000000;
+    font-family: 'Tahoma', sans-serif;
+    font-size: 11px;
+    cursor: pointer;
+    box-shadow: 
+        inset -1px -1px 1px rgba(0,0,0,0.2),
+        inset 1px 1px 1px rgba(255,255,255,1);
+}
+
+.guestbookpopup-button:hover {
+    background: linear-gradient(180deg, #63606a 0%, #EAE8D8 100%);
+}
+
+.guestbookpopup-button:active {
+    background: linear-gradient(180deg, #E1DED2 0%, #FFFFFF 100%);
+    box-shadow: 
+        inset 1px 1px 1px rgba(0,0,0,0.2),
+        inset -1px -1px 1px rgba(255,255,255,0.8);
+}
+
+.guestbookpopup-action-gif {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1100;
+    max-width: 300px;
+    max-height: 300px;
+    display: none;
+}
+
+.guestbookpopup-action-gif.show {
+    display: block;
+    animation: showGif 0.3s ease-in;
+}
+
+@keyframes guestbookpopup-fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes guestbookpopup-windowAppear {
+    0% {
+        transform: translateY(-10px);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes showGif {
+    from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+    to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+@media (max-width: 768px) {
+    .guestbookpopup-window {
+        width: 90%;
+        max-width: 436px;
+    }
+} 

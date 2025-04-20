@@ -49,7 +49,6 @@ const GuestBookEntries = ({ currentPage, onPageChange, totalPages, setTotalPages
 
     return (
         <div className="guestbook-entries">
-            <h2 className="guestbook-entries-title">✧･ﾟ: * recent signatures ✧･ﾟ:*</h2>
             <div className="entries-container">
                 {currentEntries.map((entry, index) => (
                     <div key={index} className="guestbook-entry">

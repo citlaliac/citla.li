@@ -49,11 +49,10 @@ const GuestBookPage = () => {
             <Header />
             <div className="guestbook-container">
 
-                <h1 className="guestbook-title">･ﾟ:✧･ guest book *:･ﾟ✧</h1>
+                <h1 className="guestbook-title">~･ﾟ:✧･ guest book *:･ﾟ✧~</h1>
                 <div className="guestbook-visitor-count">
-                    <p>*✧･ﾟ:*Thanks for visiting! ✧･ﾟ:</p>
                     <p>*✧･ﾟ:* you're visitor #{totalVisitors} this month *✧･ﾟ:*</p>
-                    <p style={{ fontSize: '1rem' }}>Need to sign still? Click <a href="https://www.citla.li/signGuestbook">here</a></p>
+                    <p style={{ fontSize: '1rem' }}>need to sign still? click <a href="https://www.citla.li/signGuestbook">here</a></p>
                 </div>
                 <div className="guestbook-content">
                     <div className="guestbook-entries-section">
@@ -74,7 +73,7 @@ const GuestBookPage = () => {
                 </div>
 
                 <div className="guestbook-footer">
-                    <p>✧･ﾟ: *✧･ﾟ:*</p>
+                    <p>✧･ﾟ: **✧･ﾟ:*thanks for visiting!✧･ﾟ:✧･ﾟ:</p>
                 </div>
                 <Footer />
             </div>
