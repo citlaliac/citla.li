@@ -76,13 +76,6 @@ const VisitorMap = () => {
                     </Marker>
                 ))}
             </MapContainer>
-            <div className="visitor-map-legend">
-                <div className="visitor-map-legend-title">Visitors</div>
-                <div className="visitor-map-legend-item">
-                    <div className="visitor-map-legend-color" style={{ backgroundColor: '#007bff' }}></div>
-                    <span className="visitor-map-legend-label">Visitor Location</span>
-                </div>
-            </div>
         </div>
     );
 };

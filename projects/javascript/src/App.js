@@ -71,7 +71,7 @@ function App() {
           <Route path="/tech/resume-success" element={<ResumeSuccessPage />} />
           <Route path="/tech/github" element={<GitHubPage />} />
           <Route path="/tech/ai" element={<AIPage />} />
-          <Route path="/hint-giver" element={<HintGiverPage />} />
+          <Route path="/hintgiver" element={<HintGiverPage />} />
 
           {/* Photo collection routes */}
           <Route path="/photos/summer-2023" element={<Summer2023Page />} />
@@ -86,7 +86,6 @@ function App() {
           {/* Guestbook pages */}
           <Route path="/signGuestbook" element={<SignGuestBookPage />} />
           <Route path="/guestbook" element={<GuestbookPage />} />
-          {/* <Route path="/guestbook/entries" element={<GuestbookDisplay />} /> */}
 
           {/* Other pages */}
           <Route path="/birthday" element={<BirthdayPage />} />

@@ -105,6 +105,8 @@ function GuestBookPage() {
             )}
           </form>
         </div>
+        <div>
+        </div>
       </div>
       <Footer />
     </div>

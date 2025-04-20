@@ -31,16 +31,17 @@ const GuestBookPage = () => {
 
     return (
         <div className="guestbook-page">
-                            <div className="background-gif">
-                    <img src="/assets/gifs/space.gif" alt="Background" />
-                </div>
+            <div className="background-gif">
+                <img src="/assets/gifs/space.gif" alt="Background" />
+            </div>
             <Header />
             <div className="guestbook-container">
 
                 <h1 className="guestbook-title">･ﾟ:✧･ guest book *:･ﾟ✧</h1>
                 <div className="guestbook-visitor-count">
-                    <p>Thanks for visiting! ✧･ﾟ:</p>
-                    <p>*✧･ﾟ:* you're visitor #{totalVisitors}</p>
+                    <p>*✧･ﾟ:*Thanks for visiting! ✧･ﾟ:</p>
+                    <p>*✧･ﾟ:* you're visitor #{totalVisitors} this month *✧･ﾟ:*</p>
+                    <p style={{ fontSize: '1rem' }}>Need to sign still? Click <a href="https://www.citla.li/signGuestbook">here</a></p>
                 </div>
                 <div className="guestbook-content">
                     <div className="guestbook-entries-section">

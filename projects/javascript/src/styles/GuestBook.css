@@ -368,6 +368,18 @@
     border-radius: 0; */
 }
 
+.guestbook-entries-title h2 {
+    display: inline-block;
+    font-family: Comic Sans MS, cursive, sans-serif;
+    font-size: 1.5em;
+    padding-top: 2.5rem;
+    position: relative;
+    text-align: center;
+    text-shadow: 2px 2px 0 #000, 4px 4px 0 #ff69b4;
+    width: 100%
+
+}
+
 .visitor-map-section {
     margin-top: 40px;
     width: 100%;
