@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import '../styles/SignGuestBook.css';
@@ -103,6 +103,9 @@ function GuestBookPage() {
                 {status.message}
               </div>
             )}
+            <p className="view-guestbook-link">
+              Just take me to see the <Link to="/guestbook">Guestbook</Link>
+            </p>
           </form>
         </div>
         <div>

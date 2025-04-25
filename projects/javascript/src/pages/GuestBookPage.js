@@ -49,7 +49,7 @@ const GuestBookPage = () => {
             <Header />
             <div className="guestbook-container">
 
-                <h1 className="guestbook-title">~･ﾟ:✧･ guest book *:･ﾟ✧~</h1>
+                <h1 className="guestbook-title">･ﾟ:✧･guest book *･ﾟ✧</h1>
                 <div className="guestbook-visitor-count">
                     <p>*✧･ﾟ:* you're visitor #{totalVisitors} this month *✧･ﾟ:*</p>
                     <p style={{ fontSize: '1rem' }}>need to sign still? click <a href="https://www.citla.li/signGuestbook">here</a></p>

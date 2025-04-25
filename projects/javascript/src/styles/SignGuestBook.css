@@ -124,4 +124,21 @@ button:hover {
   .guestbook-form-container h2 {
     font-size: 1.5rem;
   }
+}
+
+.view-guestbook-link {
+    text-align: center;
+    margin-top: 1rem;
+    font-family: 'Tahoma', sans-serif;
+    color: #000;
+}
+
+.view-guestbook-link a {
+    color: #0066cc;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.view-guestbook-link a:hover {
+    text-decoration: underline;
 } 

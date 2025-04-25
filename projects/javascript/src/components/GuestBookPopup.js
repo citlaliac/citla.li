@@ -6,24 +6,37 @@ const GuestBookPopup = () => {
     const [showPopup, setShowPopup] = useState(false);
     const [actionGif, setActionGif] = useState(null);
     const [dontShowAgain, setDontShowAgain] = useState(false);
+    const [hasVisited, setHasVisited] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Check if user has chosen to not show the popup
-        const hasSeenPopup = localStorage.getItem('hasSeenGuestbookPopup');
+        // Check both conditions when component mounts
+        const visitedBefore = localStorage.getItem('hasVisitedBefore') === 'true';
+        const dontShow = localStorage.getItem('dontShowAgain') === 'true';
         
-        if (!hasSeenPopup) {
+        setHasVisited(visitedBefore);
+        setDontShowAgain(dontShow);
+
+        // If neither flag is set, this is first visit
+        if (!visitedBefore && !dontShow) {
+            // Mark as visited
+            localStorage.setItem('hasVisitedBefore', 'true');
+            setHasVisited(true);
+            
+            // Show popup after delay
             const timer = setTimeout(() => {
                 setShowPopup(true);
             }, 10000);
+
             return () => clearTimeout(timer);
         }
     }, []);
 
     const handleClose = () => {
         setShowPopup(false);
+        // If "don't show again" is checked, persist that preference
         if (dontShowAgain) {
-            localStorage.setItem('hasSeenGuestbookPopup', 'true');
+            localStorage.setItem('dontShowAgain', 'true');
         }
     };
 
@@ -42,8 +55,9 @@ const GuestBookPopup = () => {
     };
 
     const handleSign = () => {
+        // If "don't show again" is checked, persist that preference
         if (dontShowAgain) {
-            localStorage.setItem('hasSeenGuestbookPopup', 'true');
+            localStorage.setItem('dontShowAgain', 'true');
         }
         navigate('/signGuestbook');
     };
@@ -52,7 +66,8 @@ const GuestBookPopup = () => {
         setDontShowAgain(e.target.checked);
     };
 
-    if (!showPopup) return null;
+    // Don't render anything if user has visited before or popup shouldn't be shown
+    if (!showPopup || hasVisited) return null;
 
     return (
         <>
