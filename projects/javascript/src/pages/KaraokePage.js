@@ -91,44 +91,49 @@ function KaraokePage() {
                     {loading ? (
                         <div className="karaoke-loading">Loading songs...</div>
                     ) : (
-                        <div className="karaoke-table-container">
-                            <table className="karaoke-table">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Song Title</th>
-                                        <th>Artist</th>
-                                        <th>Last Played</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {songs.map(song => {
-                                        const lastPlayed = song.last_played ? new Date(song.last_played) : null;
-                                        const isRecentlyPlayed = lastPlayed && 
-                                            (Date.now() - lastPlayed.getTime()) <= (24 * 60 * 60 * 1000);
-                                        
-                                        return (
-                                            <tr key={song.id}>
-                                                <td>{song.id}</td>
-                                                <td style={{ textDecoration: isRecentlyPlayed ? 'line-through' : 'none' }}>
-                                                    {song.song_title}
-                                                </td>
-                                                <td style={{ textDecoration: isRecentlyPlayed ? 'line-through' : 'none' }}>
-                                                    {song.artist}
-                                                </td>
-                                                <td>
-                                                    {lastPlayed ? lastPlayed.toLocaleString('en-US', {
-                                                        hour: '2-digit',
-                                                        minute: '2-digit',
-                                                        hour12: true
-                                                    }) : 'Never'}
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
+                        <>
+                            <div className="karaoke-table-container">
+                                <table className="karaoke-table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Song Title</th>
+                                            <th>Artist</th>
+                                            <th>Last Played</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {songs.map(song => {
+                                            const lastPlayed = song.last_played ? new Date(song.last_played) : null;
+                                            const isRecentlyPlayed = lastPlayed && 
+                                                (Date.now() - lastPlayed.getTime()) <= (24 * 60 * 60 * 1000);
+                                            
+                                            return (
+                                                <tr key={song.id}>
+                                                    <td>{song.id}</td>
+                                                    <td style={{ textDecoration: isRecentlyPlayed ? 'line-through' : 'none' }}>
+                                                        {song.song_title}
+                                                    </td>
+                                                    <td style={{ textDecoration: isRecentlyPlayed ? 'line-through' : 'none' }}>
+                                                        {song.artist}
+                                                    </td>
+                                                    <td>
+                                                        {lastPlayed ? lastPlayed.toLocaleString('en-US', {
+                                                            hour: '2-digit',
+                                                            minute: '2-digit',
+                                                            hour12: true
+                                                        }) : 'Never'}
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div className="karaoke-note">
+                                <p>Tip: If you accidentally mark a song as played, you can reset it by entering the negative ID (e.g., "-1" for song ID 1).</p>
+                            </div>
+                        </>
                     )}
                 </div>
             </div>

@@ -106,17 +106,25 @@ try {
             exit;
         }
 
-        // Update last_played timestamp - NOW() will now use Eastern Time
-        $query = "UPDATE karaoke_songs SET last_played = NOW() WHERE id = ?";
-        logMessage("Executing update query: " . $query . " with ID: " . $data['songId']);
-        $stmt = $pdo->prepare($query);
-        $result = $stmt->execute([$data['songId']]);
+        // Check if songId is negative (reset last_played)
+        if ($data['songId'] < 0) {
+            $query = "UPDATE karaoke_songs SET last_played = NULL WHERE id = ?";
+            logMessage("Resetting last_played for song ID: " . abs($data['songId']));
+            $stmt = $pdo->prepare($query);
+            $result = $stmt->execute([abs($data['songId'])]);
+        } else {
+            // Update last_played timestamp - NOW() will now use Eastern Time
+            $query = "UPDATE karaoke_songs SET last_played = NOW() WHERE id = ?";
+            logMessage("Setting last_played to current time for song ID: " . $data['songId']);
+            $stmt = $pdo->prepare($query);
+            $result = $stmt->execute([$data['songId']]);
+        }
 
         if ($result && $stmt->rowCount() > 0) {
-            logMessage("Successfully updated song ID: " . $data['songId']);
+            logMessage("Successfully updated song ID: " . abs($data['songId']));
             echo json_encode(['success' => true]);
         } else {
-            logMessage("Error: Song ID not found: " . $data['songId']);
+            logMessage("Error: Song ID not found: " . abs($data['songId']));
             http_response_code(404);
             echo json_encode(['success' => false, 'error' => 'Song not found']);
         }
