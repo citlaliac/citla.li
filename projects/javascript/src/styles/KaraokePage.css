@@ -12,6 +12,7 @@
     display: flex;
     justify-content: center;
     background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    min-height: 100vh;
 }
 
 .karaoke-form-container {
@@ -22,6 +23,7 @@
     width: 100%;
     max-width: 1000px;
     border: 1px solid #3a3a3a;
+    margin-bottom: 1rem;
 }
 
 .karaoke-title {
@@ -102,7 +104,6 @@
     border-radius: 8px;
     background: #222;
     border: 1px solid #333;
-    max-height: 60vh;
 }
 
 .karaoke-table {
@@ -188,6 +189,7 @@
 
     .karaoke-form-container {
         padding: 0.5rem;
+        margin-bottom: 0.5rem;
     }
 
     .karaoke-form-group {
