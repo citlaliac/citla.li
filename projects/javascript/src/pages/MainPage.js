@@ -48,11 +48,13 @@ function MainPage() {
       <main className="main-page-content">
         <div className="main-page-title-section">
           <div className="title-images">
-            <img 
-              src="/assets/imgs/hiImCitlali.png" 
-              alt="hi I'm citlali" 
-              className="hi-im"
-            />
+            <Link to="/karaoke">
+              <img 
+                src="/assets/imgs/hiImCitlali.png" 
+                alt="hi I'm citlali" 
+                className="hi-im"
+              />
+            </Link>
             <Link to="/signGuestbook">
               <img 
                 src="/assets/gifs/og-image.gif" 

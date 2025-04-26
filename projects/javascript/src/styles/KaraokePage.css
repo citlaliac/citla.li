@@ -1,0 +1,200 @@
+.karaoke-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #1a1a1a;
+    color: #fff;
+}
+
+.karaoke-content {
+    flex: 1;
+    padding: 4rem 1rem 1rem;
+    display: flex;
+    justify-content: center;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+}
+
+.karaoke-form-container {
+    background: #2a2a2a;
+    padding: 1rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    width: 100%;
+    max-width: 1000px;
+    border: 1px solid #3a3a3a;
+}
+
+.karaoke-title {
+    text-align: center;
+    margin-bottom: 1rem;
+    color: #fff;
+    font-size: 1.8rem;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5),
+                 0 0 20px rgba(255, 255, 255, 0.3),
+                 0 0 30px rgba(255, 255, 255, 0.2);
+    font-weight: bold;
+}
+
+.karaoke-form {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background: #333;
+    border-radius: 8px;
+    border: 1px solid #444;
+}
+
+.karaoke-form-group {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    align-items: center;
+}
+
+.karaoke-input {
+    flex: 1;
+    padding: 0.5rem 1rem;
+    background: #222;
+    border: 1px solid #444;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    color: #fff;
+    transition: all 0.3s ease;
+}
+
+.karaoke-input:focus {
+    outline: none;
+    border-color: #666;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+}
+
+.karaoke-input::placeholder {
+    color: #666;
+}
+
+.karaoke-form button[type="submit"].karaoke-submit-button {
+    padding: 0.5rem 1rem;
+    background: linear-gradient(45deg, #2e7d32a1 0%, #4caf50 100%);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    min-width: 120px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.karaoke-form button[type="submit"].karaoke-submit-button:hover {
+    background: linear-gradient(45deg, #4caf50 0%, #2e7d32 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+}
+
+.karaoke-form button[type="submit"].karaoke-submit-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.karaoke-table-container {
+    overflow-x: auto;
+    border-radius: 8px;
+    background: #222;
+    border: 1px solid #333;
+    max-height: 60vh;
+}
+
+.karaoke-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.5rem;
+}
+
+.karaoke-table th,
+.karaoke-table td {
+    padding: 0.5rem;
+    text-align: left;
+    border-bottom: 1px solid #333;
+    color: #7e36d6;
+    font-size: 0.9rem;
+}
+
+.karaoke-table th {
+    background: #333;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.karaoke-table tr:hover {
+    background: #2a2a2a;
+}
+
+.karaoke-table-row-played td {
+    color: #9638d5;
+}
+
+.karaoke-error {
+    color: #ff416c;
+    padding: 0.5rem;
+    margin-top: 0.5rem;
+    background: rgba(255, 65, 108, 0.1);
+    border-radius: 4px;
+    border: 1px solid rgba(255, 65, 108, 0.3);
+}
+
+.karaoke-success {
+    color: #4caf50;
+    padding: 0.5rem;
+    margin-top: 0.5rem;
+    background: rgba(76, 175, 80, 0.1);
+    border-radius: 4px;
+    border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.karaoke-loading {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+    font-size: 1.2rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+@media (max-width: 768px) {
+    .karaoke-content {
+        padding: 3rem 0.5rem 0.5rem;
+        margin-top: 3.5rem;
+    }
+
+    .karaoke-form-container {
+        padding: 0.5rem;
+    }
+
+    .karaoke-form-group {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .karaoke-table th,
+    .karaoke-table td {
+        padding: 0.4rem;
+        font-size: 0.8rem;
+    }
+
+    .karaoke-title {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+        padding: 1.5rem;
+    }
+
+    .karaoke-submit-button {
+        width: 100%;
+        margin-top: 0.5rem;
+    }
+} 
