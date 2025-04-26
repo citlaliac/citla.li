@@ -17,16 +17,29 @@ function logMessage($message) {
     file_put_contents($logFile, $logEntry, FILE_APPEND);
 }
 
-logMessage("Request received: " . $_SERVER['REQUEST_METHOD']);
+logMessage("Script started");
 
 // Load environment variables
 $envFile = __DIR__ . '/.env';
-$envVars = parse_ini_file($envFile);
-
-if (!$envVars) {
-    logMessage("Error: Failed to load .env file");
+if (!file_exists($envFile)) {
+    logMessage("Error: .env file not found at " . $envFile);
     http_response_code(500);
-    echo json_encode(['success' => false, 'error' => 'Configuration error']);
+    echo json_encode(['success' => false, 'error' => 'Configuration error: .env file not found']);
+    exit;
+}
+
+$envVars = parse_ini_file($envFile);
+if (!$envVars) {
+    logMessage("Error: Failed to parse .env file");
+    http_response_code(500);
+    echo json_encode(['success' => false, 'error' => 'Configuration error: Failed to parse .env']);
+    exit;
+}
+
+if (!isset($envVars['MYSQL_PASSWORD'])) {
+    logMessage("Error: MYSQL_PASSWORD not set in .env");
+    http_response_code(500);
+    echo json_encode(['success' => false, 'error' => 'Configuration error: MYSQL_PASSWORD not set']);
     exit;
 }
 
@@ -37,20 +50,23 @@ $db_pass = $envVars['MYSQL_PASSWORD'];
 $db_name = 'citlwqfk_submissions';
 $db_charset = 'latin1';
 
+logMessage("Attempting database connection with host: $db_host, user: $db_user, db: $db_name");
+
 try {
     // Create database connection
     $dsn = "mysql:host=$db_host;dbname=$db_name;charset=$db_charset";
     $pdo = new PDO($dsn, $db_user, $db_pass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
-    // Set the timezone to Eastern Time
-    $pdo->exec("SET time_zone = 'America/New_York'");
+    // Set the timezone offset for Eastern Time (UTC-4)
+    $pdo->exec("SET time_zone = '-04:00'");
     
-    logMessage("Database connection established");
+    logMessage("Database connection established successfully");
 
     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+        logMessage("Processing GET request");
         // Fetch all songs with their played status
-        $query = "SELECT *, 
+        $query = "SELECT id, song_title, artist, last_played,
                   CASE 
                     WHEN last_played IS NOT NULL 
                     AND last_played >= DATE_SUB(NOW(), INTERVAL 24 HOUR) 
@@ -60,6 +76,7 @@ try {
                   FROM karaoke_songs 
                   ORDER BY id ASC";
         
+        logMessage("Executing query: " . $query);
         $stmt = $pdo->prepare($query);
         $stmt->execute();
         $songs = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -77,6 +94,7 @@ try {
         echo json_encode(['success' => true, 'songs' => $songs]);
 
     } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        logMessage("Processing POST request");
         // Get POST data
         $data = json_decode(file_get_contents('php://input'), true);
         logMessage("Received POST data: " . json_encode($data));
@@ -90,6 +108,7 @@ try {
 
         // Update last_played timestamp - NOW() will now use Eastern Time
         $query = "UPDATE karaoke_songs SET last_played = NOW() WHERE id = ?";
+        logMessage("Executing update query: " . $query . " with ID: " . $data['songId']);
         $stmt = $pdo->prepare($query);
         $result = $stmt->execute([$data['songId']]);
 
@@ -106,9 +125,9 @@ try {
 } catch (PDOException $e) {
     logMessage("Database error: " . $e->getMessage());
     http_response_code(500);
-    echo json_encode(['success' => false, 'error' => 'Database error occurred']);
+    echo json_encode(['success' => false, 'error' => 'Database error occurred: ' . $e->getMessage()]);
 } catch (Exception $e) {
     logMessage("General error: " . $e->getMessage());
     http_response_code(500);
-    echo json_encode(['success' => false, 'error' => 'An error occurred']);
+    echo json_encode(['success' => false, 'error' => 'An error occurred: ' . $e->getMessage()]);
 } 

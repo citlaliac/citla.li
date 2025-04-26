@@ -104,8 +104,6 @@ function KaraokePage() {
                                 <tbody>
                                     {songs.map(song => {
                                         const lastPlayed = song.last_played ? new Date(song.last_played) : null;
-                                        // Subtract 4 hours from UTC to get ET
-                                        const lastPlayedET = lastPlayed ? new Date(lastPlayed.getTime() - (4 * 60 * 60 * 1000)) : null;
                                         const isRecentlyPlayed = lastPlayed && 
                                             (Date.now() - lastPlayed.getTime()) <= (24 * 60 * 60 * 1000);
                                         
@@ -119,7 +117,7 @@ function KaraokePage() {
                                                     {song.artist}
                                                 </td>
                                                 <td>
-                                                    {lastPlayedET ? lastPlayedET.toLocaleString('en-US', {
+                                                    {lastPlayed ? lastPlayed.toLocaleString('en-US', {
                                                         hour: '2-digit',
                                                         minute: '2-digit',
                                                         hour12: true
