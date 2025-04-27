@@ -1,0 +1,144 @@
+.sign-guestbook-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.background-gif {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.background-gif img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sign-guestbook-content {
+  flex: 1;
+  padding: 6rem 2rem 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.guestbook-form-container {
+  /* background: rgba(255, 255, 255, 0.9); */
+  padding: 2rem;
+  border-radius: 10px;
+  /* box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); */
+  max-width: 500px;
+  width: 100%;
+}
+
+.guestbook-form-container h2 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: #333;
+  font-size: 2rem;
+}
+
+.guestbook-submit {
+  background-color: #3a5d0a;
+}
+
+.input-group input,
+.input-group textarea {
+  width: 100%;
+  padding: 0.8rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.input-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+button {
+  width: 100%;
+  padding: 1rem;
+  background: #51290792;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+button:hover {
+  background: #cc0000;
+}
+
+.status-message {
+  margin-top: 1rem;
+  padding: 0.8rem;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.status-message.success {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-message.error {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.status-message.loading {
+  background: #cce5ff;
+  color: #004085;
+}
+
+@media (max-width: 768px) {
+  .sign-guestbook-content {
+    padding: 5rem 1rem 1rem;
+  }
+
+  .guestbook-form-container {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .sign-guestbook-content {
+    padding: 4rem 1rem 1rem;
+  }
+
+  .guestbook-form-container {
+    padding: 1rem;
+  }
+
+  .guestbook-form-container h2 {
+    font-size: 1.5rem;
+  }
+}
+
+.view-guestbook-link {
+    text-align: center;
+    margin-top: 1rem;
+    font-family: 'Tahoma', sans-serif;
+    color: #000;
+}
+
+.view-guestbook-link a {
+    color: #0066cc;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.view-guestbook-link a:hover {
+    text-decoration: underline;
+} 

@@ -1,0 +1,120 @@
+.visitor-map-container {
+    width: 100%;
+    height: 500px;
+    margin: 20px 0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.visitor-map {
+    width: 100%;
+    height: 100%;
+}
+
+.visitor-map-tooltip {
+    position: absolute;
+    background-color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    font-size: 14px;
+    pointer-events: none;
+    z-index: 1000;
+    max-width: 200px;
+}
+
+.visitor-map-tooltip-title {
+    font-weight: bold;
+    margin-bottom: 4px;
+    color: #333;
+}
+
+.visitor-map-tooltip-content {
+    color: #666;
+    font-size: 12px;
+}
+
+.visitor-map-marker {
+    width: 10px;
+    height: 10px;
+    background-color: #007bff;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.3);
+}
+
+.visitor-map-marker:hover {
+    transform: scale(1.2);
+    transition: transform 0.2s;
+}
+
+.visitor-map-legend {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    background-color: white;
+    padding: 10px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-size: 12px;
+}
+
+.visitor-map-legend-title {
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+.visitor-map-legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.visitor-map-legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.visitor-map-legend-label {
+    color: #666;
+}
+
+.visitor-map-loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #666;
+    font-size: 14px;
+}
+
+.visitor-map-error {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #dc3545;
+    font-size: 14px;
+    text-align: center;
+    padding: 20px;
+    background-color: rgba(220, 53, 69, 0.1);
+    border-radius: 4px;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .visitor-map-container {
+        height: 300px;
+    }
+
+    .visitor-map-legend {
+        bottom: 10px;
+        right: 10px;
+        font-size: 10px;
+        padding: 8px;
+    }
+} 

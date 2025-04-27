@@ -38,7 +38,7 @@ const GitHubPage = () => {
             </div>
             <div className="terminal-line terminal-output">
               <a href="https://github.com/citlaliac" target="_blank" rel="noopener noreferrer" className="terminal-link">
-                github.com/citlali
+                github.com/citlaliac
               </a>
             </div>
             <div className="terminal-line terminal-output">

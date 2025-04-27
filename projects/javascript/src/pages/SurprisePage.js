@@ -14,7 +14,6 @@ const SurprisePage = () => {
       '/read',
       '/tour',
       '/shop',
-      '/tech',
       '/contact',
       '/tech/github',
       '/tech/AIPage',
@@ -26,7 +25,11 @@ const SurprisePage = () => {
       '/photos/moody',
       '/photos/natural',
       '/photos/urban',
-      '/photos/espionner'
+      '/photos/espionner',
+      '/guestbook',
+      '/signguestbook',
+      '/hintgiver',
+      '/birthday'
     ];
 
     const randomPage = pages[Math.floor(Math.random() * pages.length)];

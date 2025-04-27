@@ -3,7 +3,7 @@
   display: flex;
   flex-direction: column;
   position: relative;
-  background: radial-gradient(circle at center, rgb(255, 0, 0) 0%, rgb(194, 0, 145) 90%);
+  background: radial-gradient(circle at center, rgb(255, 0, 0) 0%, rgb(246, 10, 195) 90%);
 }
 
 .main-page-content {
@@ -37,7 +37,7 @@
   font-size: 1.2rem;
   opacity: 0.9;
   max-width: 600px;
-  margin: 0 auto;
+  margin: 2rem auto;
   color: #fff;
 }
 

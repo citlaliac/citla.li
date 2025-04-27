@@ -35,7 +35,9 @@ import EspionnerPage from './pages/photos/EspionnerPage';
 
 //Other pages
 import BirthdayPage from './pages/BirthdayPage';
-import GuestBookPage from './pages/GuestBookPage';
+import GuestbookPage from './pages/GuestBookPage';
+import SignGuestBookPage from './pages/SignGuestBookPage';
+import KaraokePage from './pages/KaraokePage';
 
 import './styles.css';
 
@@ -49,7 +51,7 @@ function App() {
 
   return (
     <Router>
-      <div className="app">
+      <div className="app-container">
         <Routes>
           {/* Main navigation routes */}
           <Route path="/" element={<HomePage />} />
@@ -69,7 +71,7 @@ function App() {
           <Route path="/tech/resume-pdf" element={<ResumePDFPage />} />
           <Route path="/tech/resume-success" element={<ResumeSuccessPage />} />
           <Route path="/tech/github" element={<GitHubPage />} />
-          <Route path="/tech/ts" element={<AIPage />} />
+          <Route path="/tech/ai" element={<AIPage />} />
           <Route path="/hintgiver" element={<HintGiverPage />} />
 
           {/* Photo collection routes */}
@@ -81,10 +83,14 @@ function App() {
           <Route path="/photos/natural" element={<NaturalPage />} />
           <Route path="/photos/urban" element={<UrbanPage />} />
           <Route path="/photos/espionner" element={<EspionnerPage />} />
-          <Route path="/guestbook" element={<GuestBookPage />} />
+
+          {/* Guestbook pages */}
+          <Route path="/signGuestbook" element={<SignGuestBookPage />} />
+          <Route path="/guestbook" element={<GuestbookPage />} />
 
           {/* Other pages */}
           <Route path="/birthday" element={<BirthdayPage />} />
+          <Route path="/karaoke" element={<KaraokePage />} />
         </Routes>
       </div>
     </Router>

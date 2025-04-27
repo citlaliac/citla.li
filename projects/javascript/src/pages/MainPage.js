@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import GuestBookPopup from '../components/GuestBookPopup';
 import '../styles/MainPage.css';
 
 function MainPage() {
@@ -42,20 +43,25 @@ function MainPage() {
 
   return (
     <div className="main-page-container" style={backgroundStyle}>
+      <GuestBookPopup />
       <Header />
       <main className="main-page-content">
         <div className="main-page-title-section">
-          <div className="title-image-container">
-            <img 
-              src="/assets/imgs/hiImCitlali.png" 
-              alt="hi I'm citlali" 
-              className="main-page-title-image"
-            />
-            <img 
-              src="/assets/gifs/og-image.gif" 
-              alt="Decorative GIF" 
-              className="title-decorative-gif"
-            />
+          <div className="title-images">
+            <Link to="/karaoke">
+              <img 
+                src="/assets/imgs/hiImCitlali.png" 
+                alt="hi I'm citlali" 
+                className="hi-im"
+              />
+            </Link>
+            <Link to="/signGuestbook">
+              <img 
+                src="/assets/gifs/og-image.gif" 
+                alt="spinning Citlali head, and sign My Guestbook" 
+                className="guestbook"
+              />
+            </Link>
           </div>
           <p className="main-page-welcome-text">Welcome to my website. Click around and get to know me.</p>
         </div>

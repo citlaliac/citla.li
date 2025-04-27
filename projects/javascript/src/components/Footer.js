@@ -26,7 +26,7 @@ function Footer() {
         </a>
       </div>
       {isHomePage && (
-          <Link to="/guestbook" className="footer-guestbook">
+          <Link to="/signGuestbook" className="footer-guestbook">
             <div className="footer-guestbook-icon">
               <img src="/assets/gifs/guestbook.gif" alt="Sign My Guestbook" />
             </div>
