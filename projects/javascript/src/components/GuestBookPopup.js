@@ -6,30 +6,15 @@ const GuestBookPopup = () => {
     const [showPopup, setShowPopup] = useState(false);
     const [actionGif, setActionGif] = useState(null);
     const [dontShowAgain, setDontShowAgain] = useState(false);
-    const [hasVisited, setHasVisited] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Check both conditions when component mounts
-        const visitedBefore = localStorage.getItem('hasVisitedBefore') === 'true';
-        const dontShow = localStorage.getItem('dontShowAgain') === 'true';
-        
-        setHasVisited(visitedBefore);
-        setDontShowAgain(dontShow);
+        // Show popup after 10 seconds
+        const timer = setTimeout(() => {
+            setShowPopup(true);
+        }, 10000);
 
-        // If neither flag is set, this is first visit
-        if (!visitedBefore && !dontShow) {
-            // Mark as visited
-            localStorage.setItem('hasVisitedBefore', 'true');
-            setHasVisited(true);
-            
-            // Show popup after delay
-            const timer = setTimeout(() => {
-                setShowPopup(true);
-            }, 10000);
-
-            return () => clearTimeout(timer);
-        }
+        return () => clearTimeout(timer);
     }, []);
 
     const handleClose = () => {
@@ -66,8 +51,8 @@ const GuestBookPopup = () => {
         setDontShowAgain(e.target.checked);
     };
 
-    // Don't render anything if user has visited before or popup shouldn't be shown
-    if (!showPopup || hasVisited) return null;
+    // Don't render anything if popup shouldn't be shown
+    if (!showPopup) return null;
 
     return (
         <>
@@ -84,27 +69,26 @@ const GuestBookPopup = () => {
                             <button className="guestbookpopup-titlebar-button popup-close" onClick={handleClose}>×</button>
                         </div>
                     </div>
-                    <div className="guestbookpopup-content">
-                        <div className="guestbookpopup-message">
-                            <img src="/assets/gifs/guestbookpopup-pen.gif" alt="guestbook with pen" className="guestbookpopup-pen-icon" />
-                            <div className="guestbookpopup-text">
-                                <p>Wait Traveler, Sign the Guestbook!</p>
-                                <p>Leave your mark in our digital realm.</p>
-                                <label className="guestbookpopup-checkbox">
-                                    <input 
-                                        type="checkbox" 
-                                        checked={dontShowAgain}
-                                        onChange={handleCheckboxChange}
-                                    />
-                                    <span>Don't show this message again</span>
-                                </label>
-                            </div>
+                    
+                    <div className="guestbookpopup-message">
+                        <img src="/assets/gifs/guestbookpopup-pen.gif" alt="guestbook with pen" className="guestbookpopup-pen-icon" />
+                        <div className="guestbookpopup-text">
+                            <p>Wait Traveler, Sign the Guestbook!</p>
+                            <p>Leave your mark in our digital realm.</p>
+                            <label className="guestbookpopup-checkbox">
+                                <input 
+                                    type="checkbox" 
+                                    checked={dontShowAgain}
+                                    onChange={handleCheckboxChange}
+                                />
+                                <span>Don't show this message again</span>
+                            </label>
                         </div>
-                        <div className="guestbookpopup-buttons">
-                            <button className="guestbookpopup-button" onClick={handleSign}>
-                                Take me to sign!
-                            </button>
-                        </div>
+                    </div>
+                    <div className="guestbookpopup-buttons">
+                        <button className="guestbookpopup-button" onClick={handleSign}>
+                            Take me to sign!
+                        </button>
                     </div>
                 </div>
             </div>

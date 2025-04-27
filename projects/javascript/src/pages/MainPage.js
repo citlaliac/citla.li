@@ -48,7 +48,7 @@ function MainPage() {
       <main className="main-page-content">
         <div className="main-page-title-section">
           <div className="title-images">
-            <Link to="/karaoke">
+            <Link to="/signGuestbook">
               <img 
                 src="/assets/imgs/hiImCitlali.png" 
                 alt="hi I'm citlali" 

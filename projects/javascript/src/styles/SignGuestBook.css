@@ -2,143 +2,222 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background-color: #000;
   position: relative;
-}
-
-.background-gif {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: -1;
   overflow: hidden;
 }
 
-.background-gif img {
+.sign-guestbook-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+}
+
+.sign-guestbook-background img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
 }
 
 .sign-guestbook-content {
+  position: relative;
+  z-index: 1;
   flex: 1;
-  padding: 6rem 2rem 2rem;
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: 2rem;
+  min-height: calc(100vh - 120px); /* Account for header and footer */
 }
 
 .guestbook-form-container {
-  /* background: rgba(255, 255, 255, 0.9); */
+  background-color: rgba(181, 143, 73, 0.678);
   padding: 2rem;
-  border-radius: 10px;
-  /* box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); */
-  max-width: 500px;
+  border-radius: 8px;
   width: 100%;
+  max-width: 500px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
 }
 
 .guestbook-form-container h2 {
+  color: #fff;
+  background-color: (199 157 105 / 80%);
   text-align: center;
-  margin-bottom: 1.5rem;
-  color: #333;
+  margin-bottom: 2rem;
   font-size: 2rem;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
 
-.guestbook-submit {
-  background-color: #3a5d0a;
+.input-group {
+  margin-bottom: 1.5rem;
 }
 
 .input-group input,
 .input-group textarea {
   width: 100%;
   padding: 0.8rem;
-  border: 1px solid #ddd;
+  border: 1px solid #333;
   border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
   font-size: 1rem;
-  background: rgba(255, 255, 255, 0.9);
+  transition: all 0.3s ease;
 }
 
-.input-group textarea {
-  resize: vertical;
-  min-height: 100px;
+.input-group input:focus,
+.input-group textarea:focus {
+  outline: none;
+  border-color: #666;
+  background: rgba(255, 255, 255, 0.15);
 }
 
-button {
+.input-group input::placeholder,
+.input-group textarea::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.input-group input:disabled,
+.input-group textarea:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+button[type="submit"] {
   width: 100%;
   padding: 1rem;
-  background: #51290792;
-  color: white;
+  background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
   border: none;
   border-radius: 4px;
-  font-size: 1rem;
+  color: white;
+  font-size: 1.1rem;
   cursor: pointer;
-  transition: background 0.3s ease;
+  transition: all 0.3s ease;
+  margin-bottom: 1rem;
 }
 
-button:hover {
-  background: #cc0000;
+button[type="submit"]:hover {
+  background: linear-gradient(45deg, #ff5252, #ff7676);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255, 82, 82, 0.4);
+}
+
+button[type="submit"]:disabled {
+  background: #666;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .status-message {
-  margin-top: 1rem;
-  padding: 0.8rem;
+  padding: 1rem;
   border-radius: 4px;
+  margin-bottom: 1rem;
   text-align: center;
-}
-
-.status-message.success {
-  background: #d4edda;
-  color: #155724;
-}
-
-.status-message.error {
-  background: #f8d7da;
-  color: #721c24;
+  font-weight: 500;
+  word-break: break-word;
 }
 
 .status-message.loading {
-  background: #cce5ff;
-  color: #004085;
+  background: rgba(255, 193, 7, 0.2);
+  color: #ffc107;
+}
+
+.status-message.success {
+  background: rgba(76, 175, 80, 0.2);
+  color: #4caf50;
+}
+
+.status-message.error {
+  background: rgba(244, 67, 54, 0.2);
+  color: #f44336;
+}
+
+.view-guestbook-link {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.view-guestbook-link a {
+  color: #ff6b6b;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.view-guestbook-link a:hover {
+  color: #ff5252;
+  text-decoration: underline;
 }
 
 @media (max-width: 768px) {
   .sign-guestbook-content {
-    padding: 5rem 1rem 1rem;
+    padding: 1rem;
+    min-height: calc(100vh - 100px);
   }
 
   .guestbook-form-container {
     padding: 1.5rem;
+    margin: 0 1rem;
+  }
+
+  .guestbook-form-container h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .input-group {
+    margin-bottom: 1rem;
+  }
+
+  .input-group input,
+  .input-group textarea {
+    padding: 0.7rem;
+    font-size: 0.9rem;
+  }
+
+  button[type="submit"] {
+    padding: 0.8rem;
+    font-size: 1rem;
+  }
+
+  .status-message {
+    padding: 0.8rem;
+    font-size: 0.9rem;
   }
 }
 
 @media (max-width: 480px) {
   .sign-guestbook-content {
-    padding: 4rem 1rem 1rem;
+    padding: 0.5rem;
+    min-height: calc(100vh - 80px);
   }
 
   .guestbook-form-container {
     padding: 1rem;
+    margin: 0 0.5rem;
   }
 
   .guestbook-form-container h2 {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
   }
-}
 
-.view-guestbook-link {
-    text-align: center;
-    margin-top: 1rem;
-    font-family: 'Tahoma', sans-serif;
-    color: #000;
-}
+  .input-group input,
+  .input-group textarea {
+    padding: 0.6rem;
+    font-size: 0.8rem;
+  }
 
-.view-guestbook-link a {
-    color: #0066cc;
-    text-decoration: none;
-    font-weight: bold;
-}
+  button[type="submit"] {
+    padding: 0.7rem;
+    font-size: 0.9rem;
+  }
 
-.view-guestbook-link a:hover {
-    text-decoration: underline;
+  .status-message {
+    padding: 0.7rem;
+    font-size: 0.8rem;
+  }
 } 

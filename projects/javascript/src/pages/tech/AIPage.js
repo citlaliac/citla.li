@@ -35,7 +35,7 @@ const AIPage = () => {
       />
       <div className="content">
         <Header />
-        <h1 className="page-title">What is AI?</h1>
+        <h1 className="page-title">ethical trust and safety</h1>
         <div className="ai-text">
         <h6 >A Solution Engineer at a Trust and Safety vendor, I’ve had the unique opportunity to see into what are generally “locked” rooms. Use the flashlight to illuminate some of what I've learned.</h6>
         </div>

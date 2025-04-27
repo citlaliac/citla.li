@@ -4,7 +4,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import '../styles/SignGuestBook.css';
 
-function GuestBookPage() {
+function SignGuestBookPage() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
@@ -17,32 +17,51 @@ function GuestBookPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (submitting) return; // Prevent double submission
+    
     setSubmitting(true);
     setError(null);
+    setStatus({ type: 'loading', message: 'Submitting your entry...' });
 
     try {
+      // Check for network connectivity
+      if (!navigator.onLine) {
+        throw new Error('No internet connection. Please check your connection and try again.');
+      }
+
       const response = await fetch('https://citla.li/submit-guestbook.php', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
         body: JSON.stringify({
-          name: formData.name,
-          location: formData.location,
-          message: formData.message
+          name: formData.name.trim(),
+          location: formData.location.trim(),
+          message: formData.message.trim()
         })
       });
 
-      const data = await response.json();
-      
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to submit guestbook entry');
+        const errorData = await response.json().catch(() => ({ error: 'Server error occurred' }));
+        throw new Error(errorData.error || `Server error: ${response.status}`);
       }
 
-      // Redirect to guestbook display page
-      window.location.href = '/guestbook';
+      const data = await response.json();
+      
+      if (data.success) {
+        setStatus({ type: 'success', message: 'Entry submitted successfully!' });
+        setFormData({ name: '', location: '', message: '' });
+        setTimeout(() => {
+          navigate('/guestbook');
+        }, 2000);
+      } else {
+        throw new Error(data.error || 'Failed to submit guestbook entry');
+      }
     } catch (err) {
+      console.error('Submission error:', err);
       setError(err.message);
+      setStatus({ type: 'error', message: err.message });
     } finally {
       setSubmitting(false);
     }
@@ -58,14 +77,14 @@ function GuestBookPage() {
 
   return (
     <div className="sign-guestbook-page">
-      <div className="background-gif">
-        <img src="/assets/imgs/guestbook.jpg" alt="Background" />
-      </div>
       <Header />
       <div className="sign-guestbook-content">
         <div className="guestbook-form-container">
-          {/* <h2>Sign My Guestbook</h2> */}
-          <form onSubmit={handleSubmit}>
+        <div className="sign-guestbook-background">
+        <img src="/assets/imgs/guestbook.jpg" alt="Background" />
+      </div>
+          <h2>sign my guestbook</h2>
+          <form onSubmit={handleSubmit} noValidate>
             <div className="input-group">
               <input
                 type="text"
@@ -74,6 +93,9 @@ function GuestBookPage() {
                 value={formData.name}
                 onChange={handleChange}
                 required
+                disabled={submitting}
+                minLength={2}
+                maxLength={50}
               />
             </div>
             <div className="input-group">
@@ -84,6 +106,9 @@ function GuestBookPage() {
                 value={formData.location}
                 onChange={handleChange}
                 required
+                disabled={submitting}
+                minLength={2}
+                maxLength={50}
               />
             </div>
             <div className="input-group">
@@ -93,13 +118,19 @@ function GuestBookPage() {
                 value={formData.message}
                 onChange={handleChange}
                 rows="4"
+                disabled={submitting}
+                maxLength={500}
               />
             </div>
-            <button type="guestbook-submit">
-              Sign Guestbook
+            <button 
+              type="submit" 
+              disabled={submitting}
+              aria-label={submitting ? 'Submitting form' : 'Submit form'}
+            >
+              {submitting ? 'Submitting...' : 'Sign Guestbook'}
             </button>
             {status.type && (
-              <div className={`status-message ${status.type}`}>
+              <div className={`status-message ${status.type}`} role="alert">
                 {status.message}
               </div>
             )}
@@ -108,12 +139,10 @@ function GuestBookPage() {
             </p>
           </form>
         </div>
-        <div>
-        </div>
       </div>
       <Footer />
     </div>
   );
 }
 
-export default GuestBookPage; 
+export default SignGuestBookPage; 

@@ -66,6 +66,7 @@ const GuestBookPage = () => {
 
                     <div className="visitor-map-section">
                         <h2 className="map-title">visitor map</h2>
+                        <p>This map just shows country pins. Still working on making it a lil better.</p>
                         <div className="visitor-map-container">
                             <VisitorMap />
                         </div>

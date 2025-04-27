@@ -1,8 +1,9 @@
 <?php
 header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: https://citla.li');
+header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
+header('Access-Control-Allow-Headers: Content-Type, Accept');
+header('Access-Control-Max-Age: 86400'); // Cache preflight for 24 hours
 
 // Handle preflight requests
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -16,11 +17,15 @@ if (file_exists($envFile)) {
     $envVars = parse_ini_file($envFile);
     if ($envVars === false) {
         error_log("Failed to parse .env file");
-        throw new Exception('Failed to parse .env file');
+        http_response_code(500);
+        echo json_encode(['success' => false, 'error' => 'Server configuration error']);
+        exit();
     }
 } else {
     error_log(".env file not found at: " . $envFile);
-    throw new Exception('.env file not found');
+    http_response_code(500);
+    echo json_encode(['success' => false, 'error' => 'Server configuration error']);
+    exit();
 }
 
 // Database configuration
@@ -35,20 +40,41 @@ try {
     $rawData = file_get_contents('php://input');
     error_log("Received data: " . $rawData);
     
+    if (empty($rawData)) {
+        throw new Exception('No data received');
+    }
+    
     $data = json_decode($rawData, true);
     
-    if (!$data) {
-        error_log("JSON decode error: " . json_last_error_msg());
-        throw new Exception('Invalid input data: ' . json_last_error_msg());
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        throw new Exception('Invalid data format: ' . json_last_error_msg());
     }
 
-    $name = $data['name'] ?? '';
-    $location = $data['location'] ?? '';
-    $message = $data['message'] ?? '';
+    if (!$data) {
+        throw new Exception('Invalid input data');
+    }
+
+    $name = isset($data['name']) ? trim($data['name']) : '';
+    $location = isset($data['location']) ? trim($data['location']) : '';
+    $message = isset($data['message']) ? trim($data['message']) : '';
 
     // Validate required fields
-    if (empty($name) || empty($location)) {
-        throw new Exception('Name and location are required');
+    if (empty($name)) {
+        throw new Exception('Name is required');
+    }
+    if (empty($location)) {
+        throw new Exception('Location is required');
+    }
+
+    // Validate field lengths
+    if (strlen($name) > 50) {
+        throw new Exception('Name must be less than 50 characters');
+    }
+    if (strlen($location) > 50) {
+        throw new Exception('Location must be less than 50 characters');
+    }
+    if (strlen($message) > 500) {
+        throw new Exception('Message must be less than 500 characters');
     }
 
     // Get API key
@@ -56,7 +82,7 @@ try {
 
     if (empty($apiKey)) {
         error_log("Missing Perspective API key in .env file");
-        throw new Exception('Content moderation service not configured: Missing API key');
+        throw new Exception('Content moderation service not configured');
     }
 
     // Combine name and message for moderation
@@ -84,20 +110,31 @@ try {
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($perspectiveData));
     curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 10); // 10 second timeout
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5); // 5 second connect timeout
     
     $perspectiveResponse = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $curlError = curl_error($ch);
     curl_close($ch);
+
+    if ($curlError) {
+        error_log("CURL Error: " . $curlError);
+        throw new Exception('Content moderation service temporarily unavailable');
+    }
 
     error_log("Perspective API Response: " . $perspectiveResponse);
     error_log("Perspective API HTTP Code: " . $httpCode);
 
     if ($httpCode !== 200) {
         error_log("Perspective API error: " . $perspectiveResponse);
-        throw new Exception('Content moderation service error: ' . $perspectiveResponse);
+        throw new Exception('Content moderation service temporarily unavailable');
     }
 
     $perspectiveResult = json_decode($perspectiveResponse, true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        throw new Exception('Content moderation service error');
+    }
     
     // Check if any attribute exceeds threshold (0.7 = 70% confidence)
     $threshold = 0.7;
@@ -124,14 +161,14 @@ try {
 
     if ($conn->connect_error) {
         error_log("Database connection error: " . $conn->connect_error);
-        throw new Exception('Database connection failed: ' . $conn->connect_error);
+        throw new Exception('Database connection failed');
     }
 
     // Check if table exists and has required columns
     $tableCheck = $conn->query("SHOW TABLES LIKE 'guestbook'");
     if ($tableCheck->num_rows == 0) {
         error_log("Guestbook table does not exist");
-        throw new Exception('Guestbook table does not exist');
+        throw new Exception('Database error');
     }
 
     // Check for required columns
@@ -153,7 +190,7 @@ try {
     $stmt = $conn->prepare("INSERT INTO guestbook (name, location, message, created_at, is_moderated, moderation_status) VALUES (?, ?, ?, NOW(), ?, ?)");
     if (!$stmt) {
         error_log("Prepare statement error: " . $conn->error);
-        throw new Exception('Failed to prepare statement: ' . $conn->error);
+        throw new Exception('Database error');
     }
 
     $is_moderated = $isToxic ? 0 : 1;
@@ -163,7 +200,7 @@ try {
     
     if (!$stmt->execute()) {
         error_log("Execute error: " . $stmt->error);
-        throw new Exception('Failed to insert data: ' . $stmt->error);
+        throw new Exception('Failed to save entry');
     }
 
     $insertId = $stmt->insert_id;
@@ -177,8 +214,7 @@ try {
     $response = [
         'success' => true,
         'message' => 'Guestbook entry submitted successfully',
-        'moderated' => !$isToxic,
-        'perspective_response' => $perspectiveResult
+        'moderated' => !$isToxic
     ];
     echo json_encode($response);
 
