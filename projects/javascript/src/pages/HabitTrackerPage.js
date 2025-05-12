@@ -5,7 +5,12 @@ import '../styles/HabitTracker.css';
 
 const HabitTrackerPage = () => {
     const [habits, setHabits] = useState([]);
-    const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+    const [selectedDate, setSelectedDate] = useState(() => {
+        // Get current date in ET
+        const now = new Date();
+        const etDate = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+        return etDate.toISOString().split('T')[0];
+    });
     const [error, setError] = useState('');
     const [completedDates, setCompletedDates] = useState([]);
     const navigate = useNavigate();

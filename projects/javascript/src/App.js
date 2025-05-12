@@ -38,7 +38,7 @@ import BirthdayPage from './pages/BirthdayPage';
 import GuestbookPage from './pages/GuestBookPage';
 import SignGuestBookPage from './pages/SignGuestBookPage';
 import KaraokePage from './pages/KaraokePage';
-import HabitTrackerPage from './pages/HabitTrackerPage';
+// import HabitTrackerPage from './pages/HabitTrackerPage';
 import './styles.css';
 
 function App() {
@@ -91,7 +91,7 @@ function App() {
           {/* Other pages */}
           <Route path="/birthday" element={<BirthdayPage />} />
           <Route path="/karaoke" element={<KaraokePage />} />
-          <Route path="/ht" element={<HabitTrackerPage />} />
+          {/* <Route path="/ht" element={<HabitTrackerPage />} /> */}
         </Routes>
       </div>
     </Router>

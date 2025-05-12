@@ -11,7 +11,7 @@ ini_set('display_errors', 0); // Don't display errors to the client
 ini_set('log_errors', 1);
 ini_set('error_log', __DIR__ . '/habits_error.log');
 
-// Set PHP timezone to NYC
+// Set timezone to US Eastern Time
 date_default_timezone_set('America/New_York');
 
 // Handle preflight requests
@@ -162,7 +162,11 @@ try {
 
             $habit_id = $data['habit_id'];
             $completed = $data['completed'] ? 1 : 0;
+            
+            // Ensure date is in ET
             $date = isset($data['date']) ? $data['date'] : date('Y-m-d');
+            $dateTime = new DateTime($date, new DateTimeZone('America/New_York'));
+            $date = $dateTime->format('Y-m-d');
 
             // First check if a log entry exists for this date
             $check_sql = "SELECT id FROM habit_logs WHERE habit_id = ? AND date = ?";
