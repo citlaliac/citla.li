@@ -72,3 +72,6 @@ jobs:
         dangerous-clean-slate: false
         # Add logging for debugging
         log-level: verbose
+        # Add timeout and retry settings
+        timeout: 600
+        retry: 3

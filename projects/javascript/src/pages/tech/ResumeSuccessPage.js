@@ -1,6 +1,6 @@
 import React from 'react';
 import Header from '../../components/Header';
-import '../../styles/tech/ResumePdfPage.css';
+import '../../styles/tech/ResumePDFPage.css';
 
 function ResumeSuccessPage() {
   return (
