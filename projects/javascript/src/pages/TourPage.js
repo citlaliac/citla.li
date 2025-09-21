@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import { useSEO } from '../hooks/useSEO';
 import '../styles/TourPage.css';
 
 /**
@@ -10,6 +11,59 @@ import '../styles/TourPage.css';
  */
 function TourPage() {
   const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
+
+  // SEO configuration for tour page
+  useSEO({
+    title: 'NYC Tours with Citlali - Statue of Liberty, Ellis Island, Hudson Yards | citla.li/tour',
+    description: 'Book professional NYC tours with licensed guide Citlali Aguilar Canamar. Statue of Liberty, Ellis Island, Hudson Yards, Greenwich Village tours. Read 5-star reviews from satisfied customers.',
+    keywords: 'NYC tours, New York tours, Statue of Liberty tour, Ellis Island tour, Hudson Yards tour, Greenwich Village tour, NYC tour guide, Citlali tour guide, licensed NYC guide, New York City walking tours',
+    canonicalUrl: 'https://citla.li/tour',
+    ogTitle: 'NYC Tours with Citlali - Professional Licensed Guide',
+    ogDescription: 'Book professional NYC tours with licensed guide Citlali. Statue of Liberty, Ellis Island, Hudson Yards, Greenwich Village tours.',
+    ogImage: 'https://citla.li/assets/gifs/tour.gif',
+    twitterTitle: 'NYC Tours with Citlali - Professional Licensed Guide',
+    twitterDescription: 'Book professional NYC tours with licensed guide Citlali. Read 5-star reviews from satisfied customers.',
+    twitterImage: 'https://citla.li/assets/gifs/tour.gif',
+    structuredData: {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Citlali Aguilar Canamar",
+      "jobTitle": "Licensed NYC Tour Guide",
+      "description": "Professional licensed NYC tour guide offering Statue of Liberty, Ellis Island, Hudson Yards, and Greenwich Village tours",
+      "url": "https://citla.li/tour",
+      "image": "https://citla.li/assets/gifs/tour.gif",
+      "hasOccupation": {
+        "@type": "Occupation",
+        "name": "Tour Guide",
+        "occupationLocation": {
+          "@type": "City",
+          "name": "New York City"
+        }
+      },
+      "offers": [
+        {
+          "@type": "TouristTrip",
+          "name": "Statue of Liberty & Ellis Island Tour",
+          "description": "Learn about Lady Liberty, Ellis Island, and how they contributed to America today"
+        },
+        {
+          "@type": "TouristTrip", 
+          "name": "Hudson Yards Tour",
+          "description": "Learn about this massive development, what it's used for, and what you can do there"
+        },
+        {
+          "@type": "TouristTrip",
+          "name": "Greenwich Village Tour", 
+          "description": "Sights new and old, like Cherry Lane Theatre, Stonewall Inn, the Friends Apartment, and more"
+        },
+        {
+          "@type": "TouristTrip",
+          "name": "Daughter for a Day Tour",
+          "description": "Brand new tour where we walk around Manhattan for up to 3 hours"
+        }
+      ]
+    }
+  });
 
   useEffect(() => {
     const timer = setInterval(() => {

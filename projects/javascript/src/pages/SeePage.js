@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import { useSEO } from '../hooks/useSEO';
 import '../styles/SeePage.css';
 
 /**
@@ -11,6 +12,38 @@ import '../styles/SeePage.css';
  * Clicking a collection navigates to its dedicated page
  */
 const SeePage = () => {
+  // SEO configuration for photography page
+  useSEO({
+    title: 'Citlali Photography Portfolio - Portrait, Urban, Natural Photography | citla.li/see',
+    description: 'Explore Citlali Aguilar Canamar\'s photography portfolio. Professional photographer specializing in portrait, urban, natural, and moody photography collections. View stunning photo galleries from NYC and beyond.',
+    keywords: 'Citlali photography, Citlali photographer, portrait photography, urban photography, natural photography, NYC photographer, photography portfolio, photo collections, professional photographer',
+    canonicalUrl: 'https://citla.li/see',
+    ogTitle: 'Citlali Photography Portfolio - Professional Photographer',
+    ogDescription: 'Explore Citlali\'s photography portfolio. Professional photographer specializing in portrait, urban, natural, and moody photography.',
+    ogImage: 'https://citla.li/assets/photos/portrait/DSC_0544.jpg',
+    twitterTitle: 'Citlali Photography Portfolio - Professional Photographer',
+    twitterDescription: 'Explore Citlali\'s stunning photography portfolio. Portrait, urban, natural, and moody photography collections.',
+    twitterImage: 'https://citla.li/assets/photos/portrait/DSC_0544.jpg',
+    structuredData: {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Citlali Aguilar Canamar",
+      "jobTitle": "Photographer",
+      "description": "Professional photographer specializing in portrait, urban, natural, and moody photography",
+      "url": "https://citla.li/see",
+      "image": "https://citla.li/assets/photos/portrait/DSC_0544.jpg",
+      "knowsAbout": ["Photography", "Portrait Photography", "Urban Photography", "Natural Photography", "Photo Editing"],
+      "hasOccupation": {
+        "@type": "Occupation",
+        "name": "Photographer",
+        "occupationLocation": {
+          "@type": "City",
+          "name": "New York City"
+        }
+      }
+    }
+  });
+
   // Define the available photography collections
   const collections = [
     {

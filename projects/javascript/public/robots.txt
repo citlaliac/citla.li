@@ -1,0 +1,39 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://citla.li/sitemap.xml
+
+# Crawl-delay for respectful crawling
+Crawl-delay: 1
+
+# Allow all major search engines
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+User-agent: Baiduspider
+Allow: /
+
+User-agent: YandexBot
+Allow: /
+
+# Block access to admin or private areas (if any exist in the future)
+Disallow: /admin/
+Disallow: /private/
+Disallow: /api/
+Disallow: /server/
+
+# Allow access to all public content
+Allow: /assets/
+Allow: /photos/
+Allow: /gifs/
+Allow: /imgs/

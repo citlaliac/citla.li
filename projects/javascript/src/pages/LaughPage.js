@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import { useSEO } from '../hooks/useSEO';
 import '../styles/LaughPage.css';
 
 /**
@@ -10,6 +11,38 @@ import '../styles/LaughPage.css';
  */
 function LaughPage() {
   const videoRef = useRef(null);
+
+  // SEO configuration for comedy page
+  useSEO({
+    title: 'Citlali Comedy Videos - Stand-up Comedy & Improv | citla.li/laugh',
+    description: 'Watch Citlali Aguilar Canamar\'s stand-up comedy videos and improv performances. Professional comedian based in NYC with hilarious content and live performances.',
+    keywords: 'Citlali comedy, Citlali stand up, Citlali improv, Citlali comedian, stand up comedy, improv comedy, NYC comedian, comedy videos, funny videos',
+    canonicalUrl: 'https://citla.li/laugh',
+    ogTitle: 'Citlali Comedy Videos - Stand-up Comedy & Improv',
+    ogDescription: 'Watch Citlali Aguilar Canamar\'s stand-up comedy videos and improv performances. Professional comedian based in NYC.',
+    ogImage: 'https://citla.li/assets/gifs/laugh.gif',
+    twitterTitle: 'Citlali Comedy Videos - Stand-up Comedy & Improv',
+    twitterDescription: 'Watch Citlali\'s stand-up comedy videos and improv performances. Professional NYC comedian.',
+    twitterImage: 'https://citla.li/assets/gifs/laugh.gif',
+    structuredData: {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Citlali Aguilar Canamar",
+      "jobTitle": "Stand-up Comedian",
+      "description": "Professional stand-up comedian and improv performer based in New York City",
+      "url": "https://citla.li/laugh",
+      "image": "https://citla.li/assets/gifs/laugh.gif",
+      "knowsAbout": ["Stand-up Comedy", "Improv", "Comedy Writing", "Live Performance"],
+      "hasOccupation": {
+        "@type": "Occupation",
+        "name": "Stand-up Comedian",
+        "occupationLocation": {
+          "@type": "City",
+          "name": "New York City"
+        }
+      }
+    }
+  });
 
   const handlePhoneClick = () => {
     if (videoRef.current) {

@@ -1,9 +1,38 @@
 import React from 'react';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
+import { useSEO } from '../../hooks/useSEO';
 import '../../styles/photos/PhotoCollectionPage.css';
 
 const PortraitPage = () => {
+  // SEO configuration for portrait photography page
+  useSEO({
+    title: 'Portrait Photography by Citlali - Professional Portrait Collection | citla.li/photos/portrait',
+    description: 'Explore Citlali Aguilar Canamar\'s portrait photography collection. Professional portrait photographer capturing authentic moments and emotions in stunning detail.',
+    keywords: 'portrait photography, Citlali portrait photos, professional portrait photographer, portrait collection, NYC portrait photographer, headshots, professional photography',
+    canonicalUrl: 'https://citla.li/photos/portrait',
+    ogTitle: 'Portrait Photography by Citlali - Professional Collection',
+    ogDescription: 'Explore Citlali\'s portrait photography collection. Professional portrait photographer capturing authentic moments.',
+    ogImage: 'https://citla.li/assets/photos/portrait/DSC_0544.jpg',
+    twitterTitle: 'Portrait Photography by Citlali - Professional Collection',
+    twitterDescription: 'Explore Citlali\'s stunning portrait photography collection. Professional NYC photographer.',
+    twitterImage: 'https://citla.li/assets/photos/portrait/DSC_0544.jpg',
+    structuredData: {
+      "@context": "https://schema.org",
+      "@type": "ImageGallery",
+      "name": "Portrait Photography Collection by Citlali Aguilar Canamar",
+      "description": "Professional portrait photography collection showcasing authentic moments and emotions",
+      "url": "https://citla.li/photos/portrait",
+      "author": {
+        "@type": "Person",
+        "name": "Citlali Aguilar Canamar",
+        "jobTitle": "Photographer"
+      },
+      "genre": "Portrait Photography",
+      "numberOfItems": 50
+    }
+  });
+
   const photos = [
     'DSC_0194.jpg', 'DSC_0974.jpg', 'DSC_0961.jpg', 'DSC_0959.jpg',
     'DSC_0952.jpg', 'DSC_0930.jpg', 'DSC_0928.jpg', 'DSC_0890.jpg',
@@ -29,7 +58,7 @@ const PortraitPage = () => {
           <div key={index} className="photo-item">
             <img
               src={`/assets/photos/portrait/${photo}`}
-              alt={`Photo ${index + 1} from Portrait Collection`}
+              alt={`Portrait photography by Citlali Aguilar Canamar - Professional portrait photo ${index + 1} from collection`}
               loading="lazy"
               onError={(e) => {
                 console.error(`Error loading image: ${photo}`);

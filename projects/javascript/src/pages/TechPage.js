@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import { useSEO } from '../hooks/useSEO';
 import '../styles/TechPage.css';
 
 /**
@@ -10,6 +11,38 @@ import '../styles/TechPage.css';
  * Matches the style of the main page with floating animation and hover effects
  */
 function TechPage() {
+  // SEO configuration for tech page
+  useSEO({
+    title: 'Citlali Tech Portfolio - GitHub, AI, Resume | citla.li/tech',
+    description: 'Explore Citlali Aguilar Canamar\'s tech portfolio. Trust & Safety AI professional, GitHub projects, and professional resume. View technical work and professional experience.',
+    keywords: 'Citlali tech, Citlali AI, Citlali GitHub, trust and safety AI, tech professional, software engineer, AI engineer, GitHub portfolio, tech resume, professional resume',
+    canonicalUrl: 'https://citla.li/tech',
+    ogTitle: 'Citlali Tech Portfolio - AI Professional & Developer',
+    ogDescription: 'Explore Citlali\'s tech portfolio. Trust & Safety AI professional, GitHub projects, and professional resume.',
+    ogImage: 'https://citla.li/assets/gifs/tech.gif',
+    twitterTitle: 'Citlali Tech Portfolio - AI Professional & Developer',
+    twitterDescription: 'Explore Citlali\'s tech work. Trust & Safety AI professional with GitHub projects and professional experience.',
+    twitterImage: 'https://citla.li/assets/gifs/tech.gif',
+    structuredData: {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Citlali Aguilar Canamar",
+      "jobTitle": "Tech Professional",
+      "description": "Trust & Safety AI professional and software developer with expertise in AI, machine learning, and software engineering",
+      "url": "https://citla.li/tech",
+      "image": "https://citla.li/assets/gifs/tech.gif",
+      "knowsAbout": ["Trust and Safety AI", "Software Engineering", "Machine Learning", "GitHub", "Programming", "AI Ethics"],
+      "hasOccupation": {
+        "@type": "Occupation",
+        "name": "Tech Professional",
+        "occupationLocation": {
+          "@type": "City",
+          "name": "New York City"
+        }
+      }
+    }
+  });
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);

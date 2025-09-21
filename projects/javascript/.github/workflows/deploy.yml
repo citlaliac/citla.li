@@ -1,0 +1,54 @@
+name: Deploy to PlanetHoster
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: projects/javascript/package-lock.json
+        
+    - name: Install dependencies
+      working-directory: projects/javascript
+      run: npm ci
+      
+    - name: Build React app
+      working-directory: projects/javascript
+      run: npm run build
+      
+    - name: Prepare deployment files
+      working-directory: projects/javascript
+      run: |
+        # Create public directory if it doesn't exist
+        mkdir -p server/public
+        # Copy build files to server's public directory
+        cp -r build/* server/public/
+        
+    - name: Deploy to PlanetHoster via FTP
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      with:
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        local-dir: projects/javascript/server/
+        server-dir: /public_html/
+        exclude: |
+          **/.git*
+          **/.git*/**
+          **/node_modules/**
+          **/.env
+          **/.env.*
+          **/README.md
+          **/.github/**

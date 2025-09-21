@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import { useSEO } from '../hooks/useSEO';
 
 /**
  * ContactPage Component
@@ -12,6 +13,33 @@ import Footer from '../components/Footer';
  * - Form state management
  */
 function ContactPage() {
+  // SEO configuration for contact page
+  useSEO({
+    title: 'Contact Citlali - NYC Tour Guide, Comedian & Photographer | citla.li/contact',
+    description: 'Contact Citlali Aguilar Canamar for NYC tours, comedy bookings, photography services, or general inquiries. Professional tour guide, comedian, and photographer based in NYC.',
+    keywords: 'contact Citlali, book NYC tour, hire comedian, photography services, NYC tour guide contact, comedy booking, professional photographer contact',
+    canonicalUrl: 'https://citla.li/contact',
+    ogTitle: 'Contact Citlali - NYC Tour Guide, Comedian & Photographer',
+    ogDescription: 'Contact Citlali for NYC tours, comedy bookings, photography services, or general inquiries.',
+    ogImage: 'https://citla.li/assets/imgs/contact-bkg.png',
+    twitterTitle: 'Contact Citlali - NYC Tour Guide, Comedian & Photographer',
+    twitterDescription: 'Contact Citlali for NYC tours, comedy bookings, photography services, or general inquiries.',
+    twitterImage: 'https://citla.li/assets/imgs/contact-bkg.png',
+    structuredData: {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Citlali Aguilar Canamar",
+      "description": "Professional NYC tour guide, stand-up comedian, and photographer available for bookings and inquiries",
+      "url": "https://citla.li/contact",
+      "image": "https://citla.li/assets/imgs/contact-bkg.png",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "General Inquiry",
+        "url": "https://citla.li/contact"
+      }
+    }
+  });
+
   // State for form data and submission status
   const [formData, setFormData] = useState({
     name: '',
