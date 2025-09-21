@@ -51,15 +51,16 @@ jobs:
         # Copy assets to public_html root (for backward compatibility)
         cp -r public/assets deployment/public_html/
         
-    - name: Deploy to PlanetHoster via SFTP
-      uses: wlixcc/SFTP-Deploy-Action@v1.2.4
+    - name: Deploy to PlanetHoster via FTP
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
       with:
         server: ${{ secrets.FTP_SERVER }}
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
+        protocol: ftp
         port: 21
-        local_path: 'projects/javascript/deployment/public_html/*'
-        remote_path: '/public_html'
+        local-dir: projects/javascript/deployment/public_html/
+        server-dir: /public_html/
         exclude: |
           **/.git*
           **/.git*/**
