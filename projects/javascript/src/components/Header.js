@@ -23,7 +23,7 @@ function Header() {
     <header className="header">
       <div className="header-left">
         {!isMainPage && (
-          <a href="#" className="nav-icon" style={{ alignItems: 'left' }} onClick={handleBack}>
+          <a href="/" className="nav-icon" style={{ alignItems: 'left' }} onClick={handleBack}>
             <div className=".back-button img">
               <img src="/assets/gifs/back_dog.gif" alt="Back" />
             </div>

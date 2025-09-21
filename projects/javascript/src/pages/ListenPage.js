@@ -59,6 +59,7 @@ function ListenPage() {
               </div>
               <div className="playlist-embed">
                 <iframe 
+                  title="Spotify Playlist - Citlali's Music"
                   src="https://open.spotify.com/embed/playlist/411YKYQQDCNfZDYJCau8Dm?utm_source=generator&theme=0&wmode=opaque" 
                   width="100%" 
                   height="450" 

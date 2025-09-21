@@ -3,7 +3,7 @@ import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import '../../styles/tech/ResumePDFPage.css';
 
-function ResumePdfPage() {
+function ResumePDFPage() {
   return (
     <div className="resume-pdf-page">
             <div className="background-gif">
