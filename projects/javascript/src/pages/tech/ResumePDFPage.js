@@ -27,4 +27,4 @@ function ResumePDFPage() {
   );
 }
 
-export default ResumePdfPage; 
+export default ResumePDFPage; 
