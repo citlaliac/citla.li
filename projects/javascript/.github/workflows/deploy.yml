@@ -31,10 +31,25 @@ jobs:
     - name: Prepare deployment files
       working-directory: projects/javascript
       run: |
-        # Create public directory if it doesn't exist
-        mkdir -p server/public
-        # Copy build files to server's public directory
-        cp -r build/* server/public/
+        # Create deployment directory structure
+        mkdir -p deployment/public_html
+        mkdir -p deployment/public_html/public
+        
+        # Copy React build files to public subdirectory
+        cp -r build/* deployment/public_html/public/
+        
+        # Copy PHP files and server files to public_html root
+        cp server/*.php deployment/public_html/
+        cp server/server.js deployment/public_html/
+        cp server/package*.json deployment/public_html/
+        
+        # Copy any other important files
+        cp public/robots.txt deployment/public_html/
+        cp public/sitemap.xml deployment/public_html/
+        cp public/manifest.json deployment/public_html/
+        
+        # Copy assets to public_html root (for backward compatibility)
+        cp -r public/assets deployment/public_html/
         
     - name: Deploy to PlanetHoster via FTP
       uses: SamKirkland/FTP-Deploy-Action@v4.3.4
@@ -42,7 +57,7 @@ jobs:
         server: ${{ secrets.FTP_SERVER }}
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
-        local-dir: projects/javascript/server/
+        local-dir: projects/javascript/deployment/public_html/
         server-dir: /public_html/
         exclude: |
           **/.git*
@@ -52,3 +67,8 @@ jobs:
           **/.env.*
           **/README.md
           **/.github/**
+          **/deployment-info.txt
+        # Don't delete existing files on server
+        dangerous-clean-slate: false
+        # Add logging for debugging
+        log-level: verbose
