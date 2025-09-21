@@ -26,7 +26,7 @@ jobs:
       
     - name: Build React app
       working-directory: projects/javascript
-      run: npm run build
+      run: CI=false npm run build
       
     - name: Prepare deployment files
       working-directory: projects/javascript
