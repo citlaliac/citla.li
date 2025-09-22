@@ -59,6 +59,7 @@ jobs:
         password: ${{ secrets.FTP_PASSWORD }}
         protocol: ftp
         port: 21
+        security: passive
         local-dir: projects/javascript/deployment/public_html/
         server-dir: /public_html/
         exclude: |
@@ -75,4 +76,4 @@ jobs:
         # Add logging for debugging
         log-level: verbose
         # Add timeout settings
-        timeout: 600
+        timeout: 120
