@@ -52,28 +52,11 @@ jobs:
         cp -r public/assets deployment/public_html/
         
     - name: Deploy to PlanetHoster via FTP
-      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      uses: sebastianpopp/ftp-action@releases/v2
       with:
-        server: ${{ secrets.FTP_SERVER }}
-        username: ${{ secrets.FTP_USERNAME }}
+        host: ${{ secrets.FTP_SERVER }}
+        user: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
-        protocol: ftp
         port: 21
-        security: loose
-        local-dir: projects/javascript/deployment/public_html/
-        server-dir: /public_html/
-        exclude: |
-          **/.git*
-          **/.git*/**
-          **/node_modules/**
-          **/.env
-          **/.env.*
-          **/README.md
-          **/.github/**
-          **/deployment-info.txt
-        # Don't delete existing files on server
-        dangerous-clean-slate: false
-        # Add logging for debugging
-        log-level: verbose
-        # Add timeout settings
-        timeout: 120
+        localDir: projects/javascript/deployment/public_html/
+        remoteDir: /public_html/
