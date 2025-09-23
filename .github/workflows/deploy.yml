@@ -65,10 +65,16 @@ jobs:
         ls -la deployment/public_html/index.html || echo "index.html not found in root!"
         
     - name: Deploy to PlanetHoster via FTP
-      uses: sebastianpopp/ftp-action@releases/v2
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
       with:
-        host: ${{ secrets.FTP_SERVER }}
-        user: ${{ secrets.FTP_USERNAME }}
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
-        localDir: projects/javascript/deployment/public_html/
-        remoteDir: /public_html/
+        protocol: ftp
+        port: 21
+        security: loose
+        local-dir: projects/javascript/deployment/public_html/
+        server-dir: /public_html/
+        dangerous-clean-slate: false
+        log-level: verbose
+        timeout: 120
