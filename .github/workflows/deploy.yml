@@ -64,17 +64,24 @@ jobs:
         echo "Checking for index.html in root:"
         ls -la deployment/public_html/index.html || echo "index.html not found in root!"
         
-    - name: Deploy to PlanetHoster via FTP
-      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
-      with:
-        server: ${{ secrets.FTP_SERVER }}
-        username: ${{ secrets.FTP_USERNAME }}
-        password: ${{ secrets.FTP_PASSWORD }}
-        protocol: ftp
-        port: 21
-        security: loose
-        local-dir: projects/javascript/deployment/public_html/
-        server-dir: /public_html/
-        dangerous-clean-slate: false
-        log-level: verbose
-        timeout: 120
+    - name: Deploy to PlanetHoster via LFTP
+      run: |
+        # Install lftp
+        sudo apt-get update
+        sudo apt-get install -y lftp
+        
+        # Create lftp script
+        cat > lftp_script.txt << EOF
+        set ftp:ssl-allow no
+        set ftp:passive-mode on
+        set net:timeout 30
+        set net:max-retries 3
+        open ftp://${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}@${{ secrets.FTP_SERVER }}
+        cd /public_html
+        lcd projects/javascript/deployment/public_html
+        mirror -R --delete --verbose --exclude-glob .git* --exclude-glob node_modules*
+        quit
+        EOF
+        
+        # Run lftp script
+        lftp -f lftp_script.txt
