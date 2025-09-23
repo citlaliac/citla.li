@@ -83,7 +83,7 @@ jobs:
         set net:timeout 30
         set net:max-retries 3
         open ftp://${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}@${{ secrets.FTP_SERVER }}
-        cd /public_html
+        cd public_html
         lcd projects/javascript/deployment/public_html
         mirror -R --verbose --exclude-glob .git* --exclude-glob node_modules*
         quit
@@ -94,4 +94,4 @@ jobs:
         
         # Debug: Verify upload by listing remote directory
         echo "=== VERIFYING UPLOAD ==="
-        lftp -c "set ftp:ssl-allow no; open ftp://${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}@${{ secrets.FTP_SERVER }}; cd /public_html; ls -la"
+        lftp -c "set ftp:ssl-allow no; open ftp://${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}@${{ secrets.FTP_SERVER }}; cd public_html; ls -la"
