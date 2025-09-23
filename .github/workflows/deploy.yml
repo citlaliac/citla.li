@@ -70,6 +70,12 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y lftp
         
+        # Debug: Show what we're about to upload
+        echo "=== FILES TO UPLOAD ==="
+        ls -la projects/javascript/deployment/public_html/
+        echo "=== INDEX.HTML CONTENT (first 10 lines) ==="
+        head -10 projects/javascript/deployment/public_html/index.html
+        
         # Create lftp script
         cat > lftp_script.txt << EOF
         set ftp:ssl-allow no
@@ -79,9 +85,13 @@ jobs:
         open ftp://${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}@${{ secrets.FTP_SERVER }}
         cd /public_html
         lcd projects/javascript/deployment/public_html
-        mirror -R --delete --verbose --exclude-glob .git* --exclude-glob node_modules*
+        mirror -R --verbose --exclude-glob .git* --exclude-glob node_modules*
         quit
         EOF
         
         # Run lftp script
         lftp -f lftp_script.txt
+        
+        # Debug: Verify upload by listing remote directory
+        echo "=== VERIFYING UPLOAD ==="
+        lftp -c "set ftp:ssl-allow no; open ftp://${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}@${{ secrets.FTP_SERVER }}; cd /public_html; ls -la"
