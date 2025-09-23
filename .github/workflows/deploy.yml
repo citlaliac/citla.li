@@ -31,25 +31,39 @@ jobs:
     - name: Prepare deployment files
       working-directory: projects/javascript
       run: |
+        # Debug: Check if build directory exists
+        echo "Checking build directory..."
+        ls -la build/ || echo "Build directory not found!"
+        
         # Create deployment directory structure
         mkdir -p deployment/public_html
         mkdir -p deployment/public_html/public
         
         # Copy React build files to public subdirectory
-        cp -r build/* deployment/public_html/public/
+        echo "Copying build files..."
+        cp -r build/* deployment/public_html/public/ || echo "Failed to copy build files"
         
         # Copy PHP files and server files to public_html root
-        cp server/*.php deployment/public_html/
-        cp server/server.js deployment/public_html/
-        cp server/package*.json deployment/public_html/
+        echo "Copying server files..."
+        cp server/*.php deployment/public_html/ || echo "Failed to copy PHP files"
+        cp server/server.js deployment/public_html/ || echo "Failed to copy server.js"
+        cp server/package*.json deployment/public_html/ || echo "Failed to copy package files"
         
         # Copy any other important files
-        cp public/robots.txt deployment/public_html/
-        cp public/sitemap.xml deployment/public_html/
-        cp public/manifest.json deployment/public_html/
+        echo "Copying other files..."
+        cp public/robots.txt deployment/public_html/ || echo "Failed to copy robots.txt"
+        cp public/sitemap.xml deployment/public_html/ || echo "Failed to copy sitemap.xml"
+        cp public/manifest.json deployment/public_html/ || echo "Failed to copy manifest.json"
         
         # Copy assets to public_html root (for backward compatibility)
-        cp -r public/assets deployment/public_html/
+        echo "Copying assets..."
+        cp -r public/assets deployment/public_html/ || echo "Failed to copy assets"
+        
+        # Debug: Show what was created
+        echo "Deployment directory contents:"
+        ls -la deployment/public_html/
+        echo "Public subdirectory contents:"
+        ls -la deployment/public_html/public/ || echo "Public subdirectory not found"
         
     - name: Deploy to PlanetHoster via FTP
       uses: sebastianpopp/ftp-action@releases/v2
@@ -57,6 +71,5 @@ jobs:
         host: ${{ secrets.FTP_SERVER }}
         user: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
-        port: 21
         localDir: projects/javascript/deployment/public_html/
         remoteDir: /public_html/
