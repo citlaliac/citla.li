@@ -59,7 +59,7 @@ jobs:
         password: ${{ secrets.FTP_PASSWORD }}
         protocol: ftp
         port: 21
-        security: passive
+        security: loose
         local-dir: projects/javascript/deployment/public_html/
         server-dir: /public_html/
         exclude: |
