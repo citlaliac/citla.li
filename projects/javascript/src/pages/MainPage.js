@@ -91,7 +91,7 @@ function MainPage() {
               />
             </Link>
           </div>
-          <p className="main-page-welcome-text">!Welcome to my website. Click around and get to know me.</p>
+          <p className="main-page-welcome-text">!!Welcome to my website. Click around and get to know me.</p>
           {/* Test deployment - this comment should trigger GitHub Actions */}
         </div>
         <div className="main-page-icon-grid">
