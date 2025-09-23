@@ -37,11 +37,10 @@ jobs:
         
         # Create deployment directory structure
         mkdir -p deployment/public_html
-        mkdir -p deployment/public_html/public
         
-        # Copy React build files to public subdirectory
+        # Copy React build files to public_html root (where your website expects them)
         echo "Copying build files..."
-        cp -r build/* deployment/public_html/public/ || echo "Failed to copy build files"
+        cp -r build/* deployment/public_html/ || echo "Failed to copy build files"
         
         # Copy PHP files and server files to public_html root
         echo "Copying server files..."
@@ -62,8 +61,8 @@ jobs:
         # Debug: Show what was created
         echo "Deployment directory contents:"
         ls -la deployment/public_html/
-        echo "Public subdirectory contents:"
-        ls -la deployment/public_html/public/ || echo "Public subdirectory not found"
+        echo "Checking for index.html in root:"
+        ls -la deployment/public_html/index.html || echo "index.html not found in root!"
         
     - name: Deploy to PlanetHoster via FTP
       uses: sebastianpopp/ftp-action@releases/v2
