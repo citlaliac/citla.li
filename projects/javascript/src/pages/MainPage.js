@@ -79,7 +79,7 @@ function MainPage() {
             <Link to="/karaoke">
               <img 
                 src="/assets/imgs/hiImCitlali.png" 
-                alt="Hi I'm Citlali Aguilar Canamar - NYC Tour Guide, Comedian and Photographer" 
+                alt="Hi I'm Citlali Aguilar Canamar - NYC Tour Guide, Comedian and Photographer - DEPLOYED SUCCESSFULLY!" 
                 className="hi-im"
               />
             </Link>
