@@ -17,12 +17,16 @@ const Spring2023Page = () => {
         {photos.map((photo, index) => (
           <div key={index} className="photo-item">
             <img
-              src={`/assets/photos/spring-2023/${photo}`}
+              src={`${process.env.PUBLIC_URL || ''}/assets/photos/spring-2023/${photo}`}
               alt={`Photo ${index + 1} from Spring 2023`}
               loading="lazy"
+              style={{ width: '100%', height: 'auto', display: 'block' }}
               onError={(e) => {
                 console.error(`Error loading image: ${photo}`);
                 e.target.style.display = 'none';
+              }}
+              onLoad={(e) => {
+                console.log(`Successfully loaded image: ${photo}`);
               }}
             />
           </div>
