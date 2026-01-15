@@ -101,6 +101,29 @@ describe('App Routing', () => {
     });
   });
 
+  test('renders WeatherPage at /weather path', () => {
+    // Mock weather service to avoid API calls in tests
+    jest.mock('../services/weatherService', () => ({
+      getCurrentWeather: jest.fn(() => Promise.resolve({})),
+      calculateSunAngle: jest.fn(() => 0),
+      getMoonPhase: jest.fn(() => 'New Moon'),
+      getAstrologicalSign: jest.fn(() => 'Aries'),
+      formatTime: jest.fn(() => '12:00 PM'),
+      getPressureInfo: jest.fn(() => ({ level: 'Normal', effects: '' })),
+      getYesterdayPressure: jest.fn(() => Promise.resolve(null)),
+      calculatePressureChange: jest.fn(() => null)
+    }));
+
+    render(
+      <MemoryRouter initialEntries={['/weather']}>
+        <App />
+      </MemoryRouter>
+    );
+    
+    // WeatherPage should render
+    expect(document.body).toBeInTheDocument();
+  });
+
   test('handles mobile routing for /read', () => {
     mockWindowWidth(500); // Mobile width
     

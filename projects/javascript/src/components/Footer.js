@@ -1,10 +1,19 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { BUILD_DATE } from '../buildInfo';
 import '../styles/Footer.css';
 
 function Footer() {
   const location = useLocation();
   const isHomePage = location.pathname === '/';
+  
+  // Format the build date for display
+  const buildDate = new Date(BUILD_DATE);
+  const formattedDate = buildDate.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
 
   return (
     <footer className="footer">
@@ -32,7 +41,7 @@ function Footer() {
             </div>
           </Link>
         )}
-      <div className="last-updated">Last updated: {new Date().toLocaleDateString()}</div>
+      <div className="last-updated">Last updated: {formattedDate}</div>
     </footer>
   );
 }

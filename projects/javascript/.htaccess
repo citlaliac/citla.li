@@ -1,7 +1,13 @@
 RewriteEngine On
 RewriteBase /
 
-# Handle React Router
+# IMPORTANT: Allow PHP files to be executed (don't rewrite them to index.html)
+# If the requested file exists and is a PHP file, let Apache handle it
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteCond %{REQUEST_URI} \.php$ [NC]
+RewriteRule . - [L]
+
+# Handle React Router (only for files that don't exist)
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-l

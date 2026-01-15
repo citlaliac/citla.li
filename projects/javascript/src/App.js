@@ -38,6 +38,7 @@ import BirthdayPage from './pages/BirthdayPage';
 import GuestbookPage from './pages/GuestBookPage';
 import SignGuestBookPage from './pages/SignGuestBookPage';
 import KaraokePage from './pages/KaraokePage';
+import WeatherPage from './pages/WeatherPage';
 
 import './styles.css';
 
@@ -91,6 +92,7 @@ function App() {
           {/* Other pages */}
           <Route path="/birthday" element={<BirthdayPage />} />
           <Route path="/karaoke" element={<KaraokePage />} />
+          <Route path="/weather" element={<WeatherPage />} />
         </Routes>
       </div>
     </Router>

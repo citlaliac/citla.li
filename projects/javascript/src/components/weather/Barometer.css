@@ -1,0 +1,334 @@
+.weather-barometer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 2rem;
+  padding-right: 3rem; /* Extra padding on right for markings */
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  overflow: visible; /* Allow markings to show */
+}
+
+.weather-barometer-container {
+  position: relative;
+  width: 100px;
+  height: 350px;
+  padding-right: 70px; /* Make room for the scale markings */
+  overflow: visible; /* Allow markings to show outside */
+}
+
+.weather-barometer-glass {
+  position: relative;
+  width: 100px;
+  height: 100%;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.4) 0%,
+    rgba(255, 255, 255, 0.15) 50%,
+    rgba(255, 255, 255, 0.1) 100%
+  );
+  border: 4px solid rgba(255, 255, 255, 0.6);
+  border-radius: 50px;
+  overflow: hidden;
+  box-shadow: 
+    inset 0 0 30px rgba(0, 0, 0, 0.15),
+    inset 0 2px 10px rgba(255, 255, 255, 0.3),
+    0 6px 20px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.weather-barometer-zones {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.weather-barometer-zone {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: 0.15;
+  border-left: 3px solid;
+  transition: opacity 0.3s ease;
+}
+
+.weather-barometer-zone-low {
+  background: linear-gradient(180deg, rgba(46, 92, 138, 0.2) 0%, rgba(74, 144, 226, 0.1) 100%);
+  border-color: #4A90E2;
+}
+
+.weather-barometer-zone-normal {
+  background: linear-gradient(180deg, rgba(61, 123, 168, 0.2) 0%, rgba(91, 163, 211, 0.1) 100%);
+  border-color: #5BA3D3;
+}
+
+.weather-barometer-zone-high {
+  background: linear-gradient(180deg, rgba(91, 163, 211, 0.2) 0%, rgba(135, 206, 235, 0.1) 100%);
+  border-color: #87CEEB;
+}
+
+.weather-barometer-zone-label {
+  position: absolute;
+  left: -45px;
+  top: 50%;
+  transform: translateY(-50%) rotate(-90deg);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  white-space: nowrap;
+}
+
+.weather-barometer-liquid {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  transition: height 1.5s cubic-bezier(0.4, 0, 0.2, 1), background 1s ease-in-out;
+  border-radius: 0 0 46px 46px;
+  z-index: 2;
+  box-shadow: 
+    inset 0 -15px 30px rgba(0, 0, 0, 0.4),
+    inset 0 2px 5px rgba(255, 255, 255, 0.2),
+    0 3px 15px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+.weather-barometer-shimmer {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.2) 50%,
+    transparent 70%
+  );
+  animation: weather-barometer-shimmer 8s infinite;
+  pointer-events: none;
+}
+
+@keyframes weather-barometer-shimmer {
+  0% {
+    transform: translateX(-100%) translateY(-100%) rotate(45deg);
+  }
+  100% {
+    transform: translateX(100%) translateY(100%) rotate(45deg);
+  }
+}
+
+.weather-barometer-indicator {
+  position: absolute;
+  left: -8px;
+  width: calc(100% + 16px);
+  z-index: 3;
+  pointer-events: none;
+  transition: bottom 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.weather-barometer-indicator-line {
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, 
+    transparent 0%,
+    rgba(255, 255, 255, 0.8) 20%,
+    rgba(255, 255, 255, 1) 50%,
+    rgba(255, 255, 255, 0.8) 80%,
+    transparent 100%
+  );
+  box-shadow: 
+    0 0 8px rgba(255, 255, 255, 0.6),
+    0 0 4px rgba(255, 255, 255, 0.4);
+}
+
+.weather-barometer-indicator-dot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  border: 2px solid rgba(0, 0, 0, 0.3);
+  border-radius: 50%;
+  box-shadow: 
+    0 0 10px rgba(255, 255, 255, 0.8),
+    0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.weather-barometer-scale {
+  position: absolute;
+  right: -65px;
+  top: 0;
+  bottom: 0;
+  width: 60px;
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.weather-barometer-mark {
+  position: absolute;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.weather-barometer-mark-line {
+  width: 12px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.5);
+  border-radius: 1px;
+}
+
+.weather-barometer-mark-line-minor {
+  width: 6px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.6);
+  box-shadow: none;
+}
+
+.weather-barometer-mark-line-zone {
+  width: 16px;
+  height: 3px;
+  background: rgba(255, 255, 255, 1);
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.7);
+}
+
+.weather-barometer-mark-value {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  line-height: 1;
+}
+
+.weather-barometer-mark-zone-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.9);
+  text-transform: uppercase;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  margin-bottom: 2px;
+}
+
+
+.weather-barometer-reading {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.weather-barometer-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
+  margin-bottom: 0.25rem;
+  letter-spacing: -0.5px;
+}
+
+.weather-barometer-unit {
+  font-size: 1.3rem;
+  font-weight: 400;
+  opacity: 0.95;
+}
+
+.weather-barometer-hpa {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 500;
+}
+
+.weather-barometer-zone-badge {
+  display: inline-block;
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-top: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  border: 2px solid;
+}
+
+.weather-barometer-zone-badge-low {
+  background: rgba(74, 144, 226, 0.3);
+  border-color: #4A90E2;
+  color: #87CEEB;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.weather-barometer-zone-badge-normal {
+  background: rgba(91, 163, 211, 0.3);
+  border-color: #5BA3D3;
+  color: #B8E0F5;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.weather-barometer-zone-badge-high {
+  background: rgba(135, 206, 235, 0.3);
+  border-color: #87CEEB;
+  color: #E0F4FF;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+@media (max-width: 768px) {
+  .weather-barometer {
+    padding: 1.5rem;
+    padding-right: 2.5rem; /* Extra padding on right for markings */
+  }
+  
+  .weather-barometer-container {
+    width: 70px;
+    height: 280px;
+    padding-right: 50px; /* Make room for the scale markings on mobile */
+  }
+  
+  .weather-barometer-value {
+    font-size: 1.8rem;
+  }
+  
+  .weather-barometer-scale {
+    right: -45px;
+    width: 40px;
+  }
+  
+  .weather-barometer-mark-value {
+    font-size: 0.65rem;
+  }
+  
+  .weather-barometer-mark-zone-label {
+    font-size: 0.55rem;
+  }
+  
+  .weather-barometer-zone-label {
+    left: -35px;
+    font-size: 0.55rem;
+  }
+  
+  .weather-barometer-indicator-dot {
+    width: 10px;
+    height: 10px;
+  }
+}
+
