@@ -118,25 +118,33 @@ jobs:
         echo "=== INDEX.HTML CONTENT (first 10 lines) ==="
         head -10 projects/javascript/deployment/public_html/index.html
         
-        # Use lftp's -u flag to handle special characters in password
-        lftp -u "${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }}" -e "
-        set ftp:ssl-allow no;
-        set ftp:passive-mode on;
-        set net:timeout 30;
-        set net:max-retries 3;
-        open ${{ secrets.FTP_SERVER }};
-        cd public_html;
-        lcd projects/javascript/deployment/public_html;
-        mirror -R --verbose --exclude-glob .git* --exclude-glob node_modules* --exclude-glob .env*;
+        # Create lftp script for deployment
+        cat > /tmp/ftp_deploy.txt << 'LFTP_SCRIPT'
+        set ftp:ssl-allow no
+        set ftp:passive-mode on
+        set net:timeout 30
+        set net:max-retries 3
+LFTP_SCRIPT
+        echo "open -u ${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }} ${{ secrets.FTP_SERVER }}" >> /tmp/ftp_deploy.txt
+        cat >> /tmp/ftp_deploy.txt << 'LFTP_SCRIPT'
+        cd public_html
+        lcd projects/javascript/deployment/public_html
+        mirror -R --verbose --exclude-glob .git* --exclude-glob node_modules* --exclude-glob .env*
         quit
-        "
+LFTP_SCRIPT
+        
+        # Run deployment
+        lftp -f /tmp/ftp_deploy.txt
         
         # Debug: Verify upload by listing remote directory
         echo "=== VERIFYING UPLOAD ==="
-        lftp -u "${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }}" -e "
-        set ftp:ssl-allow no;
-        open ${{ secrets.FTP_SERVER }};
-        cd public_html;
-        ls -la;
+        cat > /tmp/ftp_verify.txt << 'LFTP_SCRIPT'
+        set ftp:ssl-allow no
+LFTP_SCRIPT
+        echo "open -u ${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }} ${{ secrets.FTP_SERVER }}" >> /tmp/ftp_verify.txt
+        cat >> /tmp/ftp_verify.txt << 'LFTP_SCRIPT'
+        cd public_html
+        ls -la
         quit
-        "
+LFTP_SCRIPT
+        lftp -f /tmp/ftp_verify.txt
