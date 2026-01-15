@@ -29,34 +29,32 @@ jobs:
         echo "Username: ${{ secrets.FTP_USERNAME }}"
         echo "Password: [HIDDEN]"
         
-        cat > test_ftp.txt << EOF
-        set ftp:ssl-allow no
-        set ftp:passive-mode on
-        set net:timeout 30
-        set net:max-retries 3
-        set ftp:list-options -a
-        open ftp://${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}@${{ secrets.FTP_SERVER }}
-        pwd
-        ls -la | head -10
-        cd public_html
-        pwd
-        ls -la | head -10
+        # Use lftp's -u flag to avoid URL encoding issues with special characters
+        lftp -u "${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }}" -e "
+        set ftp:ssl-allow no;
+        set ftp:passive-mode on;
+        set net:timeout 30;
+        set net:max-retries 3;
+        open ${{ secrets.FTP_SERVER }};
+        pwd;
+        ls -la | head -10;
+        cd public_html;
+        pwd;
+        ls -la | head -10;
         quit
-        EOF
-        
-        echo "Running FTP connection test..."
-        if lftp -f test_ftp.txt 2>&1; then
-          echo "✅ FTP connection successful!"
-        else
+        " || {
           echo "❌ FTP connection failed!"
           echo ""
           echo "Troubleshooting steps:"
           echo "1. Verify FTP_SERVER secret: ${{ secrets.FTP_SERVER }}"
           echo "2. Verify FTP_USERNAME secret: ${{ secrets.FTP_USERNAME }}"
-          echo "3. Check FTP_PASSWORD secret (make sure no extra spaces)"
+          echo "3. Check FTP_PASSWORD secret (special characters like ! should work)"
           echo "4. Try connecting manually with an FTP client to verify credentials"
           exit 1
-        fi
+        }
+        
+        echo "✅ FTP connection successful!"
+        
       
     - name: Setup Node.js
       uses: actions/setup-node@v4
@@ -120,22 +118,25 @@ jobs:
         echo "=== INDEX.HTML CONTENT (first 10 lines) ==="
         head -10 projects/javascript/deployment/public_html/index.html
         
-        # Create lftp script
-        cat > lftp_script.txt << EOF
-        set ftp:ssl-allow no
-        set ftp:passive-mode on
-        set net:timeout 30
-        set net:max-retries 3
-        open ftp://${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}@${{ secrets.FTP_SERVER }}
-        cd public_html
-        lcd projects/javascript/deployment/public_html
-        mirror -R --verbose --exclude-glob .git* --exclude-glob node_modules* --exclude-glob .env*
+        # Use lftp's -u flag to handle special characters in password
+        lftp -u "${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }}" -e "
+        set ftp:ssl-allow no;
+        set ftp:passive-mode on;
+        set net:timeout 30;
+        set net:max-retries 3;
+        open ${{ secrets.FTP_SERVER }};
+        cd public_html;
+        lcd projects/javascript/deployment/public_html;
+        mirror -R --verbose --exclude-glob .git* --exclude-glob node_modules* --exclude-glob .env*;
         quit
-        EOF
-        
-        # Run lftp script
-        lftp -f lftp_script.txt
+        "
         
         # Debug: Verify upload by listing remote directory
         echo "=== VERIFYING UPLOAD ==="
-        lftp -c "set ftp:ssl-allow no; open ftp://${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}@${{ secrets.FTP_SERVER }}; cd public_html; ls -la"
+        lftp -u "${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }}" -e "
+        set ftp:ssl-allow no;
+        open ${{ secrets.FTP_SERVER }};
+        cd public_html;
+        ls -la;
+        quit
+        "
