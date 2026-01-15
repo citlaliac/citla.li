@@ -29,20 +29,33 @@ jobs:
         echo "Username: ${{ secrets.FTP_USERNAME }}"
         echo "Password: [HIDDEN]"
         
-        # Use lftp's -u flag to avoid URL encoding issues with special characters
-        lftp -u "${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }}" -e "
-        set ftp:ssl-allow no;
-        set ftp:passive-mode on;
-        set net:timeout 30;
-        set net:max-retries 3;
-        open ${{ secrets.FTP_SERVER }};
-        pwd;
-        ls -la | head -10;
-        cd public_html;
-        pwd;
-        ls -la | head -10;
+        # Create lftp script file to avoid shell escaping issues
+        # Use FTPS (FTP over TLS) since PlanetHoster requires it
+        cat > /tmp/ftp_test.txt << 'LFTP_SCRIPT'
+        set ftp:ssl-allow yes
+        set ftp:ssl-force yes
+        set ftp:ssl-protect-data yes
+        set ftp:ssl-protect-list yes
+        set ssl:verify-certificate no
+        set ftp:passive-mode on
+        set net:timeout 30
+        set net:max-retries 3
+        set ftp:list-options -a
+LFTP_SCRIPT
+        echo "open -u ${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }} ${{ secrets.FTP_SERVER }}" >> /tmp/ftp_test.txt
+        cat >> /tmp/ftp_test.txt << 'LFTP_SCRIPT'
+        pwd
+        ls -la | head -10
+        cd public_html
+        pwd
+        ls -la | head -10
         quit
-        " || {
+LFTP_SCRIPT
+        
+        echo "Running FTP connection test..."
+        if lftp -f /tmp/ftp_test.txt 2>&1; then
+          echo "✅ FTP connection successful!"
+        else
           echo "❌ FTP connection failed!"
           echo ""
           echo "Troubleshooting steps:"
@@ -118,9 +131,13 @@ jobs:
         echo "=== INDEX.HTML CONTENT (first 10 lines) ==="
         head -10 projects/javascript/deployment/public_html/index.html
         
-        # Create lftp script for deployment
+        # Create lftp script for deployment (using FTPS)
         cat > /tmp/ftp_deploy.txt << 'LFTP_SCRIPT'
-        set ftp:ssl-allow no
+        set ftp:ssl-allow yes
+        set ftp:ssl-force yes
+        set ftp:ssl-protect-data yes
+        set ftp:ssl-protect-list yes
+        set ssl:verify-certificate no
         set ftp:passive-mode on
         set net:timeout 30
         set net:max-retries 3
@@ -139,7 +156,9 @@ LFTP_SCRIPT
         # Debug: Verify upload by listing remote directory
         echo "=== VERIFYING UPLOAD ==="
         cat > /tmp/ftp_verify.txt << 'LFTP_SCRIPT'
-        set ftp:ssl-allow no
+        set ftp:ssl-allow yes
+        set ftp:ssl-force yes
+        set ssl:verify-certificate no
 LFTP_SCRIPT
         echo "open -u ${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }} ${{ secrets.FTP_SERVER }}" >> /tmp/ftp_verify.txt
         cat >> /tmp/ftp_verify.txt << 'LFTP_SCRIPT'
