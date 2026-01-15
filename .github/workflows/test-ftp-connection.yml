@@ -1,0 +1,44 @@
+name: Test FTP Connection
+
+on:
+  workflow_dispatch: # Manual trigger only
+
+jobs:
+  test-connection:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Install lftp
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y lftp
+    
+    - name: Test FTP Connection
+      run: |
+        echo "🔍 Testing FTP connection to PlanetHoster..."
+        
+        # Create test script
+        cat > test_ftp.txt << EOF
+        set ftp:ssl-allow no
+        set ftp:passive-mode on
+        set net:timeout 10
+        set net:max-retries 2
+        open ftp://${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}@${{ secrets.FTP_SERVER }}
+        pwd
+        ls -la
+        cd public_html
+        ls -la | head -10
+        quit
+        EOF
+        
+        # Test connection
+        if lftp -f test_ftp.txt; then
+          echo "✅ FTP connection successful!"
+          echo "✅ Can access public_html directory"
+          exit 0
+        else
+          echo "❌ FTP connection failed!"
+          echo "Check your FTP credentials in GitHub Secrets"
+          exit 1
+        fi
+
