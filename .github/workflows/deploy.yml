@@ -3,7 +3,13 @@ name: Deploy to PlanetHoster
 on:
   push:
     branches: [ main ]
-  workflow_dispatch: # Allows manual triggering
+  workflow_dispatch: # Allows manual triggering from any branch
+    inputs:
+      test_mode:
+        description: 'Test mode (only test connection, no deployment)'
+        required: false
+        default: 'false'
+        type: boolean
 
 jobs:
   deploy:
@@ -12,6 +18,32 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+    
+    - name: Test FTP Connection
+      run: |
+        echo "🔍 Testing FTP connection first..."
+        sudo apt-get update
+        sudo apt-get install -y lftp
+        
+        cat > test_ftp.txt << EOF
+        set ftp:ssl-allow no
+        set ftp:passive-mode on
+        set net:timeout 10
+        set net:max-retries 2
+        open ftp://${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}@${{ secrets.FTP_SERVER }}
+        pwd
+        ls -la | head -5
+        cd public_html
+        ls -la | head -5
+        quit
+        EOF
+        
+        if lftp -f test_ftp.txt; then
+          echo "✅ FTP connection successful!"
+        else
+          echo "❌ FTP connection failed! Check your GitHub Secrets."
+          exit 1
+        fi
       
     - name: Setup Node.js
       uses: actions/setup-node@v4
