@@ -30,13 +30,8 @@ jobs:
         echo "Password: [HIDDEN]"
         
         # Create lftp script file to avoid shell escaping issues
-        # Use FTPS (FTP over TLS) since PlanetHoster requires it
         cat > /tmp/ftp_test.txt << 'LFTP_SCRIPT'
-        set ftp:ssl-allow yes
-        set ftp:ssl-force yes
-        set ftp:ssl-protect-data yes
-        set ftp:ssl-protect-list yes
-        set ssl:verify-certificate no
+        set ftp:ssl-allow no
         set ftp:passive-mode on
         set net:timeout 30
         set net:max-retries 3
@@ -131,13 +126,9 @@ LFTP_SCRIPT
         echo "=== INDEX.HTML CONTENT (first 10 lines) ==="
         head -10 projects/javascript/deployment/public_html/index.html
         
-        # Create lftp script for deployment (using FTPS)
+        # Create lftp script for deployment
         cat > /tmp/ftp_deploy.txt << 'LFTP_SCRIPT'
-        set ftp:ssl-allow yes
-        set ftp:ssl-force yes
-        set ftp:ssl-protect-data yes
-        set ftp:ssl-protect-list yes
-        set ssl:verify-certificate no
+        set ftp:ssl-allow no
         set ftp:passive-mode on
         set net:timeout 30
         set net:max-retries 3
@@ -156,9 +147,7 @@ LFTP_SCRIPT
         # Debug: Verify upload by listing remote directory
         echo "=== VERIFYING UPLOAD ==="
         cat > /tmp/ftp_verify.txt << 'LFTP_SCRIPT'
-        set ftp:ssl-allow yes
-        set ftp:ssl-force yes
-        set ssl:verify-certificate no
+        set ftp:ssl-allow no
 LFTP_SCRIPT
         echo "open -u ${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }} ${{ secrets.FTP_SERVER }}" >> /tmp/ftp_verify.txt
         cat >> /tmp/ftp_verify.txt << 'LFTP_SCRIPT'
