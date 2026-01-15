@@ -57,7 +57,7 @@ function TechPage() {
     {
       id: 'ai',
       title: 'trust & safety AI',
-      path: '/tech/ts',
+      path: '/tech/ai',
       icon: '/assets/gifs/ai.gif'
     },
     {

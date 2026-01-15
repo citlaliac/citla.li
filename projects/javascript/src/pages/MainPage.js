@@ -92,7 +92,7 @@ function MainPage() {
             </Link>
           </div>
           <p className="main-page-welcome-text">Welcome to my website. Click around and get to know me.</p>
-          {/* Test automated deployment - Jan 5, 2025 */}
+          {/* Test deployment - this comment should trigger GitHub Actions */}
         </div>
         <div className="main-page-icon-grid">
           {/* Navigation links with floating animation */}
