@@ -3,7 +3,13 @@ name: Deploy to PlanetHoster
 on:
   push:
     branches: [ main ]
-  workflow_dispatch: # Allows manual triggering
+  workflow_dispatch: # Allows manual triggering from any branch
+    inputs:
+      test_mode:
+        description: 'Test mode (only test connection, no deployment)'
+        required: false
+        default: 'false'
+        type: boolean
 
 jobs:
   deploy:
@@ -12,6 +18,32 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+    
+    - name: Test FTP Connection
+      run: |
+        echo "🔍 Testing FTP connection first..."
+        sudo apt-get update
+        sudo apt-get install -y lftp
+        
+        cat > test_ftp.txt << EOF
+        set ftp:ssl-allow no
+        set ftp:passive-mode on
+        set net:timeout 10
+        set net:max-retries 2
+        open ftp://${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}@${{ secrets.FTP_SERVER }}
+        pwd
+        ls -la | head -5
+        cd public_html
+        ls -la | head -5
+        quit
+        EOF
+        
+        if lftp -f test_ftp.txt; then
+          echo "✅ FTP connection successful!"
+        else
+          echo "❌ FTP connection failed! Check your GitHub Secrets."
+          exit 1
+        fi
       
     - name: Setup Node.js
       uses: actions/setup-node@v4
@@ -31,38 +63,37 @@ jobs:
     - name: Prepare deployment files
       working-directory: projects/javascript
       run: |
-        # Debug: Check if build directory exists
-        echo "Checking build directory..."
-        ls -la build/ || echo "Build directory not found!"
+        echo "📦 Preparing deployment files..."
         
-        # Create deployment directory structure
+        # Create deployment directory
         mkdir -p deployment/public_html
         
-        # Copy React build files to public_html root (where your website expects them)
-        echo "Copying build files..."
-        cp -r build/* deployment/public_html/ || echo "Failed to copy build files"
+        # Step 1: Copy React build files to public_html root
+        echo "📁 Copying React build files..."
+        cp -r build/* deployment/public_html/
         
-        # Copy PHP files and server files to public_html root
-        echo "Copying server files..."
-        cp server/*.php deployment/public_html/ || echo "Failed to copy PHP files"
-        cp server/server.js deployment/public_html/ || echo "Failed to copy server.js"
-        cp server/package*.json deployment/public_html/ || echo "Failed to copy package files"
+        # Step 2: Copy PHP files to public_html root
+        echo "📁 Copying PHP files..."
+        cp server/*.php deployment/public_html/ 2>/dev/null || echo "No PHP files found in server/"
         
-        # Copy any other important files
-        echo "Copying other files..."
-        cp public/robots.txt deployment/public_html/ || echo "Failed to copy robots.txt"
-        cp public/sitemap.xml deployment/public_html/ || echo "Failed to copy sitemap.xml"
-        cp public/manifest.json deployment/public_html/ || echo "Failed to copy manifest.json"
+        # Step 3: Copy .htaccess for React Router
+        echo "📁 Copying .htaccess..."
+        if [ -f .htaccess ]; then
+          cp .htaccess deployment/public_html/
+        else
+          echo "⚠️  .htaccess not found - React Router may not work correctly"
+        fi
         
-        # Copy assets to public_html root (for backward compatibility)
-        echo "Copying assets..."
-        cp -r public/assets deployment/public_html/ || echo "Failed to copy assets"
-        
-        # Debug: Show what was created
-        echo "Deployment directory contents:"
-        ls -la deployment/public_html/
-        echo "Checking for index.html in root:"
-        ls -la deployment/public_html/index.html || echo "index.html not found in root!"
+        # Verify critical files exist
+        echo "✅ Verifying deployment structure..."
+        echo "Files in deployment/public_html/:"
+        ls -la deployment/public_html/ | head -20
+        echo ""
+        echo "Checking for critical files:"
+        [ -f deployment/public_html/index.html ] && echo "✅ index.html found" || echo "❌ index.html missing"
+        [ -d deployment/public_html/assets ] && echo "✅ assets/ folder found" || echo "❌ assets/ folder missing"
+        [ -d deployment/public_html/static ] && echo "✅ static/ folder found" || echo "❌ static/ folder missing"
+        [ -f deployment/public_html/.htaccess ] && echo "✅ .htaccess found" || echo "⚠️  .htaccess missing"
         
     - name: Deploy to PlanetHoster via LFTP
       run: |
@@ -85,7 +116,7 @@ jobs:
         open ftp://${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}@${{ secrets.FTP_SERVER }}
         cd public_html
         lcd projects/javascript/deployment/public_html
-        mirror -R --verbose --exclude-glob .git* --exclude-glob node_modules*
+        mirror -R --verbose --exclude-glob .git* --exclude-glob node_modules* --exclude-glob .env*
         quit
         EOF
         

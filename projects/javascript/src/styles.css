@@ -1535,10 +1535,7 @@ body {
     padding: 0;
 }
 
-/* Remove grid-related styles */
-.photo-grid {
-    display: none;
-}
+/* Photo grid masonry layout - handled in PhotoCollectionPage.css */
 
 .main-page-title-section {
     margin: 0;
@@ -1605,7 +1602,6 @@ body {
 .title-image-container,
 .main-page-title-image,
 .title-decorative-gif,
-.photo-grid,
 .main-page-title-section {
     /* Remove all existing styles */
 }
