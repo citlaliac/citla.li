@@ -25,23 +25,36 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y lftp
         
+        echo "Testing connection to: ${{ secrets.FTP_SERVER }}"
+        echo "Username: ${{ secrets.FTP_USERNAME }}"
+        echo "Password: [HIDDEN]"
+        
         cat > test_ftp.txt << EOF
         set ftp:ssl-allow no
         set ftp:passive-mode on
-        set net:timeout 10
-        set net:max-retries 2
+        set net:timeout 30
+        set net:max-retries 3
+        set ftp:list-options -a
         open ftp://${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}@${{ secrets.FTP_SERVER }}
         pwd
-        ls -la | head -5
+        ls -la | head -10
         cd public_html
-        ls -la | head -5
+        pwd
+        ls -la | head -10
         quit
         EOF
         
-        if lftp -f test_ftp.txt; then
+        echo "Running FTP connection test..."
+        if lftp -f test_ftp.txt 2>&1; then
           echo "✅ FTP connection successful!"
         else
-          echo "❌ FTP connection failed! Check your GitHub Secrets."
+          echo "❌ FTP connection failed!"
+          echo ""
+          echo "Troubleshooting steps:"
+          echo "1. Verify FTP_SERVER secret: ${{ secrets.FTP_SERVER }}"
+          echo "2. Verify FTP_USERNAME secret: ${{ secrets.FTP_USERNAME }}"
+          echo "3. Check FTP_PASSWORD secret (make sure no extra spaces)"
+          echo "4. Try connecting manually with an FTP client to verify credentials"
           exit 1
         fi
       
