@@ -136,9 +136,7 @@ jobs:
         
         # Debug: Verify upload by listing remote directory
         echo "=== VERIFYING UPLOAD ==="
-        cat > verify_ftp.txt << 'VERIFYEOF'
-        set ftp:ssl-allow no
-VERIFYEOF
+        echo "set ftp:ssl-allow no" > verify_ftp.txt
         echo "open -u ${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }} ${{ secrets.FTP_SERVER }}" >> verify_ftp.txt
         echo "cd public_html" >> verify_ftp.txt
         echo "ls -la" >> verify_ftp.txt
