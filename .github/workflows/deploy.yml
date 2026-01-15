@@ -30,20 +30,20 @@ jobs:
         echo "Password: [HIDDEN]"
         
         # Create lftp script file to avoid shell escaping issues
-        cat > /tmp/ftp_test.txt << 'EOF'
-        set ftp:ssl-allow no
-        set ftp:passive-mode on
-        set net:timeout 30
-        set net:max-retries 3
-        set ftp:list-options -a
-        open -u ${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }} ${{ secrets.FTP_SERVER }}
-        pwd
-        ls -la | head -10
-        cd public_html
-        pwd
-        ls -la | head -10
-        quit
-EOF
+        {
+          echo "set ftp:ssl-allow no"
+          echo "set ftp:passive-mode on"
+          echo "set net:timeout 30"
+          echo "set net:max-retries 3"
+          echo "set ftp:list-options -a"
+          echo "open -u ${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }} ${{ secrets.FTP_SERVER }}"
+          echo "pwd"
+          echo "ls -la | head -10"
+          echo "cd public_html"
+          echo "pwd"
+          echo "ls -la | head -10"
+          echo "quit"
+        } > /tmp/ftp_test.txt
         
         echo "Running FTP connection test..."
         if lftp -f /tmp/ftp_test.txt 2>&1; then
@@ -125,28 +125,28 @@ EOF
         head -10 projects/javascript/deployment/public_html/index.html
         
         # Create lftp script for deployment
-        cat > /tmp/ftp_deploy.txt << 'EOF'
-        set ftp:ssl-allow no
-        set ftp:passive-mode on
-        set net:timeout 30
-        set net:max-retries 3
-        open -u ${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }} ${{ secrets.FTP_SERVER }}
-        cd public_html
-        lcd projects/javascript/deployment/public_html
-        mirror -R --verbose --exclude-glob .git* --exclude-glob node_modules* --exclude-glob .env*
-        quit
-EOF
+        {
+          echo "set ftp:ssl-allow no"
+          echo "set ftp:passive-mode on"
+          echo "set net:timeout 30"
+          echo "set net:max-retries 3"
+          echo "open -u ${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }} ${{ secrets.FTP_SERVER }}"
+          echo "cd public_html"
+          echo "lcd projects/javascript/deployment/public_html"
+          echo "mirror -R --verbose --exclude-glob .git* --exclude-glob node_modules* --exclude-glob .env*"
+          echo "quit"
+        } > /tmp/ftp_deploy.txt
         
         # Run deployment
         lftp -f /tmp/ftp_deploy.txt
         
         # Debug: Verify upload by listing remote directory
         echo "=== VERIFYING UPLOAD ==="
-        cat > /tmp/ftp_verify.txt << 'EOF'
-        set ftp:ssl-allow no
-        open -u ${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }} ${{ secrets.FTP_SERVER }}
-        cd public_html
-        ls -la
-        quit
-EOF
+        {
+          echo "set ftp:ssl-allow no"
+          echo "open -u ${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }} ${{ secrets.FTP_SERVER }}"
+          echo "cd public_html"
+          echo "ls -la"
+          echo "quit"
+        } > /tmp/ftp_verify.txt
         lftp -f /tmp/ftp_verify.txt
