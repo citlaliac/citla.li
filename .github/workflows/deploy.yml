@@ -30,23 +30,19 @@ jobs:
         echo "Password: [HIDDEN]"
         
         # Use -u flag to avoid URL encoding issues with special characters in password
-        cat > test_ftp.txt << 'TESTEOF'
-        set ftp:ssl-allow no
-        set ftp:passive-mode on
-        set net:timeout 30
-        set net:max-retries 3
-        set ftp:list-options -a
-TESTEOF
-        # Add credentials using -u flag (avoids URL encoding issues)
+        # Build FTP script line by line to avoid YAML syntax issues
+        echo "set ftp:ssl-allow no" > test_ftp.txt
+        echo "set ftp:passive-mode on" >> test_ftp.txt
+        echo "set net:timeout 30" >> test_ftp.txt
+        echo "set net:max-retries 3" >> test_ftp.txt
+        echo "set ftp:list-options -a" >> test_ftp.txt
         echo "open -u ${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }} ${{ secrets.FTP_SERVER }}" >> test_ftp.txt
-        cat >> test_ftp.txt << 'TESTEOF'
-        pwd
-        ls -la | head -10
-        cd public_html
-        pwd
-        ls -la | head -10
-        quit
-TESTEOF
+        echo "pwd" >> test_ftp.txt
+        echo "ls -la | head -10" >> test_ftp.txt
+        echo "cd public_html" >> test_ftp.txt
+        echo "pwd" >> test_ftp.txt
+        echo "ls -la | head -10" >> test_ftp.txt
+        echo "quit" >> test_ftp.txt
         
         echo "Running FTP connection test..."
         if lftp -f test_ftp.txt 2>&1; then
@@ -125,20 +121,15 @@ TESTEOF
         head -10 projects/javascript/deployment/public_html/index.html
         
         # Create lftp script using -u flag to avoid URL encoding issues
-        cat > lftp_script.txt << 'DEPLOYEOF'
-        set ftp:ssl-allow no
-        set ftp:passive-mode on
-        set net:timeout 30
-        set net:max-retries 3
-DEPLOYEOF
-        # Add credentials using -u flag (handles special characters like !)
+        echo "set ftp:ssl-allow no" > lftp_script.txt
+        echo "set ftp:passive-mode on" >> lftp_script.txt
+        echo "set net:timeout 30" >> lftp_script.txt
+        echo "set net:max-retries 3" >> lftp_script.txt
         echo "open -u ${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }} ${{ secrets.FTP_SERVER }}" >> lftp_script.txt
-        cat >> lftp_script.txt << 'DEPLOYEOF'
-        cd public_html
-        lcd projects/javascript/deployment/public_html
-        mirror -R --verbose --exclude-glob .git* --exclude-glob node_modules* --exclude-glob .env*
-        quit
-DEPLOYEOF
+        echo "cd public_html" >> lftp_script.txt
+        echo "lcd projects/javascript/deployment/public_html" >> lftp_script.txt
+        echo "mirror -R --verbose --exclude-glob .git* --exclude-glob node_modules* --exclude-glob .env*" >> lftp_script.txt
+        echo "quit" >> lftp_script.txt
         
         # Run lftp script
         lftp -f lftp_script.txt
