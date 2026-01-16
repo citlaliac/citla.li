@@ -107,6 +107,32 @@ jobs:
         [ -d deployment/public_html/assets ] && echo "✅ assets/ folder found" || echo "❌ assets/ folder missing"
         [ -d deployment/public_html/static ] && echo "✅ static/ folder found" || echo "❌ static/ folder missing"
         [ -f deployment/public_html/.htaccess ] && echo "✅ .htaccess found" || echo "⚠️  .htaccess missing"
+        echo ""
+        echo "Checking index.html for script tags:"
+        if [ -f deployment/public_html/index.html ]; then
+          if grep -q "static/js/main" deployment/public_html/index.html; then
+            echo "✅ index.html contains static/js/main script tag"
+            grep "static/js/main" deployment/public_html/index.html
+          else
+            echo "❌ index.html MISSING static/js/main script tag!"
+            echo "First 50 lines of index.html:"
+            head -50 deployment/public_html/index.html
+          fi
+        fi
+        echo ""
+        echo "Checking static folder contents:"
+        if [ -d deployment/public_html/static ]; then
+          echo "✅ static/ folder exists"
+          ls -la deployment/public_html/static/
+          if [ -d deployment/public_html/static/js ]; then
+            echo "✅ static/js/ folder exists"
+            ls -la deployment/public_html/static/js/ | head -5
+          else
+            echo "❌ static/js/ folder missing!"
+          fi
+        else
+          echo "❌ static/ folder missing!"
+        fi
         
     - name: Deploy to PlanetHoster via LFTP
       run: |
