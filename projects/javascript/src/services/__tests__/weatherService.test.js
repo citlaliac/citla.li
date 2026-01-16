@@ -4,7 +4,9 @@ import {
   getMoonPhaseValue,
   calculatePressureChange,
   getPressureInfo,
-  formatTime
+  formatTime,
+  getMinYearlySunlightHours,
+  getMaxYearlySunlightHours
 } from '../weatherService';
 
 describe('Weather Service', () => {
@@ -197,6 +199,108 @@ describe('Weather Service', () => {
       const formatted = formatTime(timestamp);
       
       expect(formatted).toMatch(/12:00\s?AM/i);
+    });
+  });
+
+  describe('getMinYearlySunlightHours', () => {
+    // Mock fetch globally
+    global.fetch = jest.fn();
+
+    beforeEach(() => {
+      fetch.mockClear();
+    });
+
+    test('returns minimum hours for NYC latitude', async () => {
+      const mockResponse = {
+        status: 'OK',
+        results: {
+          day_length: 32400 // 9 hours in seconds
+        }
+      };
+
+      fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockResponse
+      });
+
+      const minHours = await getMinYearlySunlightHours(40.7336); // NYC latitude
+      
+      expect(minHours).toBe(9.0);
+      expect(fetch).toHaveBeenCalledWith(
+        expect.stringContaining('12-21')
+      );
+    });
+
+    test('returns fallback value when API fails', async () => {
+      fetch.mockRejectedValueOnce(new Error('API error'));
+
+      const minHours = await getMinYearlySunlightHours(40.7336);
+      
+      // Should return fallback estimate for NYC (~9 hours)
+      expect(minHours).toBe(9.0);
+    });
+
+    test('returns appropriate fallback for different latitudes', async () => {
+      fetch.mockRejectedValueOnce(new Error('API error'));
+
+      // Equator
+      const equatorHours = await getMinYearlySunlightHours(0);
+      expect(equatorHours).toBe(11.5);
+
+      // High latitude
+      const highLatHours = await getMinYearlySunlightHours(65);
+      expect(highLatHours).toBe(4.0);
+    });
+
+    test('handles invalid API response', async () => {
+      fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ status: 'INVALID_REQUEST' })
+      });
+
+      const minHours = await getMinYearlySunlightHours(40.7336);
+      
+      // Should return fallback
+      expect(minHours).toBe(9.0);
+    });
+  });
+
+  describe('getMaxYearlySunlightHours', () => {
+    // Mock fetch globally
+    global.fetch = jest.fn();
+
+    beforeEach(() => {
+      fetch.mockClear();
+    });
+
+    test('returns maximum hours for NYC latitude', async () => {
+      const mockResponse = {
+        status: 'OK',
+        results: {
+          day_length: 54000 // 15 hours in seconds
+        }
+      };
+
+      fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockResponse
+      });
+
+      const maxHours = await getMaxYearlySunlightHours(40.7336); // NYC latitude
+      
+      expect(maxHours).toBe(15.0);
+      expect(fetch).toHaveBeenCalledWith(
+        expect.stringContaining('06-21')
+      );
+    });
+
+    test('returns fallback value when API fails', async () => {
+      fetch.mockRejectedValueOnce(new Error('API error'));
+
+      const maxHours = await getMaxYearlySunlightHours(40.7336);
+      
+      // Should return fallback estimate for NYC (~15 hours)
+      expect(maxHours).toBe(15.0);
     });
   });
 });

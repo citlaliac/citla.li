@@ -11,33 +11,86 @@
   padding: 2rem 0;
 }
 
+.weather-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
 .weather-title {
   text-align: center;
   color: #fff;
   font-size: 3rem;
   font-weight: 700;
-  margin-bottom: 3rem;
+  margin: 0;
   text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
+.weather-city-selector {
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 1.1rem;
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  min-width: 200px;
+}
+
+.weather-city-selector:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.weather-city-selector:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+}
+
+.weather-city-selector option {
+  background: #667eea;
+  color: #fff;
+}
+
 .weather-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 2rem;
+  position: relative;
+  min-height: 600px;
+  width: 100%;
   margin-bottom: 2rem;
 }
 
+.weather-widget {
+  user-select: none;
+  transition: opacity 0.2s ease;
+}
+
+.weather-widget:hover {
+  opacity: 0.9;
+}
+
+.weather-widget-dragging {
+  opacity: 0.7;
+  cursor: grabbing !important;
+}
+
+.weather-widget .weather-card,
+.weather-widget .weather-pressure-section {
+  cursor: inherit;
+}
+
 .weather-pressure-section {
-  grid-column: span 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 1.5rem;
-  background: rgba(255, 255, 255, 0.1);
+  background: transparent;
   border-radius: 12px;
   padding: 2rem;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .weather-pressure-info {

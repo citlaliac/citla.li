@@ -1,0 +1,81 @@
+.weather-precipitation {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  height: 100%;
+}
+
+.weather-precipitation-icon {
+  font-size: 3rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  transition: transform 0.3s ease;
+}
+
+.weather-precipitation-rain {
+  animation: rain-drop 1.5s ease-in-out infinite;
+}
+
+.weather-precipitation-snow {
+  animation: snow-fall 2s ease-in-out infinite;
+}
+
+.weather-precipitation-clear {
+  animation: sun-shine 3s ease-in-out infinite;
+}
+
+@keyframes rain-drop {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(5px);
+  }
+}
+
+@keyframes snow-fall {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(5px) rotate(10deg);
+  }
+}
+
+@keyframes sun-shine {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  }
+  50% {
+    transform: scale(1.1);
+    filter: drop-shadow(0 4px 8px rgba(255, 200, 0, 0.5));
+  }
+}
+
+.weather-precipitation-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  white-space: nowrap;
+}
+
+.weather-precipitation-title {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 0.25rem;
+  white-space: nowrap;
+}
+
+.weather-precipitation-label {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-align: center;
+}

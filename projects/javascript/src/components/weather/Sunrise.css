@@ -1,0 +1,69 @@
+.weather-sunrise {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  height: 100%;
+}
+
+.weather-sunrise-scene {
+  position: relative;
+  width: 120px;
+  height: 60px;
+  margin: 0.25rem 0;
+}
+
+.weather-sunrise-horizon {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+.weather-sunrise-sun {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 2.5rem;
+  filter: drop-shadow(0 2px 8px rgba(255, 200, 0, 0.6));
+  animation: sunrise-glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes sunrise-glow {
+  from {
+    filter: drop-shadow(0 2px 8px rgba(255, 200, 0, 0.6));
+  }
+  to {
+    filter: drop-shadow(0 4px 16px rgba(255, 200, 0, 0.8));
+  }
+}
+
+.weather-sunrise-title {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 0.25rem;
+  white-space: nowrap;
+}
+
+.weather-sunrise-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  white-space: nowrap;
+}
+
+.weather-sunrise-label {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}

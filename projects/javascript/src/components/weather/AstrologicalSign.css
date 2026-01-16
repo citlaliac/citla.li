@@ -1,0 +1,29 @@
+.weather-astro-sign {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  height: 100%;
+}
+
+.weather-astro-sign-star {
+  font-size: 3rem;
+  filter: drop-shadow(0 2px 8px rgba(255, 215, 0, 0.6));
+}
+
+.weather-astro-sign-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  white-space: nowrap;
+}
+
+.weather-astro-sign-label {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}

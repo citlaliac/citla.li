@@ -1,9 +1,65 @@
 /**
  * Weather Service
- * Fetches weather data for Greenwich Village, NYC
- * Uses PHP backend to call National Weather Service (NWS) API
- * No API key required - free public service
+ * Fetches weather data for multiple cities
+ * Uses National Weather Service (NWS) API for US cities
+ * Uses sunrise-sunset.org API for all cities
+ * No API key required - free public services
  */
+
+/**
+ * City definitions with coordinates
+ */
+export const CITIES = {
+  'new-york': {
+    name: 'New York',
+    lat: 40.7336,
+    lon: -73.9983,
+    timezone: 'America/New_York'
+  },
+  'paris': {
+    name: 'Paris',
+    lat: 48.8566,
+    lon: 2.3522,
+    timezone: 'Europe/Paris'
+  },
+  'ljubljana': {
+    name: 'Ljubljana',
+    lat: 46.0569,
+    lon: 14.5058,
+    timezone: 'Europe/Ljubljana'
+  },
+  'tokyo': {
+    name: 'Tokyo',
+    lat: 35.6762,
+    lon: 139.6503,
+    timezone: 'Asia/Tokyo'
+  },
+  'tucson': {
+    name: 'Tucson',
+    lat: 32.2226,
+    lon: -110.9747,
+    timezone: 'America/Phoenix'
+  },
+  'san-francisco': {
+    name: 'San Francisco',
+    lat: 37.7749,
+    lon: -122.4194,
+    timezone: 'America/Los_Angeles'
+  },
+  'sydney': {
+    name: 'Sydney',
+    lat: -33.8688,
+    lon: 151.2093,
+    timezone: 'Australia/Sydney'
+  }
+};
+
+/**
+ * Get city by key
+ */
+export function getCity(cityKey) {
+  return CITIES[cityKey] || CITIES['new-york'];
+}
 
 /**
  * Mock weather data for testing without API key
@@ -61,10 +117,11 @@ function getMockWeatherData() {
 /**
  * Get current weather data directly from NWS API
  * No proxy needed - NWS API is free and public
+ * @param {number} lat - Latitude (defaults to NYC)
+ * @param {number} lon - Longitude (defaults to NYC)
+ * @param {string} cityKey - City key for name/timezone (defaults to 'new-york')
  */
-export async function getCurrentWeather() {
-  const lat = 40.7336; // Greenwich Village, NYC
-  const lon = -73.9983;
+export async function getCurrentWeather(lat = 40.7336, lon = -73.9983, cityKey = 'new-york') {
   
   try {
     // Step 1: Get grid point information
@@ -168,7 +225,7 @@ export async function getCurrentWeather() {
     }
     
     // Transform NWS data to expected format
-    return transformNWSData(pointsData, forecastData, currentObservation, sunData);
+    return transformNWSData(pointsData, forecastData, currentObservation, sunData, cityKey);
     
   } catch (error) {
     console.error('Weather API error:', error);
@@ -186,8 +243,10 @@ export async function getCurrentWeather() {
 
 /**
  * Transform NWS API data to OpenWeatherMap-like format
+ * @param {string} cityKey - City key for name/timezone
  */
-function transformNWSData(pointsData, forecastData, currentObservation, sunData = null) {
+function transformNWSData(pointsData, forecastData, currentObservation, sunData = null, cityKey = 'new-york') {
+  const city = getCity(cityKey);
   const forecast = forecastData?.properties;
   const currentPeriod = forecast?.periods?.[0];
   const obs = currentObservation?.properties;
@@ -258,7 +317,7 @@ function transformNWSData(pointsData, forecastData, currentObservation, sunData 
   // Priority 3: Fallback to calculated times
   if (!sunrise || !sunset) {
     const today = new Date();
-    const tz = 'America/New_York';
+    const tz = city.timezone;
     const sunriseDate = new Date(today.toLocaleString('en-US', { timeZone: tz }));
     sunriseDate.setHours(6, 30, 0, 0);
     sunrise = Math.floor(sunriseDate.getTime() / 1000);
@@ -268,8 +327,14 @@ function transformNWSData(pointsData, forecastData, currentObservation, sunData 
     sunset = Math.floor(sunsetDate.getTime() / 1000);
   }
   
+  // Calculate timezone offset (in seconds)
+  const now = new Date();
+  const cityDate = new Date(now.toLocaleString('en-US', { timeZone: city.timezone }));
+  const utcDate = new Date(now.toLocaleString('en-US', { timeZone: 'UTC' }));
+  const timezoneOffset = (cityDate.getTime() - utcDate.getTime()) / 1000;
+
   return {
-    coord: { lon: -73.9983, lat: 40.7336 },
+    coord: { lon: city.lon, lat: city.lat },
     weather: [{
       id: 800,
       main: weatherMain,
@@ -297,11 +362,12 @@ function transformNWSData(pointsData, forecastData, currentObservation, sunData 
       id: 0,
       country: 'US',
       sunrise: sunrise,
-      sunset: sunset
+      sunset: sunset,
+      dayLength: sunData?.dayLength || null // Include dayLength from API
     },
-    timezone: -18000,
+    timezone: timezoneOffset,
     id: 5125771,
-    name: 'New York',
+    name: city.name,
     cod: 200
   };
 }
@@ -598,3 +664,98 @@ export function calculatePressureChange(currentPressure, yesterdayPressure) {
   };
 }
 
+/**
+ * Calculate sunlight hours for the day
+ * @param {number} sunrise - Sunrise timestamp in seconds
+ * @param {number} sunset - Sunset timestamp in seconds
+ * @param {number|null} dayLength - Day length in seconds from API (if available)
+ * @returns {number} - Sunlight hours (rounded to 1 decimal place)
+ */
+export function calculateSunlightHours(sunrise, sunset, dayLength = null) {
+  // Use API dayLength if available (most accurate)
+  if (dayLength !== null && dayLength > 0) {
+    return Math.round((dayLength / 3600) * 10) / 10;
+  }
+  
+  // Calculate from sunrise/sunset
+  if (sunrise && sunset && sunset > sunrise) {
+    const hours = (sunset - sunrise) / 3600;
+    return Math.round(hours * 10) / 10;
+  }
+  
+  // Fallback: return 0 if data is invalid
+  return 0;
+}
+
+/**
+ * Calculate maximum sunlight hours for a location (summer solstice)
+ * @param {number} lat - Latitude
+ * @returns {number} - Maximum sunlight hours (rounded to 1 decimal)
+ */
+export async function getMaxYearlySunlightHours(lat) {
+  // Approximate max hours based on latitude
+  // At equator: ~12 hours, at poles: 24 hours (polar day), at mid-latitudes: varies
+  // For most locations, max is around 14-16 hours
+  // More accurate: calculate for June 21 (summer solstice)
+  try {
+    const year = new Date().getFullYear();
+    const solsticeDate = `${year}-06-21`; // Summer solstice (approximate)
+    const sunApiUrl = `https://api.sunrise-sunset.org/json?lat=${lat}&lng=0&date=${solsticeDate}&formatted=0`;
+    
+    const response = await fetch(sunApiUrl);
+    if (response.ok) {
+      const data = await response.json();
+      if (data.status === 'OK' && data.results?.day_length) {
+        return Math.round((data.results.day_length / 3600) * 10) / 10;
+      }
+    }
+  } catch (error) {
+    console.warn('Could not fetch max sunlight hours:', error);
+  }
+  
+  // Fallback: estimate based on latitude
+  // At 40°N (NYC): ~15 hours max
+  // At 0° (equator): ~12.5 hours
+  // At 60°N: ~18 hours
+  const absLat = Math.abs(lat);
+  if (absLat < 10) return 12.5;
+  if (absLat < 30) return 13.5;
+  if (absLat < 45) return 15.0;
+  if (absLat < 60) return 18.0;
+  return 20.0; // High latitude
+}
+
+/**
+ * Calculate minimum sunlight hours for a location (winter solstice)
+ * @param {number} lat - Latitude
+ * @returns {number} - Minimum sunlight hours (rounded to 1 decimal)
+ */
+export async function getMinYearlySunlightHours(lat) {
+  // Calculate for December 21 (winter solstice)
+  try {
+    const year = new Date().getFullYear();
+    const solsticeDate = `${year}-12-21`; // Winter solstice (approximate)
+    const sunApiUrl = `https://api.sunrise-sunset.org/json?lat=${lat}&lng=0&date=${solsticeDate}&formatted=0`;
+    
+    const response = await fetch(sunApiUrl);
+    if (response.ok) {
+      const data = await response.json();
+      if (data.status === 'OK' && data.results?.day_length) {
+        return Math.round((data.results.day_length / 3600) * 10) / 10;
+      }
+    }
+  } catch (error) {
+    console.warn('Could not fetch min sunlight hours:', error);
+  }
+  
+  // Fallback: estimate based on latitude
+  // At 40°N (NYC): ~9 hours min
+  // At 0° (equator): ~11.5 hours
+  // At 60°N: ~6 hours
+  const absLat = Math.abs(lat);
+  if (absLat < 10) return 11.5;
+  if (absLat < 30) return 10.5;
+  if (absLat < 45) return 9.0;
+  if (absLat < 60) return 6.0;
+  return 4.0; // High latitude
+}
