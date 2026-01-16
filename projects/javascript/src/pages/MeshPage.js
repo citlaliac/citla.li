@@ -15,7 +15,7 @@ function MeshPage() {
           </p>
           <div className="mesh-qr-wrapper">
             <img 
-              src="/assets/imgs/mesh-qr.jpeg"
+              src={`${process.env.PUBLIC_URL || ''}/assets/imgs/mesh-qr.jpeg`}
               alt="QR Code"
               className="mesh-qr-code"
               onError={(e) => {
