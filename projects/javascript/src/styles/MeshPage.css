@@ -17,6 +17,14 @@
   max-width: 600px;
 }
 
+.mesh-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  width: 100%;
+}
+
 .mesh-qr-wrapper {
   background: #fff;
   padding: 2rem;
@@ -27,6 +35,16 @@
   justify-content: center;
   min-height: 300px;
   min-width: 300px;
+}
+
+.mesh-message {
+  color: #fff;
+  text-align: center;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  max-width: 500px;
+  margin: 0;
+  padding: 0 1rem;
 }
 
 .mesh-qr-code {
@@ -47,9 +65,18 @@
     padding: 1rem;
   }
   
+  .mesh-content {
+    gap: 1.5rem;
+  }
+  
   .mesh-qr-wrapper {
     padding: 1.5rem;
     min-height: 250px;
     min-width: 250px;
+  }
+  
+  .mesh-message {
+    font-size: 1rem;
+    padding: 0 0.5rem;
   }
 }

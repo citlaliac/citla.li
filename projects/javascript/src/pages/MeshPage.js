@@ -9,23 +9,31 @@ function MeshPage() {
   return (
     <div className="mesh-page">
       <div className="mesh-container">
-        <div className="mesh-qr-wrapper">
-          <img 
-            src="/assets/imgs/mesh-qr.png"
-            alt="QR Code"
-            className="mesh-qr-code"
-            onError={(e) => {
-              // Fallback if image doesn't exist yet
-              e.target.style.display = 'none';
-              e.target.nextSibling.style.display = 'block';
-            }}
-          />
-          <div className="mesh-qr-placeholder" style={{ display: 'none' }}>
-            <p>QR Code Image</p>
-            <p style={{ fontSize: '0.8rem', marginTop: '0.5rem' }}>
-              Place your QR code at: /public/assets/imgs/mesh-qr.png
-            </p>
+        <div className="mesh-content">
+          <p className="mesh-message">
+            Join this channel where frequent messages are welcome, and being dumb (but still a good person) is lauded.
+          </p>
+          <div className="mesh-qr-wrapper">
+            <img 
+              src="/assets/imgs/mesh-qr.jpeg"
+              alt="QR Code"
+              className="mesh-qr-code"
+              onError={(e) => {
+                // Fallback if image doesn't exist yet
+                e.target.style.display = 'none';
+                e.target.nextSibling.style.display = 'block';
+              }}
+            />
+            <div className="mesh-qr-placeholder" style={{ display: 'none' }}>
+              <p>QR Code Image</p>
+              <p style={{ fontSize: '0.8rem', marginTop: '0.5rem' }}>
+                Place your QR code at: /public/assets/imgs/mesh-qr.jpeg
+              </p>
+            </div>
           </div>
+          <p className="mesh-message">
+            It's a great place to be if, like me, you don't reeeeally know what you're doing with meshtastic and want to send messages to... not everyone everywhere.
+          </p>
         </div>
       </div>
     </div>
