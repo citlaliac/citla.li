@@ -154,7 +154,9 @@ jobs:
         echo "open -u ${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }} ${{ secrets.FTP_SERVER }}" >> lftp_script.txt
         echo "cd public_html" >> lftp_script.txt
         echo "lcd projects/javascript/deployment/public_html" >> lftp_script.txt
-        echo "mirror -R --verbose --exclude-glob .git* --exclude-glob node_modules* --exclude-glob .env*" >> lftp_script.txt
+        # Use --delete to remove old static files that are no longer in the build
+        # This ensures old JS/CSS files with different hashes are cleaned up
+        echo "mirror -R --delete --verbose --exclude-glob .git* --exclude-glob node_modules* --exclude-glob .env*" >> lftp_script.txt
         echo "quit" >> lftp_script.txt
         
         # Run lftp script
@@ -166,5 +168,23 @@ jobs:
         echo "open -u ${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }} ${{ secrets.FTP_SERVER }}" >> verify_ftp.txt
         echo "cd public_html" >> verify_ftp.txt
         echo "ls -la" >> verify_ftp.txt
+        echo "ls -la static/" >> verify_ftp.txt
+        echo "ls -la static/js/" >> verify_ftp.txt
+        echo "get index.html /tmp/remote_index.html" >> verify_ftp.txt
         echo "quit" >> verify_ftp.txt
         lftp -f verify_ftp.txt
+        
+        # Check if script tag exists in uploaded index.html
+        if [ -f /tmp/remote_index.html ]; then
+          echo "=== CHECKING UPLOADED INDEX.HTML ==="
+          if grep -q "static/js/main" /tmp/remote_index.html; then
+            echo "✅ Uploaded index.html contains static/js/main script tag"
+            grep "static/js/main" /tmp/remote_index.html
+          else
+            echo "❌ CRITICAL: Uploaded index.html MISSING static/js/main script tag!"
+            echo "First 30 lines of uploaded index.html:"
+            head -30 /tmp/remote_index.html
+          fi
+        else
+          echo "⚠️  Could not download remote index.html for verification"
+        fi
