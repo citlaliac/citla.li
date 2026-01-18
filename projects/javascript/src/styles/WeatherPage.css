@@ -65,11 +65,40 @@
   margin-bottom: 2rem;
 }
 
+/* Draggable mode for desktop */
+.weather-widgets-draggable {
+  position: relative;
+  min-height: 800px;
+  width: 100%;
+}
+
+.weather-widgets-draggable .weather-widget-card {
+  position: absolute;
+  user-select: none;
+  -webkit-user-select: none;
+  z-index: 1;
+  width: auto;
+  max-width: 300px;
+}
+
+.weather-widgets-draggable .weather-widget-card:hover {
+  z-index: 10;
+}
+
+.weather-widgets-draggable .weather-widget-card:active {
+  z-index: 20;
+}
+
 .weather-widget-card {
   width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.weather-widgets-draggable .weather-widget-card {
+  width: auto;
+  max-width: 300px;
 }
 
 .weather-moon-widget {
@@ -296,7 +325,18 @@
   .weather-widget-card {
     padding-bottom: 1rem;
     margin-bottom: 0.5rem;
-    position: relative;
+    position: relative !important;
+  }
+
+  .weather-widgets-draggable {
+    position: relative !important;
+    min-height: auto !important;
+  }
+
+  .weather-widgets-draggable .weather-widget-card {
+    position: relative !important;
+    left: auto !important;
+    top: auto !important;
   }
 
   .weather-widget-card::after {
@@ -315,25 +355,25 @@
   }
 }
 
-/* Tablet: 2 columns */
+/* Tablet: 2 columns (only when not draggable) */
 @media (min-width: 769px) and (max-width: 1024px) {
-  .weather-widgets-grid {
+  .weather-widgets-grid:not(.weather-widgets-draggable) {
     grid-template-columns: repeat(2, 1fr);
     gap: 1.25rem;
   }
 }
 
-/* Desktop: 3 columns */
+/* Desktop: 3 columns (only when not draggable) */
 @media (min-width: 1025px) {
-  .weather-widgets-grid {
+  .weather-widgets-grid:not(.weather-widgets-draggable) {
     grid-template-columns: repeat(3, 1fr);
     gap: 1.5rem;
   }
 }
 
-/* Large desktop: 4 columns for better use of space */
+/* Large desktop: 4 columns for better use of space (only when not draggable) */
 @media (min-width: 1400px) {
-  .weather-widgets-grid {
+  .weather-widgets-grid:not(.weather-widgets-draggable) {
     grid-template-columns: repeat(4, 1fr);
   }
 }
