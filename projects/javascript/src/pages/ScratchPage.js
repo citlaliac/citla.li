@@ -78,7 +78,7 @@ const ScratchPage = () => {
           ))}
         </div>
         <div className="scratch-instructions">
-          Click cards to drag them around. Click "move" to go into "scratching" mode and reveal the poems like a scratchcard.
+          Click cards to drag them around. Click the button to switch between moving and scratching modes to  the poems.
         </div>
       </div>
       <Footer />

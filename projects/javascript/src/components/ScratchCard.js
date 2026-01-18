@@ -18,6 +18,7 @@ const ScratchCard = ({ title, content, position }) => {
   const [isScratchMode, setIsScratchMode] = useState(false);
   const [isScratched, setIsScratched] = useState(false);
   const [lastPoint, setLastPoint] = useState(null);
+  const [maskImageUrl, setMaskImageUrl] = useState(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -61,10 +62,59 @@ const ScratchCard = ({ title, content, position }) => {
     ctx.textBaseline = 'middle';
     ctx.fillText('Scratch to reveal a poem', canvas.width / 2, canvas.height / 2);
     
+    // Initialize mask - use the canvas itself as the mask
+    // Where canvas has pixels (unscratched), show shiny
+    // Where canvas is transparent (scratched), hide shiny
+    updateMask();
+    
     return () => {
       // Cleanup if needed
     };
   }, []);
+
+  const updateMask = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    // Create a mask canvas that mirrors the scratch canvas
+    // White where canvas has pixels (unscratched = show shiny)
+    // Transparent where canvas is transparent (scratched = hide shiny)
+    const maskCanvas = document.createElement('canvas');
+    maskCanvas.width = canvas.width;
+    maskCanvas.height = canvas.height;
+    const maskCtx = maskCanvas.getContext('2d');
+    
+    // Copy the canvas to the mask
+    maskCtx.drawImage(canvas, 0, 0);
+    
+    // Convert to grayscale and use as mask
+    // Areas with pixels (unscratched) will be white/visible
+    // Areas that are transparent (scratched) will be transparent/hidden
+    const imageData = maskCtx.getImageData(0, 0, maskCanvas.width, maskCanvas.height);
+    const data = imageData.data;
+    
+    for (let i = 0; i < data.length; i += 4) {
+      const alpha = data[i + 3];
+      // If pixel is transparent (scratched), make mask transparent (hide shiny)
+      // If pixel has opacity (unscratched), make mask white (show shiny)
+      if (alpha === 0) {
+        // Scratched area - hide shiny
+        data[i] = 0;     // R
+        data[i + 1] = 0; // G
+        data[i + 2] = 0; // B
+        data[i + 3] = 0; // A - transparent
+      } else {
+        // Unscratched area - show shiny
+        data[i] = 255;     // R
+        data[i + 1] = 255; // G
+        data[i + 2] = 255; // B
+        data[i + 3] = 255; // A - opaque white
+      }
+    }
+    
+    maskCtx.putImageData(imageData, 0, 0);
+    setMaskImageUrl(maskCanvas.toDataURL());
+  };
 
   const startScratching = (e) => {
     if (isDragging) return;
@@ -100,6 +150,9 @@ const ScratchCard = ({ title, content, position }) => {
     ctx.moveTo(lastX, lastY);
     ctx.lineTo(x, y);
     ctx.stroke();
+    
+    // Update mask after scratching
+    updateMask();
     
     // Update last position
     setLastX(x);
@@ -194,6 +247,9 @@ const ScratchCard = ({ title, content, position }) => {
       ctx.moveTo(lastPoint.x, lastPoint.y);
       ctx.lineTo(x, y);
       ctx.stroke();
+      
+      // Update mask after scratching
+      updateMask();
     }
 
     setLastPoint({ x, y });
@@ -276,7 +332,15 @@ const ScratchCard = ({ title, content, position }) => {
           }
         }}
       />
-      {!isScratched && <div className="shiny-overlay" />}
+      {!isScratched && maskImageUrl && (
+        <div 
+          className="shiny-overlay"
+          style={{
+            maskImage: `url(${maskImageUrl})`,
+            WebkitMaskImage: `url(${maskImageUrl})`,
+          }}
+        />
+      )}
       <button 
         className="mode-toggle"
         onClick={toggleScratchMode}
@@ -288,13 +352,16 @@ const ScratchCard = ({ title, content, position }) => {
           color: 'white',
           border: 'none',
           borderRadius: '20px',
-          padding: '5px 10px',
-          fontSize: '12px',
+          padding: '5px 12px',
+          fontSize: '11px',
           cursor: 'pointer',
-          zIndex: 4
+          zIndex: 4,
+          whiteSpace: 'nowrap',
+          maxWidth: '90%',
+          textAlign: 'center'
         }}
       >
-        {isScratchMode ? 'Scratching' : 'Move'}
+        {isScratchMode ? 'Scratching mode, click green to move' : 'Moving mode, click blue to scratch'}
       </button>
     </div>
   );
