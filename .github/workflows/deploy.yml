@@ -143,15 +143,8 @@ jobs:
         # Debug: Show what we're about to upload
         echo "=== FILES TO UPLOAD ==="
         ls -la projects/javascript/deployment/public_html/
-        echo ""
-        echo "=== STATIC/JS FILES TO UPLOAD ==="
-        ls -la projects/javascript/deployment/public_html/static/js/ 2>/dev/null || echo "No static/js directory found"
-        echo ""
         echo "=== INDEX.HTML CONTENT (first 10 lines) ==="
         head -10 projects/javascript/deployment/public_html/index.html
-        echo ""
-        echo "=== JS FILE REFERENCED IN INDEX.HTML ==="
-        grep -o "static/js/main\.[^.]*\.js" projects/javascript/deployment/public_html/index.html || echo "No JS file found in index.html"
         
         # Create lftp script using -u flag to avoid URL encoding issues
         echo "set ftp:ssl-allow no" > lftp_script.txt
@@ -161,55 +154,17 @@ jobs:
         echo "open -u ${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }} ${{ secrets.FTP_SERVER }}" >> lftp_script.txt
         echo "cd public_html" >> lftp_script.txt
         echo "lcd projects/javascript/deployment/public_html" >> lftp_script.txt
-        # Use --delete to remove old static files that are no longer in the build
-        # This ensures old JS/CSS files with different hashes are cleaned up
-        # --delete removes files on server that don't exist in local directory
-        echo "mirror -R --delete --verbose --exclude-glob .git* --exclude-glob node_modules* --exclude-glob .env*" >> lftp_script.txt
+        echo "mirror -R --verbose --exclude-glob .git* --exclude-glob node_modules* --exclude-glob .env*" >> lftp_script.txt
         echo "quit" >> lftp_script.txt
         
         # Run lftp script
-        echo "=== STARTING DEPLOYMENT ==="
         lftp -f lftp_script.txt
-        echo "=== DEPLOYMENT COMPLETE ==="
         
         # Debug: Verify upload by listing remote directory
         echo "=== VERIFYING UPLOAD ==="
         echo "set ftp:ssl-allow no" > verify_ftp.txt
-        echo "set ftp:passive-mode on" >> verify_ftp.txt
-        echo "set net:timeout 30" >> verify_ftp.txt
         echo "open -u ${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }} ${{ secrets.FTP_SERVER }}" >> verify_ftp.txt
         echo "cd public_html" >> verify_ftp.txt
         echo "ls -la" >> verify_ftp.txt
-        echo "ls -la static/" >> verify_ftp.txt
-        echo "ls -la static/js/" >> verify_ftp.txt
-        echo "ls -la static/css/" >> verify_ftp.txt
         echo "quit" >> verify_ftp.txt
-        lftp -f verify_ftp.txt || echo "⚠️  Verification listing completed (some errors expected)"
-        
-        # Try to download index.html for verification (non-blocking)
-        echo "set ftp:ssl-allow no" > verify_index.txt
-        echo "set ftp:passive-mode on" >> verify_index.txt
-        echo "open -u ${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }} ${{ secrets.FTP_SERVER }}" >> verify_index.txt
-        echo "cd public_html" >> verify_index.txt
-        echo "get index.html /tmp/remote_index.html" >> verify_index.txt
-        echo "quit" >> verify_index.txt
-        lftp -f verify_index.txt 2>&1 || echo "⚠️  Could not download index.html (non-critical)"
-        
-        # Check if script tag exists in uploaded index.html
-        if [ -f /tmp/remote_index.html ]; then
-          echo "=== CHECKING UPLOADED INDEX.HTML ==="
-          if grep -q "static/js/main" /tmp/remote_index.html; then
-            echo "✅ Uploaded index.html contains static/js/main script tag"
-            grep "static/js/main" /tmp/remote_index.html
-          else
-            echo "❌ CRITICAL: Uploaded index.html MISSING static/js/main script tag!"
-            echo "First 30 lines of uploaded index.html:"
-            head -30 /tmp/remote_index.html
-          fi
-        else
-          echo "⚠️  Could not download remote index.html for verification (non-critical)"
-          echo "Checking local index.html instead:"
-          if [ -f projects/javascript/deployment/public_html/index.html ]; then
-            grep "static/js/main" projects/javascript/deployment/public_html/index.html || echo "❌ Local index.html also missing script tag!"
-          fi
-        fi
+        lftp -f verify_ftp.txt
