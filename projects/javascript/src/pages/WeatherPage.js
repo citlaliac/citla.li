@@ -395,6 +395,14 @@ function WeatherPage() {
     }
   };
 
+  // Debug: Log widget count to verify new code is running
+  useEffect(() => {
+    if (weather && allWidgetIds.length > 0) {
+      console.log('Weather widgets loaded:', allWidgetIds.length, 'widgets');
+      console.log('Widget IDs:', allWidgetIds);
+    }
+  }, [weather, allWidgetIds]);
+
   return (
     <div className="weather-page">
       <Header />
