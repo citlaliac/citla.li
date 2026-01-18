@@ -33,12 +33,24 @@ ALT
   - This lets you test PHP/DB interactions before automated deployment- Make sure you're in the `projects/javascript` directory
 
 
-### 3. Verify Tests Pass
-- Run tests: `cd projects/javascript && npm run test:ci`
+### 3. Pre-Deploy Check (Recommended)
+- Before deploying, run the pre-deploy check to ensure everything is ready:
+  ```bash
+  cd projects/javascript && npm run deploy-check
+  ```
+- This script will:
+  - Run all tests and verify they pass
+  - Check for security vulnerabilities in dependencies
+  - Provide a clear summary of any issues that need to be fixed
+- If the check fails, fix the issues before deploying
+- **Note:** This is a recommended step but not required for deployment
+
+### 4. Verify Tests Pass (Alternative)
+- If you prefer to run tests separately: `cd projects/javascript && npm run test:ci`
 - Update tests as needed if you've added new functionality
 - Tests don't block deployment, but it's good practice to keep them passing
 
-### 4. Deploy to Production
+### 5. Deploy to Production
 - Push to `main` branch:
   ```bash
   git checkout main
