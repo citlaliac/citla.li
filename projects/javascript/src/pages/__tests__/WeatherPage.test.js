@@ -22,6 +22,7 @@ jest.mock('../../services/weatherService', () => ({
   getCurrentWeather: jest.fn(),
   calculateSunAngle: jest.fn(() => 45.5),
   getMoonPhase: jest.fn(() => 'Waxing Gibbous'),
+  getMoonPhaseValue: jest.fn(() => 0.5),
   getAstrologicalSign: jest.fn(() => 'Capricorn'),
   formatTime: jest.fn((timestamp) => '6:30 AM'),
   calculateSunlightHours: jest.fn(() => 9.5),
@@ -83,6 +84,13 @@ describe('WeatherPage', () => {
     weatherService.getCurrentWeather.mockResolvedValue(mockWeatherData);
     // Ensure getCity returns a valid city object
     weatherService.getCity.mockReturnValue({ name: 'Greenwich Village', lat: 40.7336, lon: -73.9983 });
+    // Ensure getPressureInfo always returns a valid object
+    weatherService.getPressureInfo.mockReturnValue({
+      level: 'Normal',
+      effects: 'Comfortable conditions'
+    });
+    // Ensure calculateSunlightHours always returns a number
+    weatherService.calculateSunlightHours.mockReturnValue(9.5);
     // Reset window width to desktop default
     Object.defineProperty(window, 'innerWidth', {
       writable: true,
@@ -231,24 +239,24 @@ describe('WeatherPage', () => {
       expect(screen.getByText(/temperature/i)).toBeInTheDocument();
     }, { timeout: 3000 });
     
-    // Check that all widgets are present in the correct order
-    const widgets = [
-      /temperature/i,
-      /precipitation/i,
-      /wind/i,
-      /uv index/i,
-      /sunrise/i,
-      /sunset/i,
-      /sun hours/i,
-      /sunlight change/i,
-      /sun angle/i,
-      /moon phase/i,
-      /astrological sign/i,
-      /pressure/i
+    // Check that all widgets are present (using flexible matching)
+    const widgetTitles = [
+      'Temperature',
+      'Precipitation',
+      'Wind',
+      'UV Index',
+      'Sunrise',
+      'Sunset',
+      'Sunlight Hours',
+      'Sunlight Change',
+      'Sun Angle',
+      'Moon Phase',
+      'Current sign', // AstrologicalSign shows "Current sign" not "Astrological Sign"
+      'Pressure'
     ];
     
-    widgets.forEach(widget => {
-      expect(screen.getByText(widget)).toBeInTheDocument();
+    widgetTitles.forEach(title => {
+      expect(screen.getByText(title)).toBeInTheDocument();
     });
   });
 

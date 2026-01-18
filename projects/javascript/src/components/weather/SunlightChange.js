@@ -36,17 +36,6 @@ function SunlightChange({ rateOfChange }) {
   // Large gap ensures only one dash appears
   const dashLength = intensity * arcLength;
   
-  // Debug: log the calculation
-  console.log('=== SunlightChange Debug ===');
-  console.log('Rate (minutes):', rate);
-  console.log('Abs Rate:', absRate);
-  console.log('Max for direction:', maxForDirection, isGaining ? '(gain)' : '(loss)');
-  console.log('Intensity:', intensity.toFixed(4), '=', (intensity * 100).toFixed(2) + '%');
-  console.log('Arc Length (180deg):', arcLength.toFixed(2));
-  console.log('Dash Length (fill):', dashLength.toFixed(2));
-  console.log('Fill % of visible arc:', (intensity * 100).toFixed(2) + '%');
-  console.log('===========================');
-  
   // Format rate display as M:SS
   const formatRateDisplay = (minutes) => {
     if (minutes === 0) return '0:00';
