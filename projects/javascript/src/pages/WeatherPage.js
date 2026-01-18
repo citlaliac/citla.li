@@ -163,6 +163,17 @@ function WeatherPage() {
     }
   }, [widgetPositions]);
 
+  // All widget IDs (defined early for use in hooks)
+  const allWidgetIds = Object.keys(defaultPositions);
+
+  // Debug: Log widget count to verify new code is running
+  useEffect(() => {
+    if (weather && allWidgetIds.length > 0) {
+      console.log('Weather widgets loaded:', allWidgetIds.length, 'widgets');
+      console.log('Widget IDs:', allWidgetIds);
+    }
+  }, [weather, allWidgetIds]);
+
   // SEO configuration
   const city = getCity(selectedCity);
   useSEO({
@@ -234,9 +245,6 @@ function WeatherPage() {
 
   // Use saved positions or default
   const currentPositions = widgetPositions || defaultPositions;
-
-  // All widget IDs
-  const allWidgetIds = Object.keys(defaultPositions);
 
   // Drag handlers for absolute positioning
   const handleMouseDown = (e, widgetId) => {
