@@ -8,33 +8,110 @@
   padding: 1rem;
 }
 
-.weather-sunlight-change-meter-container {
-  margin-bottom: 0.5rem;
+.weather-sunlight-change-meter-wrapper {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  height: 60px;
+  margin-bottom: 1rem;
+  position: relative;
 }
 
 .weather-sunlight-change-meter {
-  display: block;
-  margin: 0 auto;
+  position: relative;
+  width: 100px;
+  height: 60px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.weather-sunlight-change-meter-svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(0deg);
+}
+
+.weather-sunlight-change-meter-fill {
+  transition: stroke-dashoffset 0.5s ease, stroke 0.3s ease;
+}
+
+.weather-sunlight-change-center {
+  position: absolute;
+  top: 35px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.weather-sunlight-change-sun {
+  font-size: 2rem;
+  line-height: 1;
+  opacity: 0.9;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  margin-bottom: 0.1rem;
+}
+
+.weather-sunlight-change-arrow {
+  position: absolute;
+  left: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
+  transition: all 0.3s ease;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.weather-sunlight-change-arrow.arrow-up {
+  color: #FF9800;
+}
+
+.weather-sunlight-change-arrow.arrow-down {
+  color: #87CEEB;
+}
+
+.weather-sunlight-change-arrow.arrow-neutral {
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .weather-sunlight-change-value {
   font-size: 1.8rem;
   font-weight: 700;
   color: #fff;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.15rem;
   white-space: nowrap;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .weather-sunlight-change-title {
   font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 0.7);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
+  font-weight: 500;
   white-space: nowrap;
   margin-top: 0.25rem;
+}
+
+@media (max-width: 768px) {
+  .weather-sunlight-change-meter {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .weather-sunlight-change-sun {
+    font-size: 1.5rem;
+  }
+  
+  .weather-sunlight-change-arrow {
+    font-size: 0.85rem;
+  }
+  
+  .weather-sunlight-change-value {
+    font-size: 1.5rem;
+  }
 }

@@ -774,7 +774,9 @@ export async function getSunlightHoursForDate(lat, lon, dateStr) {
     if (response.ok) {
       const data = await response.json();
       if (data.status === 'OK' && data.results?.day_length) {
-        return Math.round((data.results.day_length / 3600) * 10) / 10;
+        // Return hours with full precision (no rounding) for accurate calculations
+        // day_length is in seconds, convert to hours
+        return data.results.day_length / 3600;
       }
     }
   } catch (error) {
@@ -829,6 +831,7 @@ export async function getSunlightHoursForRange(lat, lon, daysBack = 7, daysForwa
 
 /**
  * Calculate rate of change of sunlight (minutes per day)
+ * Calculates the change from yesterday to today
  * @param {number} lat - Latitude
  * @param {number} lon - Longitude
  * @returns {Promise<number|null>} - Rate of change in minutes per day (positive = gaining, negative = losing)
@@ -836,19 +839,29 @@ export async function getSunlightHoursForRange(lat, lon, daysBack = 7, daysForwa
 export async function getSunlightRateOfChange(lat, lon) {
   try {
     const today = new Date();
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
     
     const todayStr = today.toISOString().split('T')[0];
-    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
+    
+    console.log('Fetching sunlight hours:', { today: todayStr, yesterday: yesterdayStr, lat, lon });
     
     const todayHours = await getSunlightHoursForDate(lat, lon, todayStr);
-    const tomorrowHours = await getSunlightHoursForDate(lat, lon, tomorrowStr);
+    const yesterdayHours = await getSunlightHoursForDate(lat, lon, yesterdayStr);
     
-    if (todayHours !== null && tomorrowHours !== null) {
-      const changeInHours = tomorrowHours - todayHours;
+    console.log('Sunlight hours fetched:', { todayHours, yesterdayHours });
+    
+    if (todayHours !== null && yesterdayHours !== null) {
+      const changeInHours = todayHours - yesterdayHours;
       const changeInMinutes = changeInHours * 60;
-      return Math.round(changeInMinutes * 10) / 10; // Round to 1 decimal
+      console.log('Change calculated:', { changeInHours, changeInMinutes });
+      // Round to 2 decimal places for more precision (to show seconds)
+      const result = Math.round(changeInMinutes * 100) / 100;
+      console.log('Final result:', result);
+      return result;
+    } else {
+      console.warn('Could not get both today and yesterday hours:', { todayHours, yesterdayHours });
     }
   } catch (error) {
     console.warn('Could not calculate sunlight rate of change:', error);

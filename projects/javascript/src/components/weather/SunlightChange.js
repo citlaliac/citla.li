@@ -3,127 +3,107 @@ import './SunlightChange.css';
 
 /**
  * Sunlight Change Widget
- * Shows rate of change of sunlight (gaining/losing) with a meter gauge
- * Range: 0.5 min/day (left) to 4.5 min/day (right)
+ * Shows rate of change of sunlight with a meter indicating intensity
+ * Meter shows where we are in the yearly cycle (high change near equinoxes, low near solstices)
  */
 function SunlightChange({ rateOfChange }) {
   // Rate of change in minutes per day (positive = gaining, negative = losing)
   const rate = rateOfChange || 0;
-  const absRate = Math.abs(rate);
   
-  // Rate range: 0.5 min/day (left) to 4.5 min/day (right)
-  const minRate = 0.5;
-  const maxRate = 4.5;
-  const normalizedRate = Math.max(minRate, Math.min(maxRate, absRate));
+  // Actual min/max values based on real-world data
+  // 2:40 = 2 minutes 40 seconds = 2 + 40/60 = 2.6667 minutes
+  // 2:43 = 2 minutes 43 seconds = 2 + 43/60 = 2.7167 minutes
+  const maxLoss = 2 + 40/60; // 2:40 in minutes (2.6667)
+  const maxGain = 2 + 43/60;  // 2:43 in minutes (2.7167)
   
   const isGaining = rate > 0;
   const isLosing = rate < 0;
+  const isNeutral = rate === 0;
   
-  // Format rate display
-  const rateDisplay = rate > 0 ? `+${rate.toFixed(1)}` : rate.toFixed(1);
+  // Calculate intensity: use the appropriate max based on direction
+  // If gaining, compare to maxGain (2:43)
+  // If losing, compare to maxLoss (2:40)
+  const absRate = Math.abs(rate);
+  const maxForDirection = isGaining ? maxGain : maxLoss;
+  const intensity = Math.min(1, absRate / maxForDirection); // 0 to 1, where 1 = max change period
   
-  // Draw meter gauge (horizontal half circle at bottom)
-  const drawMeter = () => {
-    const width = 180;
-    const height = 60;
-    const centerX = width / 2;
-    const centerY = height; // Bottom of SVG
-    const radius = height - 5; // Arc radius
-    const tubeThickness = 12; // Thickness of the filled tube
+  // Visible arc is 180 degrees (half circle from 180° to 0°), radius 40
+  // Length = (180/360) * 2 * π * 40 = 125.66
+  const arcLength = (180 / 360) * 2 * Math.PI * 40;
+  
+  // We want to fill intensity% of the 180-degree arc
+  // Dash length = intensity * arcLength (the portion we want to show)
+  // Large gap ensures only one dash appears
+  const dashLength = intensity * arcLength;
+  
+  // Debug: log the calculation
+  console.log('=== SunlightChange Debug ===');
+  console.log('Rate (minutes):', rate);
+  console.log('Abs Rate:', absRate);
+  console.log('Max for direction:', maxForDirection, isGaining ? '(gain)' : '(loss)');
+  console.log('Intensity:', intensity.toFixed(4), '=', (intensity * 100).toFixed(2) + '%');
+  console.log('Arc Length (180deg):', arcLength.toFixed(2));
+  console.log('Dash Length (fill):', dashLength.toFixed(2));
+  console.log('Fill % of visible arc:', (intensity * 100).toFixed(2) + '%');
+  console.log('===========================');
+  
+  // Format rate display as M:SS
+  const formatRateDisplay = (minutes) => {
+    if (minutes === 0) return '0:00';
     
-    // Gauge arc: 180 degrees (semi-circle from left to right at bottom)
-    // 0.5 min/day = 180° (left), 4.5 min/day = 0° (right)
-    const startAngle = 180; // Left side
-    const endAngle = 0; // Right side
-    const totalAngle = Math.abs(endAngle - startAngle); // 180 degrees
+    const sign = minutes > 0 ? '+' : '-';
+    const absMinutes = Math.abs(minutes);
+    const wholeMinutes = Math.floor(absMinutes);
+    const seconds = Math.round((absMinutes - wholeMinutes) * 60);
+    const secondsStr = seconds.toString().padStart(2, '0');
     
-    // Calculate needle angle based on rate
-    // Fast rate (4.5 min/day) = 0° (pointing right), slow rate (0.5 min/day) = 180° (pointing left)
-    const ratePercent = (normalizedRate - minRate) / (maxRate - minRate);
-    const needleAngle = startAngle - (ratePercent * totalAngle); // Subtract to go from left to right
-    const needleAngleRad = (needleAngle * Math.PI) / 180;
-    
-    // Outer arc (top of tube)
-    const outerRadius = radius;
-    const outerStartX = centerX + outerRadius * Math.cos((startAngle * Math.PI) / 180);
-    const outerStartY = centerY + outerRadius * Math.sin((startAngle * Math.PI) / 180);
-    const outerEndX = centerX + outerRadius * Math.cos((endAngle * Math.PI) / 180);
-    const outerEndY = centerY + outerRadius * Math.sin((endAngle * Math.PI) / 180);
-    
-    // Inner arc (bottom of tube)
-    const innerRadius = radius - tubeThickness;
-    const innerStartX = centerX + innerRadius * Math.cos((startAngle * Math.PI) / 180);
-    const innerStartY = centerY + innerRadius * Math.sin((startAngle * Math.PI) / 180);
-    
-    const largeArcFlag = 1; // Always large arc for 180 degrees
-    
-    // Full background arc path (unfilled)
-    const backgroundArcPath = `M ${outerStartX} ${outerStartY} A ${outerRadius} ${outerRadius} 0 ${largeArcFlag} 0 ${outerEndX} ${outerEndY}`;
-    
-    // Filled portion - up to current rate
-    const filledOuterX = centerX + outerRadius * Math.cos(needleAngleRad);
-    const filledOuterY = centerY + outerRadius * Math.sin(needleAngleRad);
-    const filledInnerX = centerX + innerRadius * Math.cos(needleAngleRad);
-    const filledInnerY = centerY + innerRadius * Math.sin(needleAngleRad);
-    
-    // Filled tube path: outer arc + line to inner + inner arc back + line to start
-    const filledTubePath = `M ${outerStartX} ${outerStartY} A ${outerRadius} ${outerRadius} 0 ${largeArcFlag} 0 ${filledOuterX} ${filledOuterY} L ${filledInnerX} ${filledInnerY} A ${innerRadius} ${innerRadius} 0 ${largeArcFlag} 1 ${innerStartX} ${innerStartY} Z`;
-    
-    // Needle/arrow endpoint
-    const needleLength = radius * 0.9;
-    const needleEndX = centerX + needleLength * Math.cos(needleAngleRad);
-    const needleEndY = centerY + needleLength * Math.sin(needleAngleRad);
-    
-    return (
-      <svg width={width} height={height} className="weather-sunlight-change-meter" viewBox={`0 0 ${width} ${height}`}>
-        <defs>
-          <linearGradient id="meterGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor={isGaining ? "rgba(76, 175, 80, 0.6)" : isLosing ? "rgba(255, 152, 0, 0.6)" : "rgba(255, 255, 255, 0.3)"} />
-            <stop offset="100%" stopColor={isGaining ? "rgba(139, 195, 74, 0.9)" : isLosing ? "rgba(255, 87, 34, 0.9)" : "rgba(255, 255, 255, 0.5)"} />
-          </linearGradient>
-        </defs>
-        {/* Background arc (unfilled portion) */}
-        <path
-          d={backgroundArcPath}
-          fill="none"
-          stroke="rgba(255, 255, 255, 0.2)"
-          strokeWidth={tubeThickness}
-          strokeLinecap="round"
-        />
-        {/* Filled tube */}
-        <path
-          d={filledTubePath}
-          fill={isGaining ? "rgba(76, 175, 80, 0.7)" : isLosing ? "rgba(255, 152, 0, 0.7)" : "rgba(255, 255, 255, 0.4)"}
-          stroke={isGaining ? "rgba(76, 175, 80, 0.9)" : isLosing ? "rgba(255, 152, 0, 0.9)" : "rgba(255, 255, 255, 0.6)"}
-          strokeWidth="1"
-        />
-        {/* Needle/Arrow */}
-        <line
-          x1={centerX}
-          y1={centerY}
-          x2={needleEndX}
-          y2={needleEndY}
-          stroke={isGaining ? "rgba(76, 175, 80, 1)" : isLosing ? "rgba(255, 152, 0, 1)" : "rgba(255, 255, 255, 0.9)"}
-          strokeWidth="3"
-          strokeLinecap="round"
-        />
-        {/* Center dot */}
-        <circle
-          cx={centerX}
-          cy={centerY}
-          r="5"
-          fill={isGaining ? "rgba(76, 175, 80, 1)" : isLosing ? "rgba(255, 152, 0, 1)" : "rgba(255, 255, 255, 0.9)"}
-        />
-      </svg>
-    );
+    return `${sign}${wholeMinutes}:${secondsStr}`;
   };
+  
+  const rateDisplay = formatRateDisplay(rate);
   
   return (
     <div className="weather-sunlight-change">
-      <div className="weather-sunlight-change-meter-container">
-        {drawMeter()}
+      <div className="weather-sunlight-change-meter-wrapper">
+        <div className="weather-sunlight-change-meter">
+          {/* Background circle - viewBox shows top half (180-degree arc) with extra space at top */}
+          <svg className="weather-sunlight-change-meter-svg" viewBox="0 -15 100 55">
+            {/* Background arc (180 degrees from left 180° to right 0°) */}
+            {/* Arc center at y=45 (moved up), radius 40, so arc goes from y=5 (top) to y=45 (center) */}
+            <path
+              d="M 10 45 A 40 40 0 0 1 90 45"
+              fill="none"
+              stroke="rgba(255, 255, 255, 0.15)"
+              strokeWidth="8"
+              strokeLinecap="round"
+            />
+            {/* Filled arc - shows intensity% of the 180-degree arc, starting from left (180°) */}
+            {/* strokeDasharray: [dash length, gap length]
+                dash = intensity * arcLength (the portion to fill)
+                gap = very large so only one dash shows
+                strokeDashoffset = 0 so it starts from the beginning (left side) */}
+            <path
+              d="M 10 45 A 40 40 0 0 1 90 45"
+              fill="none"
+              stroke={isGaining ? "#FF9800" : isLosing ? "#87CEEB" : "rgba(255, 255, 255, 0.5)"}
+              strokeWidth="8"
+              strokeLinecap="round"
+              strokeDasharray={`${dashLength} ${arcLength * 10}`}
+              strokeDashoffset={0}
+              className="weather-sunlight-change-meter-fill"
+            />
+          </svg>
+          {/* Center icon - positioned at top of arc */}
+          <div className="weather-sunlight-change-center">
+            <div className="weather-sunlight-change-sun">☀️</div>
+          </div>
+          {/* Arrow positioned to the left of the arc */}
+          <div className={`weather-sunlight-change-arrow ${isGaining ? 'arrow-up' : isLosing ? 'arrow-down' : 'arrow-neutral'}`}>
+            {isGaining ? '↑' : isLosing ? '↓' : '→'}
+          </div>
+        </div>
       </div>
-      <div className="weather-sunlight-change-value">{rateDisplay} min</div>
+      <div className="weather-sunlight-change-value">{rateDisplay}</div>
       <div className="weather-sunlight-change-title">Sunlight Change</div>
     </div>
   );

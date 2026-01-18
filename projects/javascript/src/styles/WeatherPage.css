@@ -57,116 +57,64 @@
   color: #fff;
 }
 
-.weather-grid {
-  position: relative;
-  min-height: 600px;
+.weather-widgets-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
   width: 100%;
   margin-bottom: 2rem;
 }
 
-.weather-widget {
-  user-select: none;
-  transition: opacity 0.2s ease;
+.weather-widget-card {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.weather-widget:hover {
-  opacity: 0.9;
-}
-
-.weather-widget-dragging {
-  opacity: 0.7;
-  cursor: grabbing !important;
-}
-
-.weather-widget .weather-card,
-.weather-widget .weather-pressure-section {
-  cursor: inherit;
-}
-
-.weather-pressure-section {
+.weather-moon-widget {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 1rem;
-  background: transparent;
-  border-radius: 12px;
-  padding: 1rem;
   width: 100%;
-  max-width: 250px;
+  max-width: 300px;
+  margin: 0 auto;
 }
 
-.weather-pressure-info {
-  text-align: center;
-  color: #fff;
-  width: 100%;
-  max-width: 250px;
-}
-
-.weather-pressure-level {
-  font-size: 1.2rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.weather-pressure-level strong {
-  font-weight: 700;
-  color: #fff;
-}
-
-.weather-pressure-description {
-  font-size: 1.1rem;
-  color: rgba(255, 255, 255, 0.9);
-  margin-bottom: 1rem;
-  font-weight: 500;
-}
-
-.weather-pressure-change {
-  display: inline-flex;
-  flex-direction: row;
+.weather-moon-widget-icon {
+  display: flex;
   align-items: center;
-  gap: 0.4rem;
-  margin: 0.5rem 0;
-  padding: 0.4rem 0.6rem;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  white-space: nowrap;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
-.weather-pressure-change-value {
-  font-size: 1.1rem;
+.weather-moon-widget-content {
+  text-align: center;
+}
+
+.weather-moon-widget-value {
+  font-size: 1.8rem;
   font-weight: 700;
+  color: #fff;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  margin-bottom: 0.25rem;
 }
 
-.weather-pressure-change-up {
-  color: #87CEEB;
-}
-
-.weather-pressure-change-down {
-  color: #4A90E2;
-}
-
-.weather-pressure-change-same {
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.weather-pressure-change-label {
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.7);
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-.weather-pressure-effects {
+.weather-moon-widget-title {
   font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.8);
-  line-height: 1.5;
-  font-style: italic;
-  margin-top: 0.25rem;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 500;
+}
+
+/* Make weather cards responsive */
+.weather-widget-card .weather-card {
+  width: 100%;
+  max-width: 300px;
+  height: auto;
+  min-height: 160px;
 }
 
 .weather-loading,
@@ -211,47 +159,71 @@
   font-style: italic;
 }
 
+/* Mobile-first: single column */
 @media (max-width: 768px) {
+  .weather-page {
+    padding: 1rem 0.5rem;
+  }
+
+  .weather-container {
+    padding: 1rem 0;
+  }
+
   .weather-title {
     font-size: 2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .weather-widgets-grid {
+    gap: 1rem;
+  }
+
+  .weather-header {
     margin-bottom: 2rem;
+    gap: 1rem;
   }
 
-  .weather-grid {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-
-  .weather-pressure-section {
-    padding: 1.5rem;
-  }
-
-  .weather-pressure-level {
-    font-size: 1.25rem;
-  }
-
-  .weather-pressure-description {
+  .weather-city-selector {
     font-size: 1rem;
+    padding: 0.6rem 1.2rem;
+    min-width: 180px;
   }
 
-  .weather-pressure-effects {
-    font-size: 0.85rem;
+  .weather-widget-card .weather-card {
+    max-width: 100%;
+    width: 100%;
+    padding: 1rem;
   }
-}
 
-@media (min-width: 769px) and (max-width: 1024px) {
-  .weather-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (min-width: 1025px) {
-  .weather-grid {
-    grid-template-columns: repeat(3, 1fr);
+  .weather-moon-widget {
+    max-width: 100%;
   }
   
-  .weather-pressure-section {
-    grid-column: span 1;
+  .weather-moon-widget-value {
+    font-size: 1.5rem;
+  }
+}
+
+/* Tablet: 2 columns */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .weather-widgets-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
+}
+
+/* Desktop: 3 columns */
+@media (min-width: 1025px) {
+  .weather-widgets-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+/* Large desktop: 4 columns for better use of space */
+@media (min-width: 1400px) {
+  .weather-widgets-grid {
+    grid-template-columns: repeat(4, 1fr);
   }
 }
 
