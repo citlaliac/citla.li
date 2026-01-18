@@ -6,11 +6,9 @@ const ScratchCard = ({ title, content, position }) => {
   const cardRef = useRef(null);
   const [isScratching, setIsScratching] = useState(false);
   const [isRevealed, setIsRevealed] = useState(false);
-  const [revealPercentage, setRevealPercentage] = useState(0);
   const [lastX, setLastX] = useState(0);
   const [lastY, setLastY] = useState(0);
   const [totalPixels, setTotalPixels] = useState(0);
-  const [scratchedPixels, setScratchedPixels] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStartX, setDragStartX] = useState(0);
   const [dragStartY, setDragStartY] = useState(0);
@@ -169,9 +167,7 @@ const ScratchCard = ({ title, content, position }) => {
       }
     }
     
-    setScratchedPixels(scratched);
     const percentage = (scratched / totalPixels) * 100;
-    setRevealPercentage(percentage);
     
     // If more than 30% is scratched, reveal the content
     if (percentage > 30 && !isRevealed) {

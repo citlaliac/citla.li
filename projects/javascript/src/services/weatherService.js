@@ -396,8 +396,6 @@ export function calculateSunAngle(date, lat, lon) {
   
   // Get Eastern Time components
   const year = easternDate.getFullYear();
-  const month = easternDate.getMonth() + 1;
-  const day = easternDate.getDate();
   const hour = easternDate.getHours();
   const minute = easternDate.getMinutes();
   const second = easternDate.getSeconds();

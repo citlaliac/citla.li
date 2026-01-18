@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import '../styles/HintGiverPage.css';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -41,9 +40,6 @@ const HintGiverPage = () => {
     return () => clearTimeout(videoTimer);
   }, []);
 
-  const handleTinderClick = () => {
-    window.open('https://tinder.com/download', '_blank');
-  };
 
   const handleVideoClick = () => {
     window.open('https://youtu.be/cZaJYDPY-YQ?si=RqTt2TD2Lb4eseKc&t=46', '_blank');

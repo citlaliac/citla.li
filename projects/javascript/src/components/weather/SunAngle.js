@@ -8,7 +8,6 @@ import './SunAngle.css';
 function SunAngle({ angle }) {
   // Normalize angle for display (0-90 degrees)
   const normalizedAngle = Math.max(-90, Math.min(90, angle));
-  const displayAngle = normalizedAngle > 0 ? normalizedAngle : 0;
   const rotation = normalizedAngle; // Rotate sun based on angle
   const angleLineLength = 40; // Length of the angle indicator line
   const angleRadians = (normalizedAngle * Math.PI) / 180;

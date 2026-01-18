@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { useSEO } from '../hooks/useSEO';
@@ -65,18 +64,6 @@ function TourPage() {
     }
   });
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentReviewIndex((prev) => (prev + 1) % reviews.length);
-    }, 4201);
-
-    return () => clearInterval(timer);
-  }, []);
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
-
   const tours = [
     {
       title: "Daughter for a Day",
@@ -122,6 +109,18 @@ function TourPage() {
       date: "Aug 2023"
     }
   ];
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentReviewIndex((prev) => (prev + 1) % reviews.length);
+    }, 4201);
+
+    return () => clearInterval(timer);
+  }, [reviews.length]);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   return (
     <div className="app-container tour-page">

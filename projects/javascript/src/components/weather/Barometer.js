@@ -21,15 +21,6 @@ function Barometer({ pressure }) {
   const lowZonePercent = ((lowZoneEnd - minPressure) / (maxPressure - minPressure)) * 100;
   const highZonePercent = ((highZoneStart - minPressure) / (maxPressure - minPressure)) * 100;
   
-  // Determine current zone
-  const getZone = () => {
-    if (pressure < lowZoneEnd) return 'low';
-    if (pressure > highZoneStart) return 'high';
-    return 'normal';
-  };
-  
-  const currentZone = getZone();
-  
   // Color based on pressure level with gradient
   const getColor = () => {
     if (pressure < lowZoneEnd) return 'linear-gradient(180deg, #2E5C8A 0%, #4A90E2 100%)'; // Low - darker blue

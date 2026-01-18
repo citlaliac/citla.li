@@ -11,21 +11,16 @@ function UVIndex({ uvIndex }) {
   const currentUV = uvIndex !== null && uvIndex !== undefined ? uvIndex : 0;
   const percentage = Math.min(100, (currentUV / maxUV) * 100);
   
-  // Determine UV level category
-  let uvLevel = 'Low';
-  let uvColor = '#4CAF50'; // Green
+  // Determine UV level category and color
+  let uvColor = '#4CAF50'; // Green (Low)
   if (currentUV >= 11) {
-    uvLevel = 'Extreme';
-    uvColor = '#9C27B0'; // Purple
+    uvColor = '#9C27B0'; // Purple (Extreme)
   } else if (currentUV >= 8) {
-    uvLevel = 'Very High';
-    uvColor = '#F44336'; // Red
+    uvColor = '#F44336'; // Red (Very High)
   } else if (currentUV >= 6) {
-    uvLevel = 'High';
-    uvColor = '#FF9800'; // Orange
+    uvColor = '#FF9800'; // Orange (High)
   } else if (currentUV >= 3) {
-    uvLevel = 'Moderate';
-    uvColor = '#FFC107'; // Yellow
+    uvColor = '#FFC107'; // Yellow (Moderate)
   }
   
   return (

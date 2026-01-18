@@ -18,7 +18,6 @@ function SunlightChange({ rateOfChange }) {
   
   const isGaining = rate > 0;
   const isLosing = rate < 0;
-  const isNeutral = rate === 0;
   
   // Calculate intensity: use the appropriate max based on direction
   // If gaining, compare to maxGain (2:43)

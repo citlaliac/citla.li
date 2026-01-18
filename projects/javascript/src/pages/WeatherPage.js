@@ -333,10 +333,6 @@ function WeatherPage() {
     });
   };
 
-  const handleMouseUp = () => {
-    setDraggedWidget(null);
-  };
-
   return (
     <div className="weather-page">
       <Header />

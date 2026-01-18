@@ -29,7 +29,7 @@ const UrbanPage = () => {
           <div key={index} className="photo-item">
             <img
               src={`${process.env.PUBLIC_URL || ''}/assets/photos/urban/${photo}`}
-              alt={`Photo ${index + 1} from Urban Collection`}
+              alt={`${index + 1} from Urban Collection`}
               loading="lazy"
               style={{ width: '100%', height: 'auto', display: 'block' }}
               onError={(e) => {

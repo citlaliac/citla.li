@@ -88,7 +88,8 @@ function ListenPage() {
                   frameBorder="0" 
                   allowfullscreen="" 
                   allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
-                  loading="lazy">
+                  loading="lazy"
+                  title="Spotify Playlist: The Citlali Experience">
                 </iframe>
               </div>
             </div>
@@ -110,7 +111,8 @@ function ListenPage() {
                   frameBorder="0" 
                   allowfullscreen="" 
                   allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
-                  loading="lazy">
+                  loading="lazy"
+                  title="Spotify Playlist: Brad and Jen Breakup Mix">
                 </iframe>
               </div>
             </div>
@@ -132,7 +134,8 @@ function ListenPage() {
                   frameBorder="0" 
                   allowfullscreen="" 
                   allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
-                  loading="lazy">
+                  loading="lazy"
+                  title="Spotify Playlist: Bus Radio">
                 </iframe>
               </div>
             </div>
@@ -148,13 +151,14 @@ function ListenPage() {
               </div>
               <div className="playlist-embed">
                 <iframe 
-                  src="https://open.spotify.com/embed/playlist/0XSLVKIizEHbpLvVudF7bw?utm_source=generator&theme=0&wmode=opaque" 
+                  src="https://open.spotify.com/embed/playlist/0XSLVKIizEHbpLvVudF7bw?utm_source=generator&theme=0&wmode=opaque"
                   width="100%" 
                   height="450" 
                   frameBorder="0" 
                   allowfullscreen="" 
                   allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
-                  loading="lazy">
+                  loading="lazy"
+                  title="Spotify Playlist: Saccharine">
                 </iframe>
               </div>
             </div>

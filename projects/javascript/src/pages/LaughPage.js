@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { useSEO } from '../hooks/useSEO';
@@ -10,7 +10,7 @@ import '../styles/LaughPage.css';
  * Features a background gif and embedded YouTube content
  */
 function LaughPage() {
-  const videoRef = useRef(null);
+  // const videoRef = useRef(null); // Available for future use
 
   // SEO configuration for comedy page
   useSEO({
@@ -44,11 +44,12 @@ function LaughPage() {
     }
   });
 
-  const handlePhoneClick = () => {
-    if (videoRef.current) {
-      videoRef.current.play();
-    }
-  };
+  // Phone click handler available for future use
+  // const handlePhoneClick = () => {
+  //   if (videoRef.current) {
+  //     videoRef.current.play();
+  //   }
+  // };
 
   return (
     <div className="app-container laugh-page">

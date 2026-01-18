@@ -58,7 +58,7 @@ const PortraitPage = () => {
           <div key={index} className="photo-item">
             <img
               src={`${process.env.PUBLIC_URL || ''}/assets/photos/portrait/${photo}`}
-              alt={`Portrait photography by Citlali Aguilar Canamar - Professional portrait photo ${index + 1} from collection`}
+              alt={`Portrait by Citlali Aguilar Canamar - Professional portrait ${index + 1} from collection`}
               loading="lazy"
               style={{ width: '100%', height: 'auto', display: 'block' }}
               onError={(e) => {

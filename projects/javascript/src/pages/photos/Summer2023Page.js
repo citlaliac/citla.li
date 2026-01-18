@@ -28,7 +28,7 @@ const Summer2023Page = () => {
           <div key={index} className="photo-item">
             <img
               src={`${process.env.PUBLIC_URL || ''}/assets/photos/summer-2023/${photo}`}
-              alt={`Photo ${index + 1} from Summer 2023`}
+              alt={`${index + 1} from Summer 2023`}
               loading="lazy"
               style={{ width: '100%', height: 'auto', display: 'block' }}
               onError={(e) => {

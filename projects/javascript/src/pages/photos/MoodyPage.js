@@ -26,7 +26,7 @@ const MoodyPage = () => {
           <div key={index} className="photo-item">
             <img
               src={`/assets/photos/moody/${photo}`}
-              alt={`Photo ${index + 1} from Moody Collection`}
+              alt={`${index + 1} from Moody Collection`}
               loading="lazy"
               onError={(e) => {
                 console.error(`Error loading image: ${photo}`);

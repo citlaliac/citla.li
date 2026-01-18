@@ -25,7 +25,7 @@ const EspionnerPage = () => {
           <div key={index} className="photo-item">
             <img
               src={`${process.env.PUBLIC_URL || ''}/assets/photos/espionner/${photo}`}
-              alt={`Photo ${index + 1} from Espionner Collection`}
+              alt={`${index + 1} from Espionner Collection`}
               loading="lazy"
               style={{ width: '100%', height: 'auto', display: 'block' }}
               onError={(e) => {

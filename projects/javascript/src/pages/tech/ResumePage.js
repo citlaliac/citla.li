@@ -10,11 +10,9 @@ function ResumePage() {
     name: '',
     email: ''
   });
-  const [status, setStatus] = useState({ type: null, message: '' });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setStatus({ type: 'loading', message: 'Sending...' });
 
     const API_URL = process.env.NODE_ENV === 'production' 
       ? 'https://citla.li/submit-resume.php'
@@ -46,20 +44,12 @@ function ResumePage() {
       if (!response.ok) {
         throw new Error(data.error || 'Failed to send request');
       }
-
-      setStatus({
-        type: 'success',
-        message: 'Request sent successfully!',
-      });
       
       // Redirect to PDF page after successful submission
       navigate('/tech/resume-pdf');
     } catch (error) {
       console.error('Resume request error:', error);
-      setStatus({
-        type: 'error',
-        message: error.message || 'Failed to send request. Please try again.',
-      });
+      // Error handling - could display error message in future
     }
   };
 

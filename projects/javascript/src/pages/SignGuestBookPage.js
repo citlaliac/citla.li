@@ -1,24 +1,19 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import '../styles/SignGuestBook.css';
 
 function GuestBookPage() {
-  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
     location: '',
     message: ''
   });
-  const [status, setStatus] = useState({ type: null, message: '' });
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState(null);
+  const [status] = useState({ type: null, message: '' });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitting(true);
-    setError(null);
 
     try {
       const response = await fetch('https://citla.li/submit-guestbook.php', {
@@ -42,9 +37,8 @@ function GuestBookPage() {
       // Redirect to guestbook display page
       window.location.href = '/guestbook';
     } catch (err) {
-      setError(err.message);
-    } finally {
-      setSubmitting(false);
+      // Error handling - could display error message in future
+      console.error('Guestbook submission error:', err.message);
     }
   };
 

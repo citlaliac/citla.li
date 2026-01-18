@@ -18,7 +18,7 @@ const Spring2023Page = () => {
           <div key={index} className="photo-item">
             <img
               src={`${process.env.PUBLIC_URL || ''}/assets/photos/spring-2023/${photo}`}
-              alt={`Photo ${index + 1} from Spring 2023`}
+              alt={`${index + 1} from Spring 2023`}
               loading="lazy"
               style={{ width: '100%', height: 'auto', display: 'block' }}
               onError={(e) => {

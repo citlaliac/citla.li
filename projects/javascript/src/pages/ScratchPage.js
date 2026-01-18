@@ -1,12 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import ScratchCard from '../components/ScratchCard';
 import '../styles/ScratchPage.css';
 
 const ScratchPage = () => {
-  const [backgroundGif, setBackgroundGif] = useState('');
   
   // useEffect(() => {
   //   // Select a random background GIF

@@ -116,7 +116,7 @@ function MainPage() {
           </Link>
           <Link to="/see" className="main-page-icon-item">
             <div className="main-page-icon-wrapper">
-              <img src="/assets/gifs/see.gif" alt="See Citlali's Photography - Portrait, urban, and natural photo collections" />
+              <img src="/assets/gifs/see.gif" alt="See Citlali's work - Portrait, urban, and natural collections" />
             </div>
             <span className="main-page-icon-text">see</span>
           </Link>
