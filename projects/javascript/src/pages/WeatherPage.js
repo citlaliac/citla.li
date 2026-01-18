@@ -12,6 +12,7 @@ import Precipitation from '../components/weather/Precipitation';
 import Wind from '../components/weather/Wind';
 import UVIndex from '../components/weather/UVIndex';
 import AstrologicalSign from '../components/weather/AstrologicalSign';
+import Barometer from '../components/weather/Barometer';
 import { useSEO } from '../hooks/useSEO';
 import {
   getCurrentWeather,
@@ -24,6 +25,9 @@ import {
   getMinYearlySunlightHours,
   getUVIndex,
   getSunlightRateOfChange,
+  getPressureInfo,
+  getYesterdayPressure,
+  calculatePressureChange,
   CITIES,
   getCity
 } from '../services/weatherService';
@@ -40,6 +44,7 @@ function WeatherPage() {
   const [minSunlightHours, setMinSunlightHours] = useState(9.0); // Default fallback
   const [uvIndex, setUvIndex] = useState(null);
   const [sunlightRateOfChange, setSunlightRateOfChange] = useState(null);
+  const [pressureChange, setPressureChange] = useState(null);
 
   // Update time every minute
   useEffect(() => {
@@ -109,6 +114,21 @@ function WeatherPage() {
           }
         } catch (rateError) {
           console.warn('Could not fetch sunlight rate of change:', rateError);
+        }
+        
+        // Fetch yesterday's pressure for comparison (only for US cities with NWS)
+        if (selectedCity === 'new-york' || selectedCity === 'tucson' || selectedCity === 'san-francisco') {
+          try {
+            const yesterdayPressure = await getYesterdayPressure();
+            if (yesterdayPressure) {
+              const change = calculatePressureChange(data.main.pressure, yesterdayPressure);
+              setPressureChange(change);
+            }
+          } catch (pressureError) {
+            console.warn('Could not fetch yesterday\'s pressure:', pressureError);
+          }
+        } else {
+          setPressureChange(null); // Clear pressure change for non-US cities
         }
       } catch (err) {
         console.error('Weather fetch error:', err);
@@ -186,6 +206,7 @@ function WeatherPage() {
   const astrologicalSign = getAstrologicalSign(currentTime);
   const isRaining = weather.weather[0].main === 'Rain' || weather.weather[0].main === 'Drizzle';
   const isSnowing = weather.weather[0].main === 'Snow';
+  const pressureInfo = getPressureInfo(weather.main.pressure);
   
   // Ensure sunAngle is a number (default to 0 if undefined)
   const displaySunAngle = typeof sunAngle === 'number' ? sunAngle : 0;
@@ -280,6 +301,26 @@ function WeatherPage() {
           {/* 11. Astrological Sign */}
           <div className="weather-widget-card">
             <AstrologicalSign sign={astrologicalSign} />
+          </div>
+
+          {/* 12. Barometer */}
+          <div className="weather-widget-card weather-barometer-card">
+            <Barometer pressure={weather.main.pressure} />
+            <div className="weather-pressure-info">
+              {pressureChange ? (
+                <div className="weather-pressure-change">
+                  <span className={`weather-pressure-change-value weather-pressure-change-${pressureChange.direction}`}>
+                    {pressureChange.direction === 'up' ? '↑' : pressureChange.direction === 'down' ? '↓' : '→'} 
+                    {Math.abs(pressureChange.percentChange).toFixed(1)}%
+                  </span>
+                  <span className="weather-pressure-change-label">from yesterday</span>
+                </div>
+              ) : null}
+              <div className="weather-pressure-effects">
+                {pressureInfo.effects}
+              </div>
+              <div className="weather-pressure-title">Pressure</div>
+            </div>
           </div>
         </div>
       </div>

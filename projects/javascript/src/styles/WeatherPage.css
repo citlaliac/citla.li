@@ -117,6 +117,96 @@
   min-height: 160px;
 }
 
+/* Barometer widget styles */
+.weather-barometer-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.weather-pressure-info {
+  text-align: center;
+  color: #fff;
+  width: 100%;
+  margin-top: -0.5rem;
+}
+
+.weather-pressure-level {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.weather-pressure-level strong {
+  font-weight: 700;
+  color: #fff;
+}
+
+.weather-pressure-change {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0.4rem 0.6rem;
+  white-space: nowrap;
+}
+
+.weather-pressure-change-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.weather-pressure-change-up {
+  color: #87CEEB;
+}
+
+.weather-pressure-change-down {
+  color: #4A90E2;
+}
+
+.weather-pressure-change-same {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.weather-pressure-change-label {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.weather-pressure-effects {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.5;
+  font-style: italic;
+  margin-top: 0.25rem;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  display: inline-block;
+  max-width: 180px;
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.weather-pressure-title {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 500;
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
 .weather-loading,
 .weather-error {
   display: flex;
@@ -201,6 +291,27 @@
   
   .weather-moon-widget-value {
     font-size: 1.5rem;
+  }
+
+  .weather-widget-card {
+    padding-bottom: 1rem;
+    margin-bottom: 0.5rem;
+    position: relative;
+  }
+
+  .weather-widget-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  .weather-widget-card:last-child::after {
+    display: none;
   }
 }
 
