@@ -11,6 +11,9 @@ import Sunset from '../components/weather/Sunset';
 import Temperature from '../components/weather/Temperature';
 import Precipitation from '../components/weather/Precipitation';
 import AstrologicalSign from '../components/weather/AstrologicalSign';
+import UVIndex from '../components/weather/UVIndex';
+import Wind from '../components/weather/Wind';
+import SunlightChange from '../components/weather/SunlightChange';
 import { useSEO } from '../hooks/useSEO';
 import {
   getCurrentWeather,
@@ -24,6 +27,8 @@ import {
   calculateSunlightHours,
   getMaxYearlySunlightHours,
   getMinYearlySunlightHours,
+  getUVIndex,
+  getSunlightRateOfChange,
   CITIES,
   getCity
 } from '../services/weatherService';
@@ -39,6 +44,8 @@ function WeatherPage() {
   const [selectedCity, setSelectedCity] = useState('new-york');
   const [maxSunlightHours, setMaxSunlightHours] = useState(15.0); // Default fallback
   const [minSunlightHours, setMinSunlightHours] = useState(9.0); // Default fallback
+  const [uvIndex, setUvIndex] = useState(null);
+  const [sunlightRateOfChange, setSunlightRateOfChange] = useState(null);
   const [widgetPositions, setWidgetPositions] = useState(() => {
     // Load saved positions from localStorage, or use default
     const saved = localStorage.getItem('weather-widget-positions');
@@ -64,6 +71,9 @@ function WeatherPage() {
     'precipitation': { x: 300, y: 200 },
     'sun-angle': { x: 600, y: 200 },
     'sunlight-hours': { x: 900, y: 200 },
+    'uv-index': { x: 0, y: 400 },
+    'wind': { x: 600, y: 400 },
+    'sunlight-change': { x: 900, y: 400 },
     'pressure': { x: 300, y: 400 }
   }), []);
 
@@ -115,6 +125,26 @@ function WeatherPage() {
           }
         } catch (minHoursError) {
           console.warn('Could not fetch min sunlight hours:', minHoursError);
+        }
+        
+        // Fetch UV index
+        try {
+          const uv = await getUVIndex(city.lat, city.lon);
+          if (uv !== null) {
+            setUvIndex(uv);
+          }
+        } catch (uvError) {
+          console.warn('Could not fetch UV index:', uvError);
+        }
+        
+        // Fetch sunlight rate of change
+        try {
+          const rate = await getSunlightRateOfChange(city.lat, city.lon);
+          if (rate !== null) {
+            setSunlightRateOfChange(rate);
+          }
+        } catch (rateError) {
+          console.warn('Could not fetch sunlight rate of change:', rateError);
         }
         
         // Fetch yesterday's pressure for comparison (only for US cities with NWS)
@@ -361,6 +391,30 @@ function WeatherPage() {
           <div {...commonProps}>
             <div className="weather-card">
               <SunlightHours hours={sunlightHours} maxHours={maxSunlightHours} minHours={minSunlightHours} />
+            </div>
+          </div>
+        );
+      case 'uv-index':
+        return (
+          <div {...commonProps}>
+            <div className="weather-card">
+              <UVIndex uvIndex={uvIndex} />
+            </div>
+          </div>
+        );
+      case 'wind':
+        return (
+          <div {...commonProps}>
+            <div className="weather-card">
+              <Wind speed={weather.wind.speed} direction={weather.wind.deg} />
+            </div>
+          </div>
+        );
+      case 'sunlight-change':
+        return (
+          <div {...commonProps}>
+            <div className="weather-card">
+              <SunlightChange rateOfChange={sunlightRateOfChange} />
             </div>
           </div>
         );

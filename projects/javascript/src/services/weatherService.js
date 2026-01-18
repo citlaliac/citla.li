@@ -76,28 +76,28 @@ function getMockWeatherData() {
     coord: { lon: -73.9983, lat: 40.7336 },
     weather: [
       {
-        id: 800,
-        main: 'Clear',
-        description: 'clear sky',
-        icon: '01d'
+        id: 500,
+        main: 'Rain',
+        description: 'light rain',
+        icon: '10d'
       }
     ],
     base: 'stations',
     main: {
-      temp: 72,
-      feels_like: 70,
-      temp_min: 68,
-      temp_max: 76,
-      pressure: 1013, // Normal pressure in hPa
-      humidity: 65
+      temp: 65,
+      feels_like: 63,
+      temp_min: 62,
+      temp_max: 68,
+      pressure: 970, // Low pressure in hPa (< 980)
+      humidity: 85
     },
-    visibility: 10000,
+    visibility: 8000,
     wind: {
-      speed: 5.5,
-      deg: 180
+      speed: 12.5,
+      deg: 220
     },
     clouds: {
-      all: 0
+      all: 90
     },
     dt: now,
     sys: {
@@ -122,6 +122,16 @@ function getMockWeatherData() {
  * @param {string} cityKey - City key for name/timezone (defaults to 'new-york')
  */
 export async function getCurrentWeather(lat = 40.7336, lon = -73.9983, cityKey = 'new-york') {
+  // In development, check for mock data flag (URL parameter or localStorage)
+  if (process.env.NODE_ENV === 'development') {
+    const urlParams = new URLSearchParams(window.location.search);
+    const useMock = urlParams.get('mock') === 'true' || localStorage.getItem('weather-use-mock') === 'true';
+    
+    if (useMock) {
+      console.log('🧪 Using mock weather data (low pressure, rainy)');
+      return getMockWeatherData();
+    }
+  }
   
   try {
     // Step 1: Get grid point information
@@ -565,34 +575,59 @@ export function formatTime(timestamp) {
 
 /**
  * Get pressure description and health effects
+ * Matches the Barometer component boundaries: Low < 980, Normal 980-1020, High > 1020
  */
 export function getPressureInfo(pressure) {
-  // Pressure in hPa (OpenWeatherMap returns in hPa)
-  // Normal range: 980-1020 hPa (29-30.1 inHg)
-  // Convert to mmHg: 1 hPa = 0.750062 mmHg
+  // Pressure in hPa
+  // Normal range: 980-1020 hPa (matches Barometer component)
+  const normalLow = 980;  // hPa
+  const normalHigh = 1020; // hPa
   
-  const pressureMmHg = pressure * 0.750062;
-  const normalLow = 980 * 0.750062; // ~735 mmHg
-  const normalHigh = 1020 * 0.750062; // ~765 mmHg
-  
-  if (pressureMmHg < normalLow) {
+  if (pressure < normalLow) {
     return {
       level: 'Low',
       description: 'Low pressure system',
-      effects: 'Some people may experience headaches, joint aches, or fatigue. Weather is typically stormy or rainy.'
+      effects: 'May cause headaches or fatigue. Typically stormy weather.'
     };
-  } else if (pressureMmHg > normalHigh) {
+  } else if (pressure > normalHigh) {
     return {
       level: 'High',
       description: 'High pressure system',
-      effects: 'Generally clear skies and stable weather. Most people feel comfortable, though some may experience slight sinus pressure.'
+      effects: 'Clear skies and stable weather. Generally comfortable.'
     };
   } else {
     return {
       level: 'Normal',
       description: 'Normal pressure',
-      effects: 'Comfortable conditions. No significant health effects expected for most people.'
+      effects: 'Comfortable conditions.'
     };
+  }
+}
+
+/**
+ * Get current UV index from Open-Meteo API
+ * @param {number} lat - Latitude
+ * @param {number} lon - Longitude
+ * @returns {Promise<number|null>} UV index (0-12+) or null if unavailable
+ */
+export async function getUVIndex(lat, lon) {
+  try {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=uv_index&timezone=auto`;
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      throw new Error(`Open-Meteo API error: HTTP ${response.status}`);
+    }
+    
+    const data = await response.json();
+    if (data?.current?.uv_index !== null && data?.current?.uv_index !== undefined) {
+      return Math.round(data.current.uv_index * 10) / 10; // Round to 1 decimal
+    }
+    
+    return null;
+  } catch (error) {
+    console.warn('Could not fetch UV index:', error);
+    return null;
   }
 }
 
@@ -723,6 +758,154 @@ export async function getMaxYearlySunlightHours(lat) {
   if (absLat < 45) return 15.0;
   if (absLat < 60) return 18.0;
   return 20.0; // High latitude
+}
+
+/**
+ * Get sunlight hours for a specific date
+ * @param {number} lat - Latitude
+ * @param {number} lon - Longitude
+ * @param {string} dateStr - Date in YYYY-MM-DD format
+ * @returns {Promise<number|null>} - Sunlight hours or null if unavailable
+ */
+export async function getSunlightHoursForDate(lat, lon, dateStr) {
+  try {
+    const sunApiUrl = `https://api.sunrise-sunset.org/json?lat=${lat}&lng=${lon}&date=${dateStr}&formatted=0`;
+    const response = await fetch(sunApiUrl);
+    if (response.ok) {
+      const data = await response.json();
+      if (data.status === 'OK' && data.results?.day_length) {
+        return Math.round((data.results.day_length / 3600) * 10) / 10;
+      }
+    }
+  } catch (error) {
+    console.warn('Could not fetch sunlight hours for date:', error);
+  }
+  return null;
+}
+
+/**
+ * Get sunlight hours for multiple dates
+ * @param {number} lat - Latitude
+ * @param {number} lon - Longitude
+ * @param {number} daysBack - Number of days in the past
+ * @param {number} daysForward - Number of days in the future
+ * @returns {Promise<Array<{date: string, hours: number}>>} - Array of date and hours pairs
+ */
+export async function getSunlightHoursForRange(lat, lon, daysBack = 7, daysForward = 7) {
+  const results = [];
+  const today = new Date();
+  
+  // Get past days
+  for (let i = daysBack; i > 0; i--) {
+    const date = new Date(today);
+    date.setDate(date.getDate() - i);
+    const dateStr = date.toISOString().split('T')[0];
+    const hours = await getSunlightHoursForDate(lat, lon, dateStr);
+    if (hours !== null) {
+      results.push({ date: dateStr, hours });
+    }
+  }
+  
+  // Get today
+  const todayStr = today.toISOString().split('T')[0];
+  const todayHours = await getSunlightHoursForDate(lat, lon, todayStr);
+  if (todayHours !== null) {
+    results.push({ date: todayStr, hours: todayHours });
+  }
+  
+  // Get future days
+  for (let i = 1; i <= daysForward; i++) {
+    const date = new Date(today);
+    date.setDate(date.getDate() + i);
+    const dateStr = date.toISOString().split('T')[0];
+    const hours = await getSunlightHoursForDate(lat, lon, dateStr);
+    if (hours !== null) {
+      results.push({ date: dateStr, hours });
+    }
+  }
+  
+  return results;
+}
+
+/**
+ * Calculate rate of change of sunlight (minutes per day)
+ * @param {number} lat - Latitude
+ * @param {number} lon - Longitude
+ * @returns {Promise<number|null>} - Rate of change in minutes per day (positive = gaining, negative = losing)
+ */
+export async function getSunlightRateOfChange(lat, lon) {
+  try {
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    const todayStr = today.toISOString().split('T')[0];
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+    
+    const todayHours = await getSunlightHoursForDate(lat, lon, todayStr);
+    const tomorrowHours = await getSunlightHoursForDate(lat, lon, tomorrowStr);
+    
+    if (todayHours !== null && tomorrowHours !== null) {
+      const changeInHours = tomorrowHours - todayHours;
+      const changeInMinutes = changeInHours * 60;
+      return Math.round(changeInMinutes * 10) / 10; // Round to 1 decimal
+    }
+  } catch (error) {
+    console.warn('Could not calculate sunlight rate of change:', error);
+  }
+  return null;
+}
+
+/**
+ * Get maximum rate of change of sunlight (fastest gain/loss, typically at equinoxes)
+ * @param {number} lat - Latitude
+ * @returns {Promise<number>} - Maximum rate of change in minutes per day
+ */
+export async function getMaxSunlightRateOfChange(lat) {
+  // Maximum rate occurs around spring/fall equinoxes (March 20, September 22)
+  // For mid-latitudes (40°N), max rate is typically 2-3 minutes per day
+  try {
+    const year = new Date().getFullYear();
+    const springEquinox = `${year}-03-20`;
+    const fallEquinox = `${year}-09-22`;
+    
+    // Calculate rate around spring equinox (gaining) - use 0 longitude for consistency
+    const springDay1 = await getSunlightHoursForDate(lat, 0, springEquinox);
+    const springDay2 = await getSunlightHoursForDate(lat, 0, `${year}-03-21`);
+    
+    // Calculate rate around fall equinox (losing) - use 0 longitude for consistency
+    const fallDay1 = await getSunlightHoursForDate(lat, 0, fallEquinox);
+    const fallDay2 = await getSunlightHoursForDate(lat, 0, `${year}-09-23`);
+    
+    let maxRate = 0;
+    
+    if (springDay1 !== null && springDay2 !== null) {
+      const springRate = Math.abs((springDay2 - springDay1) * 60);
+      maxRate = Math.max(maxRate, springRate);
+    }
+    
+    if (fallDay1 !== null && fallDay2 !== null) {
+      const fallRate = Math.abs((fallDay2 - fallDay1) * 60);
+      maxRate = Math.max(maxRate, fallRate);
+    }
+    
+    if (maxRate > 0) {
+      return Math.round(maxRate * 10) / 10;
+    }
+  } catch (error) {
+    console.warn('Could not fetch max sunlight rate of change:', error);
+  }
+  
+  // Fallback: estimate based on latitude
+  // At 40°N: ~2.5 min/day max
+  // At 0°: ~0.5 min/day max (equator has less variation)
+  // At 60°N: ~4 min/day max
+  const absLat = Math.abs(lat);
+  if (absLat < 10) return 0.5;
+  if (absLat < 30) return 1.5;
+  if (absLat < 45) return 2.5;
+  if (absLat < 60) return 3.5;
+  return 4.5; // High latitude
 }
 
 /**

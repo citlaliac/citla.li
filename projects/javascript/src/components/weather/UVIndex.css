@@ -1,4 +1,4 @@
-.weather-sunlight-hours {
+.weather-uv-index {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -8,32 +8,43 @@
   padding: 1rem;
 }
 
-.weather-sunlight-hours-scale {
+.weather-uv-scale {
   width: 100%;
   max-width: 180px;
   margin-bottom: 0.75rem;
 }
 
-.weather-sunlight-hours-scale-track {
+.weather-uv-scale-track {
   position: relative;
   width: 100%;
   height: 12px;
-  background: rgba(255, 255, 255, 0.2);
+  background: linear-gradient(
+    to right,
+    #4CAF50 0%,
+    #4CAF50 25%,
+    #FFC107 25%,
+    #FFC107 50%,
+    #FF9800 50%,
+    #FF9800 75%,
+    #F44336 75%,
+    #F44336 90%,
+    #9C27B0 90%,
+    #9C27B0 100%
+  );
   border-radius: 6px;
   overflow: visible;
 }
 
-.weather-sunlight-hours-scale-fill {
+.weather-uv-scale-fill {
   position: absolute;
   top: 0;
   left: 0;
   height: 100%;
-  background: linear-gradient(90deg, #ffd700, #ffaa00);
   border-radius: 6px;
   transition: width 0.3s ease, background-color 0.3s ease;
 }
 
-.weather-sunlight-hours-scale-indicator {
+.weather-uv-scale-indicator {
   position: absolute;
   top: 50%;
   transform: translate(-50%, -50%);
@@ -44,10 +55,9 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   transition: left 0.3s ease, background-color 0.3s ease;
   z-index: 2;
-  background: linear-gradient(90deg, #ffd700, #ffaa00);
 }
 
-.weather-sunlight-hours-scale-dot {
+.weather-uv-scale-dot {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -58,7 +68,7 @@
   border-radius: 50%;
 }
 
-.weather-sunlight-hours-scale-labels {
+.weather-uv-scale-labels {
   display: flex;
   justify-content: space-between;
   margin-top: 0.25rem;
@@ -66,32 +76,18 @@
   color: rgba(255, 255, 255, 0.7);
 }
 
-.weather-sunlight-hours-title {
+.weather-uv-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.25rem;
+  white-space: nowrap;
+}
+
+.weather-uv-title {
   font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.9);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   white-space: nowrap;
-}
-
-.weather-sunlight-hours-percentage {
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: #fff;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.weather-sunlight-hours-value {
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: #fff;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  margin-bottom: 0.25rem;
-  white-space: nowrap;
-}
-
-.weather-sunlight-hours-label {
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.7);
-  text-align: center;
 }

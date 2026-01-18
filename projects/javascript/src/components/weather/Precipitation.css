@@ -15,44 +15,15 @@
 }
 
 .weather-precipitation-rain {
-  animation: rain-drop 1.5s ease-in-out infinite;
+  /* No animation - static icon */
 }
 
 .weather-precipitation-snow {
-  animation: snow-fall 2s ease-in-out infinite;
+  /* No animation - static icon */
 }
 
 .weather-precipitation-clear {
-  animation: sun-shine 3s ease-in-out infinite;
-}
-
-@keyframes rain-drop {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(5px);
-  }
-}
-
-@keyframes snow-fall {
-  0%, 100% {
-    transform: translateY(0) rotate(0deg);
-  }
-  50% {
-    transform: translateY(5px) rotate(10deg);
-  }
-}
-
-@keyframes sun-shine {
-  0%, 100% {
-    transform: scale(1);
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-  }
-  50% {
-    transform: scale(1.1);
-    filter: drop-shadow(0 4px 8px rgba(255, 200, 0, 0.5));
-  }
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3)) drop-shadow(0 4px 8px rgba(255, 200, 0, 0.4));
 }
 
 .weather-precipitation-value {

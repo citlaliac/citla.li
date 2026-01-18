@@ -2,11 +2,10 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.5rem;
-  padding: 2rem;
-  padding-right: 3rem; /* Extra padding on right for markings */
+  gap: 0.75rem;
+  padding: 1rem;
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
+  border-radius: 12px;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
@@ -15,15 +14,14 @@
 
 .weather-barometer-container {
   position: relative;
-  width: 100px;
-  height: 350px;
-  padding-right: 70px; /* Make room for the scale markings */
+  width: 70px;
+  height: 250px;
   overflow: visible; /* Allow markings to show outside */
 }
 
 .weather-barometer-glass {
   position: relative;
-  width: 100px;
+  width: 70px;
   height: 100%;
   background: linear-gradient(
     135deg,
@@ -31,9 +29,9 @@
     rgba(255, 255, 255, 0.15) 50%,
     rgba(255, 255, 255, 0.1) 100%
   );
-  border: 4px solid rgba(255, 255, 255, 0.6);
-  border-radius: 50px;
-  overflow: hidden;
+  border: 3px solid rgba(255, 255, 255, 0.6);
+  border-radius: 35px;
+  overflow: visible; /* Allow tube marks to show */
   box-shadow: 
     inset 0 0 30px rgba(0, 0, 0, 0.15),
     inset 0 2px 10px rgba(255, 255, 255, 0.3),
@@ -76,17 +74,77 @@
   border-color: #87CEEB;
 }
 
-.weather-barometer-zone-label {
+.weather-barometer-tube-marks {
   position: absolute;
-  left: -45px;
-  top: 50%;
-  transform: translateY(-50%) rotate(-90deg);
+  left: -4px;
+  right: -4px;
+  top: -4px;
+  bottom: -4px;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.weather-barometer-tube-mark {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.weather-barometer-tube-mark-line {
+  width: calc(100% + 8px);
+  height: 3px;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 
+    0 0 6px rgba(255, 255, 255, 0.9),
+    0 0 3px rgba(255, 255, 255, 0.7),
+    inset 0 1px 2px rgba(0, 0, 0, 0.2);
+  border-radius: 2px;
+  margin: 0 -4px;
+}
+
+.weather-barometer-tube-mark-label {
+  position: absolute;
+  left: calc(100% + 8px);
   font-size: 0.65rem;
   font-weight: 700;
   letter-spacing: 1px;
-  color: rgba(255, 255, 255, 0.9);
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.7),
+    0 0 8px rgba(255, 255, 255, 0.5);
   white-space: nowrap;
+  text-transform: uppercase;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 2px 6px;
+  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.weather-barometer-tube-mark-low .weather-barometer-tube-mark-line {
+  background: rgba(74, 144, 226, 0.95);
+  box-shadow: 
+    0 0 8px rgba(74, 144, 226, 0.9),
+    0 0 4px rgba(74, 144, 226, 0.7),
+    inset 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.weather-barometer-tube-mark-medium .weather-barometer-tube-mark-line {
+  background: rgba(91, 163, 211, 0.95);
+  box-shadow: 
+    0 0 8px rgba(91, 163, 211, 0.9),
+    0 0 4px rgba(91, 163, 211, 0.7),
+    inset 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.weather-barometer-tube-mark-high .weather-barometer-tube-mark-line {
+  background: rgba(135, 206, 235, 0.95);
+  box-shadow: 
+    0 0 8px rgba(135, 206, 235, 0.9),
+    0 0 4px rgba(135, 206, 235, 0.7),
+    inset 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .weather-barometer-liquid {
@@ -94,7 +152,7 @@
   bottom: 0;
   width: 100%;
   transition: height 1.5s cubic-bezier(0.4, 0, 0.2, 1), background 1s ease-in-out;
-  border-radius: 0 0 46px 46px;
+  border-radius: 0 0 32px 32px;
   z-index: 2;
   box-shadow: 
     inset 0 -15px 30px rgba(0, 0, 0, 0.4),
@@ -128,105 +186,7 @@
   }
 }
 
-.weather-barometer-indicator {
-  position: absolute;
-  left: -8px;
-  width: calc(100% + 16px);
-  z-index: 3;
-  pointer-events: none;
-  transition: bottom 1.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
 
-.weather-barometer-indicator-line {
-  width: 100%;
-  height: 2px;
-  background: linear-gradient(90deg, 
-    transparent 0%,
-    rgba(255, 255, 255, 0.8) 20%,
-    rgba(255, 255, 255, 1) 50%,
-    rgba(255, 255, 255, 0.8) 80%,
-    transparent 100%
-  );
-  box-shadow: 
-    0 0 8px rgba(255, 255, 255, 0.6),
-    0 0 4px rgba(255, 255, 255, 0.4);
-}
-
-.weather-barometer-indicator-dot {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 12px;
-  height: 12px;
-  background: #fff;
-  border: 2px solid rgba(0, 0, 0, 0.3);
-  border-radius: 50%;
-  box-shadow: 
-    0 0 10px rgba(255, 255, 255, 0.8),
-    0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.weather-barometer-scale {
-  position: absolute;
-  right: -65px;
-  top: 0;
-  bottom: 0;
-  width: 60px;
-  display: flex;
-  flex-direction: column;
-  pointer-events: none;
-  z-index: 10;
-}
-
-.weather-barometer-mark {
-  position: absolute;
-  right: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
-}
-
-.weather-barometer-mark-line {
-  width: 12px;
-  height: 2px;
-  background: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 0 4px rgba(255, 255, 255, 0.5);
-  border-radius: 1px;
-}
-
-.weather-barometer-mark-line-minor {
-  width: 6px;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.6);
-  box-shadow: none;
-}
-
-.weather-barometer-mark-line-zone {
-  width: 16px;
-  height: 3px;
-  background: rgba(255, 255, 255, 1);
-  box-shadow: 0 0 6px rgba(255, 255, 255, 0.7);
-}
-
-.weather-barometer-mark-value {
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.95);
-  font-weight: 600;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-  line-height: 1;
-}
-
-.weather-barometer-mark-zone-label {
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 1px;
-  color: rgba(255, 255, 255, 0.9);
-  text-transform: uppercase;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-  margin-bottom: 2px;
-}
 
 
 .weather-barometer-reading {
@@ -234,20 +194,20 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.25rem;
 }
 
 .weather-barometer-value {
-  font-size: 2.5rem;
+  font-size: 1.8rem;
   font-weight: 700;
   color: #fff;
   text-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
-  margin-bottom: 0.25rem;
+  margin-bottom: 0;
   letter-spacing: -0.5px;
 }
 
 .weather-barometer-unit {
-  font-size: 1.3rem;
+  font-size: 1rem;
   font-weight: 400;
   opacity: 0.95;
 }
@@ -294,41 +254,36 @@
 
 @media (max-width: 768px) {
   .weather-barometer {
-    padding: 1.5rem;
-    padding-right: 2.5rem; /* Extra padding on right for markings */
+    padding: 0.75rem;
+    gap: 0.5rem;
   }
   
   .weather-barometer-container {
-    width: 70px;
-    height: 280px;
-    padding-right: 50px; /* Make room for the scale markings on mobile */
+    width: 60px;
+    height: 200px;
+  }
+  
+  .weather-barometer-glass {
+    width: 60px;
+    border-radius: 30px;
+  }
+  
+  .weather-barometer-liquid {
+    border-radius: 0 0 27px 27px;
   }
   
   .weather-barometer-value {
-    font-size: 1.8rem;
+    font-size: 1.5rem;
   }
   
-  .weather-barometer-scale {
-    right: -45px;
-    width: 40px;
+  .weather-barometer-unit {
+    font-size: 0.85rem;
   }
   
-  .weather-barometer-mark-value {
-    font-size: 0.65rem;
-  }
-  
-  .weather-barometer-mark-zone-label {
+  .weather-barometer-tube-mark-label {
     font-size: 0.55rem;
-  }
-  
-  .weather-barometer-zone-label {
-    left: -35px;
-    font-size: 0.55rem;
-  }
-  
-  .weather-barometer-indicator-dot {
-    width: 10px;
-    height: 10px;
+    left: calc(100% + 6px);
+    padding: 1px 4px;
   }
 }
 
