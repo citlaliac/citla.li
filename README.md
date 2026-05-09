@@ -72,4 +72,5 @@ If you need to manually deploy (e.g., for database testing):
 - Run `npm run build` to build
 - Upload the `build` folder contents, `.htaccess`, and PHP files from `server/` to `public_html/` on PlanetHoster
 - Set up your DBs and tables, add the access creds to the project
+- FTP login details are in PlanetHoster at: `My Accommodations -> Web Projects -> [this website page] -> FTP`
 
