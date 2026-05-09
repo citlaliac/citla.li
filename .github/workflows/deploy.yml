@@ -3,6 +3,9 @@ name: Deploy to PlanetHoster
 on:
   push:
     branches: [ main ]
+    paths-ignore:
+      - 'README.md'
+      - '**/*.md'
   workflow_dispatch: # Allows manual triggering from any branch
     inputs:
       test_mode:
