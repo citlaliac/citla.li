@@ -201,7 +201,9 @@ jobs:
                 f"open {url}",
                 "cd public_html",
                 "lcd projects/javascript/deployment/public_html",
-                "mirror -R --verbose --exclude-glob .git* --exclude-glob node_modules* --exclude-glob .env*",
+                # Ignore mtime drift from rebuilds so unchanged large assets
+                # (like photos copied into build/assets) do not re-upload each deploy.
+                "mirror -R --verbose --ignore-time --exclude-glob .git* --exclude-glob node_modules* --exclude-glob .env*",
                 "quit",
             ]
         )
