@@ -99,16 +99,16 @@ function CoinBoysPage() {
     <div className="coinboys-page">
       <Header />
       <main className="coinboys-main">
-        <p className="coinboys-credit">
-          From the{' '}
+        <h1 className="coinboys-title">Coin Boys</h1>
+        <p className="coinboys-tagline">
+          from the hit app{' '}
           <a
             href="https://github.com/citlaliac/coin-boys"
             target="_blank"
             rel="noreferrer"
           >
             Coin Boys
-          </a>{' '}
-          app — coin is life.
+          </a>
         </p>
         <div className="coinboys-stage">
           <button
