@@ -5,8 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "react-scripts start",
-    "prestart": "node scripts/write-movethings-manifest.js",
-    "prebuild": "node scripts/write-movethings-manifest.js && node scripts/generate-build-info.js",
+    "prestart": "node scripts/write-movethings-manifest.js && node scripts/write-nicework-manifest.js",
+    "prebuild": "node scripts/write-movethings-manifest.js && node scripts/write-nicework-manifest.js && node scripts/generate-build-info.js",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "test:ci": "react-scripts test --watchAll=false --coverage",

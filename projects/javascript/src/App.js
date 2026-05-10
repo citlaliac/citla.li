@@ -43,6 +43,7 @@ import MeshPage from './pages/MeshPage';
 import CmapPage from './pages/CmapPage';
 import CoinBoysPage from './pages/CoinBoysPage';
 import MoveThingsAroundPage from './pages/MoveThingsAroundPage';
+import NiceWorkPage from './pages/NiceWorkPage';
 import NotFoundPage from './pages/NotFoundPage';
 
 import './styles.css';
@@ -102,6 +103,7 @@ function App() {
           <Route path="/cmap" element={<CmapPage />} />
           <Route path="/coinboys" element={<CoinBoysPage />} />
           <Route path="/movethingsaround" element={<MoveThingsAroundPage />} />
+          <Route path="/nicework" element={<NiceWorkPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </div>

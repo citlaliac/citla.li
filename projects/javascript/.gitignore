@@ -11,6 +11,7 @@ node_modules/
 
 # Auto-generated image list for /movethingsaround (see scripts/write-movethings-manifest.js)
 public/assets/movethingsaround/manifest.json
+public/assets/nicework/manifest.json
 
 # Misc
 .DS_Store

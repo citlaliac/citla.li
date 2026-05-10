@@ -1,0 +1,7 @@
+Drop images here for /nicework popup thumbnails.
+
+Formats: png, jpg, jpeg, gif, webp
+
+Filenames are listed in manifest.json when you run npm start or npm run build (see scripts/write-nicework-manifest.js).
+
+If this folder is empty, popups are text-only.

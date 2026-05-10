@@ -1,0 +1,561 @@
+/*
+ * Fake dialogs — flat fills, no gradients. Fonts: typical Windows UI stack.
+ * Tahoma (XP dialogs), MS Sans Serif (older), Segoe UI (Vista+), Arial fallback.
+ */
+
+.nicework-page {
+  --nicework-font: Tahoma, "MS Sans Serif", "Segoe UI", Verdana, Arial, sans-serif;
+
+  position: relative;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  background: #fff;
+  overflow-x: hidden;
+  overflow-y: auto;
+  font-family: var(--nicework-font);
+}
+
+.nicework-center-line {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+  padding: 0 1rem;
+  font-family: var(--nicework-font);
+  font-size: clamp(1.35rem, 4.5vw, 2rem);
+  font-weight: 700;
+  color: #111;
+  text-align: center;
+  z-index: 1;
+  pointer-events: none;
+  user-select: none;
+}
+
+.nicework-alert {
+  position: fixed;
+  box-sizing: border-box;
+  font-family: var(--nicework-font);
+  min-width: 0;
+}
+
+.nicework-alert-image-frame {
+  margin: 0 0 10px;
+  padding: 4px;
+  background: #00000022;
+  border: 1px solid;
+  border-color: #ffffff59 #00000059 #00000059 #ffffff59;
+}
+
+.nicework-alert-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  image-rendering: auto;
+}
+
+.nicework-alert--camspam .nicework-alert-image-frame {
+  background: #101010;
+  border-color: #606060 #202020 #202020 #606060;
+}
+
+.nicework-alert--antivirus .nicework-alert-image-frame {
+  background: #ffffaa;
+  border-color: #ffffff #999999 #999999 #ffffff;
+}
+
+.nicework-alert--neonclub .nicework-alert-image-frame {
+  background: #181818;
+  border-color: #505050 #101010 #101010 #505050;
+}
+
+.nicework-alert--chromeFake .nicework-alert-image-frame {
+  background: #f5f5f5;
+  border: 1px solid #c0c0c0;
+}
+
+.nicework-alert--macos .nicework-alert-image-frame {
+  background: #dcdcdc;
+  border: 1px solid #a0a0a0;
+}
+
+.nicework-alert--prize .nicework-alert-image-frame {
+  background: #fffdf0;
+  border: 2px ridge #daa520;
+}
+
+.nicework-alert--torrent .nicework-alert-image-frame {
+  background: #111;
+  border: 1px solid #6ecf00;
+}
+
+.nicework-alert-titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.35rem;
+  padding: 3px 4px 3px 6px;
+  cursor: default;
+  font-family: var(--nicework-font);
+}
+
+.nicework-alert-title-text {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nicework-alert-body {
+  padding: 12px 14px 14px;
+  font-family: var(--nicework-font);
+}
+
+.nicework-alert-message {
+  margin: 0 0 12px;
+  line-height: 1.35;
+  font-family: var(--nicework-font);
+}
+
+.nicework-alert-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.nicework-alert-close,
+.nicework-alert-ok {
+  font-family: var(--nicework-font);
+}
+
+/* ---------- classic (Win95 / XP flat navy bar) ---------- */
+
+.nicework-alert--classic {
+  background: #c0c0c0;
+  border: 2px solid;
+  border-color: #ffffff #404040 #404040 #ffffff;
+  box-shadow: 2px 2px 0 #00000033;
+}
+
+.nicework-alert--classic .nicework-alert-titlebar {
+  background: #000080;
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.nicework-alert--classic .nicework-alert-body {
+  background: #c0c0c0;
+}
+
+.nicework-alert--classic .nicework-alert-message {
+  font-size: 13px;
+  color: #000;
+}
+
+.nicework-alert--classic .nicework-alert-close {
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  line-height: 1;
+  font-size: 14px;
+  font-weight: bold;
+  color: #000;
+  background: #c0c0c0;
+  border: 2px solid;
+  border-color: #ffffff #404040 #404040 #ffffff;
+  cursor: pointer;
+}
+
+.nicework-alert--classic .nicework-alert-close:active {
+  border-color: #404040 #ffffff #ffffff #404040;
+}
+
+.nicework-alert--classic .nicework-alert-ok {
+  min-width: 76px;
+  padding: 4px 18px;
+  font-size: 12px;
+  font-weight: bold;
+  color: #000;
+  background: #c0c0c0;
+  border: 2px solid;
+  border-color: #ffffff #404040 #404040 #ffffff;
+  cursor: pointer;
+}
+
+.nicework-alert--classic .nicework-alert-ok:active {
+  border-color: #404040 #ffffff #ffffff #404040;
+  padding: 5px 17px 3px 19px;
+}
+
+/* ---------- camspam (flat garish — no glow / animation) ---------- */
+
+.nicework-alert--camspam {
+  background: #2d2d2d;
+  border: 2px solid #c00080;
+  box-shadow: 2px 2px 0 #00000044;
+}
+
+.nicework-alert--camspam .nicework-alert-titlebar {
+  background: #800080;
+  color: #fff;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 5px 6px;
+  border-bottom: 1px solid #505050;
+}
+
+.nicework-live-pill {
+  flex-shrink: 0;
+  padding: 1px 6px;
+  font-size: 9px;
+  font-weight: bold;
+  color: #fff;
+  background: #c00000;
+  border: 1px solid #800000;
+}
+
+.nicework-alert--camspam .nicework-alert-body {
+  background: #3c3c3c;
+}
+
+.nicework-alert--camspam .nicework-alert-message {
+  font-size: 12px;
+  color: #e0e0e0;
+}
+
+.nicework-alert--camspam .nicework-alert-close {
+  width: 18px;
+  height: 18px;
+  font-size: 14px;
+  color: #000;
+  background: #c0c0c0;
+  border: 2px solid;
+  border-color: #ffffff #404040 #404040 #ffffff;
+  cursor: pointer;
+}
+
+.nicework-alert--camspam .nicework-alert-ok {
+  padding: 4px 18px;
+  font-size: 12px;
+  font-weight: bold;
+  color: #000;
+  background: #fc0;
+  border: 2px solid;
+  border-color: #ffffff #804000 #804040 #ffffff;
+  cursor: pointer;
+}
+
+.nicework-alert--camspam .nicework-alert-ok:active {
+  border-color: #804040 #ffffff #ffffff #804040;
+}
+
+/* ---------- antivirus (flat scare yellow / red) ---------- */
+
+.nicework-alert--antivirus {
+  background: #ffff99;
+  border: 3px solid #c00000;
+  box-shadow: 2px 2px 0 #00000044;
+}
+
+.nicework-alert--antivirus .nicework-alert-titlebar {
+  background: #c00000;
+  color: #ffff99;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 6px 8px;
+  border-bottom: 2px solid #800000;
+}
+
+.nicework-alert--antivirus .nicework-alert-body {
+  background: #ffffcc;
+}
+
+.nicework-alert--antivirus .nicework-alert-message {
+  font-size: 12px;
+  font-weight: bold;
+  color: #800000;
+}
+
+.nicework-alert--antivirus .nicework-alert-close {
+  background: #ffff99;
+  border: 2px solid #000;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.nicework-alert--antivirus .nicework-alert-ok {
+  padding: 5px 18px;
+  font-size: 12px;
+  font-weight: bold;
+  color: #fff;
+  background: #c00000;
+  border: 2px solid;
+  border-color: #ffffff #600000 #600000 #ffffff;
+  cursor: pointer;
+}
+
+/* ---------- neonclub → flat “dark tool” window ---------- */
+
+.nicework-alert--neonclub {
+  background: #212121;
+  border: 2px solid #808080;
+  box-shadow: 2px 2px 0 #00000055;
+}
+
+.nicework-alert--neonclub .nicework-alert-titlebar {
+  background: #404040;
+  color: #e0e0e0;
+  font-size: 11px;
+  font-weight: bold;
+  border-bottom: 1px solid #606060;
+}
+
+.nicework-alert--neonclub .nicework-alert-body {
+  background: #2b2b2b;
+}
+
+.nicework-alert--neonclub .nicework-alert-message {
+  font-size: 12px;
+  color: #d0ffd0;
+}
+
+.nicework-alert--neonclub .nicework-alert-close {
+  background: #c0c0c0;
+  color: #000;
+  border: 2px solid;
+  border-color: #ffffff #404040 #404040 #ffffff;
+  cursor: pointer;
+}
+
+.nicework-alert--neonclub .nicework-alert-ok {
+  padding: 4px 16px;
+  font-size: 12px;
+  font-weight: bold;
+  color: #000;
+  background: #90ee90;
+  border: 2px solid;
+  border-color: #ffffff #206020 #206020 #ffffff;
+  cursor: pointer;
+}
+
+/* ---------- chromeFake → plain white box, Segoe/Tahoma ---------- */
+
+.nicework-alert--chromeFake {
+  background: #fff;
+  border: 1px solid #a0a0a0;
+  box-shadow: 2px 2px 6px #00000033;
+}
+
+.nicework-alert--chromeFake .nicework-alert-titlebar {
+  background: #fff;
+  color: #404040;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 10px 10px 6px;
+}
+
+.nicework-alert--chromeFake .nicework-alert-body {
+  background: #fff;
+  padding-top: 4px;
+}
+
+.nicework-alert--chromeFake .nicework-alert-message {
+  font-size: 13px;
+  color: #000;
+}
+
+.nicework-alert--chromeFake .nicework-alert-close {
+  width: 22px;
+  height: 22px;
+  border: 1px solid #a0a0a0;
+  background: #f0f0f0;
+  color: #000;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.nicework-alert--chromeFake .nicework-alert-actions {
+  justify-content: flex-end;
+}
+
+.nicework-alert--chromeFake .nicework-alert-ok {
+  padding: 5px 18px;
+  font-size: 12px;
+  font-weight: bold;
+  color: #fff;
+  background: #0066cc;
+  border: 2px solid;
+  border-color: #ffffff #003060 #003060 #ffffff;
+  cursor: pointer;
+}
+
+/* ---------- macos → flat gray + flat blue button, Windows fonts in body ---------- */
+
+.nicework-alert--macos {
+  background: #ececec;
+  border: 1px solid #808080;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 3px 3px 8px #00000044;
+}
+
+.nicework-mac-lights {
+  display: flex;
+  gap: 5px;
+  flex-shrink: 0;
+  padding-left: 4px;
+}
+
+.nicework-mac-light {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1px solid #33333366;
+}
+
+.nicework-mac-light--red {
+  background: #e81123;
+}
+
+.nicework-mac-light--yellow {
+  background: #ffb900;
+}
+
+.nicework-mac-light--green {
+  background: #107c10;
+}
+
+.nicework-alert--macos .nicework-alert-titlebar {
+  background: #d9d9d9;
+  color: #000;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 8px 8px 6px;
+  border-bottom: 1px solid #b0b0b0;
+}
+
+.nicework-alert--macos .nicework-alert-title-text {
+  text-align: center;
+}
+
+.nicework-alert--macos .nicework-alert-body {
+  background: #ececec;
+}
+
+.nicework-alert--macos .nicework-alert-message {
+  font-size: 13px;
+  color: #000;
+  text-align: center;
+}
+
+.nicework-alert--macos .nicework-alert-close {
+  background: transparent;
+  border: 1px solid #999;
+  color: #333;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.nicework-alert--macos .nicework-alert-ok {
+  min-width: 80px;
+  padding: 5px 16px;
+  font-size: 12px;
+  font-weight: bold;
+  color: #fff;
+  background: #0066cc;
+  border: 2px solid;
+  border-color: #ffffff #003060 #003060 #ffffff;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+/* ---------- prize (flat gold / orange, no stripes) ---------- */
+
+.nicework-alert--prize {
+  background: #fff8dc;
+  border: 3px solid #daa520;
+  box-shadow: 2px 2px 0 #00000033;
+}
+
+.nicework-alert--prize .nicework-alert-titlebar {
+  background: #ffd700;
+  color: #654321;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 8px;
+  border-bottom: 2px solid #b8860b;
+}
+
+.nicework-alert--prize .nicework-alert-body {
+  background: #fffacd;
+}
+
+.nicework-alert--prize .nicework-alert-message {
+  font-size: 12px;
+  font-weight: bold;
+  color: #8b4513;
+  text-align: center;
+}
+
+.nicework-alert--prize .nicework-alert-close {
+  background: #fff;
+  border: 2px solid #999;
+  cursor: pointer;
+}
+
+.nicework-alert--prize .nicework-alert-ok {
+  padding: 6px 22px;
+  font-size: 12px;
+  font-weight: bold;
+  color: #fff;
+  background: #e65100;
+  border: 2px solid;
+  border-color: #ffffff #803000 #803000 #ffffff;
+  cursor: pointer;
+}
+
+/* ---------- torrent (flat dark + lime accent) ---------- */
+
+.nicework-alert--torrent {
+  background: #1e1e1e;
+  border: 2px solid #6ecf00;
+  box-shadow: 2px 2px 0 #00000055;
+}
+
+.nicework-alert--torrent .nicework-alert-titlebar {
+  background: #2f4f2f;
+  color: #adff2f;
+  font-size: 11px;
+  font-weight: bold;
+  border-bottom: 1px solid #6ecf00;
+}
+
+.nicework-alert--torrent .nicework-alert-body {
+  background: #1e1e1e;
+}
+
+.nicework-alert--torrent .nicework-alert-message {
+  font-size: 12px;
+  color: #c0ffc0;
+}
+
+.nicework-alert--torrent .nicework-alert-close {
+  background: #333;
+  color: #adff2f;
+  border: 1px solid #6ecf00;
+  cursor: pointer;
+}
+
+.nicework-alert--torrent .nicework-alert-ok {
+  padding: 4px 14px;
+  font-size: 11px;
+  font-weight: bold;
+  color: #000;
+  background: #6ecf00;
+  border: 2px solid;
+  border-color: #ffffff #3d6b00 #3d6b00 #ffffff;
+  cursor: pointer;
+}
