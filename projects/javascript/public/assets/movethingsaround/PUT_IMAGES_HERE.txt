@@ -1,0 +1,7 @@
+Put image files in this folder (same folder as this file).
+
+Supported extensions: png, jpg, jpeg, gif, webp.
+
+All images here are included on /movethingsaround automatically. The list is written to manifest.json when you run npm start or npm run build (see scripts/write-movethings-manifest.js).
+
+After adding or removing files locally, restart the dev server or rebuild so the manifest updates.

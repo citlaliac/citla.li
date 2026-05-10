@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "react-scripts start",
-    "prebuild": "node scripts/generate-build-info.js",
+    "prestart": "node scripts/write-movethings-manifest.js",
+    "prebuild": "node scripts/write-movethings-manifest.js && node scripts/generate-build-info.js",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "test:ci": "react-scripts test --watchAll=false --coverage",
@@ -60,7 +61,7 @@
   "overrides": {
     "nth-check": "^2.1.1",
     "postcss": "^8.4.31",
-    "webpack-dev-server": "^5.2.0"
+    "webpack-dev-server": "4.15.2"
   },
   "private": true,
   "proxy": "http://localhost:8000"

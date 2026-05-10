@@ -54,6 +54,7 @@ export const CMAP_SECTIONS = [
       { path: '/weather', label: 'Weather' },
       { path: '/mesh', label: 'Mesh' },
       { path: '/coinboys', label: 'Coin Boys (coin flip)' },
+      { path: '/movethingsaround', label: 'Move things around' },
     ],
   },
 ];

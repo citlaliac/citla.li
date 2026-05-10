@@ -9,6 +9,9 @@ node_modules/
 # Production
 /build
 
+# Auto-generated image list for /movethingsaround (see scripts/write-movethings-manifest.js)
+public/assets/movethingsaround/manifest.json
+
 # Misc
 .DS_Store
 .env
