@@ -1,0 +1,10 @@
+Relic icons — filenames must match HOTSPOTS in CatholiceCloudPage.js.
+
+Current:
+  aspergillum.png
+  vatican.png
+  rosary.webp
+  insence.webp
+  vigil-candle.png
+  st-jude-arm-bone.png
+  lent-fish-fry.png

@@ -58,6 +58,7 @@ export const CMAP_SECTIONS = [
       { path: '/nicework', label: 'Nice work' },
       { path: '/kudos', label: 'Kudos hall of fame' },
       { path: '/makekudos', label: 'Add kudos (owner)' },
+      { path: '/catholicecloud', label: 'Catholic e Cloud' },
     ],
   },
 ];

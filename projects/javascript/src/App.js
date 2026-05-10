@@ -46,6 +46,7 @@ import MoveThingsAroundPage from './pages/MoveThingsAroundPage';
 import NiceWorkPage from './pages/NiceWorkPage';
 import KudosPage from './pages/KudosPage';
 import MakeKudosPage from './pages/MakeKudosPage';
+import CatholiceCloudPage from './pages/CatholiceCloudPage';
 import NotFoundPage from './pages/NotFoundPage';
 
 import './styles.css';
@@ -108,6 +109,7 @@ function App() {
           <Route path="/nicework" element={<NiceWorkPage />} />
           <Route path="/kudos" element={<KudosPage />} />
           <Route path="/makekudos" element={<MakeKudosPage />} />
+          <Route path="/catholicecloud" element={<CatholiceCloudPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </div>

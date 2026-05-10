@@ -1,0 +1,9 @@
+Background collages live in background/
+
+Current wired filenames (edit CatholiceCloudPage.css to swap):
+  background/cathedral-bkg.jpg   → .cec-bg-layer--photo-cathedral
+  background/heaven-bkg.jpg      → .cec-bg-layer--photo-heaven
+  background/foret_fontainebleu.jpg → .cec-bg-layer--photo-forest
+
+Popup frame (center text sits inside the aperture — tweak .cec-toast-frame-text in CSS if needed):
+  frame.png  → FRAME_POPUP in CatholiceCloudPage.js
