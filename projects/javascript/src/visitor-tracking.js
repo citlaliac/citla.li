@@ -1,7 +1,9 @@
 // Track visitor information
 async function trackVisitor(url = window.location.href) {
   try {
-    console.log('Tracking visit to:', url);
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('Tracking visit to:', url);
+    }
     
     const response = await fetch('/track-visitor.php', {
       method: 'POST',

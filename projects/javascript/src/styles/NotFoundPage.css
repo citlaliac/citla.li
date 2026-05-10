@@ -1,0 +1,46 @@
+.notfound-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+}
+
+.notfound-main {
+  flex-grow: 1;
+  flex-shrink: 0;
+  padding: 6rem 1.5rem 3rem;
+  max-width: 560px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.notfound-title {
+  font-family: 'Averia Libre', cursive;
+  font-size: 2rem;
+  color: #fff;
+  margin: 0 0 1rem;
+}
+
+.notfound-text {
+  font-family: 'Kodchasan', sans-serif;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.6;
+  margin: 0 0 1rem;
+}
+
+.notfound-text kbd {
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.15);
+  font-size: 0.85em;
+}
+
+.notfound-link {
+  color: #8cf;
+  font-weight: 600;
+}
+
+.notfound-link:hover {
+  text-decoration: underline;
+}

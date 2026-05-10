@@ -41,6 +41,8 @@ import KaraokePage from './pages/KaraokePage';
 import WeatherPage from './pages/WeatherPage';
 import MeshPage from './pages/MeshPage';
 import CmapPage from './pages/CmapPage';
+import CoinBoysPage from './pages/CoinBoysPage';
+import NotFoundPage from './pages/NotFoundPage';
 
 import './styles.css';
 
@@ -97,6 +99,8 @@ function App() {
           <Route path="/weather" element={<WeatherPage />} />
           <Route path="/mesh" element={<MeshPage />} />
           <Route path="/cmap" element={<CmapPage />} />
+          <Route path="/coinboys" element={<CoinBoysPage />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </div>
     </Router>

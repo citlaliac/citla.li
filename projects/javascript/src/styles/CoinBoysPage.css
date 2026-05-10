@@ -1,0 +1,99 @@
+.coinboys-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #000;
+}
+
+.coinboys-main {
+  flex: 1;
+  padding: 5rem 1.25rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.coinboys-credit {
+  font-family: 'Kodchasan', sans-serif;
+  font-size: 0.95rem;
+  color: rgba(140, 255, 140, 0.85);
+  text-align: center;
+  margin: 0 0 1.5rem;
+  max-width: 28rem;
+}
+
+.coinboys-credit a {
+  color: #8cff8c;
+  font-weight: 600;
+}
+
+.coinboys-credit a:hover {
+  text-decoration: underline;
+}
+
+.coinboys-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+}
+
+.coinboys-coin-hitbox {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  border-radius: 12px;
+}
+
+.coinboys-coin-hitbox:disabled {
+  cursor: default;
+  opacity: 0.85;
+}
+
+.coinboys-coin-img {
+  display: block;
+  height: 220px;
+  width: 225px;
+  object-fit: contain;
+}
+
+.coinboys-result {
+  font-family: 'Kodchasan', sans-serif;
+  color: #8cff8c;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 1.25rem 0 0;
+  text-align: center;
+  min-height: 2rem;
+}
+
+.coinboys-btn-wrap {
+  margin-top: 3rem;
+}
+
+.coinboys-coinme {
+  font-family: 'Kodchasan', sans-serif;
+  font-size: 1.5rem;
+  color: #0f0;
+  background: #064600;
+  border: none;
+  border-radius: 50px;
+  padding: 8px 32px;
+  cursor: pointer;
+}
+
+.coinboys-coinme:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.coinboys-coinme:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.coinboys-coinme--spinning {
+  color: #0f0;
+  opacity: 0.25;
+}

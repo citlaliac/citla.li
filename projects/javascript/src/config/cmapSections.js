@@ -53,6 +53,7 @@ export const CMAP_SECTIONS = [
       { path: '/karaoke', label: 'Karaoke' },
       { path: '/weather', label: 'Weather' },
       { path: '/mesh', label: 'Mesh' },
+      { path: '/coinboys', label: 'Coin Boys (coin flip)' },
     ],
   },
 ];

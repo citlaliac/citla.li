@@ -10,7 +10,8 @@ function extractRoutePathsFromAppJs(source) {
     paths.push(m[1]);
     m = re.exec(source);
   }
-  return paths;
+  // Catch-all route is not a real page URL for the site map
+  return paths.filter((p) => p !== '*');
 }
 
 function flattenCmapPaths(sections) {
