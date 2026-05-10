@@ -40,6 +40,7 @@ import SignGuestBookPage from './pages/SignGuestBookPage';
 import KaraokePage from './pages/KaraokePage';
 import WeatherPage from './pages/WeatherPage';
 import MeshPage from './pages/MeshPage';
+import CmapPage from './pages/CmapPage';
 
 import './styles.css';
 
@@ -95,6 +96,7 @@ function App() {
           <Route path="/karaoke" element={<KaraokePage />} />
           <Route path="/weather" element={<WeatherPage />} />
           <Route path="/mesh" element={<MeshPage />} />
+          <Route path="/cmap" element={<CmapPage />} />
         </Routes>
       </div>
     </Router>
