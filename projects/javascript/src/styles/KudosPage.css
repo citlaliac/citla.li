@@ -1,0 +1,173 @@
+.kudos-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #faf6f0;
+  color: #1a1a1a;
+}
+
+.kudos-main {
+  flex: 1;
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 5rem 1.25rem 3rem;
+  width: 100%;
+}
+
+/*
+ * Global styles.css sets font-family on * (every element), which blocks normal
+ * inheritance from parents. Target descendants so Metamorphous / Cinzel win.
+ */
+.kudos-hero,
+.kudos-hero * {
+  font-family: 'Metamorphous', 'Times New Roman', Times, serif;
+}
+
+.kudos-hero {
+  margin-bottom: 2.5rem;
+  text-align: center;
+}
+
+.kudos-title {
+  font-size: clamp(1.45rem, 3.9vw, 2.05rem);
+  font-weight: 400;
+  color: #6b5420;
+  margin: 0 0 1rem;
+  line-height: 1.35;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-shadow:
+    0 1px 0 rgba(255, 250, 235, 0.95),
+    0 2px 6px rgba(44, 24, 16, 0.12);
+}
+
+.kudos-lede {
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.65;
+  letter-spacing: 0.03em;
+  color: #3d2e28;
+  margin: 0 auto;
+  max-width: 38rem;
+}
+
+.kudos-hof,
+.kudos-hof * {
+  font-family: 'Cinzel', 'Times New Roman', Times, serif;
+}
+
+.kudos-hof-heading {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #5c4033;
+  margin: 0 0 1.25rem;
+  text-align: center;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.kudos-status,
+.kudos-empty {
+  font-size: 0.95rem;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  text-align: center;
+  color: #5c4a42;
+}
+
+.kudos-status--error {
+  color: #8b2500;
+}
+
+.kudos-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.kudos-card {
+  background: #fffef9;
+  border: 1px solid #e8dcc8;
+  border-radius: 10px;
+  padding: 1.25rem 1.35rem;
+  box-shadow: 0 2px 8px rgba(44, 24, 16, 0.06);
+}
+
+.kudos-card-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.65rem;
+  border-bottom: 1px solid #eee5d8;
+}
+
+.kudos-card-name {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #2c1810;
+  letter-spacing: 0.04em;
+}
+
+.kudos-card-date {
+  font-size: 0.8rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: #8a7569;
+}
+
+.kudos-card-reason-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #a08060;
+  margin: 0 0 0.35rem;
+}
+
+.kudos-card-reason {
+  font-size: 0.95rem;
+  font-weight: 400;
+  line-height: 1.55;
+  letter-spacing: 0.03em;
+  color: #3d2e28;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.kudos-owner-note,
+.kudos-owner-note * {
+  font-family: 'Cinzel', 'Times New Roman', Times, serif;
+}
+
+.kudos-owner-note {
+  margin-top: 2.5rem;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+}
+
+.kudos-owner-link {
+  color: #7a5c48;
+}
+
+.kudos-owner-link:hover {
+  color: #4a3020;
+}
+
+@media (max-width: 600px) {
+  .kudos-main {
+    padding-top: 4.5rem;
+  }
+
+  .kudos-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

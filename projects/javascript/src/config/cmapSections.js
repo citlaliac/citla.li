@@ -56,6 +56,8 @@ export const CMAP_SECTIONS = [
       { path: '/coinboys', label: 'Coin Boys (coin flip)' },
       { path: '/movethingsaround', label: 'Move things around' },
       { path: '/nicework', label: 'Nice work' },
+      { path: '/kudos', label: 'Kudos hall of fame' },
+      { path: '/makekudos', label: 'Add kudos (owner)' },
     ],
   },
 ];

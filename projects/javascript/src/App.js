@@ -44,6 +44,8 @@ import CmapPage from './pages/CmapPage';
 import CoinBoysPage from './pages/CoinBoysPage';
 import MoveThingsAroundPage from './pages/MoveThingsAroundPage';
 import NiceWorkPage from './pages/NiceWorkPage';
+import KudosPage from './pages/KudosPage';
+import MakeKudosPage from './pages/MakeKudosPage';
 import NotFoundPage from './pages/NotFoundPage';
 
 import './styles.css';
@@ -104,6 +106,8 @@ function App() {
           <Route path="/coinboys" element={<CoinBoysPage />} />
           <Route path="/movethingsaround" element={<MoveThingsAroundPage />} />
           <Route path="/nicework" element={<NiceWorkPage />} />
+          <Route path="/kudos" element={<KudosPage />} />
+          <Route path="/makekudos" element={<MakeKudosPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </div>
