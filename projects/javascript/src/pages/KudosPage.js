@@ -62,18 +62,15 @@ function KudosPage() {
       <Header />
       <main className="kudos-main">
         <section className="kudos-hero">
-          <h1 className="kudos-title">THANK YOU FOR SAVING MY A$$!</h1>
+          <h1 className="kudos-title">Hall of Fame</h1>
+          <p className="kudos-tagline">THANK YOU FOR SAVING MY A$$!</p>
           <p className="kudos-lede">
             This is a space to celebrate YOU! Send it to friends, coworkers, and put me as a
             reference for any interviews because you officially saved my ass!
           </p>
         </section>
 
-        <section className="kudos-hof" aria-labelledby="hof-heading">
-          <h2 id="hof-heading" className="kudos-hof-heading">
-            Hall of fame
-          </h2>
-
+        <section className="kudos-hof" aria-label="Kudos">
           {loading && (
             <p className="kudos-status">Loading…</p>
           )}
