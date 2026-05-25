@@ -1,0 +1,17 @@
+Optional building sprites (transparent PNG/WebP).
+
+Until added, the map uses relic images from ../relics/ per cecConfig.js buildingFile.
+
+To use custom buildings instead, set buildingSrc in CEC_LOCATIONS to:
+  /assets/catholicecloud/buildings/{id}.png
+
+Suggested filenames when you add art:
+  incense.png
+  fish_fry.png
+  rosary.png
+  vatican.png
+  aspergillum.png
+  st_jude.png
+  candle.png
+  bulletin.png
+  wheel.png
