@@ -103,7 +103,7 @@ const POPUP_MESSAGES = [
 const MAX_ALERTS = 118;
 
 /** Quiet beat before chaos — shows centered text alone first */
-const BOOT_DELAY_MS = 4000;
+const BOOT_DELAY_MS = 2000;
 
 /** Irregular cadence: bursts, normal clicks, occasional long gaps */
 function nextSpawnDelayMs() {
