@@ -1,9 +1,10 @@
-Background collages live in background/
+Catholic e Cloud assets — drop folders:
 
-Current wired filenames (edit CatholiceCloudPage.css to swap):
-  background/cathedral-bkg.jpg   → .cec-bg-layer--photo-cathedral
-  background/heaven-bkg.jpg      → .cec-bg-layer--photo-heaven
-  background/foret_fontainebleu.jpg → .cec-bg-layer--photo-forest
+  background/     — map collage layers (cathedral, heaven, forest)
+  relics/         — building icons (used until buildings/ art is ready)
+  buildings/      — custom map building sprites (optional)
+  worshipers/     — pilgrim appearance sprites (see PUT_IMAGES_HERE inside)
+  wheel/          — wheel-dial.png (optional) + wheel/saints/ portraits
+  frame.png       — popup frame (root of this folder)
 
-Popup frame (center text sits inside the aperture — tweak .cec-toast-frame-text in CSS if needed):
-  frame.png  → FRAME_POPUP in CatholiceCloudPage.js
+Config: projects/javascript/src/cec/cecConfig.js
