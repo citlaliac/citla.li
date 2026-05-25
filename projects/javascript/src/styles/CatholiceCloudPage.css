@@ -846,6 +846,346 @@
   font-size: 0.85rem;
 }
 
+/* Worshiper portrait + picker */
+.cec-register-panel--wide {
+  max-width: 28rem;
+}
+
+.cec-avatar-picker {
+  border: none;
+  margin: 0 0 1rem;
+  padding: 0;
+}
+
+.cec-avatar-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.cec-avatar-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.4rem;
+  cursor: pointer;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.2);
+  color: #f5edd8;
+  font-family: inherit;
+  font-size: 0.65rem;
+}
+
+.cec-avatar-option--selected {
+  border-color: #d4af37;
+  background: rgba(212, 175, 55, 0.15);
+}
+
+.cec-avatar-option-label {
+  line-height: 1.2;
+  text-align: center;
+}
+
+.cec-portrait {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(255, 248, 220, 0.12);
+  border: 2px solid rgba(212, 175, 55, 0.4);
+}
+
+.cec-portrait--sm {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.cec-portrait--lg {
+  width: 4.5rem;
+  height: 4.5rem;
+}
+
+.cec-portrait-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.cec-portrait-emoji {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.cec-portrait--lg .cec-portrait-emoji {
+  font-size: 2.25rem;
+}
+
+.cec-stats-portrait-btn {
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+.cec-stats-portrait-btn:hover {
+  box-shadow: 0 0 12px rgba(212, 175, 55, 0.45);
+}
+
+.cec-avatar-change-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.cec-avatar-cancel {
+  padding: 0.55rem 1rem;
+  font-family: inherit;
+  cursor: pointer;
+  border: 2px solid #8b6914;
+  border-radius: 999px;
+  background: transparent;
+  color: #f5edd8;
+}
+
+/* Wheel modal */
+.cec-wheel-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1150;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(8, 4, 16, 0.78);
+}
+
+.cec-wheel-modal {
+  position: relative;
+  max-width: 26rem;
+  width: 100%;
+  padding: 1.25rem 1rem 1.5rem;
+  border: 3px solid #8b6914;
+  border-radius: 14px;
+  background: linear-gradient(165deg, #2a2218, #120c08);
+  color: #f5edd8;
+  text-align: center;
+}
+
+.cec-wheel-close {
+  position: absolute;
+  top: 0.35rem;
+  right: 0.55rem;
+  border: none;
+  background: transparent;
+  color: #f5edd8;
+  font-size: 1.5rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.cec-wheel-title {
+  margin: 0 0 0.35rem;
+  font-size: 1.35rem;
+  color: #f0e6c8;
+}
+
+.cec-wheel-tagline {
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.cec-wheel-stage {
+  position: relative;
+  width: min(280px, 85vw);
+  height: min(280px, 85vw);
+  margin: 0 auto;
+}
+
+.cec-wheel-dial-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+.cec-wheel-disc {
+  position: absolute;
+  inset: 4%;
+  border-radius: 50%;
+  transition: transform 2.8s cubic-bezier(0.2, 0.9, 0.2, 1);
+  background: radial-gradient(circle, #6b5030 0%, #3d2914 70%, #2a1a0c 100%);
+  border: 4px solid #d4af37;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.4);
+}
+
+.cec-wheel-disc--spinning {
+  filter: brightness(1.05);
+}
+
+.cec-wheel-segment {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  transform: rotate(var(--seg-rot));
+}
+
+.cec-wheel-segment-inner {
+  position: absolute;
+  left: -1.25rem;
+  top: -7.5rem;
+  width: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  transform: rotate(calc(-1 * var(--seg-rot)));
+}
+
+.cec-wheel-segment-img {
+  width: 1.75rem;
+  height: 1.75rem;
+  object-fit: contain;
+  border-radius: 4px;
+  background: rgba(255, 248, 220, 0.2);
+}
+
+.cec-wheel-segment-emoji {
+  font-size: 1rem;
+}
+
+.cec-wheel-segment-label {
+  font-size: 0.55rem;
+  font-weight: 700;
+  color: #ffe9a8;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  max-width: 3.5rem;
+  line-height: 1.1;
+}
+
+.cec-wheel-hub {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 50%;
+  border: 3px solid #8b6914;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  color: #141008;
+  background: linear-gradient(148deg, #f2e088, #c9a227);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+}
+
+.cec-wheel-hub:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+/* Saint result popup */
+.cec-saint-result-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(8, 4, 16, 0.82);
+  pointer-events: auto;
+}
+
+.cec-saint-result-wrap {
+  width: min(420px, 94vw);
+}
+
+.cec-saint-result-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem 1.25rem;
+  border: 3px solid #d4af37;
+  border-radius: 14px;
+  background: linear-gradient(165deg, #f8f0dc, #e8d8b0);
+  color: #2a1a0c;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+}
+
+.cec-saint-result-portrait {
+  width: 8rem;
+  height: 8rem;
+  border-radius: 50%;
+  border: 3px solid #8b6914;
+  background: #fffef5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.cec-saint-result-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.cec-saint-result-emoji {
+  font-size: 3rem;
+}
+
+.cec-saint-result-kicker {
+  margin: 0;
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #6b4423;
+}
+
+.cec-saint-result-title {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #4a3018;
+}
+
+.cec-saint-result-blurb {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.cec-saint-result-pp {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.cec-saint-result-pp strong {
+  color: #8b6914;
+  font-size: 1.2rem;
+}
+
+.cec-saint-result-amen {
+  margin-top: 1rem;
+}
+
 @media (max-width: 900px) {
   .cec-layout {
     grid-template-columns: 1fr;
@@ -853,6 +1193,10 @@
 
   .cec-bulletin {
     max-height: none;
+  }
+
+  .cec-avatar-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 

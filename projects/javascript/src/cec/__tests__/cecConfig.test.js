@@ -3,6 +3,8 @@ import {
   canCompleteAction,
   nextRank,
   amenDiscoveryKey,
+  avatarById,
+  WHEEL_SAINTS_BY_ID,
 } from '../cecConfig';
 
 describe('cecConfig', () => {
@@ -28,5 +30,14 @@ describe('cecConfig', () => {
 
   test('amenDiscoveryKey', () => {
     expect(amenDiscoveryKey('vatican')).toBe('amen_vatican');
+  });
+
+  test('avatarById falls back', () => {
+    expect(avatarById('missing').id).toBe('pilgrim_lector');
+  });
+
+  test('wheel saints have blurbs', () => {
+    expect(WHEEL_SAINTS_BY_ID.francis.blurb).toBeTruthy();
+    expect(WHEEL_SAINTS_BY_ID.jude_wheel.imageFile).toBe('jude.png');
   });
 });

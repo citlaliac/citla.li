@@ -1,16 +1,56 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
+import { WHEEL_SAINTS } from './cecConfig';
+import { ASSET_DIRS, saintImageUrl } from './cecAssets';
+import CecSaintResultPopup from './CecSaintResultPopup';
 
-const PUB = process.env.PUBLIC_URL || '';
-const FRAME_POPUP = `${PUB}/assets/catholicecloud/frame.png`;
+const SEGMENT_COUNT = WHEEL_SAINTS.length;
+const SEG_DEG = 360 / SEGMENT_COUNT;
+
+function WheelSegmentThumb({ saint, index }) {
+  const [failed, setFailed] = useState(false);
+  const src = saintImageUrl(saint);
+  const rot = index * SEG_DEG + SEG_DEG / 2;
+
+  return (
+    <div
+      className="cec-wheel-segment"
+      style={{ '--seg-rot': `${rot}deg` }}
+      aria-hidden
+    >
+      <div className="cec-wheel-segment-inner">
+        {src && !failed ? (
+          <img
+            className="cec-wheel-segment-img"
+            src={src}
+            alt=""
+            draggable={false}
+            onError={() => setFailed(true)}
+          />
+        ) : (
+          <span className="cec-wheel-segment-emoji">✦</span>
+        )}
+        <span className="cec-wheel-segment-label">{saint.shortLabel}</span>
+      </div>
+    </div>
+  );
+}
 
 function CecSaintWheel({ worshiper, onClose, onSpinResult }) {
   const [spinning, setSpinning] = useState(false);
+  const [wheelRotation, setWheelRotation] = useState(0);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
+  const [dialFailed, setDialFailed] = useState(false);
+
+  const resultIndex = useMemo(() => {
+    if (!result?.saintId) return -1;
+    return WHEEL_SAINTS.findIndex((s) => s.id === result.saintId);
+  }, [result]);
 
   const handleSpin = async () => {
     setSpinning(true);
     setError(null);
+    setResult(null);
     try {
       const res = await fetch('/cec-wheel-spin.php', {
         method: 'POST',
@@ -20,50 +60,79 @@ function CecSaintWheel({ worshiper, onClose, onSpinResult }) {
       const data = await res.json();
       if (res.status === 409) {
         setError('Already spun today for this worshiper.');
+        setSpinning(false);
         return;
       }
       if (!data.success) throw new Error(data.error || 'Spin failed');
-      setResult(data);
-      onSpinResult(data.points, data.saintLabel);
+
+      const idx = WHEEL_SAINTS.findIndex((s) => s.id === data.saintId);
+      const safeIdx = idx >= 0 ? idx : 0;
+      const extraTurns = 4 + Math.floor(Math.random() * 2);
+      const landOn = extraTurns * 360 + (360 - safeIdx * SEG_DEG - SEG_DEG / 2);
+      setWheelRotation((r) => r + landOn);
+
+      window.setTimeout(() => {
+        setResult(data);
+        onSpinResult(data.points, data.saintLabel);
+        setSpinning(false);
+      }, 2800);
     } catch (err) {
       setError(err.message || 'Wheel stuck. Try later.');
-    } finally {
       setSpinning(false);
     }
   };
 
+  if (result && resultIndex >= 0) {
+    return (
+      <CecSaintResultPopup
+        saintId={result.saintId}
+        saintLabel={result.saintLabel}
+        points={result.points}
+        onAmen={onClose}
+      />
+    );
+  }
+
   return (
-    <div className="cec-toast-overlay" role="dialog" aria-modal="true" aria-labelledby="cec-wheel-title">
-      <div className="cec-toast-frame-wrap cec-wheel-wrap">
-        <div className="cec-toast-frame-visual">
-          <img className="cec-toast-frame-img" src={FRAME_POPUP} alt="" draggable={false} />
-          <div className="cec-toast-frame-text">
-            <div className="cec-toast-frame-text-inner">
-              <strong id="cec-wheel-title">Wheel of Saints</strong>
-              {!result ? (
-                <>
-                  <span className="cec-toast-body">One spin per worshiper per day.</span>
-                  <button
-                    type="button"
-                    className="cec-popup-action"
-                    onClick={handleSpin}
-                    disabled={spinning}
-                  >
-                    {spinning ? 'Spinning…' : 'Spin'}
-                  </button>
-                  {error && <p className="cec-wheel-error">{error}</p>}
-                </>
-              ) : (
-                <span className="cec-toast-body">
-                  {result.saintLabel} grants you <strong>{result.points}</strong> Pontifex Points!
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-        <button type="button" className="cec-toast-dismiss" onClick={onClose}>
-          {result ? 'Amen' : 'Close'}
+    <div className="cec-wheel-overlay" role="dialog" aria-modal="true" aria-labelledby="cec-wheel-title">
+      <div className="cec-wheel-modal">
+        <button type="button" className="cec-wheel-close" onClick={onClose} aria-label="Close">
+          ×
         </button>
+        <h2 id="cec-wheel-title" className="cec-wheel-title">
+          Wheel of Saints
+        </h2>
+        <p className="cec-wheel-tagline">One spin per worshiper per day. The saints are generous (usually).</p>
+
+        <div className="cec-wheel-stage">
+          {!dialFailed && (
+            <img
+              className="cec-wheel-dial-bg"
+              src={ASSET_DIRS.wheelDial}
+              alt=""
+              draggable={false}
+              onError={() => setDialFailed(true)}
+            />
+          )}
+          <div
+            className={`cec-wheel-disc${spinning ? ' cec-wheel-disc--spinning' : ''}`}
+            style={{ transform: `rotate(${wheelRotation}deg)` }}
+          >
+            {WHEEL_SAINTS.map((saint, i) => (
+              <WheelSegmentThumb key={saint.id} saint={saint} index={i} />
+            ))}
+          </div>
+          <button
+            type="button"
+            className="cec-wheel-hub"
+            onClick={handleSpin}
+            disabled={spinning}
+          >
+            {spinning ? '…' : 'SPIN'}
+          </button>
+        </div>
+
+        {error && <p className="cec-wheel-error">{error}</p>}
       </div>
     </div>
   );

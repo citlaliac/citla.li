@@ -1,0 +1,9 @@
+Wheel of Saints assets.
+
+OPTIONAL (whole wheel chrome):
+  wheel-dial.png   — circular dial behind segments (PNG with transparency)
+  wheel-frame.png  — decorative frame around the wheel (optional, not wired yet)
+
+SAINT PORTRAITS — put in wheel/saints/ (see wheel/saints/PUT_IMAGES_HERE.txt)
+
+After adding images, rebuild or refresh the site. No manifest needed; filenames are fixed in cecConfig.js.

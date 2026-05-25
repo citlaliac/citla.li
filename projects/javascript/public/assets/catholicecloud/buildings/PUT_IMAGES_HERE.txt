@@ -1,17 +1,9 @@
-Optional building sprites (transparent PNG/WebP).
+Map building sprites (connected buildings on the parish plaza).
 
-Until added, the map uses relic images from ../relics/ per cecConfig.js buildingFile.
+Drop PNG/WebP here when ready. Wire in src/cec/cecConfig.js CEC_LOCATIONS buildingFile,
+or keep using ../relics/ filenames (current default).
 
-To use custom buildings instead, set buildingSrc in CEC_LOCATIONS to:
-  /assets/catholicecloud/buildings/{id}.png
-
-Suggested filenames when you add art:
-  incense.png
-  fish_fry.png
-  rosary.png
-  vatican.png
-  aspergillum.png
-  st_jude.png
-  candle.png
-  bulletin.png
-  wheel.png
+Also see:
+  ../worshipers/PUT_IMAGES_HERE.txt  — how your pilgrim looks
+  ../wheel/saints/PUT_IMAGES_HERE.txt — wheel saint portraits
+  ../wheel/PUT_IMAGES_HERE.txt        — optional wheel-dial.png

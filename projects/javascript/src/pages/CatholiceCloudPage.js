@@ -9,6 +9,7 @@ import CecLocationPopup, { AMEN_BURST_MS } from '../cec/CecLocationPopup';
 import CecParishBulletin from '../cec/CecParishBulletin';
 import CecSaintWheel from '../cec/CecSaintWheel';
 import CecRankToast from '../cec/CecRankToast';
+import CecAvatarPickerModal from '../cec/CecAvatarPickerModal';
 import { hasAmenDiscovery } from '../cec/cecConfig';
 import {
   awardAmenDiscovery,
@@ -16,6 +17,7 @@ import {
   addWheelPoints,
   loadWorshiper,
   registerWorshiper,
+  updateWorshiperAvatar,
 } from '../cec/worshiperStorage';
 import '../styles/CatholiceCloudPage.css';
 
@@ -46,14 +48,15 @@ function CatholiceCloudPage() {
   const [showWheel, setShowWheel] = useState(false);
   const [bulletinOpen, setBulletinOpen] = useState(true);
   const [rankToast, setRankToast] = useState(null);
+  const [showAvatarPicker, setShowAvatarPicker] = useState(false);
 
   const applyWorshiper = useCallback((next, rankUp) => {
     setWorshiper(next);
     if (rankUp) setRankToast(rankUp);
   }, []);
 
-  const handleRegister = (name) => {
-    const w = registerWorshiper(name);
+  const handleRegister = (name, avatarId) => {
+    const w = registerWorshiper(name, avatarId);
     setWorshiper(w);
   };
 
@@ -166,7 +169,11 @@ function CatholiceCloudPage() {
       </div>
 
       <Header />
-      <CecStatsBar worshiper={worshiper} onOpenWheel={() => setShowWheel(true)} />
+      <CecStatsBar
+        worshiper={worshiper}
+        onOpenWheel={() => setShowWheel(true)}
+        onChangeLook={() => setShowAvatarPicker(true)}
+      />
 
       <main className="cec-main">
         <header className="cec-banner">
@@ -212,6 +219,17 @@ function CatholiceCloudPage() {
           worshiper={worshiper}
           onClose={() => setShowWheel(false)}
           onSpinResult={(points) => handleWheelResult(points)}
+        />
+      )}
+
+      {showAvatarPicker && (
+        <CecAvatarPickerModal
+          currentAvatarId={worshiper.avatarId}
+          onSave={(avatarId) => {
+            setWorshiper(updateWorshiperAvatar(worshiper, avatarId));
+            setShowAvatarPicker(false);
+          }}
+          onClose={() => setShowAvatarPicker(false)}
         />
       )}
 

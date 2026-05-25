@@ -12,18 +12,18 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 /** Server-side saint table (weights must match cecConfig.js WHEEL_SAINTS) */
 $SAINTS = [
-    ['id' => 'francis', 'label' => 'St. Francis', 'weight' => 12, 'ppMin' => 8, 'ppMax' => 15],
-    ['id' => 'therese', 'label' => 'St. Thérèse', 'weight' => 12, 'ppMin' => 8, 'ppMax' => 14],
-    ['id' => 'anthony', 'label' => 'St. Anthony', 'weight' => 10, 'ppMin' => 10, 'ppMax' => 15],
-    ['id' => 'cecilia', 'label' => 'St. Cecilia', 'weight' => 10, 'ppMin' => 9, 'ppMax' => 16],
-    ['id' => 'patrick', 'label' => 'St. Patrick', 'weight' => 8, 'ppMin' => 12, 'ppMax' => 18],
-    ['id' => 'michael', 'label' => 'St. Michael', 'weight' => 8, 'ppMin' => 20, 'ppMax' => 26],
-    ['id' => 'joan', 'label' => 'St. Joan of Arc', 'weight' => 7, 'ppMin' => 22, 'ppMax' => 28],
-    ['id' => 'augustine', 'label' => 'St. Augustine', 'weight' => 7, 'ppMin' => 18, 'ppMax' => 24],
-    ['id' => 'joseph', 'label' => 'St. Joseph', 'weight' => 5, 'ppMin' => 35, 'ppMax' => 45],
-    ['id' => 'jude_wheel', 'label' => 'St. Jude', 'weight' => 5, 'ppMin' => 38, 'ppMax' => 50],
-    ['id' => 'peter', 'label' => 'St. Peter', 'weight' => 8, 'ppMin' => 14, 'ppMax' => 20],
-    ['id' => 'maria', 'label' => 'Our Lady', 'weight' => 8, 'ppMin' => 16, 'ppMax' => 22],
+    ['id' => 'francis', 'label' => 'St. Francis', 'weight' => 12, 'ppMin' => 8, 'ppMax' => 15, 'blurb' => 'Preach to the birds. Bonus: humility and birds.'],
+    ['id' => 'therese', 'label' => 'St. Thérèse', 'weight' => 12, 'ppMin' => 8, 'ppMax' => 14, 'blurb' => 'The little way. Small acts, decent PP.'],
+    ['id' => 'anthony', 'label' => 'St. Anthony', 'weight' => 10, 'ppMin' => 10, 'ppMax' => 15, 'blurb' => 'Finder of lost things, including your keys probably.'],
+    ['id' => 'cecilia', 'label' => 'St. Cecilia', 'weight' => 10, 'ppMin' => 9, 'ppMax' => 16, 'blurb' => 'Patron of music. Your Spotify playlist is blessed.'],
+    ['id' => 'patrick', 'label' => 'St. Patrick', 'weight' => 8, 'ppMin' => 12, 'ppMax' => 18, 'blurb' => 'Snakes evicted. Green vibes only.'],
+    ['id' => 'michael', 'label' => 'St. Michael', 'weight' => 8, 'ppMin' => 20, 'ppMax' => 26, 'blurb' => 'Archangel energy. Serious PP.'],
+    ['id' => 'joan', 'label' => 'St. Joan of Arc', 'weight' => 7, 'ppMin' => 22, 'ppMax' => 28, 'blurb' => 'Hear the voices. Charge forth (politely).'],
+    ['id' => 'augustine', 'label' => 'St. Augustine', 'weight' => 7, 'ppMin' => 18, 'ppMax' => 24, 'blurb' => 'Late convert, early thinker. Confessions unlocked.'],
+    ['id' => 'joseph', 'label' => 'St. Joseph', 'weight' => 5, 'ppMin' => 35, 'ppMax' => 45, 'blurb' => 'Rare pull. Carpenter of excellent PP.'],
+    ['id' => 'jude_wheel', 'label' => 'St. Jude', 'weight' => 5, 'ppMin' => 38, 'ppMax' => 50, 'blurb' => 'Hopeless causes enjoyer. Jackpot saint.'],
+    ['id' => 'peter', 'label' => 'St. Peter', 'weight' => 8, 'ppMin' => 14, 'ppMax' => 20, 'blurb' => 'Keys to the kingdom (and maybe your diary).'],
+    ['id' => 'maria', 'label' => 'Our Lady', 'weight' => 8, 'ppMin' => 16, 'ppMax' => 22, 'blurb' => 'Mother of the cloud. Grace multiplier vibes.'],
 ];
 
 function pick_weighted_saint($saints) {
@@ -84,6 +84,7 @@ try {
         'success' => true,
         'saintId' => $saint['id'],
         'saintLabel' => $saint['label'],
+        'blurb' => $saint['blurb'] ?? '',
         'points' => $points,
     ]);
 } catch (Exception $e) {

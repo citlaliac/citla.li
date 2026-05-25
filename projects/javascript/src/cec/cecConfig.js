@@ -139,20 +139,150 @@ export const CEC_LOCATIONS = [
   },
 ];
 
-export const WHEEL_SAINTS = [
-  { id: 'francis', label: 'St. Francis', weight: 12, ppMin: 8, ppMax: 15 },
-  { id: 'therese', label: 'St. Thérèse', weight: 12, ppMin: 8, ppMax: 14 },
-  { id: 'anthony', label: 'St. Anthony', weight: 10, ppMin: 10, ppMax: 15 },
-  { id: 'cecilia', label: 'St. Cecilia', weight: 10, ppMin: 9, ppMax: 16 },
-  { id: 'patrick', label: 'St. Patrick', weight: 8, ppMin: 12, ppMax: 18 },
-  { id: 'michael', label: 'St. Michael', weight: 8, ppMin: 20, ppMax: 26 },
-  { id: 'joan', label: 'St. Joan of Arc', weight: 7, ppMin: 22, ppMax: 28 },
-  { id: 'augustine', label: 'St. Augustine', weight: 7, ppMin: 18, ppMax: 24 },
-  { id: 'joseph', label: 'St. Joseph', weight: 5, ppMin: 35, ppMax: 45 },
-  { id: 'jude_wheel', label: 'St. Jude', weight: 5, ppMin: 38, ppMax: 50 },
-  { id: 'peter', label: 'St. Peter', weight: 8, ppMin: 14, ppMax: 20 },
-  { id: 'maria', label: 'Our Lady', weight: 8, ppMin: 16, ppMax: 22 },
+/** Drop PNG/WebP in public/assets/catholicecloud/worshipers/ — filename = imageFile */
+export const WORSHIPER_AVATARS = [
+  { id: 'pilgrim_lector', label: 'Lector in plain robes', emoji: '📖', imageFile: 'pilgrim_lector.png' },
+  { id: 'pilgrim_cantor', label: 'Cantor with hymnal', emoji: '🎵', imageFile: 'pilgrim_cantor.png' },
+  { id: 'pilgrim_seminarian', label: 'Seminarian with collar', emoji: '✝️', imageFile: 'pilgrim_seminarian.png' },
+  { id: 'pilgrim_nun', label: 'Sister in habit', emoji: '👩‍🦳', imageFile: 'pilgrim_nun.png' },
+  { id: 'pilgrim_deacon', label: 'Deacon in dalmatic', emoji: '🕊️', imageFile: 'pilgrim_deacon.png' },
+  { id: 'pilgrim_pigeon', label: 'Cathedral pigeon', emoji: '🕊️', imageFile: 'pilgrim_pigeon.png' },
 ];
+
+export const DEFAULT_AVATAR_ID = WORSHIPER_AVATARS[0].id;
+
+export const WHEEL_SAINTS = [
+  {
+    id: 'francis',
+    label: 'St. Francis',
+    shortLabel: 'Francis',
+    weight: 12,
+    ppMin: 8,
+    ppMax: 15,
+    imageFile: 'francis.png',
+    blurb: 'Preach to the birds. Bonus: humility and birds.',
+  },
+  {
+    id: 'therese',
+    label: 'St. Thérèse',
+    shortLabel: 'Thérèse',
+    weight: 12,
+    ppMin: 8,
+    ppMax: 14,
+    imageFile: 'therese.png',
+    blurb: 'The little way. Small acts, decent PP.',
+  },
+  {
+    id: 'anthony',
+    label: 'St. Anthony',
+    shortLabel: 'Anthony',
+    weight: 10,
+    ppMin: 10,
+    ppMax: 15,
+    imageFile: 'anthony.png',
+    blurb: 'Finder of lost things, including your keys probably.',
+  },
+  {
+    id: 'cecilia',
+    label: 'St. Cecilia',
+    shortLabel: 'Cecilia',
+    weight: 10,
+    ppMin: 9,
+    ppMax: 16,
+    imageFile: 'cecilia.png',
+    blurb: 'Patron of music. Your Spotify playlist is blessed.',
+  },
+  {
+    id: 'patrick',
+    label: 'St. Patrick',
+    shortLabel: 'Patrick',
+    weight: 8,
+    ppMin: 12,
+    ppMax: 18,
+    imageFile: 'patrick.png',
+    blurb: 'Snakes evicted. Green vibes only.',
+  },
+  {
+    id: 'michael',
+    label: 'St. Michael',
+    shortLabel: 'Michael',
+    weight: 8,
+    ppMin: 20,
+    ppMax: 26,
+    imageFile: 'michael.png',
+    blurb: 'Archangel energy. Serious PP.',
+  },
+  {
+    id: 'joan',
+    label: 'St. Joan of Arc',
+    shortLabel: 'Joan',
+    weight: 7,
+    ppMin: 22,
+    ppMax: 28,
+    imageFile: 'joan.png',
+    blurb: 'Hear the voices. Charge forth (politely).',
+  },
+  {
+    id: 'augustine',
+    label: 'St. Augustine',
+    shortLabel: 'Augustine',
+    weight: 7,
+    ppMin: 18,
+    ppMax: 24,
+    imageFile: 'augustine.png',
+    blurb: 'Late convert, early thinker. Confessions unlocked.',
+  },
+  {
+    id: 'joseph',
+    label: 'St. Joseph',
+    shortLabel: 'Joseph',
+    weight: 5,
+    ppMin: 35,
+    ppMax: 45,
+    imageFile: 'joseph.png',
+    blurb: 'Rare pull. Carpenter of excellent PP.',
+  },
+  {
+    id: 'jude_wheel',
+    label: 'St. Jude',
+    shortLabel: 'Jude',
+    weight: 5,
+    ppMin: 38,
+    ppMax: 50,
+    imageFile: 'jude.png',
+    blurb: 'Hopeless causes enjoyer. Jackpot saint.',
+  },
+  {
+    id: 'peter',
+    label: 'St. Peter',
+    shortLabel: 'Peter',
+    weight: 8,
+    ppMin: 14,
+    ppMax: 20,
+    imageFile: 'peter.png',
+    blurb: 'Keys to the kingdom (and maybe your diary).',
+  },
+  {
+    id: 'maria',
+    label: 'Our Lady',
+    shortLabel: 'Mary',
+    weight: 8,
+    ppMin: 16,
+    ppMax: 22,
+    imageFile: 'maria.png',
+    blurb: 'Mother of the cloud. Grace multiplier vibes.',
+  },
+];
+
+export const WHEEL_SAINTS_BY_ID = Object.fromEntries(WHEEL_SAINTS.map((s) => [s.id, s]));
+
+export const WORSHIPER_AVATARS_BY_ID = Object.fromEntries(
+  WORSHIPER_AVATARS.map((a) => [a.id, a])
+);
+
+export function avatarById(id) {
+  return WORSHIPER_AVATARS_BY_ID[id] || WORSHIPER_AVATARS[0];
+}
 
 export function rankFromPoints(pp) {
   let current = RANKS[0];
