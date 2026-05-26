@@ -1,20 +1,4 @@
-Saint portraits for the Wheel of Saints (segments + result popup).
+Optional subfolder for wheel saints.
 
-Filename MUST match cecConfig.js WHEEL_SAINTS imageFile:
-
-  francis.png
-  therese.png
-  anthony.png
-  cecilia.png
-  patrick.png
-  michael.png
-  joan.png
-  augustine.png
-  joseph.png
-  jude.png      (id jude_wheel in code)
-  peter.png
-  maria.png
-
-Tips:
-  - Square or portrait crop, transparent PNG/WebP, ~120–240px.
-  - Blurb text is edited in src/cec/cecConfig.js (and server cec-wheel-spin.php).
+Currently peter.png lives here (referenced as saints/peter.png in cecConfig.js).
+Other saint portraits are in the parent wheel/ folder.

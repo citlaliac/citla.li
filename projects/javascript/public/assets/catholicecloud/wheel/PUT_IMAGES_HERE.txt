@@ -1,9 +1,20 @@
-Wheel of Saints assets.
+Wheel of Saints — portrait files (wired in src/cec/cecConfig.js).
 
-OPTIONAL (whole wheel chrome):
-  wheel-dial.png   — circular dial behind segments (PNG with transparency)
-  wheel-frame.png  — decorative frame around the wheel (optional, not wired yet)
+Current files in this folder:
+  assisi.png
+  padua.png
+  joan.png
+  drogo.png
+  bibiana.png
+  Genesius.png
+  vitus.png
+  Fiacre.png
+  Saint Therese of Lisieux.png
 
-SAINT PORTRAITS — put in wheel/saints/ (see wheel/saints/PUT_IMAGES_HERE.txt)
+Peter is in saints/:
+  saints/peter.png
 
-After adding images, rebuild or refresh the site. No manifest needed; filenames are fixed in cecConfig.js.
+Optional:
+  wheel-dial.png — circular background behind the wheel
+
+Filenames must match imageFile in cecConfig.js exactly (case-sensitive on Linux hosting).

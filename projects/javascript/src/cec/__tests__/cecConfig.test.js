@@ -36,8 +36,10 @@ describe('cecConfig', () => {
     expect(avatarById('missing').id).toBe('cantor_a');
   });
 
-  test('wheel saints have blurbs', () => {
-    expect(WHEEL_SAINTS_BY_ID.francis.blurb).toBeTruthy();
-    expect(WHEEL_SAINTS_BY_ID.jude_wheel.imageFile).toBe('jude.png');
+  test('wheel saints match uploaded assets', () => {
+    expect(WHEEL_SAINTS_BY_ID.francis.imageFile).toBe('assisi.png');
+    expect(WHEEL_SAINTS_BY_ID.peter.imageFile).toBe('saints/peter.png');
+    expect(WHEEL_SAINTS_BY_ID.therese.imageFile).toBe('Saint Therese of Lisieux.png');
+    expect(Object.keys(WHEEL_SAINTS_BY_ID)).toHaveLength(10);
   });
 });
