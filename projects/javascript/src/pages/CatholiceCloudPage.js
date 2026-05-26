@@ -9,7 +9,6 @@ import CecLocationPopup, { AMEN_BURST_MS } from '../cec/CecLocationPopup';
 import CecParishBulletin from '../cec/CecParishBulletin';
 import CecSaintWheel from '../cec/CecSaintWheel';
 import CecRankToast from '../cec/CecRankToast';
-import CecAvatarPickerModal from '../cec/CecAvatarPickerModal';
 import { hasAmenDiscovery } from '../cec/cecConfig';
 import {
   awardAmenDiscovery,
@@ -17,7 +16,6 @@ import {
   addWheelPoints,
   loadWorshiper,
   registerWorshiper,
-  updateWorshiperAvatar,
 } from '../cec/worshiperStorage';
 import '../styles/CatholiceCloudPage.css';
 
@@ -48,15 +46,14 @@ function CatholiceCloudPage() {
   const [showWheel, setShowWheel] = useState(false);
   const [bulletinOpen, setBulletinOpen] = useState(true);
   const [rankToast, setRankToast] = useState(null);
-  const [showAvatarPicker, setShowAvatarPicker] = useState(false);
 
   const applyWorshiper = useCallback((next, rankUp) => {
     setWorshiper(next);
     if (rankUp) setRankToast(rankUp);
   }, []);
 
-  const handleRegister = (name, avatarId) => {
-    const w = registerWorshiper(name, avatarId);
+  const handleRegister = (name) => {
+    const w = registerWorshiper(name);
     setWorshiper(w);
   };
 
@@ -102,15 +99,14 @@ function CatholiceCloudPage() {
 
   useSEO({
     title: 'Catholic e Cloud | citla.li/catholicecloud',
-    description:
-      'Like Neopets, for Catholics — earn Pontifex Points, visit holy buildings, spin the Wheel of Saints.',
+    description: 'Heaven online — a campy Vatican-cloud hangout. Catholics, enjoy this space.',
     keywords: 'citla.li, catholic e cloud, heaven online',
     canonicalUrl: 'https://citla.li/catholicecloud',
     ogTitle: 'Catholic e Cloud',
     ogDescription: 'Heaven on earth? This is heaven online.',
     ogImage: 'https://citla.li/og-image.gif',
     twitterTitle: 'Catholic e Cloud',
-    twitterDescription: 'Like Neopets, for Catholics.',
+    twitterDescription: 'Heaven online. Catholics, enjoy this space.',
     twitterImage: 'https://citla.li/og-image.gif',
   });
 
@@ -169,20 +165,13 @@ function CatholiceCloudPage() {
       </div>
 
       <Header />
-      <CecStatsBar
-        worshiper={worshiper}
-        onOpenWheel={() => setShowWheel(true)}
-        onChangeLook={() => setShowAvatarPicker(true)}
-      />
+      <CecStatsBar worshiper={worshiper} onOpenWheel={() => setShowWheel(true)} />
 
       <main className="cec-main">
         <header className="cec-banner">
           <h1 className="cec-title">catholic e cloud</h1>
-          <p className="cec-subtitle">Like Neopets, for Catholics.</p>
-          <p className="cec-blurb">
-            Heaven online. Earn Pontifex Points, level up from Lector to Priest, and leave notes on the
-            Parish Bulletin.
-          </p>
+          <p className="cec-subtitle">Heaven on earth? This is heaven online.</p>
+          <p className="cec-blurb">A cool online space for Catholics to hang out.</p>
         </header>
 
         <div className="cec-layout">
@@ -219,17 +208,6 @@ function CatholiceCloudPage() {
           worshiper={worshiper}
           onClose={() => setShowWheel(false)}
           onSpinResult={(points) => handleWheelResult(points)}
-        />
-      )}
-
-      {showAvatarPicker && (
-        <CecAvatarPickerModal
-          currentAvatarId={worshiper.avatarId}
-          onSave={(avatarId) => {
-            setWorshiper(updateWorshiperAvatar(worshiper, avatarId));
-            setShowAvatarPicker(false);
-          }}
-          onClose={() => setShowAvatarPicker(false)}
         />
       )}
 

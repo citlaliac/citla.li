@@ -9,13 +9,13 @@ import {
 
 describe('cecConfig', () => {
   test('rankFromPoints', () => {
-    expect(rankFromPoints(0).id).toBe('lector');
+    expect(rankFromPoints(0).id).toBe('cantor');
     expect(rankFromPoints(30).id).toBe('cantor');
     expect(rankFromPoints(500).id).toBe('priest');
   });
 
   test('nextRank', () => {
-    expect(nextRank(10)?.id).toBe('cantor');
+    expect(nextRank(10)?.id).toBe('seminarian');
     expect(nextRank(500)).toBeNull();
   });
 
@@ -33,7 +33,7 @@ describe('cecConfig', () => {
   });
 
   test('avatarById falls back', () => {
-    expect(avatarById('missing').id).toBe('pilgrim_lector');
+    expect(avatarById('missing').id).toBe('cantor_a');
   });
 
   test('wheel saints have blurbs', () => {

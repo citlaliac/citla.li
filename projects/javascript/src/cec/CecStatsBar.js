@@ -2,21 +2,15 @@ import React from 'react';
 import { canSpinToday } from './worshiperStorage';
 import CecWorshiperPortrait from './CecWorshiperPortrait';
 
-function CecStatsBar({ worshiper, onOpenWheel, onChangeLook }) {
+function CecStatsBar({ worshiper, onOpenWheel }) {
   const canSpin = canSpinToday(worshiper);
 
   return (
     <div className="cec-stats-bar">
       <div className="cec-stats-bar-inner">
-        <button
-          type="button"
-          className="cec-stats-portrait-btn"
-          onClick={onChangeLook}
-          title="Change how you look"
-          aria-label="Change worshiper appearance"
-        >
+        <span className="cec-stats-portrait-badge" title="Session look">
           <CecWorshiperPortrait avatarId={worshiper.avatarId} size="sm" />
-        </button>
+        </span>
         <span className="cec-stats-name">{worshiper.displayName}</span>
         <span className="cec-stats-rank">{worshiper.rank.label}</span>
         <span className="cec-stats-pp">

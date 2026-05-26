@@ -1,8 +1,7 @@
 /** Catholic e Cloud — ranks, locations, paths, saints, PP rules */
 
 export const RANKS = [
-  { id: 'lector', label: 'Lector', minPP: 0 },
-  { id: 'cantor', label: 'Cantor', minPP: 30 },
+  { id: 'cantor', label: 'Cantor', minPP: 0 },
   { id: 'seminarian', label: 'Seminarian', minPP: 90 },
   { id: 'deacon', label: 'Deacon', minPP: 220 },
   { id: 'priest', label: 'Priest', minPP: 500 },
@@ -141,12 +140,9 @@ export const CEC_LOCATIONS = [
 
 /** Drop PNG/WebP in public/assets/catholicecloud/worshipers/ — filename = imageFile */
 export const WORSHIPER_AVATARS = [
-  { id: 'pilgrim_lector', label: 'Lector in plain robes', emoji: '📖', imageFile: 'pilgrim_lector.png' },
-  { id: 'pilgrim_cantor', label: 'Cantor with hymnal', emoji: '🎵', imageFile: 'pilgrim_cantor.png' },
-  { id: 'pilgrim_seminarian', label: 'Seminarian with collar', emoji: '✝️', imageFile: 'pilgrim_seminarian.png' },
-  { id: 'pilgrim_nun', label: 'Sister in habit', emoji: '👩‍🦳', imageFile: 'pilgrim_nun.png' },
-  { id: 'pilgrim_deacon', label: 'Deacon in dalmatic', emoji: '🕊️', imageFile: 'pilgrim_deacon.png' },
-  { id: 'pilgrim_pigeon', label: 'Cathedral pigeon', emoji: '🕊️', imageFile: 'pilgrim_pigeon.png' },
+  { id: 'cantor_a', label: 'Cantor I', emoji: '🎵', imageFile: 'cantor_a.png' },
+  { id: 'cantor_b', label: 'Cantor II', emoji: '🎶', imageFile: 'cantor_b.png' },
+  { id: 'cantor_c', label: 'Cantor III', emoji: '🎼', imageFile: 'cantor_c.png' },
 ];
 
 export const DEFAULT_AVATAR_ID = WORSHIPER_AVATARS[0].id;

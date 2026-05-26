@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
-import { DEFAULT_AVATAR_ID, WORSHIPER_AVATARS } from './cecConfig';
-import CecWorshiperPortrait from './CecWorshiperPortrait';
+import { getCantorCollectionProgress } from './worshiperStorage';
 
 function CecPilgrimRegister({ onRegister }) {
   const [name, setName] = useState('');
-  const [avatarId, setAvatarId] = useState(DEFAULT_AVATAR_ID);
+  const { seenCount, total } = getCantorCollectionProgress();
 
   const handleSubmit = (e) => {
     e.preventDefault();
     const trimmed = name.trim();
-    if (trimmed) onRegister(trimmed, avatarId);
+    if (trimmed) onRegister(trimmed);
   };
 
   return (
@@ -19,27 +18,13 @@ function CecPilgrimRegister({ onRegister }) {
           Pilgrim Register
         </h2>
         <p className="cec-register-blurb">
-          Pick how you look, choose a name, and enter the cloud. Gone when you close this tab.
+          A cool online space for Catholics to hang out. Your worshiper is assigned one Cantor look per
+          session.
+        </p>
+        <p className="cec-register-collection">
+          Collect all 3 Cantors: {seenCount}/{total}
         </p>
         <form onSubmit={handleSubmit}>
-          <fieldset className="cec-avatar-picker">
-            <legend className="cec-register-label">Your worshiper</legend>
-            <div className="cec-avatar-grid">
-              {WORSHIPER_AVATARS.map((a) => (
-                <button
-                  key={a.id}
-                  type="button"
-                  className={`cec-avatar-option${avatarId === a.id ? ' cec-avatar-option--selected' : ''}`}
-                  onClick={() => setAvatarId(a.id)}
-                  aria-pressed={avatarId === a.id}
-                  aria-label={a.label}
-                >
-                  <CecWorshiperPortrait avatarId={a.id} size="lg" />
-                  <span className="cec-avatar-option-label">{a.label}</span>
-                </button>
-              ))}
-            </div>
-          </fieldset>
           <label className="cec-register-label" htmlFor="cec-pilgrim-name">
             Display name
           </label>

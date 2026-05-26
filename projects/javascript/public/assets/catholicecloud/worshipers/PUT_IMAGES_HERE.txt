@@ -1,14 +1,11 @@
-Worshiper appearance sprites (pick one at Pilgrim Register).
+Cantor appearance sprites (one assigned per session).
 
 Drop PNG or WebP here. Filename MUST match cecConfig.js WORSHIPER_AVATARS imageFile:
 
-  pilgrim_lector.png       — Lector in plain robes
-  pilgrim_cantor.png       — Cantor with hymnal
-  pilgrim_seminarian.png   — Seminarian with collar
-  pilgrim_nun.png          — Sister in habit
-  pilgrim_deacon.png       — Deacon in dalmatic
-  pilgrim_pigeon.png       — Cathedral pigeon
+  cantor_a.png       — Cantor I
+  cantor_b.png       — Cantor II
+  cantor_c.png       — Cantor III
 
 Tips:
   - Transparent background, roughly square, ~200–400px wide.
-  - Until a file exists, that option shows its emoji fallback.
+  - Until a file exists, that Cantor shows emoji fallback.

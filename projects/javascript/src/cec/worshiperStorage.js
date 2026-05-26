@@ -1,6 +1,7 @@
 import {
   ACTIVITY_REWARDS,
   AMEN_DISCOVERY_PP,
+  WORSHIPER_AVATARS,
   amenDiscoveryKey,
   canCompleteAction,
   DEFAULT_AVATAR_ID,
@@ -9,6 +10,8 @@ import {
 } from './cecConfig';
 
 const STORAGE_KEY = 'cec_worshiper';
+const CANTOR_COLLECTION_KEY = 'cec_cantor_collection_v1';
+const CANTOR_ROTATION_KEY = 'cec_cantor_rotation_idx_v1';
 
 function newSessionId() {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
@@ -105,11 +108,56 @@ export function canSpinToday(worshiper) {
 }
 
 export function registerWorshiper(displayName, avatarId) {
-  const w = createWorshiper(displayName, avatarId);
+  const chosenAvatarId = avatarId || chooseCantorVariantForSession();
+  const w = createWorshiper(displayName, chosenAvatarId);
   const { worshiper } = awardPoints(w, 'register');
   return worshiper;
 }
 
-export function updateWorshiperAvatar(worshiper, avatarId) {
-  return saveWorshiper({ ...worshiper, avatarId: avatarId || DEFAULT_AVATAR_ID });
+function chooseCantorVariantForSession() {
+  const avatars = WORSHIPER_AVATARS.map((a) => a.id);
+  if (avatars.length === 0) return DEFAULT_AVATAR_ID;
+
+  let seen = [];
+  try {
+    const raw = localStorage.getItem(CANTOR_COLLECTION_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    seen = Array.isArray(parsed) ? parsed.filter((id) => avatars.includes(id)) : [];
+  } catch {
+    seen = [];
+  }
+
+  const unseen = avatars.filter((id) => !seen.includes(id));
+  let selected;
+
+  if (unseen.length > 0) {
+    selected = unseen[Math.floor(Math.random() * unseen.length)];
+  } else {
+    const currentRotation = Number(localStorage.getItem(CANTOR_ROTATION_KEY) || 0);
+    selected = avatars[currentRotation % avatars.length];
+    localStorage.setItem(CANTOR_ROTATION_KEY, String((currentRotation + 1) % avatars.length));
+  }
+
+  const nextSeen = seen.includes(selected) ? seen : [...seen, selected];
+  try {
+    localStorage.setItem(CANTOR_COLLECTION_KEY, JSON.stringify(nextSeen));
+  } catch {
+    /* ignore localStorage write errors */
+  }
+
+  return selected;
+}
+
+export function getCantorCollectionProgress() {
+  const total = WORSHIPER_AVATARS.length;
+  try {
+    const raw = localStorage.getItem(CANTOR_COLLECTION_KEY);
+    const seen = raw ? JSON.parse(raw) : [];
+    const count = Array.isArray(seen)
+      ? new Set(seen.filter((id) => WORSHIPER_AVATARS.some((a) => a.id === id))).size
+      : 0;
+    return { seenCount: count, total };
+  } catch {
+    return { seenCount: 0, total };
+  }
 }
