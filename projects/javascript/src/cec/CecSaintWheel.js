@@ -35,7 +35,7 @@ function WheelSegmentThumb({ saint, index }) {
   );
 }
 
-function CecSaintWheel({ worshiper, onClose, onSpinResult }) {
+function CecSaintWheel({ worshiper, alreadySpun, onClose, onSpinResult }) {
   const [spinning, setSpinning] = useState(false);
   const [wheelRotation, setWheelRotation] = useState(0);
   const [result, setResult] = useState(null);
@@ -48,6 +48,7 @@ function CecSaintWheel({ worshiper, onClose, onSpinResult }) {
   }, [result]);
 
   const handleSpin = async () => {
+    if (alreadySpun) return;
     setSpinning(true);
     setError(null);
     setResult(null);
@@ -59,7 +60,7 @@ function CecSaintWheel({ worshiper, onClose, onSpinResult }) {
       });
       const data = await res.json();
       if (res.status === 409) {
-        setError('Already spun today for this worshiper.');
+        setError('You already spun today for this worshiper.');
         setSpinning(false);
         return;
       }
@@ -94,15 +95,21 @@ function CecSaintWheel({ worshiper, onClose, onSpinResult }) {
   }
 
   return (
-    <div className="cec-wheel-overlay" role="dialog" aria-modal="true" aria-labelledby="cec-wheel-title">
+    <div
+      className="cec-wheel-overlay cec-wheel-overlay--map"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="cec-wheel-title"
+    >
       <div className="cec-wheel-modal">
-        <button type="button" className="cec-wheel-close" onClick={onClose} aria-label="Close">
-          ×
-        </button>
         <h2 id="cec-wheel-title" className="cec-wheel-title">
           Wheel of Saints
         </h2>
-        <p className="cec-wheel-tagline">One spin per worshiper per day. The saints are generous (usually).</p>
+        <p className="cec-wheel-tagline">
+          {alreadySpun
+            ? 'You already visited the Wheel of Saints today. Come back tomorrow for another spin.'
+            : 'One spin per worshiper per day. The saints are generous (usually).'}
+        </p>
 
         <div className="cec-wheel-stage">
           {!dialFailed && (
@@ -115,24 +122,34 @@ function CecSaintWheel({ worshiper, onClose, onSpinResult }) {
             />
           )}
           <div
-            className={`cec-wheel-disc${spinning ? ' cec-wheel-disc--spinning' : ''}`}
+            className={`cec-wheel-disc${spinning ? ' cec-wheel-disc--spinning' : ''}${alreadySpun ? ' cec-wheel-disc--done' : ''}`}
             style={{ transform: `rotate(${wheelRotation}deg)` }}
           >
             {WHEEL_SAINTS.map((saint, i) => (
               <WheelSegmentThumb key={saint.id} saint={saint} index={i} />
             ))}
           </div>
-          <button
-            type="button"
-            className="cec-wheel-hub"
-            onClick={handleSpin}
-            disabled={spinning}
-          >
-            {spinning ? '…' : 'SPIN'}
-          </button>
+          {!alreadySpun ? (
+            <button
+              type="button"
+              className="cec-wheel-hub"
+              onClick={handleSpin}
+              disabled={spinning}
+            >
+              {spinning ? '…' : 'SPIN'}
+            </button>
+          ) : (
+            <div className="cec-wheel-hub cec-wheel-hub--done" aria-hidden>
+              ✓
+            </div>
+          )}
         </div>
 
         {error && <p className="cec-wheel-error">{error}</p>}
+
+        <button type="button" className="cec-toast-dismiss cec-wheel-amen" onClick={onClose}>
+          Amen
+        </button>
       </div>
     </div>
   );

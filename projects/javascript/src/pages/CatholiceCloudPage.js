@@ -2,8 +2,9 @@ import React, { useCallback, useEffect, useState } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { useSEO } from '../hooks/useSEO';
-import CecPilgrimRegister from '../cec/CecPilgrimRegister';
+import CecWorshiperRegister from '../cec/CecWorshiperRegister';
 import CecStatsBar from '../cec/CecStatsBar';
+import CecWorshiperStage from '../cec/CecWorshiperStage';
 import CecParishMap from '../cec/CecParishMap';
 import CecLocationPopup, { AMEN_BURST_MS } from '../cec/CecLocationPopup';
 import CecParishBulletin from '../cec/CecParishBulletin';
@@ -14,6 +15,7 @@ import {
   awardAmenDiscovery,
   awardPoints,
   addWheelPoints,
+  canSpinToday,
   loadWorshiper,
   registerWorshiper,
 } from '../cec/worshiperStorage';
@@ -52,8 +54,8 @@ function CatholiceCloudPage() {
     if (rankUp) setRankToast(rankUp);
   }, []);
 
-  const handleRegister = (name) => {
-    const w = registerWorshiper(name);
+  const handleRegister = (name, skinId) => {
+    const w = registerWorshiper(name, skinId);
     setWorshiper(w);
   };
 
@@ -118,7 +120,7 @@ function CatholiceCloudPage() {
     return (
       <div className="cec-page">
         <Header />
-        <CecPilgrimRegister onRegister={handleRegister} />
+        <CecWorshiperRegister onRegister={handleRegister} />
         <Footer />
       </div>
     );
@@ -165,7 +167,7 @@ function CatholiceCloudPage() {
       </div>
 
       <Header />
-      <CecStatsBar worshiper={worshiper} onOpenWheel={() => setShowWheel(true)} />
+      <CecStatsBar worshiper={worshiper} />
 
       <main className="cec-main">
         <header className="cec-banner">
@@ -174,20 +176,29 @@ function CatholiceCloudPage() {
           <p className="cec-blurb">A cool online space for Catholics to hang out.</p>
         </header>
 
-        <div className="cec-layout">
-          <CecParishMap worshiper={worshiper} onSelectLocation={handleSelectLocation} />
-          <CecParishBulletin
+        <div className="cec-play-layout">
+          <CecWorshiperStage worshiper={worshiper} />
+          <div className="cec-layout">
+            <CecParishMap worshiper={worshiper} onSelectLocation={handleSelectLocation} />
+            <CecParishBulletin
             worshiper={worshiper}
             expanded={bulletinOpen}
             onToggleExpand={() => setBulletinOpen((o) => !o)}
             onPostApproved={() => handleAward('bulletin_post')}
           />
+          </div>
         </div>
       </main>
 
       <Footer />
 
-      {rankToast && <CecRankToast rank={rankToast} onDone={() => setRankToast(null)} />}
+      {rankToast && (
+        <CecRankToast
+          worshiper={worshiper}
+          rank={rankToast}
+          onDone={() => setRankToast(null)}
+        />
+      )}
 
       {activeLocation && (
         <CecLocationPopup
@@ -206,6 +217,7 @@ function CatholiceCloudPage() {
       {showWheel && (
         <CecSaintWheel
           worshiper={worshiper}
+          alreadySpun={!canSpinToday(worshiper)}
           onClose={() => setShowWheel(false)}
           onSpinResult={(points) => handleWheelResult(points)}
         />

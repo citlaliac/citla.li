@@ -3,7 +3,7 @@ Catholic e Cloud assets — drop folders:
   background/     — map collage layers (cathedral, heaven, forest)
   relics/         — building icons (used until buildings/ art is ready)
   buildings/      — custom map building sprites (optional)
-  worshipers/     — pilgrim appearance sprites (see PUT_IMAGES_HERE inside)
+  worshipers/     — worshiper appearance sprites (see PUT_IMAGES_HERE inside)
   wheel/          — wheel-dial.png (optional) + wheel/saints/ portraits
   frame.png       — popup frame (root of this folder)
 

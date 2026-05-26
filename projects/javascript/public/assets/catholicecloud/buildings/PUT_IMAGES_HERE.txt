@@ -4,6 +4,6 @@ Drop PNG/WebP here when ready. Wire in src/cec/cecConfig.js CEC_LOCATIONS buildi
 or keep using ../relics/ filenames (current default).
 
 Also see:
-  ../worshipers/PUT_IMAGES_HERE.txt  — how your pilgrim looks
+  ../worshipers/PUT_IMAGES_HERE.txt  — how your worshiper looks
   ../wheel/saints/PUT_IMAGES_HERE.txt — wheel saint portraits
   ../wheel/PUT_IMAGES_HERE.txt        — optional wheel-dial.png

@@ -1,11 +1,18 @@
-Cantor appearance sprites (one assigned per session).
+Worshiper sprites.
 
-Drop PNG or WebP here. Filename MUST match cecConfig.js WORSHIPER_AVATARS imageFile:
+Entry skins (pick at registration) — see ENTRY_WORSHIPER_SKINS in cecConfig.js:
 
-  cantor_a.png       — Cantor I
-  cantor_b.png       — Cantor II
-  cantor_c.png       — Cantor III
+  frog            — rank sprites below (Cantor → Priest)
+  worshiper_a     — emoji placeholder until art (🙏)
+  worshiper_b     — emoji placeholder until art (🕊️)
+
+Frog filenames (frog skin only):
+
+  frog-cantor.png
+  frog-seminarian.png
+  frog-deacon.png
+  frog-priest.png
 
 Tips:
   - Transparent background, roughly square, ~200–400px wide.
-  - Until a file exists, that Cantor shows emoji fallback.
+  - Large portrait on the left updates when you rank up (frog only).

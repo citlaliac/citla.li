@@ -4,6 +4,9 @@ import {
   nextRank,
   amenDiscoveryKey,
   avatarById,
+  portraitForRank,
+  portraitForSkinAndRank,
+  portraitForWorshiper,
   WHEEL_SAINTS_BY_ID,
 } from '../cecConfig';
 
@@ -32,8 +35,28 @@ describe('cecConfig', () => {
     expect(amenDiscoveryKey('vatican')).toBe('amen_vatican');
   });
 
-  test('avatarById falls back', () => {
-    expect(avatarById('missing').id).toBe('cantor_a');
+  test('portraitForRank uses frog sprites', () => {
+    expect(portraitForRank('cantor').imageFile).toBe('frog-cantor.png');
+    expect(portraitForRank('priest').imageFile).toBe('frog-priest.png');
+  });
+
+  test('portraitForSkinAndRank', () => {
+    expect(portraitForSkinAndRank('frog', 'deacon').imageFile).toBe('frog-deacon.png');
+    expect(portraitForSkinAndRank('worshiper_a', 'cantor').emoji).toBe('🙏');
+    expect(portraitForSkinAndRank('worshiper_b', 'priest').emoji).toBe('🕊️');
+    expect(portraitForSkinAndRank('worshiper_a', 'priest').imageFile).toBeNull();
+  });
+
+  test('portraitForWorshiper respects skin', () => {
+    const frog = portraitForWorshiper({ avatarId: 'frog', pontifexPoints: 500, rank: { id: 'priest' } });
+    expect(frog.imageFile).toBe('frog-priest.png');
+    const b = portraitForWorshiper({ avatarId: 'worshiper_b', pontifexPoints: 0, rank: { id: 'cantor' } });
+    expect(b.emoji).toBe('🕊️');
+  });
+
+  test('avatarById legacy cantor ids map to frog cantor', () => {
+    expect(avatarById('cantor_a').imageFile).toBe('frog-cantor.png');
+    expect(avatarById('missing').imageFile).toBe('frog-cantor.png');
   });
 
   test('wheel saints match uploaded assets', () => {

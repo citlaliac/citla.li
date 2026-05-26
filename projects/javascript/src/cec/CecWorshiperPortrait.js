@@ -1,11 +1,17 @@
 import React, { useState } from 'react';
-import { avatarById } from './cecConfig';
+import { portraitForSkinAndRank, portraitForWorshiper } from './cecConfig';
 import { worshiperAvatarUrl } from './cecAssets';
 
-function CecWorshiperPortrait({ avatarId, size = 'md', className = '' }) {
+function CecWorshiperPortrait({
+  worshiper,
+  skinId,
+  rankId = 'cantor',
+  size = 'md',
+  className = '',
+}) {
   const [imgFailed, setImgFailed] = useState(false);
-  const avatar = avatarById(avatarId);
-  const src = worshiperAvatarUrl(avatar);
+  const portrait = worshiper ? portraitForWorshiper(worshiper) : portraitForSkinAndRank(skinId, rankId);
+  const src = worshiperAvatarUrl(portrait);
   const sizeClass = `cec-portrait--${size}`;
 
   return (
@@ -19,7 +25,7 @@ function CecWorshiperPortrait({ avatarId, size = 'md', className = '' }) {
           onError={() => setImgFailed(true)}
         />
       ) : (
-        <span className="cec-portrait-emoji">{avatar.emoji}</span>
+        <span className="cec-portrait-emoji">{portrait.emoji}</span>
       )}
     </span>
   );

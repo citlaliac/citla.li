@@ -1,10 +1,10 @@
 import {
   ACTIVITY_REWARDS,
   AMEN_DISCOVERY_PP,
-  WORSHIPER_AVATARS,
+  DEFAULT_SKIN_ID,
+  VALID_SKIN_IDS,
   amenDiscoveryKey,
   canCompleteAction,
-  DEFAULT_AVATAR_ID,
   rankFromPoints,
   todayDateString,
 } from './cecConfig';
@@ -18,11 +18,17 @@ function newSessionId() {
   return `cec-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
 }
 
-export function createWorshiper(displayName, avatarId = DEFAULT_AVATAR_ID) {
+function normalizeSkinId(skinId) {
+  if (!skinId || skinId.startsWith('cantor_')) return DEFAULT_SKIN_ID;
+  if (VALID_SKIN_IDS.has(skinId)) return skinId;
+  return DEFAULT_SKIN_ID;
+}
+
+export function createWorshiper(displayName, skinId = DEFAULT_SKIN_ID) {
   return {
     sessionId: newSessionId(),
     displayName: displayName.trim().slice(0, 24),
-    avatarId: avatarId || DEFAULT_AVATAR_ID,
+    avatarId: normalizeSkinId(skinId),
     pontifexPoints: 0,
     rank: rankFromPoints(0),
     completedActions: [],
@@ -36,7 +42,7 @@ export function loadWorshiper() {
     if (!raw) return null;
     const w = JSON.parse(raw);
     if (!w?.sessionId || !w?.displayName) return null;
-    if (!w.avatarId) w.avatarId = DEFAULT_AVATAR_ID;
+    w.avatarId = normalizeSkinId(w.avatarId);
     w.rank = rankFromPoints(w.pontifexPoints || 0);
     return w;
   } catch {
@@ -47,6 +53,7 @@ export function loadWorshiper() {
 export function saveWorshiper(worshiper) {
   const next = {
     ...worshiper,
+    avatarId: normalizeSkinId(worshiper.avatarId),
     rank: rankFromPoints(worshiper.pontifexPoints),
   };
   sessionStorage.setItem(STORAGE_KEY, JSON.stringify(next));
@@ -105,15 +112,8 @@ export function canSpinToday(worshiper) {
   return worshiper.lastSpinDate !== todayDateString();
 }
 
-export function registerWorshiper(displayName, avatarId) {
-  const chosenAvatarId = avatarId || chooseCantorVariantForSession();
-  const w = createWorshiper(displayName, chosenAvatarId);
+export function registerWorshiper(displayName, skinId = DEFAULT_SKIN_ID) {
+  const w = createWorshiper(displayName, skinId);
   const { worshiper } = awardPoints(w, 'register');
   return worshiper;
-}
-
-function chooseCantorVariantForSession() {
-  const avatars = WORSHIPER_AVATARS;
-  if (avatars.length === 0) return DEFAULT_AVATAR_ID;
-  return avatars[Math.floor(Math.random() * avatars.length)].id;
 }

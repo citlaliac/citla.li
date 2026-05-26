@@ -66,7 +66,7 @@ function CecParishBulletin({ worshiper, onPostApproved, expanded, onToggleExpand
       </button>
       {expanded && (
         <div className="cec-bulletin-body">
-          <p className="cec-bulletin-hint">Shared notes from pilgrims. Names reset when you close this tab.</p>
+          <p className="cec-bulletin-hint">Shared notes from worshipers. Names reset when you close this tab.</p>
           {canPost ? (
             <form className="cec-bulletin-form" onSubmit={handleSubmit}>
               <textarea

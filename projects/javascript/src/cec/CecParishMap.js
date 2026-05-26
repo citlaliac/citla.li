@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { CEC_LOCATIONS } from './cecConfig';
 import { buildDecorativePaths } from './cecPathUtils';
 import { hasAmenDiscovery } from './cecConfig';
+import { canSpinToday } from './worshiperStorage';
 
 const PUB = process.env.PUBLIC_URL || '';
 const RELICS_BASE = `${PUB}/assets/catholicecloud/relics`;
@@ -9,9 +10,10 @@ const PATH_DS = buildDecorativePaths();
 
 function CecBuilding({ location, worshiper, onSelect }) {
   const [useFallback, setUseFallback] = useState(false);
-  const visited = location.actionId
-    ? worshiper.completedActions.includes(location.actionId)
-    : false;
+  const wheelDone = location.id === 'wheel' && !canSpinToday(worshiper);
+  const visited =
+    (location.actionId && worshiper.completedActions.includes(location.actionId)) ||
+    wheelDone;
   const discovered = hasAmenDiscovery(worshiper, location.id);
   const src = location.buildingFile
     ? `${RELICS_BASE}/${location.buildingFile}`
@@ -26,7 +28,11 @@ function CecBuilding({ location, worshiper, onSelect }) {
         type="button"
         className="cec-building-hit"
         onClick={() => onSelect(location)}
-        aria-label={`${location.label}. Click to visit.`}
+        aria-label={
+        wheelDone
+          ? `${location.label}. Already visited today.`
+          : `${location.label}. Click to visit.`
+      }
       >
         {src && !useFallback ? (
           <img
@@ -42,7 +48,10 @@ function CecBuilding({ location, worshiper, onSelect }) {
           </span>
         )}
       </button>
-      <span className="cec-building-label">{location.label}</span>
+      <span className="cec-building-label">
+        {location.label}
+        {wheelDone ? ' · today' : ''}
+      </span>
     </div>
   );
 }

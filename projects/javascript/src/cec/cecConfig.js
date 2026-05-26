@@ -138,14 +138,41 @@ export const CEC_LOCATIONS = [
   },
 ];
 
-/** Drop PNG/WebP in public/assets/catholicecloud/worshipers/ — filename = imageFile */
-export const WORSHIPER_AVATARS = [
-  { id: 'cantor_a', label: 'Cantor I', emoji: '🎵', imageFile: 'cantor_a.png' },
-  { id: 'cantor_b', label: 'Cantor II', emoji: '🎶', imageFile: 'cantor_b.png' },
-  { id: 'cantor_c', label: 'Cantor III', emoji: '🎼', imageFile: 'cantor_c.png' },
+/** Default entry skin */
+export const WORSHIPER_SKIN_ID = 'frog';
+export const DEFAULT_SKIN_ID = WORSHIPER_SKIN_ID;
+
+/** Pick one at registration — frog uses rank sprites; A/B use emoji until art ships */
+export const ENTRY_WORSHIPER_SKINS = [
+  { id: 'frog', label: 'Frog Worshiper', emoji: '🐸' },
+  { id: 'worshiper_a', label: 'Worshiper A', emoji: '🙏' },
+  { id: 'worshiper_b', label: 'Worshiper B', emoji: '🕊️' },
 ];
 
-export const DEFAULT_AVATAR_ID = WORSHIPER_AVATARS[0].id;
+export const ENTRY_WORSHIPER_SKINS_BY_ID = Object.fromEntries(
+  ENTRY_WORSHIPER_SKINS.map((s) => [s.id, s])
+);
+
+export const VALID_SKIN_IDS = new Set(ENTRY_WORSHIPER_SKINS.map((s) => s.id));
+
+/** Frog worshiper sprites in public/assets/catholicecloud/worshipers/ */
+export const FROG_PORTRAITS = [
+  { id: 'frog_cantor', rankId: 'cantor', label: 'Frog Cantor', emoji: '🐸', imageFile: 'frog-cantor.png' },
+  {
+    id: 'frog_seminarian',
+    rankId: 'seminarian',
+    label: 'Frog Seminarian',
+    emoji: '🐸',
+    imageFile: 'frog-seminarian.png',
+  },
+  { id: 'frog_deacon', rankId: 'deacon', label: 'Frog Deacon', emoji: '🐸', imageFile: 'frog-deacon.png' },
+  { id: 'frog_priest', rankId: 'priest', label: 'Frog Priest', emoji: '🐸', imageFile: 'frog-priest.png' },
+];
+
+/** @deprecated alias */
+export const WORSHIPER_PORTRAITS = FROG_PORTRAITS;
+
+export const DEFAULT_AVATAR_ID = DEFAULT_SKIN_ID;
 
 export const WHEEL_SAINTS = [
   {
@@ -252,12 +279,50 @@ export const WHEEL_SAINTS = [
 
 export const WHEEL_SAINTS_BY_ID = Object.fromEntries(WHEEL_SAINTS.map((s) => [s.id, s]));
 
-export const WORSHIPER_AVATARS_BY_ID = Object.fromEntries(
-  WORSHIPER_AVATARS.map((a) => [a.id, a])
-);
+export const FROG_PORTRAITS_BY_RANK = Object.fromEntries(FROG_PORTRAITS.map((p) => [p.rankId, p]));
+
+export const FROG_PORTRAITS_BY_ID = Object.fromEntries(FROG_PORTRAITS.map((p) => [p.id, p]));
+
+export const WORSHIPER_PORTRAITS_BY_RANK = FROG_PORTRAITS_BY_RANK;
+export const WORSHIPER_PORTRAITS_BY_ID = FROG_PORTRAITS_BY_ID;
+
+/** @deprecated */
+export const WORSHIPER_AVATARS = FROG_PORTRAITS;
+
+export function frogPortraitForRank(rankId) {
+  return FROG_PORTRAITS_BY_RANK[rankId] || FROG_PORTRAITS[0];
+}
+
+/** @deprecated — frog only */
+export function portraitForRank(rankId) {
+  return frogPortraitForRank(rankId);
+}
+
+export function portraitForSkinAndRank(skinId, rankId = 'cantor') {
+  const skin = VALID_SKIN_IDS.has(skinId) ? skinId : DEFAULT_SKIN_ID;
+  if (skin === 'frog') return frogPortraitForRank(rankId);
+  const entry = ENTRY_WORSHIPER_SKINS_BY_ID[skin];
+  return {
+    id: `${skin}_${rankId}`,
+    emoji: entry?.emoji ?? '✦',
+    imageFile: null,
+    label: entry?.label ?? 'Worshiper',
+  };
+}
+
+export function portraitForWorshiper(worshiper) {
+  const rankId = worshiper?.rank?.id ?? rankFromPoints(worshiper?.pontifexPoints ?? 0).id;
+  return portraitForSkinAndRank(worshiper?.avatarId, rankId);
+}
 
 export function avatarById(id) {
-  return WORSHIPER_AVATARS_BY_ID[id] || WORSHIPER_AVATARS[0];
+  if (FROG_PORTRAITS_BY_ID[id]) return FROG_PORTRAITS_BY_ID[id];
+  if (ENTRY_WORSHIPER_SKINS_BY_ID[id]) {
+    const entry = ENTRY_WORSHIPER_SKINS_BY_ID[id];
+    return { id, emoji: entry.emoji, imageFile: null, label: entry.label };
+  }
+  if (id === DEFAULT_SKIN_ID || id?.startsWith('cantor_')) return FROG_PORTRAITS[0];
+  return FROG_PORTRAITS[0];
 }
 
 export function rankFromPoints(pp) {
