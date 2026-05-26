@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
-import { getCantorCollectionProgress } from './worshiperStorage';
 
 function CecPilgrimRegister({ onRegister }) {
   const [name, setName] = useState('');
-  const { seenCount, total } = getCantorCollectionProgress();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -22,7 +20,7 @@ function CecPilgrimRegister({ onRegister }) {
           session.
         </p>
         <p className="cec-register-collection">
-          Collect all 3 Cantors: {seenCount}/{total}
+          Collect all three worshiper skins — one look per visit.
         </p>
         <form onSubmit={handleSubmit}>
           <label className="cec-register-label" htmlFor="cec-pilgrim-name">
