@@ -54,7 +54,7 @@ describe('cecConfig', () => {
   test('portraitForSkinAndRank', () => {
     expect(portraitForSkinAndRank('frog', 'deacon').imageFile).toBe('frog-deacon.png');
     expect(portraitForSkinAndRank('fairy', 'priest').imageFile).toBe('fairy-preist.png');
-    expect(portraitForSkinAndRank('fairy', 'seminarian').imageFile).toBe('fairy_seminarian.png');
+    expect(portraitForSkinAndRank('fairy', 'seminarian').imageFile).toBe('fairy-seminarian.png');
     expect(portraitForSkinAndRank('worshiper_a', 'cantor').emoji).toBe('🙏');
     expect(portraitForSkinAndRank('worshiper_a', 'priest').imageFile).toBeNull();
   });

@@ -198,7 +198,7 @@ export const FAIRY_PORTRAITS = [
     rankId: 'seminarian',
     label: 'Fairy Seminarian',
     emoji: '🧚',
-    imageFile: 'fairy_seminarian.png',
+    imageFile: 'fairy-seminarian.png',
   },
   { id: 'fairy_deacon', rankId: 'deacon', label: 'Fairy Deacon', emoji: '🧚', imageFile: 'fairy-deacon.png' },
   { id: 'fairy_priest', rankId: 'priest', label: 'Fairy Priest', emoji: '🧚', imageFile: 'fairy-preist.png' },

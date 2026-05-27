@@ -16,7 +16,7 @@ Frog filenames:
 Fairy filenames (must match exactly):
 
   fairy-cantor.png
-  fairy_seminarian.png
+  fairy-seminarian.png
   fairy-deacon.png
   fairy-preist.png
 
