@@ -64,7 +64,7 @@
   min-height: 100px;
 }
 
-button {
+.sign-guestbook-content button {
   width: 100%;
   padding: 1rem;
   background: #51290792;
@@ -76,7 +76,7 @@ button {
   transition: background 0.3s ease;
 }
 
-button:hover {
+.sign-guestbook-content button:hover {
   background: #cc0000;
 }
 

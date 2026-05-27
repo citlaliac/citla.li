@@ -1,5 +1,6 @@
 import {
   rankFromPoints,
+  rankPromotionMessage,
   canCompleteAction,
   nextRank,
   amenDiscoveryKey,
@@ -7,6 +8,9 @@ import {
   portraitForRank,
   portraitForSkinAndRank,
   portraitForWorshiper,
+  maxPontifexPointsNonWheelSession,
+  ENTRY_WORSHIPER_SKINS,
+  RANKS,
   WHEEL_SAINTS_BY_ID,
 } from '../cecConfig';
 
@@ -20,6 +24,13 @@ describe('cecConfig', () => {
   test('nextRank', () => {
     expect(nextRank(10)?.id).toBe('seminarian');
     expect(nextRank(500)).toBeNull();
+  });
+
+  test('rankPromotionMessage', () => {
+    expect(rankPromotionMessage('seminarian', 'Maria')).toMatch(/Maria.*admitted to seminary/i);
+    expect(rankPromotionMessage('deacon', 'Paul')).toMatch(/Paul.*Diaconate/i);
+    expect(rankPromotionMessage('priest', 'Ana')).toMatch(/Ana.*Priesthood/i);
+    expect(rankPromotionMessage('cantor', 'X')).toBeNull();
   });
 
   test('canCompleteAction', () => {
@@ -42,21 +53,30 @@ describe('cecConfig', () => {
 
   test('portraitForSkinAndRank', () => {
     expect(portraitForSkinAndRank('frog', 'deacon').imageFile).toBe('frog-deacon.png');
+    expect(portraitForSkinAndRank('fairy', 'priest').imageFile).toBe('fairy-preist.png');
+    expect(portraitForSkinAndRank('fairy', 'seminarian').imageFile).toBe('fairy_seminarian.png');
     expect(portraitForSkinAndRank('worshiper_a', 'cantor').emoji).toBe('🙏');
-    expect(portraitForSkinAndRank('worshiper_b', 'priest').emoji).toBe('🕊️');
     expect(portraitForSkinAndRank('worshiper_a', 'priest').imageFile).toBeNull();
   });
 
   test('portraitForWorshiper respects skin', () => {
     const frog = portraitForWorshiper({ avatarId: 'frog', pontifexPoints: 500, rank: { id: 'priest' } });
     expect(frog.imageFile).toBe('frog-priest.png');
-    const b = portraitForWorshiper({ avatarId: 'worshiper_b', pontifexPoints: 0, rank: { id: 'cantor' } });
-    expect(b.emoji).toBe('🕊️');
+    const fairy = portraitForWorshiper({ avatarId: 'fairy', pontifexPoints: 220, rank: { id: 'deacon' } });
+    expect(fairy.imageFile).toBe('fairy-deacon.png');
+  });
+
+  test('ENTRY_WORSHIPER_SKINS has three entry options', () => {
+    expect(ENTRY_WORSHIPER_SKINS.map((s) => s.id)).toEqual(['frog', 'fairy', 'worshiper_a']);
   });
 
   test('avatarById legacy cantor ids map to frog cantor', () => {
     expect(avatarById('cantor_a').imageFile).toBe('frog-cantor.png');
     expect(avatarById('missing').imageFile).toBe('frog-cantor.png');
+  });
+
+  test('full session PP budget reaches Priest without wheel', () => {
+    expect(maxPontifexPointsNonWheelSession()).toBeGreaterThanOrEqual(RANKS[RANKS.length - 1].minPP);
   });
 
   test('wheel saints match uploaded assets', () => {

@@ -5,8 +5,7 @@ export const ASSET_DIRS = {
   worshipers: `${BASE}/worshipers`,
   /** Saint portraits live in wheel/ (some in wheel/saints/) */
   wheelSaints: `${BASE}/wheel`,
-  wheelDial: `${BASE}/wheel/wheel-dial.png`,
-  wheelFrame: `${BASE}/wheel/wheel-frame.png`,
+  wheelWood: `${BASE}/relics/spin_wheel.png`,
 };
 
 function assetUrl(base, file) {

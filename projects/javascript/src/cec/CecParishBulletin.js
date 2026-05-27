@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { canCompleteAction } from './cecConfig';
+import { ACTIVITY_REWARDS, canCompleteAction } from './cecConfig';
 
 const POLL_MS = 12000;
+const BULLETIN_PP = ACTIVITY_REWARDS.bulletin_post.pp;
 
-function CecParishBulletin({ worshiper, onPostApproved, expanded, onToggleExpand }) {
+function CecParishBulletin({ worshiper, onPostApproved, onClose }) {
   const [entries, setEntries] = useState([]);
   const [body, setBody] = useState('');
   const [status, setStatus] = useState(null);
@@ -46,9 +47,12 @@ function CecParishBulletin({ worshiper, onPostApproved, expanded, onToggleExpand
       if (!data.success) throw new Error(data.error || 'Post failed');
       setBody('');
       if (data.approved) {
-        setStatus('Posted to the Parish Bulletin.');
-        onPostApproved();
+        const { awarded } = onPostApproved();
+        const ppLine =
+          awarded > 0 ? ` +${awarded} Pontifex Points` : awarded === 0 ? '' : '';
+        setStatus(`Posted to the Parish Bulletin.${ppLine}`);
         fetchEntries();
+        onClose();
       } else {
         setStatus('Held for incense review. Check back soon.');
       }
@@ -60,13 +64,23 @@ function CecParishBulletin({ worshiper, onPostApproved, expanded, onToggleExpand
   };
 
   return (
-    <aside className={`cec-bulletin${expanded ? ' cec-bulletin--open' : ''}`}>
-      <button type="button" className="cec-bulletin-toggle" onClick={onToggleExpand}>
-        Parish Bulletin {expanded ? '▾' : '▸'}
-      </button>
-      {expanded && (
+    <div
+      className="cec-bulletin-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="cec-bulletin-title"
+    >
+      <aside className="cec-bulletin-panel">
+        <div className="cec-bulletin-head">
+          <h2 id="cec-bulletin-title" className="cec-bulletin-title">
+            Parish Bulletin
+          </h2>
+        </div>
         <div className="cec-bulletin-body">
-          <p className="cec-bulletin-hint">Shared notes from worshipers. Names reset when you close this tab.</p>
+          <p className="cec-bulletin-hint">
+            Shared notes from worshipers. Pin a note for +{BULLETIN_PP} Pontifex Points (up to{' '}
+            {ACTIVITY_REWARDS.bulletin_post.maxPerSession} per visit).
+          </p>
           {canPost ? (
             <form className="cec-bulletin-form" onSubmit={handleSubmit}>
               <textarea
@@ -78,7 +92,7 @@ function CecParishBulletin({ worshiper, onPostApproved, expanded, onToggleExpand
                 placeholder="Leave a note for the cloud…"
               />
               <button type="submit" className="cec-bulletin-submit" disabled={submitting || !body.trim()}>
-                Pin to board
+                Pin to board (+{BULLETIN_PP} PP)
               </button>
             </form>
           ) : (
@@ -102,8 +116,11 @@ function CecParishBulletin({ worshiper, onPostApproved, expanded, onToggleExpand
             )}
           </ul>
         </div>
-      )}
-    </aside>
+        <button type="button" className="cec-toast-dismiss cec-bulletin-amen" onClick={onClose}>
+          Amen
+        </button>
+      </aside>
+    </div>
   );
 }
 

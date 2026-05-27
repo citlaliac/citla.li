@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { DEFAULT_SKIN_ID, ENTRY_WORSHIPER_SKINS } from './cecConfig';
 import CecWorshiperPortrait from './CecWorshiperPortrait';
 
+const PUB = process.env.PUBLIC_URL || '';
+const HEAVEN_BTN_BG = `${PUB}/assets/catholicecloud/background/heaven-bkg.jpg`;
+
 function CecWorshiperRegister({ onRegister }) {
   const [name, setName] = useState('');
   const [skinId, setSkinId] = useState(DEFAULT_SKIN_ID);
@@ -19,8 +22,8 @@ function CecWorshiperRegister({ onRegister }) {
           Worshiper Register
         </h2>
         <p className="cec-register-blurb">
-          Pick your entry-level worshiper, then choose a display name. Frog worshipers level up through Cantor,
-          Seminarian, Deacon, and Priest.
+          Pick your entry-level worshiper, then choose a display name. Frog and Fairy worshipers level up
+          through Cantor, Seminarian, Deacon, and Priest.
         </p>
 
         <fieldset className="cec-worshiper-pick">
@@ -34,7 +37,7 @@ function CecWorshiperRegister({ onRegister }) {
                 onClick={() => setSkinId(skin.id)}
                 aria-pressed={skinId === skin.id}
               >
-                <CecWorshiperPortrait skinId={skin.id} rankId="cantor" size="lg" />
+                <CecWorshiperPortrait skinId={skin.id} rankId="cantor" size="xl" />
                 <span className="cec-worshiper-pick-label">{skin.label}</span>
               </button>
             ))}
@@ -58,7 +61,12 @@ function CecWorshiperRegister({ onRegister }) {
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. Sister Agnes"
           />
-          <button type="submit" className="cec-register-submit" disabled={!name.trim()}>
+          <button
+            type="submit"
+            className="cec-register-submit"
+            disabled={!name.trim()}
+            style={{ '--cec-heaven-btn-bg': `url('${HEAVEN_BTN_BG}')` }}
+          >
             Enter the cloud
           </button>
         </form>

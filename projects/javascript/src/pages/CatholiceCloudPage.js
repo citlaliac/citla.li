@@ -3,13 +3,14 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { useSEO } from '../hooks/useSEO';
 import CecWorshiperRegister from '../cec/CecWorshiperRegister';
-import CecStatsBar from '../cec/CecStatsBar';
 import CecWorshiperStage from '../cec/CecWorshiperStage';
 import CecParishMap from '../cec/CecParishMap';
 import CecLocationPopup, { AMEN_BURST_MS } from '../cec/CecLocationPopup';
 import CecParishBulletin from '../cec/CecParishBulletin';
 import CecSaintWheel from '../cec/CecSaintWheel';
 import CecRankToast from '../cec/CecRankToast';
+import CecShootingStars from '../cec/CecShootingStars';
+import EcclesiasticalClock from '../ecclesiasticalTime/EcclesiasticalClock';
 import { hasAmenDiscovery } from '../cec/cecConfig';
 import {
   awardAmenDiscovery,
@@ -26,6 +27,11 @@ const BG = {
   cathedral: `${PUB}/assets/catholicecloud/background/cathedral-bkg.jpg`,
   heaven: `${PUB}/assets/catholicecloud/background/heaven-bkg.jpg`,
   forest: `${PUB}/assets/catholicecloud/background/foret_fontainebleu.jpg`,
+};
+
+/** Manicule cursor — tip at upper-left; use manicule-cursor.png (≤128px) for browser support */
+const CEC_PAGE_STYLE = {
+  '--cec-manicule-cursor': `url('${PUB}/assets/catholicecloud/manicule-cursor.png') 0 0, auto`,
 };
 
 const SPRINKLES = [
@@ -46,12 +52,25 @@ function CatholiceCloudPage() {
   const [activeLocation, setActiveLocation] = useState(null);
   const [amenSparkle, setAmenSparkle] = useState(false);
   const [showWheel, setShowWheel] = useState(false);
-  const [bulletinOpen, setBulletinOpen] = useState(true);
-  const [rankToast, setRankToast] = useState(null);
+  const [bulletinOpen, setBulletinOpen] = useState(false);
+  const [rewardToast, setRewardToast] = useState(null);
+  const [, setPendingReward] = useState(null);
 
-  const applyWorshiper = useCallback((next, rankUp) => {
+  const mergeReward = (prev, { awarded = 0, rankUp }) => ({
+    pp: (prev?.pp || 0) + awarded,
+    rankUp: rankUp || prev?.rankUp || null,
+  });
+
+  const applyWorshiper = useCallback((next, reward, deferToast = false) => {
     setWorshiper(next);
-    if (rankUp) setRankToast(rankUp);
+    if (!reward) return;
+    const hasReward = reward.awarded > 0 || reward.rankUp;
+    if (!hasReward) return;
+    if (deferToast) {
+      setPendingReward((prev) => mergeReward(prev, reward));
+      return;
+    }
+    setRewardToast(mergeReward(null, reward));
   }, []);
 
   const handleRegister = (name, skinId) => {
@@ -60,10 +79,11 @@ function CatholiceCloudPage() {
   };
 
   const handleAward = useCallback(
-    (actionId) => {
-      if (!worshiper) return;
-      const { worshiper: next, rankUp } = awardPoints(worshiper, actionId);
-      applyWorshiper(next, rankUp);
+    (actionId, { deferToast } = {}) => {
+      if (!worshiper) return { awarded: 0 };
+      const { worshiper: next, awarded, rankUp } = awardPoints(worshiper, actionId);
+      applyWorshiper(next, { awarded, rankUp }, deferToast);
+      return { awarded };
     },
     [worshiper, applyWorshiper]
   );
@@ -77,26 +97,41 @@ function CatholiceCloudPage() {
       setShowWheel(true);
       return;
     }
+    setPendingReward(null);
     setActiveLocation(loc);
   };
 
   const dismissAmen = () => {
-    if (!activeLocation || !worshiper) return;
-    if (!hasAmenDiscovery(worshiper, activeLocation.id)) {
-      const { worshiper: next, rankUp } = awardAmenDiscovery(worshiper, activeLocation.id);
-      applyWorshiper(next, rankUp);
-    }
+    if (!activeLocation) return;
     setAmenSparkle(true);
-    window.setTimeout(() => {
-      setActiveLocation(null);
-      setAmenSparkle(false);
-    }, AMEN_BURST_MS);
+    setWorshiper((w) => {
+      if (!w) return w;
+      let next = w;
+      let amenPart = { awarded: 0, rankUp: null };
+      if (!hasAmenDiscovery(w, activeLocation.id)) {
+        const result = awardAmenDiscovery(w, activeLocation.id);
+        next = result.worshiper;
+        amenPart = { awarded: result.awarded, rankUp: result.rankUp };
+      }
+      setPendingReward((prev) => {
+        const flush = mergeReward(prev, amenPart);
+        window.setTimeout(() => {
+          setActiveLocation(null);
+          setAmenSparkle(false);
+          if (flush.pp > 0 || flush.rankUp) {
+            setRewardToast(flush);
+          }
+        }, AMEN_BURST_MS);
+        return null;
+      });
+      return next;
+    });
   };
 
   const handleWheelResult = (points) => {
     if (!worshiper) return;
     const { worshiper: next, rankUp } = addWheelPoints(worshiper, points);
-    applyWorshiper(next, rankUp);
+    applyWorshiper(next, { awarded: points, rankUp });
   };
 
   useSEO({
@@ -118,7 +153,15 @@ function CatholiceCloudPage() {
 
   if (!worshiper) {
     return (
-      <div className="cec-page">
+      <div className="cec-page cec-page--register" style={CEC_PAGE_STYLE}>
+        <div className="cec-bg-stack" aria-hidden="true">
+          <div className="cec-bg-layer cec-bg-layer--register-scrim" />
+          <div
+            className="cec-bg-layer cec-bg-layer--photo cec-bg-layer--photo-cathedral cec-bg-layer--register-hero"
+            style={{ backgroundImage: `url('${BG.cathedral}')` }}
+          />
+          <div className="cec-bg-layer cec-bg-layer--vignette" />
+        </div>
         <Header />
         <CecWorshiperRegister onRegister={handleRegister} />
         <Footer />
@@ -127,7 +170,7 @@ function CatholiceCloudPage() {
   }
 
   return (
-    <div className="cec-page">
+    <div className="cec-page" style={CEC_PAGE_STYLE}>
       <div className="cec-bg-stack" aria-hidden="true">
         <div className="cec-bg-layer cec-bg-layer--gradient" />
         <div
@@ -148,6 +191,8 @@ function CatholiceCloudPage() {
         <div className="cec-bg-layer cec-bg-layer--vignette" />
       </div>
 
+      <CecShootingStars />
+
       <div className="cec-sprinkles" aria-hidden="true">
         {SPRINKLES.map((s) => (
           <span
@@ -167,36 +212,34 @@ function CatholiceCloudPage() {
       </div>
 
       <Header />
-      <CecStatsBar worshiper={worshiper} />
 
       <main className="cec-main">
         <header className="cec-banner">
           <h1 className="cec-title">catholic e cloud</h1>
-          <p className="cec-subtitle">Heaven on earth? This is heaven online.</p>
-          <p className="cec-blurb">A cool online space for Catholics to hang out.</p>
+          <p className="cec-subtitle">
+            A cool online space for Catholics to hang out. Heaven on earth? This is heaven online.
+          </p>
         </header>
 
-        <div className="cec-play-layout">
+        <div className="cec-play-row">
           <CecWorshiperStage worshiper={worshiper} />
           <div className="cec-layout">
+            <div className="cec-layout-head">
+              <EcclesiasticalClock />
+            </div>
             <CecParishMap worshiper={worshiper} onSelectLocation={handleSelectLocation} />
-            <CecParishBulletin
-            worshiper={worshiper}
-            expanded={bulletinOpen}
-            onToggleExpand={() => setBulletinOpen((o) => !o)}
-            onPostApproved={() => handleAward('bulletin_post')}
-          />
           </div>
         </div>
       </main>
 
       <Footer />
 
-      {rankToast && (
+      {rewardToast && (
         <CecRankToast
           worshiper={worshiper}
-          rank={rankToast}
-          onDone={() => setRankToast(null)}
+          pp={rewardToast.pp}
+          rank={rewardToast.rankUp}
+          onDone={() => setRewardToast(null)}
         />
       )}
 
@@ -206,11 +249,19 @@ function CatholiceCloudPage() {
           worshiper={worshiper}
           amenSparkle={amenSparkle}
           onDismissAmen={dismissAmen}
-          onCommunion={() => handleAward('vatican')}
-          onPartake={() => handleAward('fish_fry')}
-          onRosaryComplete={() => handleAward('rosary')}
-          onLightCandle={() => handleAward('candle')}
-          onActionDone={() => handleAward(activeLocation.actionId)}
+          onCommunion={() => handleAward('vatican', { deferToast: true })}
+          onPartake={() => handleAward('fish_fry', { deferToast: true })}
+          onRosaryComplete={() => handleAward('rosary', { deferToast: true })}
+          onLightCandle={() => handleAward('candle', { deferToast: true })}
+          onActionDone={() => handleAward(activeLocation.actionId, { deferToast: true })}
+        />
+      )}
+
+      {bulletinOpen && (
+        <CecParishBulletin
+          worshiper={worshiper}
+          onClose={() => setBulletinOpen(false)}
+          onPostApproved={() => handleAward('bulletin_post')}
         />
       )}
 

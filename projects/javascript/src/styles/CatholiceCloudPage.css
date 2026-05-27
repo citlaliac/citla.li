@@ -3,9 +3,75 @@
 .cec-page {
   position: relative;
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   color: #f5edd8;
+  overflow-x: clip;
+  /* --cec-manicule-cursor set on page in CatholiceCloudPage.js (tip at 0 0) */
+  cursor: var(--cec-manicule-cursor, auto);
+}
+
+.cec-page,
+.cec-page * {
+  font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
+/* Manicule on all CEC UI (overrides scattered cursor:pointer rules) */
+.cec-page,
+.cec-page * {
+  cursor: var(--cec-manicule-cursor, auto) !important;
+}
+
+.cec-page :where(button:disabled, input:disabled, textarea:disabled) {
+  cursor: not-allowed !important;
+}
+
+.cec-page .cec-wheel-hub:disabled {
+  cursor: wait !important;
+}
+
+.cec-page input:not(:disabled),
+.cec-page textarea:not(:disabled) {
+  cursor: text !important;
+}
+
+/* Worshiper pick — cathedral full-bleed behind register form */
+.cec-page--register {
+  display: flex;
+  flex-direction: column;
+}
+
+.cec-page--register .cec-bg-layer--register-scrim {
+  background: rgba(12, 8, 20, 0.25);
+}
+
+.cec-page--register .cec-bg-layer--register-hero {
+  opacity: 1;
+  mix-blend-mode: normal;
+  transform: none;
+  filter: saturate(1.05) contrast(1.02) brightness(0.72);
+  background-size: cover;
+  background-position: center;
+}
+
+.cec-page--register > .header,
+.cec-page--register > .footer {
+  position: relative;
+  z-index: 2;
+}
+
+.cec-page--register .cec-register-overlay {
+  position: relative;
+  flex: 1;
+  z-index: 2;
+  min-height: min(calc(100dvh - 11rem), 720px);
+  background: transparent;
+}
+
+.cec-page--register .cec-register-panel {
+  background: linear-gradient(165deg, rgba(42, 31, 20, 0.94), rgba(21, 16, 16, 0.96));
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
 }
 
 /* No outline rings or stroke chrome on controls */
@@ -13,6 +79,200 @@
 .cec-page :where(button, input, textarea, select):focus-visible {
   outline: none;
   box-shadow: none;
+}
+
+/*
+ * Icon/image targets: no solid/red hover wash (blocks leaked global button:hover).
+ * Magnify + soft ethereal glow instead — gold action pills excluded below.
+ */
+.cec-page :where(
+    .cec-building-hit,
+    .cec-hotspot,
+    .cec-worshiper-pick-option,
+    .cec-avatar-option,
+    .cec-avatar-cancel,
+    .cec-rosary-bead,
+    .header a.nav-icon
+  ) {
+  background: transparent !important;
+  -webkit-tap-highlight-color: transparent;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.cec-page :where(
+    .cec-building-hit,
+    .cec-hotspot,
+    .cec-worshiper-pick-option,
+    .cec-avatar-option,
+    .cec-avatar-cancel,
+    .cec-rosary-bead,
+    .header a.nav-icon
+  ):hover,
+.cec-page :where(
+    .cec-building-hit,
+    .cec-hotspot,
+    .cec-worshiper-pick-option,
+    .cec-avatar-option,
+    .cec-avatar-cancel,
+    .cec-rosary-bead,
+    .header a.nav-icon
+  ):active,
+.cec-page :where(
+    .cec-building-hit,
+    .cec-hotspot,
+    .cec-worshiper-pick-option,
+    .cec-avatar-option,
+    .cec-avatar-cancel,
+    .cec-rosary-bead,
+    .header a.nav-icon
+  ):focus,
+.cec-page :where(
+    .cec-building-hit,
+    .cec-hotspot,
+    .cec-worshiper-pick-option,
+    .cec-avatar-option,
+    .cec-avatar-cancel,
+    .cec-rosary-bead,
+    .header a.nav-icon
+  ):focus-visible {
+  background: transparent !important;
+  outline: none;
+  box-shadow: none;
+}
+
+.cec-page .cec-building-hit,
+.cec-page .cec-hotspot,
+.cec-page .header a.nav-icon {
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.cec-page .cec-building-img,
+.cec-page .cec-building-emoji,
+.cec-page .cec-hotspot-img,
+.cec-page .cec-hotspot-fallback,
+.cec-page .header a.nav-icon img,
+.cec-page .header a.nav-icon .icon-wrapper {
+  transition:
+    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.28s ease;
+}
+
+.cec-page .cec-building-hit:hover,
+.cec-page .cec-building-hit:focus-visible {
+  transform: scale(1.12);
+}
+
+.cec-page .cec-hotspot:hover,
+.cec-page .cec-hotspot:focus-visible {
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+.cec-page .cec-building-hit:hover .cec-building-img,
+.cec-page .cec-building-hit:hover .cec-building-emoji,
+.cec-page .cec-building-hit:focus-visible .cec-building-img,
+.cec-page .cec-building-hit:focus-visible .cec-building-emoji,
+.cec-page .cec-hotspot:hover .cec-hotspot-img,
+.cec-page .cec-hotspot:hover .cec-hotspot-fallback,
+.cec-page .cec-hotspot:focus-visible .cec-hotspot-img,
+.cec-page .cec-hotspot:focus-visible .cec-hotspot-fallback,
+.cec-page .header a.nav-icon:hover img,
+.cec-page .header a.nav-icon:focus-visible img,
+.cec-page .header a.nav-icon:hover .icon-wrapper,
+.cec-page .header a.nav-icon:focus-visible .icon-wrapper {
+  filter:
+    drop-shadow(0 2px 8px rgba(0, 0, 0, 0.28))
+    drop-shadow(0 0 16px rgba(255, 235, 200, 0.22))
+    drop-shadow(0 0 28px rgba(255, 200, 120, 0.14));
+}
+
+.cec-page .header a.nav-icon:hover,
+.cec-page .header a.nav-icon:focus-visible {
+  transform: scale(1.08);
+}
+
+.cec-page .header a.nav-icon:hover img,
+.cec-page .header a.nav-icon:focus-visible img {
+  transform: scale(1.05);
+}
+
+/* Occasional shooting stars — map page only (CecShootingStars) */
+.cec-shooting-stars {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Curved SVG streak — quadratic path, dash draw, soft halo + bright core */
+.cec-shooting-star-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.cec-shooting-star-stroke {
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  opacity: 0;
+  animation: cec-shooting-star-draw var(--cec-star-dur, 0.85s) cubic-bezier(0.22, 0.85, 0.35, 1) forwards;
+}
+
+.cec-shooting-star-stroke--halo {
+  stroke-width: 3.5;
+  filter: blur(2.5px);
+  opacity: 0;
+  animation: cec-shooting-star-draw-halo var(--cec-star-dur, 0.85s) cubic-bezier(0.22, 0.85, 0.35, 1) forwards;
+}
+
+.cec-shooting-star-stroke--core {
+  stroke-width: 1.15;
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.95))
+    drop-shadow(0 0 10px rgba(255, 236, 190, 0.65))
+    drop-shadow(0 0 18px rgba(212, 175, 55, 0.25));
+}
+
+@keyframes cec-shooting-star-draw {
+  0% {
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+  6% {
+    opacity: 1;
+  }
+  72% {
+    opacity: 0.85;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+
+@keyframes cec-shooting-star-draw-halo {
+  0% {
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+  8% {
+    opacity: 0.45;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cec-shooting-stars {
+    display: none;
+  }
 }
 
 /* Viewport-fixed glitter (Neopets city map energy) — below real UI, above collage */
@@ -123,12 +383,12 @@
 }
 
 .cec-bg-layer--photo-forest {
-  opacity: 0.38;
-  mix-blend-mode: overlay;
+  opacity: 0.17;
+  mix-blend-mode: soft-light;
   background-position: 42% 58%;
   transform: scale(1.08);
   transform-origin: 60% 70%;
-  filter: saturate(0.85) hue-rotate(18deg);
+  filter: saturate(0.8) hue-rotate(12deg) brightness(1.05);
 }
 
 .cec-bg-layer--vignette {
@@ -150,29 +410,31 @@
   width: 100%;
   max-width: 1280px;
   margin: 0 auto;
-  padding: 5rem 1rem 2.5rem;
+  padding: clamp(4rem, 12vw, 5rem) clamp(0.75rem, 3vw, 1rem) 2.5rem;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-/* Global * sets Kodchasan on every node — override for this page content */
+/* Page content uses Georgia (matches .cec-page) */
 .cec-main,
-.cec-main *,
+.cec-main * {
+  font-family: inherit;
+}
+
 .cec-toast-overlay,
 .cec-toast-overlay * {
-  font-family: Georgia, 'Times New Roman', Times, serif;
+  font-family: inherit;
 }
 
 /* Flat copy — no panels; type reads off the collage */
 .cec-banner {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: clamp(3.5rem, 8vw, 5.5rem);
   padding: 0 0.5rem;
 }
 
 .cec-title {
-  font-family: Georgia, 'Times New Roman', Times, serif;
   font-size: clamp(1.75rem, 5vw, 2.35rem);
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -186,27 +448,15 @@
 }
 
 .cec-subtitle {
-  font-family: Georgia, 'Times New Roman', Times, serif;
   font-size: clamp(1rem, 2.8vw, 1.2rem);
   font-style: italic;
   color: rgba(245, 237, 216, 0.97);
-  margin: 0 0 1rem;
-  line-height: 1.45;
+  margin: 0 auto;
+  max-width: 36rem;
+  line-height: 1.55;
   text-shadow:
     0 0 12px rgba(0, 0, 0, 0.65),
     0 2px 8px rgba(0, 0, 0, 0.45);
-}
-
-.cec-blurb {
-  font-family: Georgia, 'Times New Roman', Times, serif;
-  font-size: 1rem;
-  line-height: 1.55;
-  color: rgba(245, 237, 216, 0.96);
-  margin: 0;
-  max-width: 36rem;
-  text-shadow:
-    0 0 10px rgba(0, 0, 0, 0.6),
-    0 2px 6px rgba(0, 0, 0, 0.4);
 }
 
 /*
@@ -307,8 +557,7 @@
 }
 
 /*
- * Popup = frame art only (no dim sheet, no extra panel chrome).
- * Frame width follows MoveThingsAround board logic: min(1100px, 96vw)-style cap.
+ * Map location popup — large frame over softly dimmed page.
  * Text sits in an ellipse clipped to the oval opening — tweak ellipse() if frame.png changes.
  */
 .cec-toast-overlay {
@@ -318,10 +567,25 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: max(0.75rem, env(safe-area-inset-top)) max(0.75rem, env(safe-area-inset-right))
-    max(0.75rem, env(safe-area-inset-bottom)) max(0.75rem, env(safe-area-inset-left));
-  background: transparent;
-  pointer-events: none;
+  padding: max(0.5rem, env(safe-area-inset-top)) max(0.5rem, env(safe-area-inset-right))
+    max(0.5rem, env(safe-area-inset-bottom)) max(0.5rem, env(safe-area-inset-left));
+  background: rgba(8, 4, 18, 0.55);
+  pointer-events: auto;
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+}
+
+.cec-toast-overlay:not(.cec-toast-overlay--amen) {
+  animation: cec-overlay-dim 0.4s ease forwards;
+}
+
+@keyframes cec-overlay-dim {
+  from {
+    background: rgba(8, 4, 18, 0);
+  }
+  to {
+    background: rgba(8, 4, 18, 0.55);
+  }
 }
 
 .cec-toast-frame-wrap {
@@ -329,8 +593,8 @@
   flex-direction: column;
   align-items: center;
   gap: 0;
-  /* Same max span idea as .movethings-board (1100px), capped by viewport */
-  width: min(1100px, 96vw);
+  width: min(1050px, 96vw);
+  max-height: min(92dvh, 920px);
   pointer-events: auto;
 }
 
@@ -365,6 +629,7 @@
 .cec-toast-frame-visual {
   position: relative;
   width: 100%;
+  max-height: min(82dvh, 780px);
   line-height: 0;
 }
 
@@ -373,48 +638,63 @@
   width: 100%;
   height: auto;
   max-width: 100%;
+  max-height: min(82dvh, 780px);
+  object-fit: contain;
+  object-position: center;
+  margin: 0 auto;
   user-select: none;
   pointer-events: none;
 }
 
-/* Oval window: full-bleed layer over the image, clipped to an ellipse (like the frame opening) */
+/*
+ * Cream oval in frame.png — wide, slightly above vertical center.
+ * Box + ellipse clip aligned to the opening (not full-bleed inset).
+ */
 .cec-toast-frame-text {
   position: absolute;
-  inset: 0;
+  left: 50%;
+  top: 46%;
+  transform: translate(-50%, -50%);
+  width: 54%;
+  height: 36%;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   box-sizing: border-box;
-  padding: 7% 12% 8%;
-  overflow-y: auto;
-  -webkit-clip-path: ellipse(48% 44% at 50% 46%);
-  clip-path: ellipse(48% 44% at 50% 46%);
+  padding: 0 4%;
+  overflow: hidden;
+  -webkit-clip-path: ellipse(50% 50% at 50% 50%);
+  clip-path: ellipse(50% 50% at 50% 50%);
 }
 
-/* Narrow column (~40% of frame width) keeps large type inside the oval without spilling */
 .cec-toast-frame-text-inner {
-  width: 40%;
-  max-width: 40%;
+  width: 100%;
+  max-width: 100%;
   min-width: 0;
+  max-height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.65rem;
+  padding-top: 0.35rem;
+  gap: 0.35rem;
   text-align: center;
   color: #a88618;
-  font-size: clamp(1rem, 2.2vw, 1.38rem);
-  line-height: 1.45;
-  overflow-wrap: anywhere;
+  font-size: clamp(0.82rem, 1.85vw, 1.05rem);
+  line-height: 1.35;
+  overflow-wrap: break-word;
   word-wrap: break-word;
 }
 
 .cec-toast-frame-text strong {
   display: block;
-  font-size: clamp(0.78rem, 1.85vw, 0.98rem);
-  letter-spacing: 0.15em;
+  width: 100%;
+  margin: 0 auto;
+  font-size: clamp(0.72rem, 1.65vw, 0.95rem);
+  letter-spacing: 0.1em;
   text-transform: uppercase;
+  text-align: center;
   color: #c9a94e;
 }
 
@@ -422,21 +702,24 @@
   display: block;
   width: 100%;
   min-width: 0;
+  margin: 0 auto;
+  text-align: center;
+  text-wrap: balance;
+  font-size: clamp(0.78rem, 1.75vw, 1rem);
+  line-height: 1.32;
 }
 
 .cec-toast-dismiss {
   width: max-content;
-  /* Strong overlap: tuck Amen into the lower frame ornament */
-  margin: clamp(-12rem, -34vw, -7rem) auto 0;
+  margin: 0;
   padding: 0.55rem 1.35rem;
-  font-family: Georgia, 'Times New Roman', Times, serif;
+  font-family: inherit;
   font-size: clamp(1.05rem, 2.4vw, 1.35rem);
   font-weight: 600;
   letter-spacing: 0.06em;
   white-space: nowrap;
   cursor: pointer;
   position: relative;
-  transform: translateX(-0.3rem);
   color: #141008;
   border: none;
   border-radius: 999px;
@@ -480,8 +763,27 @@
     0 3px 8px rgba(0, 0, 0, 0.22);
 }
 
+.cec-toast-dismiss--in-frame {
+  position: absolute;
+  left: 50%;
+  bottom: 6.5%;
+  z-index: 3;
+  transform: translateX(-50%);
+  max-width: min(38%, 10rem);
+  padding: 0.45rem 1rem;
+  font-size: clamp(0.9rem, 1.85vw, 1.1rem);
+}
+
+.cec-toast-dismiss--in-frame:hover {
+  transform: translateX(-50%);
+}
+
+.cec-toast-dismiss--in-frame:active {
+  transform: translateX(-50%) translateY(1px) scale(0.99);
+}
+
 .cec-toast-dismiss:active {
-  transform: translate(-0.3rem, 1px) scale(0.99);
+  transform: translateY(1px) scale(0.99);
   box-shadow:
     inset 0 3px 8px rgba(35, 24, 4, 0.45),
     inset 0 1px 1px rgba(255, 250, 220, 0.35),
@@ -498,8 +800,12 @@
     animation: none;
   }
 
+  .cec-toast-dismiss--in-frame:active {
+    transform: translateX(-50%) scale(0.99);
+  }
+
   .cec-toast-dismiss:active {
-    transform: translateX(-0.3rem);
+    transform: scale(0.99);
   }
 }
 
@@ -538,13 +844,19 @@
   }
 }
 
-/* Worshiper (sticky) + map / bulletin */
-.cec-play-layout {
+/* Worshiper tracker + map side by side (below banner) */
+.cec-play-row {
   display: grid;
-  grid-template-columns: minmax(200px, 260px) 1fr;
-  gap: 1.25rem;
+  grid-template-columns: minmax(200px, 280px) minmax(0, 1fr);
+  gap: clamp(1.5rem, 4vw, 2.25rem);
   width: 100%;
+  max-width: calc(100% - clamp(0.5rem, 2vw, 1.25rem));
+  margin-top: clamp(0.75rem, 2.5vw, 1.5rem);
+  margin-right: auto;
+  margin-left: 0;
+  padding-right: clamp(1rem, 4vw, 2.75rem);
   align-items: start;
+  box-sizing: border-box;
 }
 
 .cec-worshiper-stage {
@@ -554,21 +866,63 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.5rem 0;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.35rem 0.5rem 0.75rem;
+  line-height: normal;
+  text-align: center;
+  background: transparent;
+  border: none;
+  box-shadow: none;
 }
 
+.cec-worshiper-stage p,
+.cec-worshiper-stage span,
+.cec-worshiper-stage strong {
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.8),
+    0 0 10px rgba(0, 0, 0, 0.35);
+}
+
+.cec-worshiper-stage-kicker,
+.cec-worshiper-stage-type,
 .cec-worshiper-stage-name {
-  margin: 0.25rem 0 0;
-  font-size: 1.15rem;
+  width: 100%;
+  margin: 0;
+  text-align: center;
+}
+
+.cec-worshiper-stage-kicker {
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(212, 175, 55, 0.85);
+}
+
+.cec-worshiper-stage-type {
+  font-size: 1.2rem;
   font-weight: 700;
   color: #f0e6c8;
-  text-align: center;
   line-height: 1.2;
 }
 
+.cec-worshiper-stage-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: rgba(245, 237, 216, 0.9);
+  line-height: 1.2;
+}
+
+.cec-worshiper-stage .cec-portrait {
+  align-self: center;
+  width: 100%;
+  max-width: min(260px, 100%);
+}
+
 .cec-worshiper-stage-rank {
-  margin: 0;
+  margin: 0.25rem 0 0;
+  width: 100%;
   font-size: 0.8rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -576,94 +930,124 @@
   text-align: center;
 }
 
-.cec-worshiper-stage-pp {
-  margin: 0;
-  font-size: 0.9rem;
-  color: #f5edd8;
+.cec-worshiper-stage-pp-block {
+  width: 100%;
+  margin-top: 0.15rem;
+  padding: 0.25rem 0;
   text-align: center;
+  background: transparent;
 }
 
-.cec-worshiper-stage-pp strong {
+.cec-worshiper-stage-pp-label {
+  display: block;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.85;
+  color: #f5edd8;
+}
+
+.cec-worshiper-stage-pp-value {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 1.75rem;
+  font-weight: 700;
   color: #ffe9a8;
-  font-size: 1.1rem;
+  line-height: 1.1;
 }
 
 .cec-worshiper-stage-next {
-  margin: 0.35rem 0 0;
-  font-size: 0.75rem;
-  opacity: 0.85;
+  margin: 0.15rem 0 0;
+  width: 100%;
+  font-size: 0.82rem;
+  color: #f5edd8;
+  line-height: 1.4;
   text-align: center;
-  line-height: 1.35;
 }
 
-/* Two-column: map + bulletin */
-.cec-layout {
-  display: grid;
-  grid-template-columns: 1fr min(320px, 34%);
-  gap: 1rem;
-  width: 100%;
-  align-items: start;
-  min-width: 0;
-}
-
-.cec-stats-bar {
-  position: relative;
-  z-index: 2;
-  width: 100%;
-  max-width: 1280px;
-  margin: 4.25rem auto 0;
-  padding: 0 1rem;
-}
-
-.cec-stats-bar-inner {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.65rem 1.25rem;
-  padding: 0.55rem 1rem;
-  border: none;
-  border-radius: 8px;
-  background: linear-gradient(180deg, rgba(45, 32, 18, 0.92), rgba(25, 18, 10, 0.95));
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
-}
-
-.cec-stats-name {
-  font-weight: 700;
+.cec-worshiper-stage-next strong {
   color: #f0e6c8;
 }
 
-.cec-stats-rank {
-  font-size: 0.85rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+.cec-worshiper-stage-next-pp {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.78rem;
+  opacity: 0.88;
   color: #d4af37;
 }
 
-.cec-stats-pp strong {
-  color: #ffe9a8;
-  margin-left: 0.35rem;
+.cec-worshiper-stage-next--max {
+  color: #d4af37;
+  font-style: italic;
 }
 
-.cec-stats-pp-label {
-  font-size: 0.8rem;
-  opacity: 0.85;
+/* Map playfield column */
+.cec-layout {
+  width: 100%;
+  min-width: 0;
+}
+
+.cec-layout-head {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  margin-bottom: 0.85rem;
+  padding-right: 0.1rem;
+}
+
+.cec-ecclesiastical-season {
+  margin: 0;
+  font-size: clamp(0.75rem, 2vw, 0.88rem);
+  font-weight: 600;
+  color: #f5ecd8;
+  text-align: right;
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.9),
+    0 0 8px rgba(0, 0, 0, 0.55);
 }
 
 .cec-playfield--map {
-  min-height: 520px;
+  position: relative;
+  width: 100%;
+  min-height: 0;
   border-radius: 12px;
-  overflow: hidden;
+  overflow: visible;
   border: none;
+  background: transparent;
 }
 
-.cec-map-ground {
+.cec-map-frame {
+  position: relative;
+  width: 100%;
+  max-width: min(1040px, 100%);
+  margin: 0;
+  margin-right: auto;
+  line-height: 0;
+}
+
+.cec-map-base {
+  display: block;
+  width: 100%;
+  height: auto;
+  user-select: none;
+  pointer-events: none;
+  filter: drop-shadow(0 8px 28px rgba(0, 0, 0, 0.45));
+}
+
+.cec-map-stops {
   position: absolute;
   inset: 0;
-  z-index: 0;
-  background:
-    radial-gradient(ellipse 80% 50% at 50% 100%, rgba(60, 100, 50, 0.5), transparent),
-    linear-gradient(180deg, #4a7c59 0%, #3d6b4a 40%, #2f5538 100%);
-  opacity: 0.88;
+  pointer-events: none;
+}
+
+.cec-map-stops .cec-building {
+  pointer-events: auto;
+}
+
+/* Decorative SVG paths removed — map.png includes walkways */
+.cec-walk-path {
+  display: none;
 }
 
 .cec-building {
@@ -677,17 +1061,58 @@
 }
 
 .cec-building-hit {
+  position: relative;
   padding: 0;
   border: none;
-  background: transparent;
+  background: transparent !important;
   cursor: pointer;
   line-height: 0;
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transform-origin: center center;
+}
+
+/* Anchor art on map red dots (no faux dot — image must cover the pin) */
+.cec-building--incense,
+.cec-building--aspergillum {
+  transform: translate(-50%, -50%);
+}
+
+.cec-building--incense .cec-building-img {
+  max-width: min(156px, 28vw);
+}
+
+.cec-building--aspergillum .cec-building-img {
+  max-width: min(132px, 24vw);
+}
+
+.cec-building--wheel .cec-building-img,
+.cec-building--bulletin .cec-building-img {
+  max-width: min(132px, 24vw);
+}
+
+/* Center PNGs in their boxes (same idea as movethingsaround) */
+.cec-building-img,
+.cec-portrait-img,
+.cec-hotspot-img,
+.cec-wheel-slice-img,
+.cec-saint-result-img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: center;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .cec-building-img {
-  display: block;
   max-width: min(120px, 22vw);
-  height: auto;
   filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.4));
 }
 
@@ -703,16 +1128,14 @@
 
 .cec-building-label {
   display: inline-block;
-  padding: 0.2rem 0.65rem;
   font-size: clamp(0.65rem, 1.8vw, 0.78rem);
   font-weight: 700;
-  color: #0f1830;
-  background: linear-gradient(180deg, #b8d4f8, #88b0e8);
-  border: none;
-  border-radius: 999px;
+  color: #f5ecd8;
   white-space: nowrap;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
   text-align: center;
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.9),
+    0 0 8px rgba(0, 0, 0, 0.55);
 }
 
 .cec-register-overlay {
@@ -723,7 +1146,10 @@
   align-items: center;
   justify-content: center;
   background: rgba(8, 4, 16, 0.72);
-  padding: 1rem;
+  padding: max(0.75rem, env(safe-area-inset-top)) max(0.75rem, env(safe-area-inset-right))
+    max(0.75rem, env(safe-area-inset-bottom)) max(0.75rem, env(safe-area-inset-left));
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .cec-register-panel {
@@ -752,45 +1178,186 @@
   background: rgba(255, 248, 220, 0.12);
 }
 
+@keyframes cec-enter-cloud-glow {
+  0%,
+  100% {
+    box-shadow:
+      inset 0 2px 6px rgba(255, 255, 250, 0.95),
+      inset 0 -8px 14px rgba(70, 45, 4, 0.45),
+      0 0 0 2px rgba(255, 228, 160, 0.55),
+      0 6px 20px rgba(0, 0, 0, 0.32),
+      0 0 32px rgba(255, 210, 80, 0.5),
+      0 0 56px rgba(212, 175, 55, 0.28);
+  }
+  50% {
+    box-shadow:
+      inset 0 3px 8px rgba(255, 255, 255, 1),
+      inset 0 -8px 16px rgba(60, 38, 4, 0.4),
+      0 0 0 2px rgba(255, 240, 200, 0.7),
+      0 8px 26px rgba(0, 0, 0, 0.35),
+      0 0 48px rgba(255, 230, 120, 0.72),
+      0 0 72px rgba(255, 200, 60, 0.4);
+  }
+}
+
 .cec-register-submit {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   width: 100%;
-  padding: 0.55rem;
+  margin-top: 0.5rem;
+  padding: 0.95rem 1.75rem;
+  min-height: 58px;
   font-family: inherit;
-  font-weight: 600;
+  font-weight: 800;
+  font-size: clamp(1.12rem, 2.8vw, 1.38rem);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
   cursor: pointer;
+  color: #1a0f02;
   border: none;
   border-radius: 999px;
-  background: linear-gradient(148deg, #f2e088, #c9a227);
-  color: #141008;
+  -webkit-tap-highlight-color: transparent;
+  text-shadow:
+    0 1px 0 rgba(255, 252, 235, 0.9),
+    0 0 12px rgba(255, 255, 255, 0.65),
+    0 2px 6px rgba(40, 28, 8, 0.45);
+  background: transparent;
+  transition:
+    transform 0.2s ease,
+    filter 0.2s ease;
 }
 
-.cec-bulletin {
-  position: relative;
-  z-index: 2;
+/* Heaven sky photo (--cec-heaven-btn-bg set on button in CecWorshiperRegister) */
+.cec-register-submit::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  border-radius: inherit;
+  background-image: var(--cec-heaven-btn-bg);
+  background-size: cover;
+  background-position: center 35%;
+  background-repeat: no-repeat;
+}
+
+/* Gold shimmer veil over heaven */
+.cec-register-submit::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: linear-gradient(
+    155deg,
+    rgba(255, 252, 230, 0.72) 0%,
+    rgba(255, 228, 120, 0.58) 18%,
+    rgba(232, 192, 48, 0.52) 32%,
+    rgba(255, 240, 168, 0.62) 48%,
+    rgba(201, 162, 39, 0.55) 58%,
+    rgba(247, 232, 120, 0.6) 72%,
+    rgba(180, 140, 30, 0.5) 84%,
+    rgba(255, 246, 200, 0.7) 100%
+  );
+  background-size: 240% 240%;
+  background-position: 20% 30%;
+}
+
+.cec-register-submit:not(:disabled)::after {
+  animation: cec-amen-shiny 3.8s ease-in-out infinite;
+}
+
+.cec-register-submit:not(:disabled) {
+  animation: cec-enter-cloud-glow 2.6s ease-in-out infinite;
+}
+
+.cec-register-submit:not(:disabled):hover {
+  color: #120a02;
+  transform: translateY(-2px) scale(1.02);
+  filter: brightness(1.08) saturate(1.05);
+  animation-duration: 1.8s;
+}
+
+.cec-register-submit:not(:disabled):hover::after {
+  animation-duration: 2.2s;
+}
+
+.cec-register-submit:not(:disabled):active {
+  transform: translateY(1px) scale(0.99);
+  filter: brightness(0.98);
+}
+
+.cec-register-submit:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  animation: none;
+  box-shadow: none;
+  filter: grayscale(0.35);
+}
+
+/* Parish bulletin — full-screen overlay from map */
+.cec-bulletin-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(0.75rem, env(safe-area-inset-top)) max(0.75rem, env(safe-area-inset-right))
+    max(0.75rem, env(safe-area-inset-bottom)) max(0.75rem, env(safe-area-inset-left));
+  background: rgba(8, 4, 18, 0.58);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  animation: cec-overlay-dim 0.35s ease forwards;
+  pointer-events: auto;
+}
+
+.cec-bulletin-panel {
+  display: flex;
+  flex-direction: column;
+  width: min(580px, 94vw);
+  max-height: min(88dvh, 720px);
   border: none;
-  border-radius: 10px;
-  background: rgba(35, 22, 12, 0.88);
+  border-radius: 14px;
+  background: rgba(35, 22, 12, 0.97);
   color: #f5edd8;
-  max-height: 560px;
   overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(212, 175, 55, 0.2),
+    0 16px 48px rgba(0, 0, 0, 0.5);
+  animation: cec-frame-majesty 0.75s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-.cec-bulletin-toggle {
-  width: 100%;
-  padding: 0.6rem 0.85rem;
-  text-align: left;
-  font-family: inherit;
-  font-weight: 700;
-  cursor: pointer;
-  border: none;
+.cec-bulletin-amen {
+  flex-shrink: 0;
+  align-self: center;
+  margin: 0.75rem auto 1rem;
+}
+
+.cec-bulletin-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.65rem 0.85rem;
   background: rgba(107, 68, 35, 0.5);
+}
+
+.cec-bulletin-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
   color: #f0e6c8;
 }
 
 .cec-bulletin-body {
-  padding: 0.75rem;
+  flex: 1;
+  min-height: 0;
+  padding: 0.75rem 1rem;
   overflow-y: auto;
-  max-height: 500px;
+  max-height: none;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 .cec-bulletin-input {
@@ -839,16 +1406,51 @@
   color: #d4af37;
 }
 
+.cec-popup-action,
+.cec-popup-done {
+  margin: 0.1rem auto 0;
+  text-align: center;
+}
+
 .cec-popup-action {
-  margin-top: 0.35rem;
-  padding: 0.35rem 0.75rem;
+  display: block;
+  padding: 0.28rem 0.5rem;
+  min-height: 28px;
+  max-width: 100%;
+  width: max-content;
   font-family: inherit;
-  font-size: 0.85rem;
+  font-size: clamp(0.55rem, 1.15vw, 0.68rem);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
   cursor: pointer;
   border-radius: 999px;
   border: none;
   background: #edd76a;
   color: #141008;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+
+.cec-popup-done {
+  width: 100%;
+  font-size: clamp(0.72rem, 1.6vw, 0.9rem);
+  line-height: 1.3;
+  color: #a88618;
+}
+
+.cec-rosary-wrap {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.cec-rosary-hint {
+  margin: 0;
+  font-size: clamp(0.65rem, 1.4vw, 0.78rem);
+  text-align: center;
 }
 
 .cec-rosary-beads {
@@ -863,36 +1465,98 @@
   height: 1.1rem;
   border-radius: 50%;
   border: none;
-  background: #3d2914;
+  background: #3d2914 !important;
   cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    filter 0.2s ease,
+    background 0.2s ease;
+}
+
+.cec-rosary-bead:hover:not(:disabled),
+.cec-rosary-bead:focus-visible:not(:disabled) {
+  transform: scale(1.2);
+  background: #4a3520 !important;
+  filter: drop-shadow(0 0 8px rgba(255, 220, 140, 0.45));
 }
 
 .cec-rosary-bead--lit {
-  background: #d4af37;
+  background: #d4af37 !important;
 }
 
-.cec-rank-toast {
+.cec-rosary-bead--lit:hover:not(:disabled) {
+  background: #e8c24d !important;
+  filter: drop-shadow(0 0 10px rgba(255, 230, 160, 0.55));
+}
+
+/* Worshiper reward toast — after map Amen (PP + optional rank-up) */
+.cec-reward-overlay {
   position: fixed;
-  bottom: 2rem;
-  left: 50%;
-  transform: translateX(-50%);
+  inset: 0;
   z-index: 1300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(0.75rem, env(safe-area-inset-top)) max(0.75rem, env(safe-area-inset-right))
+    max(0.75rem, env(safe-area-inset-bottom)) max(0.75rem, env(safe-area-inset-left));
+  background: rgba(8, 4, 18, 0.58);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  animation: cec-overlay-dim 0.35s ease forwards;
+}
+
+.cec-reward-panel {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
-  padding: 1rem 1.5rem;
-  border: none;
-  border-radius: 16px;
-  background: rgba(25, 15, 8, 0.95);
+  gap: 1rem;
+  width: min(520px, 92vw);
+  max-height: min(88dvh, 720px);
+  padding: clamp(1.5rem, 4vw, 2.25rem) clamp(1.25rem, 4vw, 2rem);
+  border-radius: 20px;
+  background: linear-gradient(165deg, rgba(42, 28, 14, 0.97) 0%, rgba(22, 12, 6, 0.98) 100%);
   color: #ffe9a8;
-  font-size: 1.05rem;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  box-shadow:
+    0 0 0 1px rgba(212, 175, 55, 0.25),
+    0 16px 48px rgba(0, 0, 0, 0.5),
+    0 0 40px rgba(180, 140, 40, 0.15);
+  animation: cec-frame-majesty 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-.cec-rank-toast-text {
-  margin: 0;
+.cec-reward-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
   text-align: center;
+}
+
+.cec-reward-pp {
+  margin: 0;
+  font-size: clamp(1.35rem, 4vw, 1.85rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #f5e6a8;
+}
+
+.cec-reward-rank {
+  margin: 0;
+  font-size: clamp(1.05rem, 2.8vw, 1.35rem);
+  color: #e8d5a0;
+}
+
+.cec-reward-rank strong {
+  color: #fff0c8;
+}
+
+.cec-reward-name {
+  margin: 0;
+  font-size: clamp(0.95rem, 2.4vw, 1.1rem);
+  opacity: 0.85;
+}
+
+.cec-reward-dismiss {
+  margin-top: 0.25rem;
 }
 
 .cec-wheel-error {
@@ -902,12 +1566,12 @@
 
 /* Worshiper portrait + picker */
 .cec-register-panel--wide {
-  max-width: 36rem;
+  max-width: 40rem;
 }
 
 .cec-worshiper-pick {
   border: none;
-  margin: 0 0 1rem;
+  margin: 0 0 1.25rem;
   padding: 0;
 }
 
@@ -915,45 +1579,171 @@
   font-size: 0.95rem;
   font-weight: 700;
   color: #d4af37;
-  margin-bottom: 0.65rem;
+  margin-bottom: 0.85rem;
   padding: 0;
 }
 
 .cec-worshiper-pick-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 0.5rem;
+  gap: 1rem 0.75rem;
+  align-items: end;
 }
 
+/* Worshiper pick — no button chrome; warm halo + scale on hover (blocks global red button:hover) */
 .cec-worshiper-pick-option {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.5rem 0.35rem;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  line-height: 0;
+  padding: 0.25rem;
+  min-height: 0;
   cursor: pointer;
   border: none;
-  border-radius: 10px;
-  background: rgba(0, 0, 0, 0.25);
+  border-radius: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent !important;
   color: #f5edd8;
   font-family: inherit;
-  font-size: 0.72rem;
+  font-size: 0.85rem;
   line-height: 1.2;
+  box-shadow: none;
+  accent-color: transparent;
+  -webkit-tap-highlight-color: transparent;
+  transform: scale(1);
+  transform-origin: center bottom;
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.cec-worshiper-pick-option::-moz-focus-inner {
+  border: 0;
+}
+
+.cec-worshiper-pick-option:hover,
+.cec-worshiper-pick-option:active,
+.cec-worshiper-pick-option:focus,
+.cec-worshiper-pick-option:focus-visible {
+  background: transparent !important;
+  outline: none;
+  box-shadow: none;
+}
+
+.cec-worshiper-pick-option .cec-portrait {
+  position: relative;
+  z-index: 1;
+  width: min(6.5rem, 22vw);
+  height: min(6.5rem, 22vw);
+  border-radius: 0;
+  background: transparent !important;
+  border: none;
+  transition:
+    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.28s ease;
+}
+
+.cec-worshiper-pick-option .cec-portrait-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.cec-worshiper-pick-option:hover,
+.cec-worshiper-pick-option:focus-visible {
+  transform: scale(1.14);
+  z-index: 2;
+}
+
+.cec-worshiper-pick-option:hover .cec-portrait,
+.cec-worshiper-pick-option:focus-visible .cec-portrait {
+  filter: brightness(1.06) saturate(1.05)
+    drop-shadow(0 2px 10px rgba(0, 0, 0, 0.22))
+    drop-shadow(0 0 18px rgba(255, 235, 200, 0.22))
+    drop-shadow(0 0 32px rgba(255, 215, 150, 0.14))
+    drop-shadow(0 -4px 24px rgba(255, 200, 120, 0.12));
 }
 
 .cec-worshiper-pick-option--selected {
-  background: rgba(212, 175, 55, 0.2);
+  transform: scale(1.1);
+}
+
+.cec-worshiper-pick-option--selected .cec-portrait {
+  filter: brightness(1.04)
+    drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2))
+    drop-shadow(0 0 16px rgba(255, 230, 190, 0.18))
+    drop-shadow(0 0 28px rgba(255, 210, 140, 0.1));
+}
+
+.cec-worshiper-pick-option--selected .cec-worshiper-pick-label {
+  color: #ffe9a8;
+  font-weight: 700;
+}
+
+.cec-worshiper-pick-option:hover .cec-worshiper-pick-label,
+.cec-worshiper-pick-option:focus-visible .cec-worshiper-pick-label {
+  color: #fff4d4;
 }
 
 .cec-worshiper-pick-label {
+  position: relative;
+  z-index: 1;
   text-align: center;
+  transition: color 0.2s ease;
+}
+
+@media (min-width: 640px) {
+  .cec-worshiper-pick-option .cec-portrait {
+    width: min(8.5rem, 18vw);
+    height: min(8.5rem, 18vw);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cec-worshiper-pick-option,
+  .cec-worshiper-pick-option .cec-portrait {
+    transition: none;
+  }
+
+  .cec-worshiper-pick-option:hover,
+  .cec-worshiper-pick-option:focus-visible,
+  .cec-worshiper-pick-option--selected,
+  .cec-page .cec-building-hit:hover,
+  .cec-page .header a.nav-icon:hover,
+  .cec-avatar-option:hover {
+    transform: none;
+  }
+
+  .cec-register-submit:not(:disabled) {
+    animation: none;
+    box-shadow:
+      inset 0 2px 6px rgba(255, 255, 250, 0.9),
+      inset 0 -8px 14px rgba(70, 45, 4, 0.45),
+      0 0 0 2px rgba(255, 228, 160, 0.55),
+      0 6px 20px rgba(0, 0, 0, 0.32),
+      0 0 40px rgba(255, 210, 80, 0.55);
+  }
+
+  .cec-register-submit:not(:disabled)::after {
+    animation: none;
+    background-position: 50% 45%;
+  }
+
+  .cec-register-submit:not(:disabled):hover {
+    transform: none;
+  }
 }
 
 .cec-register-preview {
   display: flex;
+  align-items: center;
   justify-content: center;
   margin: 0 0 1.25rem;
   padding: 0.5rem 0;
+  line-height: 0;
+  width: 100%;
 }
 
 .cec-register-collection {
@@ -976,22 +1766,52 @@
 }
 
 .cec-avatar-option {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.25rem;
-  padding: 0.4rem;
+  gap: 0.35rem;
+  padding: 0.25rem;
   cursor: pointer;
   border: none;
-  border-radius: 8px;
-  background: rgba(0, 0, 0, 0.2);
+  border-radius: 0;
+  background: transparent !important;
   color: #f5edd8;
   font-family: inherit;
   font-size: 0.65rem;
+  transform: scale(1);
+  transform-origin: center bottom;
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.cec-avatar-option .cec-portrait {
+  transition:
+    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.28s ease;
+}
+
+.cec-avatar-option:hover,
+.cec-avatar-option:focus-visible {
+  transform: scale(1.12);
+  z-index: 2;
+}
+
+.cec-avatar-option:hover .cec-portrait,
+.cec-avatar-option:focus-visible .cec-portrait {
+  filter:
+    drop-shadow(0 2px 8px rgba(0, 0, 0, 0.28))
+    drop-shadow(0 0 16px rgba(255, 235, 200, 0.22))
+    drop-shadow(0 0 28px rgba(255, 200, 120, 0.14));
 }
 
 .cec-avatar-option--selected {
-  background: rgba(212, 175, 55, 0.15);
+  transform: scale(1.08);
+}
+
+.cec-avatar-option--selected .cec-portrait {
+  filter:
+    drop-shadow(0 2px 8px rgba(0, 0, 0, 0.24))
+    drop-shadow(0 0 14px rgba(255, 230, 190, 0.18));
 }
 
 .cec-avatar-option-label {
@@ -1003,6 +1823,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  line-height: 0;
   border-radius: 8px;
   overflow: hidden;
   background: transparent;
@@ -1031,9 +1852,7 @@
 }
 
 .cec-portrait-img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
+  flex-shrink: 0;
 }
 
 .cec-portrait-emoji {
@@ -1051,13 +1870,6 @@
 
 .cec-portrait--hero .cec-portrait-emoji {
   font-size: min(7rem, 22vw);
-}
-
-.cec-stats-portrait-badge {
-  display: inline-flex;
-  padding: 0;
-  border-radius: 8px;
-  box-shadow: none;
 }
 
 .cec-avatar-change-actions {
@@ -1085,8 +1897,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
+  padding: max(0.5rem, env(safe-area-inset-top)) max(0.5rem, env(safe-area-inset-right))
+    max(0.5rem, env(safe-area-inset-bottom)) max(0.5rem, env(safe-area-inset-left));
   background: rgba(8, 4, 16, 0.78);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .cec-wheel-overlay--map {
@@ -1095,9 +1910,10 @@
 
 .cec-wheel-modal {
   position: relative;
-  max-width: min(640px, 96vw);
+  max-width: min(920px, calc(100vw - 1rem));
   width: 100%;
-  padding: 1.5rem 1.25rem 1.75rem;
+  margin: auto;
+  padding: 1.25rem clamp(0.75rem, 3vw, 1.5rem) 1.5rem;
   border: none;
   border-radius: 14px;
   background: linear-gradient(165deg, #2a2218, #120c08);
@@ -1121,83 +1937,102 @@
 }
 
 .cec-wheel-stage {
-  --wheel-size: min(560px, min(92vw, 72vh));
+  --wheel-size: min(720px, min(98vw, min(88dvh, 86svh)));
   position: relative;
   width: var(--wheel-size);
   height: var(--wheel-size);
   margin: 0 auto;
 }
 
-.cec-wheel-dial-bg {
+.cec-wheel-pointer {
+  position: absolute;
+  left: 50%;
+  top: -0.15rem;
+  z-index: 4;
+  transform: translateX(-50%);
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
+  line-height: 1;
+  color: #d4af37;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+}
+
+.cec-wheel-rotator {
+  position: absolute;
+  inset: 0;
+  transition: transform 2.8s cubic-bezier(0.2, 0.9, 0.2, 1);
+}
+
+.cec-wheel-rotator--spinning {
+  filter: brightness(1.05);
+}
+
+.cec-wheel-rotator--done {
+  opacity: 0.92;
+  filter: saturate(0.85);
+}
+
+.cec-wheel-wood {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: contain;
   pointer-events: none;
-  opacity: 0.85;
+  filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.45));
 }
 
 .cec-wheel-disc {
   position: absolute;
-  inset: 4%;
+  inset: 11%;
   border-radius: 50%;
-  transition: transform 2.8s cubic-bezier(0.2, 0.9, 0.2, 1);
-  background: radial-gradient(circle, #6b5030 0%, #3d2914 70%, #2a1a0c 100%);
+  overflow: hidden;
   border: none;
-  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.4);
-}
-
-.cec-wheel-disc--spinning {
-  filter: brightness(1.05);
-}
-
-.cec-wheel-disc--done {
-  opacity: 0.92;
-  filter: saturate(0.85);
-}
-
-.cec-wheel-segment {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 0;
-  height: 0;
-  transform: rotate(var(--seg-rot));
-}
-
-.cec-wheel-segment-inner {
-  position: absolute;
-  left: calc(var(--wheel-size) * -0.048);
-  top: calc(var(--wheel-size) * -0.27);
-  width: calc(var(--wheel-size) * 0.096);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.2rem;
-  transform: rotate(calc(-1 * var(--seg-rot)));
-}
-
-.cec-wheel-segment-img {
-  width: calc(var(--wheel-size) * 0.11);
-  height: calc(var(--wheel-size) * 0.11);
-  object-fit: contain;
-  border: none;
-  border-radius: 0;
+  box-shadow: none;
   background: transparent;
 }
 
-.cec-wheel-segment-emoji {
-  font-size: calc(var(--wheel-size) * 0.06);
+.cec-wheel-slice {
+  position: absolute;
+  inset: 0;
+  background: transparent;
 }
 
-.cec-wheel-segment-label {
-  font-size: clamp(0.55rem, 1.4vw, 0.72rem);
+.cec-wheel-slice--alt {
+  background: transparent;
+}
+
+.cec-wheel-slice-content {
+  position: absolute;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  width: clamp(2.75rem, 13%, 5rem);
+  line-height: 1.1;
+  text-align: center;
+  pointer-events: none;
+}
+
+.cec-wheel-slice-img {
+  width: clamp(2.25rem, 11vw, 4.25rem);
+  height: clamp(2.25rem, 11vw, 4.25rem);
+  object-fit: contain;
+}
+
+.cec-wheel-slice-emoji {
+  font-size: clamp(1.25rem, 4vw, 2rem);
+  line-height: 1;
+}
+
+.cec-wheel-slice-label {
+  font-size: clamp(0.58rem, 1.7vw, 0.78rem);
   font-weight: 700;
   color: #ffe9a8;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
-  max-width: calc(var(--wheel-size) * 0.14);
-  line-height: 1.1;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
+  line-height: 1.15;
 }
 
 .cec-wheel-hub {
@@ -1206,8 +2041,8 @@
   top: 50%;
   transform: translate(-50%, -50%);
   z-index: 3;
-  width: calc(var(--wheel-size) * 0.2);
-  height: calc(var(--wheel-size) * 0.2);
+  width: calc(var(--wheel-size) * 0.22);
+  height: calc(var(--wheel-size) * 0.22);
   border-radius: 50%;
   border: none;
   font-family: inherit;
@@ -1248,13 +2083,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
+  padding: max(0.5rem, env(safe-area-inset-top)) max(0.5rem, env(safe-area-inset-right))
+    max(0.5rem, env(safe-area-inset-bottom)) max(0.5rem, env(safe-area-inset-left));
   background: rgba(8, 4, 16, 0.82);
   pointer-events: auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .cec-saint-result-wrap {
-  width: min(420px, 94vw);
+  width: min(440px, calc(100vw - 1rem));
 }
 
 .cec-saint-result-card {
@@ -1271,21 +2109,19 @@
 }
 
 .cec-saint-result-portrait {
-  width: 8rem;
-  height: 8rem;
+  width: min(10rem, 42vw);
+  height: min(10rem, 42vw);
   border-radius: 50%;
   border: none;
   background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
+  line-height: 0;
   overflow: hidden;
 }
 
 .cec-saint-result-img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
   background: transparent;
   border: none;
 }
@@ -1330,43 +2166,31 @@
 }
 
 @media (max-width: 900px) {
-  .cec-play-layout {
+  .cec-play-row {
     grid-template-columns: 1fr;
+    max-width: 100%;
+    padding-right: clamp(0.5rem, 3vw, 1.5rem);
   }
 
   .cec-worshiper-stage {
     position: relative;
     top: auto;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.75rem 1.25rem;
-    padding-bottom: 0.75rem;
-  }
-
-  .cec-worshiper-stage-name,
-  .cec-worshiper-stage-rank,
-  .cec-worshiper-stage-pp,
-  .cec-worshiper-stage-next {
-    flex: 1 1 8rem;
-    text-align: center;
+    max-width: 100%;
   }
 
   .cec-portrait--hero {
-    width: min(200px, 48vw);
-    height: min(200px, 48vw);
-  }
-
-  .cec-layout {
-    grid-template-columns: 1fr;
+    width: min(220px, 56vw);
+    height: min(220px, 56vw);
   }
 
   .cec-worshiper-pick-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem 1rem;
   }
 
-  .cec-bulletin {
-    max-height: none;
+  .cec-worshiper-pick-option .cec-portrait {
+    width: min(7rem, 34vw);
+    height: min(7rem, 34vw);
   }
 
   .cec-avatar-grid {
@@ -1376,18 +2200,23 @@
 
 @media (max-width: 768px) {
   .cec-main {
-    padding-top: 4.5rem;
+    padding-top: clamp(3.75rem, 14vw, 4.5rem);
   }
 
   .cec-playfield {
-    min-height: calc(100vh - 13rem);
+    min-height: min(calc(100dvh - 12rem), 560px);
   }
 
   .cec-playfield--map {
-    min-height: 420px;
+    min-height: 0;
   }
 
   .cec-building-img {
     max-width: min(100px, 28vw);
+  }
+
+  .cec-rosary-bead {
+    width: 1.25rem;
+    height: 1.25rem;
   }
 }

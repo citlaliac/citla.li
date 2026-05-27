@@ -2,17 +2,24 @@ Worshiper sprites.
 
 Entry skins (pick at registration) — see ENTRY_WORSHIPER_SKINS in cecConfig.js:
 
-  frog            — rank sprites below (Cantor → Priest)
+  frog            — rank sprites below
+  fairy           — rank sprites below (fairy-preist.png is intentional filename)
   worshiper_a     — emoji placeholder until art (🙏)
-  worshiper_b     — emoji placeholder until art (🕊️)
 
-Frog filenames (frog skin only):
+Frog filenames:
 
   frog-cantor.png
   frog-seminarian.png
   frog-deacon.png
   frog-priest.png
 
+Fairy filenames (must match exactly):
+
+  fairy-cantor.png
+  fairy_seminarian.png
+  fairy-deacon.png
+  fairy-preist.png
+
 Tips:
   - Transparent background, roughly square, ~200–400px wide.
-  - Large portrait on the left updates when you rank up (frog only).
+  - Large portrait on the left updates when you rank up (frog/fairy).

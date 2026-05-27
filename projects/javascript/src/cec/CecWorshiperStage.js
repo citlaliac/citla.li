@@ -1,21 +1,40 @@
 import React from 'react';
 import CecWorshiperPortrait from './CecWorshiperPortrait';
-import { nextRank } from './cecConfig';
+import { ENTRY_WORSHIPER_SKINS_BY_ID, nextRank } from './cecConfig';
 
 function CecWorshiperStage({ worshiper }) {
   const upcoming = nextRank(worshiper.pontifexPoints);
+  const skin =
+    ENTRY_WORSHIPER_SKINS_BY_ID[worshiper.avatarId] ?? {
+      label: 'Worshiper',
+    };
+  const ppToNext = upcoming ? upcoming.minPP - worshiper.pontifexPoints : 0;
 
   return (
     <aside className="cec-worshiper-stage" aria-label="Your worshiper">
-      <CecWorshiperPortrait worshiper={worshiper} size="hero" />
+      <p className="cec-worshiper-stage-kicker">Your worshiper</p>
+      <p className="cec-worshiper-stage-type">{skin.label}</p>
       <p className="cec-worshiper-stage-name">{worshiper.displayName}</p>
+
+      <CecWorshiperPortrait worshiper={worshiper} size="hero" />
+
       <p className="cec-worshiper-stage-rank">{worshiper.rank.label}</p>
-      <p className="cec-worshiper-stage-pp">
-        <strong>{worshiper.pontifexPoints}</strong> Pontifex Points
-      </p>
-      {upcoming && (
+
+      <div className="cec-worshiper-stage-pp-block">
+        <span className="cec-worshiper-stage-pp-label">Pontifex Points</span>
+        <strong className="cec-worshiper-stage-pp-value">{worshiper.pontifexPoints}</strong>
+      </div>
+
+      {upcoming ? (
         <p className="cec-worshiper-stage-next">
-          Next: {upcoming.label} at {upcoming.minPP} PP
+          Next: <strong>{upcoming.label}</strong>
+          <span className="cec-worshiper-stage-next-pp">
+            {ppToNext > 0 ? `${ppToNext} PP to go` : '— rank up!'}
+          </span>
+        </p>
+      ) : (
+        <p className="cec-worshiper-stage-next cec-worshiper-stage-next--max">
+          Highest rank this visit
         </p>
       )}
     </aside>

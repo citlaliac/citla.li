@@ -6,5 +6,8 @@ Catholic e Cloud assets — drop folders:
   worshipers/     — worshiper appearance sprites (see PUT_IMAGES_HERE inside)
   wheel/          — wheel-dial.png (optional) + wheel/saints/ portraits
   frame.png       — popup frame (root of this folder)
+  manicule.png         — full-size manicule art (source)
+  manicule-cursor.png  — browser cursor (auto-generated ~48px wide; tip = upper-left)
+  map.png              — parish map base (position stops on red dots in cecConfig)
 
 Config: projects/javascript/src/cec/cecConfig.js

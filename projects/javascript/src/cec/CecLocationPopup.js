@@ -24,6 +24,12 @@ function CecLocationPopup({
   const actionId = location.actionId;
   const canDoAction = actionId && canCompleteAction(worshiper, actionId);
 
+  const ppButtonLabel = (fallback) => {
+    const pp = ACTIVITY_REWARDS[actionId]?.pp ?? 0;
+    const verb = location.actionLabel || fallback;
+    return `${verb} (+${pp} PP)`;
+  };
+
   const handleRosaryBead = () => {
     const next = rosaryCount + 1;
     setRosaryCount(next);
@@ -34,14 +40,14 @@ function CecLocationPopup({
     if (location.actionType === 'communion' && canDoAction) {
       return (
         <button type="button" className="cec-popup-action" onClick={onCommunion}>
-          Receive communion (+18 PP)
+          {ppButtonLabel('Communion')}
         </button>
       );
     }
     if (location.actionType === 'partake' && canDoAction) {
       return (
         <button type="button" className="cec-popup-action" onClick={onPartake}>
-          Partake at the fry (+14 PP)
+          {ppButtonLabel('Eat the fish')}
         </button>
       );
     }
@@ -80,17 +86,16 @@ function CecLocationPopup({
               onLightCandle();
             }}
           >
-            Light vigil candle (+10 PP)
+            {ppButtonLabel('Light candle')}
           </button>
         );
       }
       return <p className="cec-popup-done">{candleLit ? 'Flame lit.' : 'Candle already lit.'}</p>;
     }
     if (location.actionType === 'amen' && canDoAction) {
-      const pp = ACTIVITY_REWARDS[actionId]?.pp ?? 0;
       return (
         <button type="button" className="cec-popup-action" onClick={onActionDone}>
-          Complete visit (+{pp} PP)
+          {ppButtonLabel('Pray')}
         </button>
       );
     }
@@ -117,10 +122,14 @@ function CecLocationPopup({
               {extraContent()}
             </div>
           </div>
+          <button
+            type="button"
+            className="cec-toast-dismiss cec-toast-dismiss--in-frame"
+            onClick={onDismissAmen}
+          >
+            Amen
+          </button>
         </div>
-        <button type="button" className="cec-toast-dismiss" onClick={onDismissAmen}>
-          Amen
-        </button>
       </div>
       {amenSparkle && (
         <div className="cec-amen-sparkle-burst" aria-hidden="true">

@@ -4,32 +4,59 @@ import { ASSET_DIRS, saintImageUrl } from './cecAssets';
 import CecSaintResultPopup from './CecSaintResultPopup';
 
 const SEGMENT_COUNT = WHEEL_SAINTS.length;
-const SEG_DEG = 360 / SEGMENT_COUNT;
+const SLICE_DEG = 360 / SEGMENT_COUNT;
+const HALF_SLICE = SLICE_DEG / 2;
 
-function WheelSegmentThumb({ saint, index }) {
+/** Pie wedge from center — slice 0 centered at top (12 o'clock). */
+function wedgeClipPath(index) {
+  const toPoint = (deg) => {
+    const rad = ((deg - 90) * Math.PI) / 180;
+    const r = 50.2;
+    return `${50 + r * Math.cos(rad)}% ${50 + r * Math.sin(rad)}%`;
+  };
+  const start = index * SLICE_DEG - HALF_SLICE;
+  const end = index * SLICE_DEG + HALF_SLICE;
+  return `polygon(50% 50%, ${toPoint(start)}, ${toPoint(end)})`;
+}
+
+/** Saint art sits in the middle of each slice; slight tilt so labels feel hand-placed. */
+function sliceContentStyle(index) {
+  const mid = index * SLICE_DEG;
+  const rad = ((mid - 90) * Math.PI) / 180;
+  const dist = 33;
+  const x = 50 + dist * Math.cos(rad);
+  const y = 50 + dist * Math.sin(rad);
+  const tilt = ((index % 5) - 2) * 5;
+  return {
+    left: `${x}%`,
+    top: `${y}%`,
+    transform: `translate(-50%, -50%) rotate(${mid + tilt}deg)`,
+  };
+}
+
+function WheelSlice({ saint, index }) {
   const [failed, setFailed] = useState(false);
   const src = saintImageUrl(saint);
-  const rot = index * SEG_DEG + SEG_DEG / 2;
 
   return (
     <div
-      className="cec-wheel-segment"
-      style={{ '--seg-rot': `${rot}deg` }}
+      className={`cec-wheel-slice${index % 2 === 1 ? ' cec-wheel-slice--alt' : ''}`}
+      style={{ clipPath: wedgeClipPath(index) }}
       aria-hidden
     >
-      <div className="cec-wheel-segment-inner">
+      <div className="cec-wheel-slice-content" style={sliceContentStyle(index)}>
         {src && !failed ? (
           <img
-            className="cec-wheel-segment-img"
+            className="cec-wheel-slice-img"
             src={src}
             alt=""
             draggable={false}
             onError={() => setFailed(true)}
           />
         ) : (
-          <span className="cec-wheel-segment-emoji">✦</span>
+          <span className="cec-wheel-slice-emoji">✦</span>
         )}
-        <span className="cec-wheel-segment-label">{saint.shortLabel}</span>
+        <span className="cec-wheel-slice-label">{saint.shortLabel}</span>
       </div>
     </div>
   );
@@ -40,7 +67,6 @@ function CecSaintWheel({ worshiper, alreadySpun, onClose, onSpinResult }) {
   const [wheelRotation, setWheelRotation] = useState(0);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
-  const [dialFailed, setDialFailed] = useState(false);
 
   const resultIndex = useMemo(() => {
     if (!result?.saintId) return -1;
@@ -69,7 +95,7 @@ function CecSaintWheel({ worshiper, alreadySpun, onClose, onSpinResult }) {
       const idx = WHEEL_SAINTS.findIndex((s) => s.id === data.saintId);
       const safeIdx = idx >= 0 ? idx : 0;
       const extraTurns = 4 + Math.floor(Math.random() * 2);
-      const landOn = extraTurns * 360 + (360 - safeIdx * SEG_DEG - SEG_DEG / 2);
+      const landOn = extraTurns * 360 + (360 - safeIdx * SLICE_DEG);
       setWheelRotation((r) => r + landOn);
 
       window.setTimeout(() => {
@@ -112,22 +138,24 @@ function CecSaintWheel({ worshiper, alreadySpun, onClose, onSpinResult }) {
         </p>
 
         <div className="cec-wheel-stage">
-          {!dialFailed && (
-            <img
-              className="cec-wheel-dial-bg"
-              src={ASSET_DIRS.wheelDial}
-              alt=""
-              draggable={false}
-              onError={() => setDialFailed(true)}
-            />
-          )}
+          <div className="cec-wheel-pointer" aria-hidden>
+            ▼
+          </div>
           <div
-            className={`cec-wheel-disc${spinning ? ' cec-wheel-disc--spinning' : ''}${alreadySpun ? ' cec-wheel-disc--done' : ''}`}
+            className={`cec-wheel-rotator${spinning ? ' cec-wheel-rotator--spinning' : ''}${alreadySpun ? ' cec-wheel-rotator--done' : ''}`}
             style={{ transform: `rotate(${wheelRotation}deg)` }}
           >
-            {WHEEL_SAINTS.map((saint, i) => (
-              <WheelSegmentThumb key={saint.id} saint={saint} index={i} />
-            ))}
+            <img
+              className="cec-wheel-wood"
+              src={ASSET_DIRS.wheelWood}
+              alt=""
+              draggable={false}
+            />
+            <div className="cec-wheel-disc">
+              {WHEEL_SAINTS.map((saint, i) => (
+                <WheelSlice key={saint.id} saint={saint} index={i} />
+              ))}
+            </div>
           </div>
           {!alreadySpun ? (
             <button

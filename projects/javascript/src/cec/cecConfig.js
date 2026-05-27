@@ -7,20 +7,36 @@ export const RANKS = [
   { id: 'priest', label: 'Priest', minPP: 500 },
 ];
 
+/** Rank-up toast copy — includes worshiper display name. */
+export function rankPromotionMessage(rankId, displayName) {
+  const name = (displayName || 'Worshiper').trim() || 'Worshiper';
+  switch (rankId) {
+    case 'seminarian':
+      return `${name}, you've been admitted to seminary.`;
+    case 'deacon':
+      return `${name}, you've been ordained to the Diaconate.`;
+    case 'priest':
+      return `${name}, you've been ordained to the Priesthood.`;
+    default:
+      return null;
+  }
+}
+
+/** Tuned so one full session (all map activities + 2 bulletin + 7 first Amens) reaches Priest (500+). */
 export const ACTIVITY_REWARDS = {
-  register: { pp: 5, maxPerSession: 1 },
-  incense: { pp: 6, maxPerSession: 1 },
-  fish_fry: { pp: 14, maxPerSession: 1 },
-  rosary: { pp: 22, maxPerSession: 1 },
-  vatican: { pp: 18, maxPerSession: 1 },
-  aspergillum: { pp: 8, maxPerSession: 1 },
-  st_jude: { pp: 12, maxPerSession: 1 },
-  candle: { pp: 10, maxPerSession: 1 },
-  bulletin_post: { pp: 15, maxPerSession: 2 },
+  register: { pp: 28, maxPerSession: 1 },
+  incense: { pp: 32, maxPerSession: 1 },
+  fish_fry: { pp: 36, maxPerSession: 1 },
+  rosary: { pp: 48, maxPerSession: 1 },
+  vatican: { pp: 42, maxPerSession: 1 },
+  aspergillum: { pp: 30, maxPerSession: 1 },
+  st_jude: { pp: 34, maxPerSession: 1 },
+  candle: { pp: 32, maxPerSession: 1 },
+  bulletin_post: { pp: 46, maxPerSession: 2 },
 };
 
-/** amen_${locationId} — discovery bonus per building */
-export const AMEN_DISCOVERY_PP = 4;
+/** amen_${locationId} — first Amen dismiss per map building (7 buildings, not bulletin/wheel) */
+export const AMEN_DISCOVERY_PP = 21;
 
 /** Decorative path edges only (not visit order) */
 export const CEC_PATH_EDGES = [
@@ -40,12 +56,13 @@ export const CEC_LOCATIONS = [
   {
     id: 'incense',
     label: 'Thurible & Co.',
-    buildingFile: 'insence.webp',
+    buildingFile: 'insence_gif.gif',
     fallbackEmoji: '💨',
-    top: '14%',
-    left: '12%',
+    top: '15%',
+    left: '7%',
     actionId: 'incense',
-    fact: 'The thurible swings. Frankincense levels: critically aesthetic.',
+    fact: 'Burn some incense and say a prayer.',
+    actionLabel: 'Burn incense',
     actionType: 'amen',
   },
   {
@@ -53,10 +70,11 @@ export const CEC_LOCATIONS = [
     label: 'Friday Fish Fry',
     buildingFile: 'lent-fish-fry.png',
     fallbackEmoji: '🐟',
-    top: '72%',
-    left: '18%',
+    top: '78%',
+    left: '4%',
     actionId: 'fish_fry',
-    fact: 'Tartar sauce is not canonical but is respected.',
+    fact: 'Eat the fish for Lent, to gain a health (PP) boost.',
+    actionLabel: 'Eat the fish',
     actionType: 'partake',
   },
   {
@@ -64,10 +82,10 @@ export const CEC_LOCATIONS = [
     label: 'Rosary Chapel',
     buildingFile: 'rosary.webp',
     fallbackEmoji: '📿',
-    top: '58%',
-    left: '8%',
+    top: '93%',
+    left: '30%',
     actionId: 'rosary',
-    fact: 'Ten Hail Marys for your Pontifex Points.',
+    fact: 'Pray ten decades of the rosary to atone for your sins.',
     actionType: 'rosary',
   },
   {
@@ -76,9 +94,10 @@ export const CEC_LOCATIONS = [
     buildingFile: 'vatican.png',
     fallbackEmoji: '🏛️',
     top: '20%',
-    left: '48%',
+    left: '45%',
     actionId: 'vatican',
     fact: 'Yur visit has topped up your ecclesiastical health!',
+    actionLabel: 'Communion',
     actionType: 'communion',
   },
   {
@@ -86,8 +105,8 @@ export const CEC_LOCATIONS = [
     label: 'Holy Water Font',
     buildingFile: 'aspergillum.png',
     fallbackEmoji: '💧',
-    top: '10%',
-    left: '82%',
+    top: '16%',
+    left: '91%',
     actionId: 'aspergillum',
     fact: "Sprinkle sprinkle! You're all wet with holy water!",
     actionType: 'amen',
@@ -97,30 +116,32 @@ export const CEC_LOCATIONS = [
     label: 'St. Jude Shrine',
     buildingFile: 'st-jude-arm-bone.png',
     fallbackEmoji: '🦴',
-    top: '46%',
-    left: '86%',
+    top: '80%',
+    left: '85%',
     actionId: 'st_jude',
-    fact: 'Patron of hopeless causes — including this tooltip.',
+    fact: 'Pray a novena to Saint Jude.',
+    actionLabel: 'Pray novena',
     actionType: 'amen',
   },
   {
     id: 'candle',
-    label: 'Vigil Candle Stand',
-    buildingFile: 'vigil-candle.png',
+    label: 'Votive Candle',
+    buildingFile: 'votive-candle.png',
     fallbackEmoji: '🕯️',
-    top: '82%',
-    left: '52%',
+    top: '97%',
+    left: '68%',
     actionId: 'candle',
-    fact: 'This flame is purely decorative until the wax DLC drops.',
+    fact: 'Light a candle for a fallen worshiper.',
+    actionLabel: 'Spread the light',
     actionType: 'candle',
   },
   {
     id: 'bulletin',
     label: 'Parish Bulletin',
-    buildingFile: null,
+    buildingFile: 'bulletin.png',
     fallbackEmoji: '📋',
-    top: '38%',
-    left: '28%',
+    top: '68%',
+    left: '18%',
     actionId: null,
     fact: 'Leave a note for the cloud. Names reset when you close this tab.',
     actionType: 'bulletin',
@@ -128,10 +149,10 @@ export const CEC_LOCATIONS = [
   {
     id: 'wheel',
     label: 'Wheel of Saints',
-    buildingFile: null,
+    buildingFile: 'spin_wheel.png',
     fallbackEmoji: '☸️',
-    top: '28%',
-    left: '68%',
+    top: '67%',
+    left: '98%',
     actionId: null,
     fact: 'One spin per worshiper per day. The saints are generous (usually).',
     actionType: 'wheel',
@@ -142,11 +163,11 @@ export const CEC_LOCATIONS = [
 export const WORSHIPER_SKIN_ID = 'frog';
 export const DEFAULT_SKIN_ID = WORSHIPER_SKIN_ID;
 
-/** Pick one at registration — frog uses rank sprites; A/B use emoji until art ships */
+/** Pick one at registration — frog/fairy use rank sprites; A/B use emoji until art ships */
 export const ENTRY_WORSHIPER_SKINS = [
   { id: 'frog', label: 'Frog Worshiper', emoji: '🐸' },
+  { id: 'fairy', label: 'Fairy Worshiper', emoji: '🧚' },
   { id: 'worshiper_a', label: 'Worshiper A', emoji: '🙏' },
-  { id: 'worshiper_b', label: 'Worshiper B', emoji: '🕊️' },
 ];
 
 export const ENTRY_WORSHIPER_SKINS_BY_ID = Object.fromEntries(
@@ -168,6 +189,23 @@ export const FROG_PORTRAITS = [
   { id: 'frog_deacon', rankId: 'deacon', label: 'Frog Deacon', emoji: '🐸', imageFile: 'frog-deacon.png' },
   { id: 'frog_priest', rankId: 'priest', label: 'Frog Priest', emoji: '🐸', imageFile: 'frog-priest.png' },
 ];
+
+/** Fairy worshiper sprites — filenames match uploads (incl. fairy-preist.png typo) */
+export const FAIRY_PORTRAITS = [
+  { id: 'fairy_cantor', rankId: 'cantor', label: 'Fairy Cantor', emoji: '🧚', imageFile: 'fairy-cantor.png' },
+  {
+    id: 'fairy_seminarian',
+    rankId: 'seminarian',
+    label: 'Fairy Seminarian',
+    emoji: '🧚',
+    imageFile: 'fairy_seminarian.png',
+  },
+  { id: 'fairy_deacon', rankId: 'deacon', label: 'Fairy Deacon', emoji: '🧚', imageFile: 'fairy-deacon.png' },
+  { id: 'fairy_priest', rankId: 'priest', label: 'Fairy Priest', emoji: '🧚', imageFile: 'fairy-preist.png' },
+];
+
+/** Skins with per-rank PNG portraits */
+export const RANK_PORTRAIT_SKIN_IDS = new Set(['frog', 'fairy']);
 
 /** @deprecated alias */
 export const WORSHIPER_PORTRAITS = FROG_PORTRAITS;
@@ -283,6 +321,12 @@ export const FROG_PORTRAITS_BY_RANK = Object.fromEntries(FROG_PORTRAITS.map((p) 
 
 export const FROG_PORTRAITS_BY_ID = Object.fromEntries(FROG_PORTRAITS.map((p) => [p.id, p]));
 
+export const FAIRY_PORTRAITS_BY_RANK = Object.fromEntries(FAIRY_PORTRAITS.map((p) => [p.rankId, p]));
+
+export const FAIRY_PORTRAITS_BY_ID = Object.fromEntries(FAIRY_PORTRAITS.map((p) => [p.id, p]));
+
+export const RANK_PORTRAITS_BY_ID = { ...FROG_PORTRAITS_BY_ID, ...FAIRY_PORTRAITS_BY_ID };
+
 export const WORSHIPER_PORTRAITS_BY_RANK = FROG_PORTRAITS_BY_RANK;
 export const WORSHIPER_PORTRAITS_BY_ID = FROG_PORTRAITS_BY_ID;
 
@@ -293,6 +337,16 @@ export function frogPortraitForRank(rankId) {
   return FROG_PORTRAITS_BY_RANK[rankId] || FROG_PORTRAITS[0];
 }
 
+export function fairyPortraitForRank(rankId) {
+  return FAIRY_PORTRAITS_BY_RANK[rankId] || FAIRY_PORTRAITS[0];
+}
+
+export function rankPortraitForSkin(skinId, rankId) {
+  if (skinId === 'frog') return frogPortraitForRank(rankId);
+  if (skinId === 'fairy') return fairyPortraitForRank(rankId);
+  return null;
+}
+
 /** @deprecated — frog only */
 export function portraitForRank(rankId) {
   return frogPortraitForRank(rankId);
@@ -300,7 +354,8 @@ export function portraitForRank(rankId) {
 
 export function portraitForSkinAndRank(skinId, rankId = 'cantor') {
   const skin = VALID_SKIN_IDS.has(skinId) ? skinId : DEFAULT_SKIN_ID;
-  if (skin === 'frog') return frogPortraitForRank(rankId);
+  const rankPortrait = rankPortraitForSkin(skin, rankId);
+  if (rankPortrait) return rankPortrait;
   const entry = ENTRY_WORSHIPER_SKINS_BY_ID[skin];
   return {
     id: `${skin}_${rankId}`,
@@ -316,7 +371,7 @@ export function portraitForWorshiper(worshiper) {
 }
 
 export function avatarById(id) {
-  if (FROG_PORTRAITS_BY_ID[id]) return FROG_PORTRAITS_BY_ID[id];
+  if (RANK_PORTRAITS_BY_ID[id]) return RANK_PORTRAITS_BY_ID[id];
   if (ENTRY_WORSHIPER_SKINS_BY_ID[id]) {
     const entry = ENTRY_WORSHIPER_SKINS_BY_ID[id];
     return { id, emoji: entry.emoji, imageFile: null, label: entry.label };
@@ -356,6 +411,21 @@ export function hasAmenDiscovery(worshiper, locationId) {
 
 export function locationById(id) {
   return CEC_LOCATIONS.find((l) => l.id === id);
+}
+
+/** Buildings that open the frame popup (Amen dismiss grants discovery once each). */
+export const AMEN_DISCOVERABLE_LOCATION_COUNT = CEC_LOCATIONS.filter(
+  (l) => l.actionType !== 'bulletin' && l.actionType !== 'wheel'
+).length;
+
+/** Max PP from activities + Amens in one session (wheel spin not included). */
+export function maxPontifexPointsNonWheelSession() {
+  let sum = 0;
+  for (const rule of Object.values(ACTIVITY_REWARDS)) {
+    sum += rule.pp * rule.maxPerSession;
+  }
+  sum += AMEN_DISCOVERY_PP * AMEN_DISCOVERABLE_LOCATION_COUNT;
+  return sum;
 }
 
 export function todayDateString() {

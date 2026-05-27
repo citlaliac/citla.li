@@ -20,6 +20,7 @@ function newSessionId() {
 
 function normalizeSkinId(skinId) {
   if (!skinId || skinId.startsWith('cantor_')) return DEFAULT_SKIN_ID;
+  if (skinId === 'worshiper_b') return 'worshiper_a';
   if (VALID_SKIN_IDS.has(skinId)) return skinId;
   return DEFAULT_SKIN_ID;
 }

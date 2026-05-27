@@ -184,6 +184,27 @@ app.post('/api/track-visitor', async (req, res) => {
   }
 });
 
+/**
+ * Liturgical calendar proxy (Church Calendar API — avoids browser CORS).
+ * GET /api/liturgical/today
+ */
+app.get('/api/liturgical/today', async (req, res) => {
+  const upstreamUrl =
+    'https://calapi.inadiutorium.cz/api/v0/en/calendars/general-en/today';
+  try {
+    const upstream = await fetch(upstreamUrl, {
+      headers: { Accept: 'application/json' },
+    });
+    const body = await upstream.text();
+    res.status(upstream.status);
+    res.setHeader('Content-Type', 'application/json');
+    res.send(body);
+  } catch (error) {
+    console.error('Liturgical API proxy error:', error);
+    res.status(502).json({ error: 'Liturgical API unavailable' });
+  }
+});
+
 // Handle all other routes by serving index.html
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'index.html'));
