@@ -167,6 +167,7 @@ export const DEFAULT_SKIN_ID = WORSHIPER_SKIN_ID;
 export const ENTRY_WORSHIPER_SKINS = [
   { id: 'frog', label: 'Frog Worshiper', emoji: '🐸' },
   { id: 'fairy', label: 'Fairy Worshiper', emoji: '🧚' },
+  { id: 'lamb', label: 'Lamb Worshiper', emoji: '🐑' },
   { id: 'worshiper_a', label: 'Worshiper A', emoji: '🙏' },
 ];
 
@@ -204,8 +205,22 @@ export const FAIRY_PORTRAITS = [
   { id: 'fairy_priest', rankId: 'priest', label: 'Fairy Priest', emoji: '🧚', imageFile: 'fairy-preist.png' },
 ];
 
+/** Lamb worshiper sprites — keep exact extension casing from uploads */
+export const LAMB_PORTRAITS = [
+  { id: 'lamb_cantor', rankId: 'cantor', label: 'Lamb Cantor', emoji: '🐑', imageFile: 'lamb-cantor.PNG' },
+  {
+    id: 'lamb_seminarian',
+    rankId: 'seminarian',
+    label: 'Lamb Seminarian',
+    emoji: '🐑',
+    imageFile: 'lamb-seminarian.PNG',
+  },
+  { id: 'lamb_deacon', rankId: 'deacon', label: 'Lamb Deacon', emoji: '🐑', imageFile: 'lamb-deacon.png' },
+  { id: 'lamb_priest', rankId: 'priest', label: 'Lamb Priest', emoji: '🐑', imageFile: 'lamb-priest.png' },
+];
+
 /** Skins with per-rank PNG portraits */
-export const RANK_PORTRAIT_SKIN_IDS = new Set(['frog', 'fairy']);
+export const RANK_PORTRAIT_SKIN_IDS = new Set(['frog', 'fairy', 'lamb']);
 
 /** @deprecated alias */
 export const WORSHIPER_PORTRAITS = FROG_PORTRAITS;
@@ -325,7 +340,15 @@ export const FAIRY_PORTRAITS_BY_RANK = Object.fromEntries(FAIRY_PORTRAITS.map((p
 
 export const FAIRY_PORTRAITS_BY_ID = Object.fromEntries(FAIRY_PORTRAITS.map((p) => [p.id, p]));
 
-export const RANK_PORTRAITS_BY_ID = { ...FROG_PORTRAITS_BY_ID, ...FAIRY_PORTRAITS_BY_ID };
+export const LAMB_PORTRAITS_BY_RANK = Object.fromEntries(LAMB_PORTRAITS.map((p) => [p.rankId, p]));
+
+export const LAMB_PORTRAITS_BY_ID = Object.fromEntries(LAMB_PORTRAITS.map((p) => [p.id, p]));
+
+export const RANK_PORTRAITS_BY_ID = {
+  ...FROG_PORTRAITS_BY_ID,
+  ...FAIRY_PORTRAITS_BY_ID,
+  ...LAMB_PORTRAITS_BY_ID,
+};
 
 export const WORSHIPER_PORTRAITS_BY_RANK = FROG_PORTRAITS_BY_RANK;
 export const WORSHIPER_PORTRAITS_BY_ID = FROG_PORTRAITS_BY_ID;
@@ -341,9 +364,14 @@ export function fairyPortraitForRank(rankId) {
   return FAIRY_PORTRAITS_BY_RANK[rankId] || FAIRY_PORTRAITS[0];
 }
 
+export function lambPortraitForRank(rankId) {
+  return LAMB_PORTRAITS_BY_RANK[rankId] || LAMB_PORTRAITS[0];
+}
+
 export function rankPortraitForSkin(skinId, rankId) {
   if (skinId === 'frog') return frogPortraitForRank(rankId);
   if (skinId === 'fairy') return fairyPortraitForRank(rankId);
+  if (skinId === 'lamb') return lambPortraitForRank(rankId);
   return null;
 }
 

@@ -4,6 +4,7 @@ Entry skins (pick at registration) — see ENTRY_WORSHIPER_SKINS in cecConfig.js
 
   frog            — rank sprites below
   fairy           — rank sprites below (fairy-preist.png is intentional filename)
+  lamb            — rank sprites below
   worshiper_a     — emoji placeholder until art (🙏)
 
 Frog filenames:
@@ -20,6 +21,13 @@ Fairy filenames (must match exactly):
   fairy-deacon.png
   fairy-preist.png
 
+Lamb filenames (must match exactly, including .PNG casing):
+
+  lamb-cantor.PNG
+  lamb-seminarian.PNG
+  lamb-deacon.png
+  lamb-priest.png
+
 Tips:
   - Transparent background, roughly square, ~200–400px wide.
-  - Large portrait on the left updates when you rank up (frog/fairy).
+  - Large portrait on the left updates when you rank up (frog/fairy/lamb).

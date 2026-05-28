@@ -55,6 +55,10 @@ describe('cecConfig', () => {
     expect(portraitForSkinAndRank('frog', 'deacon').imageFile).toBe('frog-deacon.png');
     expect(portraitForSkinAndRank('fairy', 'priest').imageFile).toBe('fairy-preist.png');
     expect(portraitForSkinAndRank('fairy', 'seminarian').imageFile).toBe('fairy-seminarian.png');
+    expect(portraitForSkinAndRank('lamb', 'cantor').imageFile).toBe('lamb-cantor.PNG');
+    expect(portraitForSkinAndRank('lamb', 'seminarian').imageFile).toBe('lamb-seminarian.PNG');
+    expect(portraitForSkinAndRank('lamb', 'deacon').imageFile).toBe('lamb-deacon.png');
+    expect(portraitForSkinAndRank('lamb', 'priest').imageFile).toBe('lamb-priest.png');
     expect(portraitForSkinAndRank('worshiper_a', 'cantor').emoji).toBe('🙏');
     expect(portraitForSkinAndRank('worshiper_a', 'priest').imageFile).toBeNull();
   });
@@ -64,10 +68,12 @@ describe('cecConfig', () => {
     expect(frog.imageFile).toBe('frog-priest.png');
     const fairy = portraitForWorshiper({ avatarId: 'fairy', pontifexPoints: 220, rank: { id: 'deacon' } });
     expect(fairy.imageFile).toBe('fairy-deacon.png');
+    const lamb = portraitForWorshiper({ avatarId: 'lamb', pontifexPoints: 90, rank: { id: 'seminarian' } });
+    expect(lamb.imageFile).toBe('lamb-seminarian.PNG');
   });
 
-  test('ENTRY_WORSHIPER_SKINS has three entry options', () => {
-    expect(ENTRY_WORSHIPER_SKINS.map((s) => s.id)).toEqual(['frog', 'fairy', 'worshiper_a']);
+  test('ENTRY_WORSHIPER_SKINS has four entry options', () => {
+    expect(ENTRY_WORSHIPER_SKINS.map((s) => s.id)).toEqual(['frog', 'fairy', 'lamb', 'worshiper_a']);
   });
 
   test('avatarById legacy cantor ids map to frog cantor', () => {

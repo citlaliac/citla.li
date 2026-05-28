@@ -4,10 +4,12 @@ import CecWorshiperPortrait from './CecWorshiperPortrait';
 
 const PUB = process.env.PUBLIC_URL || '';
 const HEAVEN_BTN_BG = `${PUB}/assets/catholicecloud/background/heaven-bkg.jpg`;
+const HEAVEN_PANEL_BG = `${PUB}/assets/catholicecloud/background/heaven-bkg.jpg`;
 
 function CecWorshiperRegister({ onRegister }) {
   const [name, setName] = useState('');
   const [skinId, setSkinId] = useState(DEFAULT_SKIN_ID);
+  const trimmedName = name.trim();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -17,19 +19,22 @@ function CecWorshiperRegister({ onRegister }) {
 
   return (
     <div className="cec-register-overlay" role="dialog" aria-modal="true" aria-labelledby="cec-register-title">
-      <div className="cec-register-panel cec-register-panel--wide">
-        <h2 id="cec-register-title" className="cec-register-title">
-          Worshiper Register
-        </h2>
+      <h2 id="cec-register-title" className="cec-register-title cec-register-title--hero">
+        Pick a worshiper to enter the catholid e cloud
+      </h2>
+      <div
+        className="cec-register-panel cec-register-panel--wide"
+        style={{ '--cec-heaven-panel-bg': `url('${HEAVEN_PANEL_BG}')` }}
+      >
         <p className="cec-register-blurb">
-          Pick your entry-level worshiper, then choose a display name. Frog and Fairy worshipers level up
-          through Cantor, Seminarian, Deacon, and Priest.
+          Pick your worshiper type and a display name. Level up your worshiper with Pontifex Points
+          earned by completing liturgical activites.
         </p>
 
-        <fieldset className="cec-worshiper-pick">
-          <legend className="cec-worshiper-pick-legend">Choose your worshiper</legend>
+        <p className="cec-worshiper-pick-legend">Choose your worshiper</p>
+        <fieldset className="cec-worshiper-pick" aria-label="Choose your worshiper">
           <div className="cec-worshiper-pick-grid">
-            {ENTRY_WORSHIPER_SKINS.map((skin) => (
+            {ENTRY_WORSHIPER_SKINS.filter((skin) => skin.id !== 'worshiper_a').map((skin) => (
               <button
                 key={skin.id}
                 type="button"
@@ -45,12 +50,13 @@ function CecWorshiperRegister({ onRegister }) {
         </fieldset>
 
         <div className="cec-register-preview" aria-live="polite">
+          <p className="cec-register-preview-name">{trimmedName || '\u00A0'}</p>
           <CecWorshiperPortrait skinId={skinId} rankId="cantor" size="hero" />
         </div>
 
         <form onSubmit={handleSubmit}>
           <label className="cec-register-label" htmlFor="cec-worshiper-name">
-            Display name
+            Select a name for your worshiper
           </label>
           <input
             id="cec-worshiper-name"

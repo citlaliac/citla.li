@@ -64,7 +64,7 @@ function CatholiceCloudPage() {
   const applyWorshiper = useCallback((next, reward, deferToast = false) => {
     setWorshiper(next);
     if (!reward) return;
-    const hasReward = reward.awarded > 0 || reward.rankUp;
+    const hasReward = !!reward.rankUp;
     if (!hasReward) return;
     if (deferToast) {
       setPendingReward((prev) => mergeReward(prev, reward));
@@ -118,7 +118,7 @@ function CatholiceCloudPage() {
         window.setTimeout(() => {
           setActiveLocation(null);
           setAmenSparkle(false);
-          if (flush.pp > 0 || flush.rankUp) {
+          if (flush.rankUp) {
             setRewardToast(flush);
           }
         }, AMEN_BURST_MS);
