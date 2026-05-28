@@ -998,14 +998,14 @@
 }
 
 .cec-worshiper-stage-type {
-  font-size: 1.2rem;
+  font-size: 0.95rem;
   font-weight: 700;
   color: #f0e6c8;
   line-height: 1.2;
 }
 
 .cec-worshiper-stage-name {
-  font-size: 0.95rem;
+  font-size: 1.2rem;
   font-weight: 600;
   color: rgba(245, 237, 216, 0.9);
   line-height: 1.2;
@@ -2391,7 +2391,7 @@
     flex: 1 1 auto;
     order: 2;
     min-width: 6rem;
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     text-align: left;
   }
 
@@ -2631,7 +2631,7 @@
   }
 
   .cec-worshiper-stage-name {
-    font-size: 0.85rem;
+    font-size: 1rem;
   }
 
   .cec-portrait--hero {

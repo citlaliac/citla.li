@@ -22,7 +22,7 @@ export function rankPromotionMessage(rankId, displayName) {
   }
 }
 
-/** Tuned so one full session (all map activities + 2 bulletin + 7 first Amens) reaches Priest (500+). */
+/** Tuned so one full day (map + 7 Amens + daily wheel) reaches Priest (500+); bulletin is bonus PP. */
 export const ACTIVITY_REWARDS = {
   register: { pp: 28, maxPerSession: 1 },
   incense: { pp: 32, maxPerSession: 1 },
@@ -36,7 +36,7 @@ export const ACTIVITY_REWARDS = {
 };
 
 /** amen_${locationId} — first Amen dismiss per map building (7 buildings, not bulletin/wheel) */
-export const AMEN_DISCOVERY_PP = 21;
+export const AMEN_DISCOVERY_PP = 31;
 
 /** Decorative path edges only (not visit order) */
 export const CEC_PATH_EDGES = [
@@ -55,7 +55,7 @@ export const CEC_PATH_EDGES = [
 export const CEC_LOCATIONS = [
   {
     id: 'incense',
-    label: 'Thurible & Co.',
+    label: 'Light incense',
     buildingFile: 'insence_gif.gif',
     fallbackEmoji: '💨',
     top: '5.1%',
@@ -96,13 +96,13 @@ export const CEC_LOCATIONS = [
     top: '10.0%',
     left: '47.7%',
     actionId: 'vatican',
-    fact: 'Yur visit has topped up your ecclesiastical health!',
+    fact: 'Your visit has topped up your ecclesiastical health!',
     actionLabel: 'Communion',
     actionType: 'communion',
   },
   {
     id: 'aspergillum',
-    label: 'Holy Water Font',
+    label: 'Aspergillum splash',
     buildingFile: 'aspergillum.png',
     fallbackEmoji: '💧',
     top: '19.9%',
@@ -446,6 +446,25 @@ export const AMEN_DISCOVERABLE_LOCATION_COUNT = CEC_LOCATIONS.filter(
   (l) => l.actionType !== 'bulletin' && l.actionType !== 'wheel'
 ).length;
 
+/** Map building action ids (excludes register, bulletin, wheel). */
+export const MAP_ACTIVITY_IDS = [
+  'incense',
+  'fish_fry',
+  'rosary',
+  'vatican',
+  'aspergillum',
+  'st_jude',
+  'candle',
+];
+
+export function minWheelPontifexPoints() {
+  return WHEEL_SAINTS.reduce((min, s) => Math.min(min, s.ppMin), Number.POSITIVE_INFINITY);
+}
+
+export function maxWheelPontifexPoints() {
+  return WHEEL_SAINTS.reduce((max, s) => Math.max(max, s.ppMax), 0);
+}
+
 /** Max PP from activities + Amens in one session (wheel spin not included). */
 export function maxPontifexPointsNonWheelSession() {
   let sum = 0;
@@ -454,6 +473,22 @@ export function maxPontifexPointsNonWheelSession() {
   }
   sum += AMEN_DISCOVERY_PP * AMEN_DISCOVERABLE_LOCATION_COUNT;
   return sum;
+}
+
+/** Register + all map activities + all Amen discoveries + one wheel spin (worst saint roll). */
+export function minPontifexPointsPerDay() {
+  let sum = ACTIVITY_REWARDS.register.pp;
+  for (const id of MAP_ACTIVITY_IDS) {
+    sum += ACTIVITY_REWARDS[id].pp;
+  }
+  sum += AMEN_DISCOVERY_PP * AMEN_DISCOVERABLE_LOCATION_COUNT;
+  sum += minWheelPontifexPoints();
+  return sum;
+}
+
+/** Full session cap including best possible wheel spin. */
+export function maxPontifexPointsFullDay() {
+  return maxPontifexPointsNonWheelSession() + maxWheelPontifexPoints();
 }
 
 export function todayDateString() {

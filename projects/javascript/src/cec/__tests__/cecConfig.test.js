@@ -9,6 +9,8 @@ import {
   portraitForSkinAndRank,
   portraitForWorshiper,
   maxPontifexPointsNonWheelSession,
+  maxPontifexPointsFullDay,
+  minPontifexPointsPerDay,
   ENTRY_WORSHIPER_SKINS,
   RANKS,
   WHEEL_SAINTS_BY_ID,
@@ -83,6 +85,14 @@ describe('cecConfig', () => {
 
   test('full session PP budget reaches Priest without wheel', () => {
     expect(maxPontifexPointsNonWheelSession()).toBeGreaterThanOrEqual(RANKS[RANKS.length - 1].minPP);
+  });
+
+  test('core daily loop reaches Priest (map + Amens + wheel, no bulletin)', () => {
+    expect(minPontifexPointsPerDay()).toBeGreaterThanOrEqual(RANKS[RANKS.length - 1].minPP);
+  });
+
+  test('max daily PP includes wheel headroom above Priest', () => {
+    expect(maxPontifexPointsFullDay()).toBeGreaterThan(RANKS[RANKS.length - 1].minPP);
   });
 
   test('wheel saints match uploaded assets', () => {
