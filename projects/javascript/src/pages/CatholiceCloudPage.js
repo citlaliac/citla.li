@@ -16,7 +16,6 @@ import {
   awardAmenDiscovery,
   awardPoints,
   addWheelPoints,
-  canSpinToday,
   loadWorshiper,
   registerWorshiper,
 } from '../cec/worshiperStorage';
@@ -216,9 +215,7 @@ function CatholiceCloudPage() {
       <main className="cec-main">
         <header className="cec-banner">
           <h1 className="cec-title">catholic e cloud</h1>
-          <p className="cec-subtitle">
-            A cool online space for Catholics to hang out. Heaven on earth? This is heaven online.
-          </p>
+          <p className="cec-subtitle">A cool online space for Catholics to hang out.</p>
         </header>
 
         <div className="cec-play-row">
@@ -230,6 +227,7 @@ function CatholiceCloudPage() {
             <CecParishMap worshiper={worshiper} onSelectLocation={handleSelectLocation} />
           </div>
         </div>
+        <p className="cec-bottom-tagline">Heaven on earth? This is heaven online.</p>
       </main>
 
       <Footer />
@@ -268,7 +266,6 @@ function CatholiceCloudPage() {
       {showWheel && (
         <CecSaintWheel
           worshiper={worshiper}
-          alreadySpun={!canSpinToday(worshiper)}
           onClose={() => setShowWheel(false)}
           onSpinResult={(points) => handleWheelResult(points)}
         />

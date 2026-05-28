@@ -38,7 +38,13 @@ function CecSaintResultPopup({ saintId, saintLabel, points, onAmen }) {
             </h2>
             <p className="cec-saint-result-blurb">{saint.blurb}</p>
             <p className="cec-saint-result-pp">
-              You receive <strong>{points}</strong> Pontifex Points
+              {points > 0 ? (
+                <>
+                  You receive <strong>{points}</strong> Pontifex Points
+                </>
+              ) : (
+                'No additional Pontifex Points this spin.'
+              )}
             </p>
           </div>
         </div>

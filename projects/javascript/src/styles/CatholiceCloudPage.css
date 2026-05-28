@@ -487,7 +487,7 @@
   width: 100%;
   max-width: 1280px;
   margin: 0 auto;
-  padding: clamp(4rem, 12vw, 5rem) clamp(0.75rem, 3vw, 1rem) 2.5rem;
+  padding: clamp(2.25rem, 7vw, 3.25rem) clamp(0.75rem, 3vw, 1rem) 1.25rem;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -507,7 +507,7 @@
 /* Flat copy — no panels; type reads off the collage */
 .cec-banner {
   text-align: center;
-  margin-bottom: clamp(3.5rem, 8vw, 5.5rem);
+  margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
   padding: 0 0.5rem;
 }
 
@@ -534,6 +534,19 @@
   text-shadow:
     0 0 12px rgba(0, 0, 0, 0.65),
     0 2px 8px rgba(0, 0, 0, 0.45);
+}
+
+.cec-bottom-tagline {
+  margin: clamp(3.6rem, 9vw, 5rem) auto 0.35rem;
+  max-width: min(900px, 92vw);
+  padding: 0 0.75rem;
+  text-align: center;
+  font-size: clamp(0.82rem, 1.95vw, 0.98rem);
+  font-style: italic;
+  color: rgba(245, 237, 216, 0.95);
+  text-shadow:
+    0 0 10px rgba(0, 0, 0, 0.6),
+    0 2px 6px rgba(0, 0, 0, 0.42);
 }
 
 /*
@@ -732,14 +745,14 @@
   left: 50%;
   top: 46%;
   transform: translate(-50%, -50%);
-  width: 54%;
-  height: 36%;
+  width: 45%;
+  height: 40%;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   box-sizing: border-box;
-  padding: 0 4%;
+  padding: 1.5% 4%;
   overflow: hidden;
   -webkit-clip-path: ellipse(50% 50% at 50% 50%);
   clip-path: ellipse(50% 50% at 50% 50%);
@@ -753,8 +766,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding-top: 0.35rem;
+  justify-content: flex-start;
+  padding-top: 0.15rem;
   gap: 0.35rem;
   text-align: center;
   color: #a88618;
@@ -766,10 +779,10 @@
 
 .cec-toast-frame-text strong {
   display: block;
-  width: 100%;
+  width: 82%;
   margin: 0 auto;
   font-size: clamp(0.8rem, 1.82vw, 1.05rem);
-  letter-spacing: 0.1em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   text-align: center;
   white-space: normal;
@@ -780,16 +793,17 @@
 
 .cec-toast-body {
   display: block;
-  width: 100%;
+  width: 80%;
   min-width: 0;
-  margin: 0 auto;
+  margin: 0.15rem auto 0.2rem;
   text-align: center;
-  text-wrap: balance;
+  text-wrap: pretty;
   white-space: normal;
   overflow-wrap: anywhere;
   word-break: break-word;
+  max-width: 80%;
   font-size: clamp(0.86rem, 1.93vw, 1.1rem);
-  line-height: 1.32;
+  line-height: 1.4;
 }
 
 .cec-toast-dismiss {
@@ -931,13 +945,13 @@
 .cec-play-row {
   display: grid;
   grid-template-columns: minmax(200px, 280px) minmax(0, 1fr);
-  gap: clamp(1.5rem, 4vw, 2.25rem);
+  gap: clamp(0.85rem, 2.5vw, 1.35rem);
   width: 100%;
   max-width: calc(100% - clamp(0.5rem, 2vw, 1.25rem));
-  margin-top: clamp(0.75rem, 2.5vw, 1.5rem);
+  margin-top: clamp(0.25rem, 1.2vw, 0.75rem);
   margin-right: auto;
   margin-left: 0;
-  padding-right: clamp(1rem, 4vw, 2.75rem);
+  padding-right: clamp(0.5rem, 2vw, 1.25rem);
   align-items: start;
   box-sizing: border-box;
 }
@@ -1000,7 +1014,7 @@
 .cec-worshiper-stage .cec-portrait {
   align-self: center;
   width: 100%;
-  max-width: min(260px, 100%);
+  max-width: min(220px, 24dvh, 100%);
 }
 
 .cec-worshiper-stage-rank {
@@ -1069,6 +1083,7 @@
 .cec-layout {
   width: 100%;
   min-width: 0;
+  max-width: min(100%, calc((100dvh - 15rem) * 1.45));
 }
 
 .cec-layout-head {
@@ -1103,7 +1118,7 @@
 .cec-map-frame {
   position: relative;
   width: 100%;
-  max-width: min(1040px, 100%);
+  max-width: min(920px, 100%, calc((100dvh - 15rem) * 1.45));
   margin: 0;
   margin-right: auto;
   line-height: 0;
@@ -1136,7 +1151,7 @@
 .cec-building {
   position: absolute;
   z-index: 2;
-  transform: translate(-50%, -55%);
+  transform: translate(-50%, -50%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1165,16 +1180,16 @@
 }
 
 .cec-building--incense .cec-building-img {
-  max-width: min(156px, 28vw);
+  max-width: min(142px, 25vw);
 }
 
 .cec-building--aspergillum .cec-building-img {
-  max-width: min(132px, 24vw);
+  max-width: min(120px, 22vw);
 }
 
 .cec-building--wheel .cec-building-img,
 .cec-building--bulletin .cec-building-img {
-  max-width: min(132px, 24vw);
+  max-width: min(120px, 22vw);
 }
 
 /* Center PNGs in their boxes (same idea as movethingsaround) */
@@ -1195,7 +1210,7 @@
 }
 
 .cec-building-img {
-  max-width: min(120px, 22vw);
+  max-width: min(108px, 20vw);
   filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.4));
 }
 
@@ -1210,7 +1225,7 @@
 }
 
 .cec-building-label {
-  display: inline-block;
+  display: none;
   font-size: clamp(0.65rem, 1.8vw, 0.78rem);
   font-weight: 700;
   color: #f5ecd8;
@@ -2136,34 +2151,26 @@
   filter: saturate(0.85);
 }
 
-.cec-wheel-wood {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  pointer-events: none;
-  filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.45));
-}
-
 .cec-wheel-disc {
   position: absolute;
-  inset: 11%;
+  inset: 3%;
   border-radius: 50%;
   overflow: hidden;
-  border: none;
-  box-shadow: none;
-  background: transparent;
+  border: 3px solid #8b6914;
+  box-shadow:
+    inset 0 0 24px rgba(0, 0, 0, 0.35),
+    0 4px 20px rgba(0, 0, 0, 0.35);
+  background: #4a3820;
 }
 
 .cec-wheel-slice {
   position: absolute;
   inset: 0;
-  background: transparent;
+  background: #5c4628;
 }
 
 .cec-wheel-slice--alt {
-  background: transparent;
+  background: #4a3820;
 }
 
 .cec-wheel-slice-content {

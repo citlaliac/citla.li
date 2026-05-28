@@ -4,15 +4,13 @@ import { CEC_LOCATIONS } from './cecConfig';
 
 import { hasAmenDiscovery } from './cecConfig';
 
-import { canSpinToday } from './worshiperStorage';
-
 
 
 const PUB = process.env.PUBLIC_URL || '';
 
 const RELICS_BASE = `${PUB}/assets/catholicecloud/relics`;
 
-const MAP_IMAGE = `${PUB}/assets/catholicecloud/map.png`;
+const MAP_IMAGE = `${PUB}/assets/catholicecloud/map2.png`;
 
 
 
@@ -20,13 +18,9 @@ function CecBuilding({ location, worshiper, onSelect }) {
 
   const [useFallback, setUseFallback] = useState(false);
 
-  const wheelDone = location.id === 'wheel' && !canSpinToday(worshiper);
-
   const visited =
 
-    (location.actionId && worshiper.completedActions.includes(location.actionId)) ||
-
-    wheelDone;
+    location.actionId && worshiper.completedActions.includes(location.actionId);
 
   const discovered = hasAmenDiscovery(worshiper, location.id);
 
@@ -58,15 +52,7 @@ function CecBuilding({ location, worshiper, onSelect }) {
 
         onClick={() => onSelect(location)}
 
-        aria-label={
-
-          wheelDone
-
-            ? `${location.label}. Already visited today.`
-
-            : `${location.label}. Click to visit.`
-
-        }
+        aria-label={`${location.label}. Click to visit.`}
 
       >
 
@@ -101,8 +87,6 @@ function CecBuilding({ location, worshiper, onSelect }) {
       <span className="cec-building-label">
 
         {location.label}
-
-        {wheelDone ? ' · today' : ''}
 
       </span>
 

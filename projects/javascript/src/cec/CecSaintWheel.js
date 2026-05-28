@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { WHEEL_SAINTS } from './cecConfig';
-import { ASSET_DIRS, saintImageUrl } from './cecAssets';
+import { saintImageUrl } from './cecAssets';
 import CecSaintResultPopup from './CecSaintResultPopup';
 
 const SEGMENT_COUNT = WHEEL_SAINTS.length;
@@ -62,7 +62,7 @@ function WheelSlice({ saint, index }) {
   );
 }
 
-function CecSaintWheel({ worshiper, alreadySpun, onClose, onSpinResult }) {
+function CecSaintWheel({ worshiper, onClose, onSpinResult }) {
   const [spinning, setSpinning] = useState(false);
   const [wheelRotation, setWheelRotation] = useState(0);
   const [result, setResult] = useState(null);
@@ -74,7 +74,6 @@ function CecSaintWheel({ worshiper, alreadySpun, onClose, onSpinResult }) {
   }, [result]);
 
   const handleSpin = async () => {
-    if (alreadySpun) return;
     setSpinning(true);
     setError(null);
     setResult(null);
@@ -84,13 +83,21 @@ function CecSaintWheel({ worshiper, alreadySpun, onClose, onSpinResult }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sessionId: worshiper.sessionId }),
       });
-      const data = await res.json();
+      const payload = await res.json();
+      let data = payload;
+
       if (res.status === 409) {
-        setError('You already spun today for this worshiper.');
-        setSpinning(false);
-        return;
+        // Unlimited spins visually; server still guards PP to first eligible spin.
+        const randomSaint = WHEEL_SAINTS[Math.floor(Math.random() * WHEEL_SAINTS.length)];
+        data = {
+          success: true,
+          saintId: randomSaint.id,
+          saintLabel: randomSaint.label,
+          points: 0,
+        };
+      } else if (!payload.success) {
+        throw new Error(payload.error || 'Spin failed');
       }
-      if (!data.success) throw new Error(data.error || 'Spin failed');
 
       const idx = WHEEL_SAINTS.findIndex((s) => s.id === data.saintId);
       const safeIdx = idx >= 0 ? idx : 0;
@@ -100,7 +107,7 @@ function CecSaintWheel({ worshiper, alreadySpun, onClose, onSpinResult }) {
 
       window.setTimeout(() => {
         setResult(data);
-        onSpinResult(data.points, data.saintLabel);
+        if (data.points > 0) onSpinResult(data.points, data.saintLabel);
         setSpinning(false);
       }, 2800);
     } catch (err) {
@@ -132,9 +139,7 @@ function CecSaintWheel({ worshiper, alreadySpun, onClose, onSpinResult }) {
           Wheel of Saints
         </h2>
         <p className="cec-wheel-tagline">
-          {alreadySpun
-            ? 'You already visited the Wheel of Saints today. Come back tomorrow for another spin.'
-            : 'One spin per worshiper per day. The saints are generous (usually).'}
+          Spin as much as you want. Pontifex Points are awarded once per worshiper per day.
         </p>
 
         <div className="cec-wheel-stage">
@@ -142,35 +147,18 @@ function CecSaintWheel({ worshiper, alreadySpun, onClose, onSpinResult }) {
             ▼
           </div>
           <div
-            className={`cec-wheel-rotator${spinning ? ' cec-wheel-rotator--spinning' : ''}${alreadySpun ? ' cec-wheel-rotator--done' : ''}`}
+            className={`cec-wheel-rotator${spinning ? ' cec-wheel-rotator--spinning' : ''}`}
             style={{ transform: `rotate(${wheelRotation}deg)` }}
           >
-            <img
-              className="cec-wheel-wood"
-              src={ASSET_DIRS.wheelWood}
-              alt=""
-              draggable={false}
-            />
             <div className="cec-wheel-disc">
               {WHEEL_SAINTS.map((saint, i) => (
                 <WheelSlice key={saint.id} saint={saint} index={i} />
               ))}
             </div>
           </div>
-          {!alreadySpun ? (
-            <button
-              type="button"
-              className="cec-wheel-hub"
-              onClick={handleSpin}
-              disabled={spinning}
-            >
-              {spinning ? '…' : 'SPIN'}
-            </button>
-          ) : (
-            <div className="cec-wheel-hub cec-wheel-hub--done" aria-hidden>
-              ✓
-            </div>
-          )}
+          <button type="button" className="cec-wheel-hub" onClick={handleSpin} disabled={spinning}>
+            {spinning ? '…' : 'SPIN'}
+          </button>
         </div>
 
         {error && <p className="cec-wheel-error">{error}</p>}

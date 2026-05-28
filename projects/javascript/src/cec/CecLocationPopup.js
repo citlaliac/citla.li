@@ -118,7 +118,7 @@ function CecLocationPopup({
           <div className="cec-toast-frame-text">
             <div className="cec-toast-frame-text-inner">
               <strong id="cec-toast-title">{location.label}</strong>
-              <span className="cec-toast-body">{location.fact}</span>
+              <p className="cec-toast-body">{location.fact}</p>
               {extraContent()}
             </div>
           </div>
