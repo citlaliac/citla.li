@@ -1,8 +1,10 @@
 import React from 'react';
 import CecWorshiperPortrait from './CecWorshiperPortrait';
 import { ENTRY_WORSHIPER_SKINS_BY_ID, nextRank } from './cecConfig';
+import { getSeasonStarNameStyle } from './cecSeasonTheme';
 
-function CecWorshiperStage({ worshiper, onPortraitClick }) {
+function CecWorshiperStage({ worshiper, onPortraitClick, starPalette = 'gold' }) {
+  const nameStyle = getSeasonStarNameStyle(starPalette);
   const upcoming = nextRank(worshiper.pontifexPoints);
   const skin =
     ENTRY_WORSHIPER_SKINS_BY_ID[worshiper.avatarId] ?? {
@@ -15,7 +17,9 @@ function CecWorshiperStage({ worshiper, onPortraitClick }) {
     <aside className="cec-worshiper-stage" aria-label="Your worshiper">
       <p className="cec-worshiper-stage-kicker">Your worshiper</p>
       <p className="cec-worshiper-stage-type">{skin.label}</p>
-      <p className="cec-worshiper-stage-name">{worshiper.displayName}</p>
+      <p className="cec-worshiper-stage-name" style={nameStyle}>
+        {worshiper.displayName}
+      </p>
 
       <button
         type="button"

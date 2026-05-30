@@ -30,7 +30,12 @@ export function useEcclesiasticalTime() {
   }, [refresh]);
 
   return {
-    data: result?.data ?? { season: 'Ordinary Time', celebration: '—', color: 'Green' },
+    data: result?.data ?? {
+      season: 'Ordinary Time',
+      celebration: '—',
+      color: 'Green',
+      themeId: 'ordinary',
+    },
     source: result?.source ?? 'fallback',
     loading,
     fetchedAt: result?.fetchedAt ?? null,

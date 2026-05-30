@@ -1,0 +1,14 @@
+Liturgical season floaters — all PNG, transparent background:
+
+  wreath.png   — Advent
+  angel.png    — Christmas
+  camel.png    — Epiphany (CSS walks it across)
+  fish.png     — Lent
+  palm.png     — Holy Week (CSS fan animation)
+  lamb.png     — Easter (CSS walks it across)
+  fire.png     — Pentecost (CSS fan animation)
+  holly.png    — Christmas map decor (Basilica + Votive Candle)
+
+Folder: projects/javascript/public/assets/catholicecloud/season/
+
+GIFs optional later if you want built-in frame animation; CSS motion works with PNGs.

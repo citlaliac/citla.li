@@ -7,4 +7,5 @@ export const ECCLESIASTICAL_FALLBACK = {
   season: 'Ordinary Time',
   celebration: '—',
   color: 'Green',
+  themeId: 'ordinary',
 };

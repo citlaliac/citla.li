@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { CEC_STAR_PALETTES } from './cecSeasonTheme';
 
 const MIN_INTERVAL_MS = 5_000;
 const MAX_INTERVAL_MS = 20_000;
@@ -24,8 +25,10 @@ function createStar() {
   };
 }
 
-function CecShootingStars() {
+function CecShootingStars({ starPalette = 'gold' }) {
   const [star, setStar] = useState(null);
+  const palette = CEC_STAR_PALETTES[starPalette] ?? CEC_STAR_PALETTES.gold;
+  const isDarkRed = starPalette === 'darkRed';
 
   useEffect(() => {
     let mounted = true;
@@ -52,14 +55,18 @@ function CecShootingStars() {
       window.clearTimeout(scheduleTimer);
       window.clearTimeout(clearTimer);
     };
-  }, []);
+  }, [starPalette]);
 
   if (!star) return null;
 
   const gradId = `cec-star-grad-${star.id}`;
 
   return (
-    <div className="cec-shooting-stars" aria-hidden="true">
+    <div
+      className={`cec-shooting-stars${isDarkRed ? ' cec-shooting-stars--dark-red' : ''}`}
+      aria-hidden="true"
+      style={{ '--cec-star-core-shadow': palette.coreShadow }}
+    >
       <svg
         className="cec-shooting-star-svg"
         viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
@@ -67,11 +74,9 @@ function CecShootingStars() {
       >
         <defs>
           <linearGradient id={gradId} gradientUnits="userSpaceOnUse" x1="0" y1="0" x2={VIEW_W} y2={VIEW_H}>
-            <stop offset="0%" stopColor="rgba(255, 255, 255, 0)" />
-            <stop offset="28%" stopColor="rgba(255, 248, 230, 0.12)" />
-            <stop offset="62%" stopColor="rgba(255, 252, 245, 0.55)" />
-            <stop offset="88%" stopColor="rgba(255, 255, 255, 0.92)" />
-            <stop offset="100%" stopColor="rgba(255, 250, 235, 1)" />
+            {palette.stops.map(([offset, color]) => (
+              <stop key={offset} offset={offset} stopColor={color} />
+            ))}
           </linearGradient>
         </defs>
         <path

@@ -5,6 +5,7 @@ const PUB = process.env.PUBLIC_URL || '';
 const HEAVEN_PANEL_BG = `${PUB}/assets/catholicecloud/background/heaven-bkg.jpg`;
 const HEAVEN_BTN_BG = `${PUB}/assets/catholicecloud/background/heaven-bkg.jpg`;
 const CORK_BOARD_BG = `${PUB}/assets/catholicecloud/bulletin/cork.jpg`;
+const PAPER_NOTE_BG = `${PUB}/assets/catholicecloud/bulletin/paper.jpg`;
 
 const POLL_MS = 12000;
 const BULLETIN_PP = ACTIVITY_REWARDS.bulletin_post.pp;
@@ -119,7 +120,10 @@ function CecParishBulletin({ worshiper, onPostApproved, onClose }) {
           {status && <p className="cec-bulletin-status">{status}</p>}
           <div
             className="cec-bulletin-board"
-            style={{ '--cec-cork-board-bg': `url('${CORK_BOARD_BG}')` }}
+            style={{
+              '--cec-cork-board-bg': `url('${CORK_BOARD_BG}')`,
+              '--cec-bulletin-paper-bg': `url('${PAPER_NOTE_BG}')`,
+            }}
             aria-label="Cork bulletin board"
           >
             <ul className="cec-bulletin-list">

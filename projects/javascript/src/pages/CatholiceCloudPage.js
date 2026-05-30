@@ -11,7 +11,16 @@ import CecSaintWheel from '../cec/CecSaintWheel';
 import CecRankToast from '../cec/CecRankToast';
 import CecPortraitCommunionPopup from '../cec/CecPortraitCommunionPopup';
 import CecShootingStars from '../cec/CecShootingStars';
+import CecSeasonAmbience from '../cec/CecSeasonAmbience';
+import CecSeasonDebugPicker from '../cec/CecSeasonDebugPicker';
+import {
+  getCecSeasonTheme,
+  getSeasonBackgroundPhotos,
+  getSeasonSkyOverlay,
+  readSeasonThemeOverride,
+} from '../cec/cecSeasonTheme';
 import EcclesiasticalClock from '../ecclesiasticalTime/EcclesiasticalClock';
+import { useEcclesiasticalTime } from '../ecclesiasticalTime/useEcclesiasticalTime';
 import { canAwardAmenDiscovery } from '../cec/cecConfig';
 import {
   awardAmenDiscovery,
@@ -28,7 +37,27 @@ const BG = {
   cathedral: `${PUB}/assets/catholicecloud/background/cathedral-bkg.jpg`,
   heaven: `${PUB}/assets/catholicecloud/background/heaven-bkg.jpg`,
   forest: `${PUB}/assets/catholicecloud/background/foret_fontainebleu.jpg`,
+  easterCathedral: `${PUB}/assets/catholicecloud/background/easter-cathedral.jpg`,
+  christmasCathedral: `${PUB}/assets/catholicecloud/background/christmas-cathedral.jpg`,
+  clouds: `${PUB}/assets/catholicecloud/background/clouds.jpg`,
 };
+
+const CEC_BG_PHOTO_LAYERS = [
+  { id: 'cathedral', className: 'cec-bg-layer--photo-cathedral', src: BG.cathedral },
+  { id: 'heaven', className: 'cec-bg-layer--photo-heaven', src: BG.heaven },
+  { id: 'forest', className: 'cec-bg-layer--photo-forest', src: BG.forest },
+  {
+    id: 'easterCathedral',
+    className: 'cec-bg-layer--photo-easter-cathedral',
+    src: BG.easterCathedral,
+  },
+  {
+    id: 'christmasCathedral',
+    className: 'cec-bg-layer--photo-christmas-cathedral',
+    src: BG.christmasCathedral,
+  },
+  { id: 'clouds', className: 'cec-bg-layer--photo-clouds', src: BG.clouds },
+];
 
 /** Manicule cursor — tip at upper-left; use manicule-cursor.png (≤128px) for browser support */
 const CEC_PAGE_STYLE = {
@@ -59,6 +88,17 @@ function CatholiceCloudPage() {
   const [aspergillumSplash, setAspergillumSplash] = useState(false);
   const pendingAspergillumSplashRef = useRef(false);
   const [portraitCommunion, setPortraitCommunion] = useState(null);
+  const { data: liturgical } = useEcclesiasticalTime();
+  const [seasonOverride, setSeasonOverride] = useState(() => readSeasonThemeOverride());
+  const liturgicalThemeId = liturgical.themeId ?? 'ordinary';
+  const activeThemeId = seasonOverride ?? liturgicalThemeId;
+  const seasonTheme = getCecSeasonTheme(activeThemeId);
+  const seasonBgPhotos = getSeasonBackgroundPhotos(activeThemeId);
+  const singleBgPhoto = seasonBgPhotos.length === 1;
+  const skyOverlay = getSeasonSkyOverlay(activeThemeId);
+  const showSkyOverlay = skyOverlay !== null;
+  const heavenOnlyBg = skyOverlay === 'heaven' && seasonBgPhotos.length === 0;
+  const showProceduralClouds = !seasonBgPhotos.includes('clouds');
 
   const mergeReward = (prev, { awarded = 0, rankUp }) => ({
     pp: (prev?.pp || 0) + awarded,
@@ -206,27 +246,59 @@ function CatholiceCloudPage() {
 
   return (
     <div className="cec-page" style={CEC_PAGE_STYLE}>
-      <div className="cec-bg-stack" aria-hidden="true">
+      <div
+        className={`cec-bg-stack${singleBgPhoto ? ' cec-bg-stack--single-photo' : ''}${
+          showSkyOverlay ? ' cec-bg-stack--heaven-overlay' : ''
+        }${heavenOnlyBg ? ' cec-bg-stack--heaven-only' : ''}${
+          activeThemeId === 'advent' ? ' cec-bg-stack--advent' : ''
+        }${activeThemeId === 'epiphany' ? ' cec-bg-stack--epiphany' : ''
+        }${activeThemeId === 'holyWeek' ? ' cec-bg-stack--holy-week' : ''
+        }${activeThemeId === 'easter' ? ' cec-bg-stack--easter' : ''
+        }${activeThemeId === 'christmas' ? ' cec-bg-stack--christmas' : ''
+        }`}
+        aria-hidden="true"
+      >
         <div className="cec-bg-layer cec-bg-layer--gradient" />
-        <div
-          className="cec-bg-layer cec-bg-layer--photo cec-bg-layer--photo-cathedral"
-          style={{ backgroundImage: `url('${BG.cathedral}')` }}
-        />
-        <div
-          className="cec-bg-layer cec-bg-layer--photo cec-bg-layer--photo-heaven"
-          style={{ backgroundImage: `url('${BG.heaven}')` }}
-        />
-        <div
-          className="cec-bg-layer cec-bg-layer--photo cec-bg-layer--photo-forest"
-          style={{ backgroundImage: `url('${BG.forest}')` }}
-        />
+        {CEC_BG_PHOTO_LAYERS.filter((layer) => seasonBgPhotos.includes(layer.id)).map((layer) => (
+          <div
+            key={layer.id}
+            className={`cec-bg-layer cec-bg-layer--photo ${layer.className}`}
+            style={{ backgroundImage: `url('${layer.src}')` }}
+          />
+        ))}
+        {showSkyOverlay && (
+          <div
+            className={`cec-bg-layer cec-bg-layer--photo ${
+              skyOverlay === 'heaven'
+                ? 'cec-bg-layer--photo-heaven cec-bg-layer--photo-heaven-overlay'
+                : 'cec-bg-layer--photo-clouds cec-bg-layer--photo-clouds-overlay'
+            }`}
+            style={{
+              backgroundImage: `url('${skyOverlay === 'heaven' ? BG.heaven : BG.clouds}')`,
+            }}
+          />
+        )}
         <div className="cec-bg-layer cec-bg-layer--marble" />
-        <div className="cec-bg-layer cec-bg-layer--clouds" />
+        {showProceduralClouds && <div className="cec-bg-layer cec-bg-layer--clouds" />}
         <div className="cec-bg-layer cec-bg-layer--gold-dust" />
+        <div
+          className="cec-bg-layer cec-bg-layer--season-tint"
+          style={{
+            '--cec-season-overlay': seasonTheme.overlay,
+            '--cec-season-overlay-opacity': seasonTheme.overlayOpacity,
+          }}
+        />
+        {activeThemeId === 'easter' && (
+          <div className="cec-bg-layer cec-bg-layer--easter-frost" aria-hidden />
+        )}
+        {activeThemeId === 'christmas' && (
+          <div className="cec-bg-layer cec-bg-layer--christmas-frost" aria-hidden />
+        )}
         <div className="cec-bg-layer cec-bg-layer--vignette" />
       </div>
 
-      <CecShootingStars />
+      <CecShootingStars key={activeThemeId} starPalette={seasonTheme.starPalette} />
+      <CecSeasonAmbience themeId={activeThemeId} />
 
       <div className="cec-sprinkles" aria-hidden="true">
         {SPRINKLES.map((s) => (
@@ -248,6 +320,13 @@ function CatholiceCloudPage() {
 
       <Header />
 
+      <CecSeasonDebugPicker
+        activeThemeId={activeThemeId}
+        overrideThemeId={seasonOverride}
+        liturgicalThemeId={liturgicalThemeId}
+        onSelectOverride={setSeasonOverride}
+      />
+
       <main className="cec-main">
         <header className="cec-banner">
           <h1 className="cec-title">catholic e cloud</h1>
@@ -255,13 +334,19 @@ function CatholiceCloudPage() {
         </header>
 
         <div className="cec-play-row">
-          <CecWorshiperStage worshiper={worshiper} onPortraitClick={handlePortraitCommunion} />
+          <CecWorshiperStage
+            worshiper={worshiper}
+            starPalette={seasonTheme.starPalette}
+            onPortraitClick={handlePortraitCommunion}
+          />
           <div className="cec-layout">
             <div className="cec-layout-head">
-              <EcclesiasticalClock />
+              <EcclesiasticalClock themeId={activeThemeId} />
             </div>
             <CecParishMap
               worshiper={worshiper}
+              seasonThemeId={activeThemeId}
+              hollyMapIds={seasonTheme.hollyMapIds}
               onSelectLocation={handleSelectLocation}
               aspergillumSplash={aspergillumSplash}
               onAspergillumSplashEnd={endAspergillumSplash}

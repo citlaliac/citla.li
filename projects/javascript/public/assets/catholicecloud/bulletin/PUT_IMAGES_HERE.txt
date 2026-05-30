@@ -1,10 +1,6 @@
-Parish Bulletin cork board (repeating background):
+Parish Bulletin board:
 
-  cork.jpg   — tileable cork texture (current: 1000×667)
+  cork.jpg   — repeating cork board background
+  paper.jpg  — texture for pinned notes (posts on the board)
 
-The board repeats this image as posts are added. CSS scales tiles by height
-(--cec-cork-tile-h in CatholiceCloudPage.css) and keeps aspect ratio.
-
-Tips:
-  - Seamless edges help avoid visible seams when tiled.
-  - Avoid heavy shadows in the tile; paper notes add depth on top.
+Folder: projects/javascript/public/assets/catholicecloud/bulletin/

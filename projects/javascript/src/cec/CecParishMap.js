@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { CEC_LOCATIONS, hasActionDoneRecently, hasAmenDiscovery } from './cecConfig';
+import { seasonAssetUrl } from './cecSeasonTheme';
 
 const PUB = process.env.PUBLIC_URL || '';
 const RELICS_BASE = `${PUB}/assets/catholicecloud/relics`;
@@ -36,6 +37,30 @@ function buildingArtFile(location, actionComplete) {
   return location.buildingFile;
 }
 
+const HOLLY_SRC = seasonAssetUrl('holly.png');
+
+function CecBuildingHolly() {
+  const [broken, setBroken] = useState(false);
+
+  if (!HOLLY_SRC || broken) {
+    return (
+      <span className="cec-building-holly cec-building-holly--fallback" aria-hidden>
+        🌿
+      </span>
+    );
+  }
+
+  return (
+    <img
+      className="cec-building-holly"
+      src={HOLLY_SRC}
+      alt=""
+      draggable={false}
+      onError={() => setBroken(true)}
+    />
+  );
+}
+
 function isBuildingFlipped(location, actionComplete) {
   if (location.flipUntilVisited && location.actionId) {
     return !actionComplete;
@@ -46,7 +71,7 @@ function isBuildingFlipped(location, actionComplete) {
   return false;
 }
 
-function CecBuilding({ location, worshiper, onSelect, aspergillumSplash }) {
+function CecBuilding({ location, worshiper, onSelect, aspergillumSplash, showHolly }) {
   const actionComplete = location.actionId && hasActionDoneRecently(worshiper, location.actionId);
   const discovered = hasAmenDiscovery(worshiper, location.id);
   const visited = actionComplete || discovered;
@@ -72,7 +97,9 @@ function CecBuilding({ location, worshiper, onSelect, aspergillumSplash }) {
         buildingFlipped ? ' cec-building--img-flipped' : ''
       }${rosaryGlow ? ' cec-building--rosary-glow' : ''}${
         basilicaVisited ? ' cec-building--basilica-visited' : ''
-      }${splashActive ? ' cec-building--aspergillum-splash' : ''}`}
+      }${splashActive ? ' cec-building--aspergillum-splash' : ''}${
+        showHolly ? ' cec-building--holly' : ''
+      }`}
       style={{ top: location.top, left: location.left }}
     >
       <button
@@ -114,6 +141,7 @@ function CecBuilding({ location, worshiper, onSelect, aspergillumSplash }) {
           </span>
         )}
         {candleLit && <span className="cec-candle-flame" aria-hidden />}
+        {showHolly && <CecBuildingHolly />}
       </button>
       <span className="cec-building-label">{location.label}</span>
     </div>
@@ -122,6 +150,8 @@ function CecBuilding({ location, worshiper, onSelect, aspergillumSplash }) {
 
 function CecParishMap({
   worshiper,
+  seasonThemeId,
+  hollyMapIds = [],
   onSelectLocation,
   aspergillumSplash = false,
   onAspergillumSplashEnd,
@@ -146,6 +176,7 @@ function CecParishMap({
               worshiper={worshiper}
               onSelect={onSelectLocation}
               aspergillumSplash={aspergillumSplash}
+              showHolly={seasonThemeId === 'christmas' && hollyMapIds.includes(loc.id)}
             />
           ))}
         </div>

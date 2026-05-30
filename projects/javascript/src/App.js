@@ -110,6 +110,7 @@ function App() {
           <Route path="/kudos" element={<KudosPage />} />
           <Route path="/makekudos" element={<MakeKudosPage />} />
           <Route path="/catholicecloud" element={<CatholiceCloudPage />} />
+          <Route path="/catholicecloudtest" element={<CatholiceCloudPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </div>

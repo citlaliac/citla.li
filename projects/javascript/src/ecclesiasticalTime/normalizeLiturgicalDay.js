@@ -1,3 +1,4 @@
+import { resolveCecSeasonTheme } from '../cec/cecSeasonTheme';
 import { ECCLESIASTICAL_FALLBACK } from './constants';
 
 const SEASON_LABELS = {
@@ -53,5 +54,6 @@ export function normalizeLiturgicalDay(day) {
     color: primary ? formatColor(primary.colour) : ECCLESIASTICAL_FALLBACK.color,
     rank: primary?.rank,
     week: formatLiturgicalWeek(day),
+    themeId: resolveCecSeasonTheme(day),
   };
 }
