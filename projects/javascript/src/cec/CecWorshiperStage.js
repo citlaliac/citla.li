@@ -2,7 +2,7 @@ import React from 'react';
 import CecWorshiperPortrait from './CecWorshiperPortrait';
 import { ENTRY_WORSHIPER_SKINS_BY_ID, nextRank } from './cecConfig';
 
-function CecWorshiperStage({ worshiper }) {
+function CecWorshiperStage({ worshiper, onPortraitClick }) {
   const upcoming = nextRank(worshiper.pontifexPoints);
   const skin =
     ENTRY_WORSHIPER_SKINS_BY_ID[worshiper.avatarId] ?? {
@@ -17,7 +17,14 @@ function CecWorshiperStage({ worshiper }) {
       <p className="cec-worshiper-stage-type">{skin.label}</p>
       <p className="cec-worshiper-stage-name">{worshiper.displayName}</p>
 
-      <CecWorshiperPortrait worshiper={worshiper} size="hero" />
+      <button
+        type="button"
+        className="cec-worshiper-stage-portrait-btn"
+        onClick={onPortraitClick}
+        aria-label="Receive communion"
+      >
+        <CecWorshiperPortrait worshiper={worshiper} size="hero" />
+      </button>
 
       <p className="cec-worshiper-stage-rank">{worshiper.rank.label}</p>
 

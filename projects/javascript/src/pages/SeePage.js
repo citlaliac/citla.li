@@ -47,19 +47,29 @@ const SeePage = () => {
   // Define the available photography collections
   const collections = [
     {
+      title: 'espionner',
+      path: '/photos/espionner',
+      image: '/assets/photos/espionner/DSC_0462.jpg'
+    },
+    {
       title: 'summer 2023',
       path: '/photos/summer-2023',
       image: '/assets/photos/summer-2023/DSC_0708.jpg'
     },
     {
-      title: 'spring 2023',
-      path: '/photos/spring-2023',
-      image: '/assets/photos/spring-2023/DSC_0535.jpg'
+      title: 'urban',
+      path: '/photos/urban',
+      image: '/assets/photos/urban/DSC_0565.jpg'
     },
     {
       title: 'spring 2024',
       path: '/photos/spring-2024',
       image: '/assets/photos/spring-2024/DSC_0387.jpg'
+    },
+    {
+      title: 'spring 2023',
+      path: '/photos/spring-2023',
+      image: '/assets/photos/spring-2023/DSC_0535.jpg'
     },
     {
       title: 'portrait',
@@ -75,16 +85,6 @@ const SeePage = () => {
       title: 'natural',
       path: '/photos/natural',
       image: '/assets/photos/natural/DSC_0646.jpg'
-    },
-    {
-      title: 'urban',
-      path: '/photos/urban',
-      image: '/assets/photos/urban/DSC_0565.jpg'
-    },
-    {
-      title: 'espionner',
-      path: '/photos/espionner',
-      image: '/assets/photos/espionner/DSC_0462.jpg'
     }
   ];
 

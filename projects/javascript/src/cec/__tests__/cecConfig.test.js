@@ -5,6 +5,12 @@ import {
   canAwardAmenDiscovery,
   actionCooldownRemainingMs,
   formatActionCooldown,
+  advancePortraitCommunion,
+  portraitCommunionKindForClick,
+  portraitCommunionCycleExpired,
+  getPortraitCommunionStep,
+  PORTRAIT_COMMUNION_CYCLE_KEY,
+  MAP_ACTION_COOLDOWN_MS,
   hasActionDoneRecently,
   hasAmenDiscovery,
   nextRank,
@@ -16,8 +22,8 @@ import {
   maxPontifexPointsNonWheelSession,
   maxPontifexPointsFullDay,
   minPontifexPointsPerDay,
-  MAP_ACTION_COOLDOWN_MS,
   ENTRY_WORSHIPER_SKINS,
+  REGISTER_WORSHIPER_SKINS,
   RANKS,
   WHEEL_SAINTS_BY_ID,
 } from '../cecConfig';
@@ -119,6 +125,10 @@ describe('cecConfig', () => {
     expect(ENTRY_WORSHIPER_SKINS.map((s) => s.id)).toEqual(['frog', 'fairy', 'lamb', 'worshiper_a']);
   });
 
+  test('REGISTER_WORSHIPER_SKINS lists art-ready pickers only', () => {
+    expect(REGISTER_WORSHIPER_SKINS.map((s) => s.id)).toEqual(['frog', 'fairy', 'lamb']);
+  });
+
   test('avatarById legacy cantor ids map to frog cantor', () => {
     expect(avatarById('cantor_a').imageFile).toBe('frog-cantor.png');
     expect(avatarById('missing').imageFile).toBe('frog-cantor.png');
@@ -154,6 +164,33 @@ describe('cecConfig', () => {
     const w = { actionLastDone: { candle: Date.now() - 1000 } };
     expect(actionCooldownRemainingMs(w, 'candle')).toBeGreaterThan(0);
     expect(actionCooldownRemainingMs(w, 'register')).toBe(0);
+  });
+
+  test('portrait communion hourly sequence', () => {
+    let w = { actionLastDone: {} };
+    expect(portraitCommunionKindForClick(w)).toBe('blood');
+    let r = advancePortraitCommunion(w);
+    expect(r.kind).toBe('blood');
+    expect(getPortraitCommunionStep(r.worshiper)).toBe(1);
+
+    r = advancePortraitCommunion(r.worshiper);
+    expect(r.kind).toBe('body');
+    expect(getPortraitCommunionStep(r.worshiper)).toBe(2);
+
+    r = advancePortraitCommunion(r.worshiper);
+    expect(r.kind).toBe('stuffed');
+    expect(getPortraitCommunionStep(r.worshiper)).toBe(3);
+
+    expect(portraitCommunionKindForClick(r.worshiper)).toBe('stuffed');
+
+    const cooled = {
+      actionLastDone: {
+        [PORTRAIT_COMMUNION_CYCLE_KEY]: Date.now() - MAP_ACTION_COOLDOWN_MS - 1,
+        portrait_communion_step: 3,
+      },
+    };
+    expect(portraitCommunionCycleExpired(cooled)).toBe(true);
+    expect(portraitCommunionKindForClick(cooled)).toBe('blood');
   });
 
   test('wheel saints match uploaded assets', () => {

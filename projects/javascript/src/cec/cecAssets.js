@@ -3,6 +3,7 @@ const BASE = `${PUB}/assets/catholicecloud`;
 
 export const ASSET_DIRS = {
   worshipers: `${BASE}/worshipers`,
+  communion: `${BASE}/communion`,
   /** Saint portraits live in wheel/ (some in wheel/saints/) */
   wheelSaints: `${BASE}/wheel`,
   wheelWood: `${BASE}/relics/spin_wheel.png`,
@@ -25,4 +26,13 @@ export function worshiperAvatarUrl(avatar) {
 /** @param {{ id: string, imageFile?: string }} saint */
 export function saintImageUrl(saint) {
   return assetUrl(ASSET_DIRS.wheelSaints, saint?.imageFile);
+}
+
+export function communionImageUrl(imageFile) {
+  return assetUrl(ASSET_DIRS.communion, imageFile);
+}
+
+/** Communion popup card background (tall portrait crop, light blur). */
+export function communionPopupBackgroundUrl() {
+  return assetUrl(ASSET_DIRS.communion, 'priest0hands.jpg');
 }

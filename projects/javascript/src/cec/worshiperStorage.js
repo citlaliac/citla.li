@@ -5,6 +5,7 @@ import {
   VALID_SKIN_IDS,
   amenDiscoveryKey,
   canAwardAmenDiscovery,
+  advancePortraitCommunion,
   canCompleteAction,
   rankFromPoints,
   recordActionLastDone,
@@ -128,4 +129,9 @@ export function registerWorshiper(displayName, skinId = DEFAULT_SKIN_ID) {
   const w = createWorshiper(displayName, skinId);
   const { worshiper } = awardPoints(w, 'register');
   return worshiper;
+}
+
+export function receivePortraitCommunion(worshiper) {
+  const { worshiper: next, kind } = advancePortraitCommunion(worshiper);
+  return { worshiper: saveWorshiper(next), kind };
 }

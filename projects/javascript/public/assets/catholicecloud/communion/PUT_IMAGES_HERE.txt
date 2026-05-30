@@ -1,0 +1,5 @@
+Portrait communion popups (click your worshiper on the map page):
+
+  priest0hands.jpg — popup background (tall card, light blur)
+  bloodwine.png   — Blood of Christ (first click each hour)
+  wafer.png       — Body of Christ (second click)

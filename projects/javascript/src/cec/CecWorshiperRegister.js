@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { DEFAULT_SKIN_ID, ENTRY_WORSHIPER_SKINS } from './cecConfig';
+import { DEFAULT_SKIN_ID, REGISTER_WORSHIPER_SKINS } from './cecConfig';
 import CecWorshiperPortrait from './CecWorshiperPortrait';
 
 const PUB = process.env.PUBLIC_URL || '';
@@ -33,8 +33,8 @@ function CecWorshiperRegister({ onRegister }) {
 
         <p className="cec-worshiper-pick-legend">Choose your worshiper</p>
         <fieldset className="cec-worshiper-pick" aria-label="Choose your worshiper">
-          <div className="cec-worshiper-pick-grid">
-            {ENTRY_WORSHIPER_SKINS.filter((skin) => skin.id !== 'worshiper_a').map((skin) => (
+          <div className="cec-worshiper-pick-grid cec-worshiper-pick-grid--3">
+            {REGISTER_WORSHIPER_SKINS.map((skin) => (
               <button
                 key={skin.id}
                 type="button"

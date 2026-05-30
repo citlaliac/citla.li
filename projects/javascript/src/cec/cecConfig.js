@@ -192,6 +192,11 @@ export const ENTRY_WORSHIPER_SKINS = [
   { id: 'worshiper_a', label: 'Worshiper A', emoji: '🙏' },
 ];
 
+/** Skins offered on the registration picker (art-ready only). */
+export const REGISTER_WORSHIPER_SKINS = ENTRY_WORSHIPER_SKINS.filter(
+  (skin) => skin.id !== 'worshiper_a'
+);
+
 export const ENTRY_WORSHIPER_SKINS_BY_ID = Object.fromEntries(
   ENTRY_WORSHIPER_SKINS.map((s) => [s.id, s])
 );
@@ -517,6 +522,71 @@ export function recordActionLastDone(worshiper, key) {
     actionLastDone: {
       ...(worshiper.actionLastDone || {}),
       [key]: Date.now(),
+    },
+  };
+}
+
+/** Hourly portrait communion — Blood → Body → stuffed (3rd click). */
+export const PORTRAIT_COMMUNION_CYCLE_KEY = 'portrait_communion_cycle';
+export const PORTRAIT_COMMUNION_STEP_KEY = 'portrait_communion_step';
+
+export const PORTRAIT_COMMUNION = {
+  blood: {
+    id: 'blood',
+    title: 'The Blood of Christ',
+    prompt: 'Drink the Blood of Christ',
+    imageFile: 'bloodwine.png',
+    emoji: '🍷',
+  },
+  body: {
+    id: 'body',
+    title: 'The Body of Christ',
+    prompt: 'Receive the Body of Christ',
+    imageFile: 'wafer.png',
+    emoji: '🫓',
+  },
+  stuffed: {
+    id: 'stuffed',
+    message: "No thanks, im stuffed!",
+    emoji: '😌',
+  },
+};
+
+export function getPortraitCommunionStep(worshiper) {
+  const raw = worshiper?.actionLastDone?.[PORTRAIT_COMMUNION_STEP_KEY];
+  return typeof raw === 'number' && raw >= 0 && raw <= 3 ? raw : 0;
+}
+
+export function portraitCommunionCycleExpired(worshiper) {
+  const cycleStart = getActionLastDone(worshiper, PORTRAIT_COMMUNION_CYCLE_KEY);
+  if (cycleStart == null) return true;
+  return Date.now() - cycleStart >= MAP_ACTION_COOLDOWN_MS;
+}
+
+/** @returns {'blood' | 'body' | 'stuffed'} */
+export function portraitCommunionKindForClick(worshiper) {
+  const step = portraitCommunionCycleExpired(worshiper) ? 0 : getPortraitCommunionStep(worshiper);
+  if (step >= 2) return 'stuffed';
+  if (step === 1) return 'body';
+  return 'blood';
+}
+
+export function advancePortraitCommunion(worshiper) {
+  const expired = portraitCommunionCycleExpired(worshiper);
+  const step = expired ? 0 : getPortraitCommunionStep(worshiper);
+  const kind = portraitCommunionKindForClick(worshiper);
+  const newStep = step >= 2 ? 3 : step + 1;
+  const cycleTs = expired ? Date.now() : getActionLastDone(worshiper, PORTRAIT_COMMUNION_CYCLE_KEY);
+
+  return {
+    kind,
+    worshiper: {
+      ...worshiper,
+      actionLastDone: {
+        ...(worshiper.actionLastDone || {}),
+        [PORTRAIT_COMMUNION_CYCLE_KEY]: cycleTs,
+        [PORTRAIT_COMMUNION_STEP_KEY]: newStep,
+      },
     },
   };
 }

@@ -68,9 +68,11 @@
   min-height: 0;
   justify-content: flex-start;
   align-items: center;
-  padding-top: 0.35rem;
-  padding-bottom: 0.35rem;
-  overflow: hidden;
+  padding-top: max(0.35rem, env(safe-area-inset-top));
+  padding-bottom: max(0.35rem, env(safe-area-inset-bottom));
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   background: transparent;
 }
 
@@ -82,7 +84,7 @@
 
 .cec-page--register .cec-register-overlay .cec-register-panel {
   max-height: none;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .cec-page--register .cec-register-panel--wide {
@@ -1019,6 +1021,31 @@
   line-height: 1.2;
 }
 
+.cec-worshiper-stage-portrait-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  width: 100%;
+  max-width: min(220px, 24dvh, 100%);
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent !important;
+  line-height: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.cec-worshiper-stage-portrait-btn:hover .cec-portrait-img,
+.cec-worshiper-stage-portrait-btn:focus-visible .cec-portrait-img {
+  filter: brightness(1.05) drop-shadow(0 0 14px rgba(255, 220, 140, 0.35));
+}
+
+.cec-worshiper-stage-portrait-btn .cec-portrait {
+  width: 100%;
+}
+
 .cec-worshiper-stage .cec-portrait {
   align-self: center;
   width: 100%;
@@ -1185,6 +1212,11 @@
 .cec-building--incense,
 .cec-building--aspergillum {
   transform: translate(-50%, -50%);
+}
+
+/* Unvisited incense (insence-before) — nudge onto map pin */
+.cec-building--incense:not(.cec-building--visited) {
+  transform: translate(calc(-50% + 2.8%), calc(-50% + 3.7%));
 }
 
 .cec-building--incense .cec-building-img {
@@ -2186,9 +2218,15 @@
 
 .cec-worshiper-pick-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1rem 0.75rem;
   align-items: end;
+  justify-items: center;
+  width: 100%;
+}
+
+.cec-worshiper-pick-grid--3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 /* Worshiper pick — no button chrome; warm halo + scale on hover (blocks global red button:hover) */
@@ -2304,6 +2342,18 @@
   .cec-worshiper-pick-option .cec-portrait {
     width: min(8.5rem, 18vw);
     height: min(8.5rem, 18vw);
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .cec-worshiper-pick-option:hover,
+  .cec-worshiper-pick-option:focus-visible {
+    transform: scale(1.04);
+  }
+
+  .cec-worshiper-pick-option--selected:hover,
+  .cec-worshiper-pick-option--selected:focus-visible {
+    transform: scale(0.98);
   }
 }
 
@@ -2783,6 +2833,124 @@
   margin-top: 1rem;
 }
 
+/* Portrait communion (click worshiper) */
+.cec-portrait-communion-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1180;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(0.75rem, env(safe-area-inset-top)) max(0.75rem, env(safe-area-inset-right))
+    max(0.75rem, env(safe-area-inset-bottom)) max(0.75rem, env(safe-area-inset-left));
+  background: rgba(8, 4, 16, 0.78);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.cec-portrait-communion-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  width: min(15.5rem, 78vw);
+  min-height: min(22.5rem, 72dvh);
+  aspect-ratio: 5 / 7;
+  padding: 1.15rem 1rem 1rem;
+  border-radius: 14px;
+  overflow: hidden;
+  isolation: isolate;
+  color: #fff8e8;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 232, 165, 0.32),
+    0 16px 42px rgba(0, 0, 0, 0.5);
+  text-align: center;
+}
+
+.cec-portrait-communion-card::before {
+  content: '';
+  position: absolute;
+  inset: -4%;
+  z-index: 0;
+  background-image: var(--cec-communion-interior);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: 41% 46%;
+  filter: blur(2px) saturate(1.04);
+  transform: scale(1.02);
+  pointer-events: none;
+}
+
+.cec-portrait-communion-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    180deg,
+    rgba(12, 8, 4, 0.12) 0%,
+    rgba(12, 8, 4, 0.22) 100%
+  );
+  pointer-events: none;
+}
+
+.cec-portrait-communion-card > * {
+  position: relative;
+  z-index: 2;
+}
+
+.cec-portrait-communion-art {
+  width: min(9.5rem, 58vw);
+  height: min(9.5rem, 42vw);
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+}
+
+.cec-portrait-communion-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.cec-portrait-communion-emoji {
+  font-size: clamp(3.5rem, 14vw, 5rem);
+  line-height: 1;
+}
+
+.cec-portrait-communion-title {
+  margin: 0;
+  font-size: clamp(1.05rem, 4.2vw, 1.35rem);
+  color: #ffe9a8;
+  text-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.85),
+    0 0 12px rgba(0, 0, 0, 0.45);
+}
+
+.cec-portrait-communion-prompt,
+.cec-portrait-communion-message {
+  margin: 0;
+  font-size: clamp(0.9rem, 3.6vw, 1.02rem);
+  line-height: 1.4;
+  color: #f5edd8;
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.8),
+    0 0 10px rgba(0, 0, 0, 0.4);
+}
+
+.cec-portrait-communion-message {
+  font-style: italic;
+}
+
+.cec-portrait-communion-amen {
+  margin-top: 0.25rem;
+  min-height: 44px;
+}
+
 @media (max-width: 900px) {
   .cec-play-row {
     display: flex;
@@ -2823,9 +2991,15 @@
     display: none;
   }
 
-  .cec-worshiper-stage .cec-portrait {
+  .cec-worshiper-stage-portrait-btn {
     flex: 0 0 auto;
     order: 1;
+    max-width: min(96px, 24vw);
+  }
+
+  .cec-worshiper-stage-portrait-btn .cec-portrait,
+  .cec-worshiper-stage .cec-portrait {
+    flex: 0 0 auto;
     max-width: min(96px, 24vw);
   }
 
@@ -2884,14 +3058,20 @@
     margin-right: auto;
   }
 
-  .cec-worshiper-pick-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.25rem 1rem;
+  .cec-worshiper-pick-grid,
+  .cec-worshiper-pick-grid--3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem 0.35rem;
   }
 
   .cec-worshiper-pick-option .cec-portrait {
-    width: min(7rem, 34vw);
-    height: min(7rem, 34vw);
+    width: min(5.5rem, 28vw);
+    height: min(5.5rem, 28vw);
+  }
+
+  .cec-worshiper-pick-label {
+    font-size: 0.72rem;
+    line-height: 1.15;
   }
 
   .cec-avatar-grid {
@@ -3087,6 +3267,50 @@
     width: min(280px, 86vw);
     height: min(280px, 72vw);
     max-height: 300px;
+  }
+
+  .cec-page--register .cec-register-title--hero {
+    font-size: clamp(1.2rem, 5.5vw, 1.65rem);
+    margin-bottom: 0.45rem;
+  }
+
+  .cec-page--register .cec-register-panel--wide {
+    padding: 0.75rem 0.65rem 0.85rem;
+  }
+
+  .cec-page--register .cec-worshiper-pick {
+    margin-bottom: 0.55rem;
+    padding: 0.5rem 0.35rem 0.55rem;
+  }
+
+  .cec-page--register .cec-worshiper-pick-option .cec-portrait {
+    width: min(4.75rem, 26vw);
+    height: min(4.75rem, 26vw);
+  }
+
+  .cec-page--register .cec-register-preview {
+    margin-bottom: 0.55rem;
+    padding: 0.15rem 0 0.25rem;
+  }
+
+  .cec-page--register .cec-register-preview .cec-portrait--hero {
+    width: min(132px, 36vw);
+    height: min(132px, 36vw);
+    max-height: 140px;
+  }
+
+  .cec-page--register .cec-register-preview-name {
+    font-size: clamp(0.95rem, 4vw, 1.15rem);
+    margin-bottom: 0.15rem;
+  }
+
+  .cec-page--register .cec-register-blurb {
+    font-size: 0.86rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .cec-page--register .cec-register-submit {
+    width: 100%;
   }
 }
 

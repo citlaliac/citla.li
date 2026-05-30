@@ -9,6 +9,7 @@ import CecLocationPopup, { AMEN_BURST_MS } from '../cec/CecLocationPopup';
 import CecParishBulletin from '../cec/CecParishBulletin';
 import CecSaintWheel from '../cec/CecSaintWheel';
 import CecRankToast from '../cec/CecRankToast';
+import CecPortraitCommunionPopup from '../cec/CecPortraitCommunionPopup';
 import CecShootingStars from '../cec/CecShootingStars';
 import EcclesiasticalClock from '../ecclesiasticalTime/EcclesiasticalClock';
 import { canAwardAmenDiscovery } from '../cec/cecConfig';
@@ -18,6 +19,7 @@ import {
   addWheelPoints,
   loadWorshiper,
   registerWorshiper,
+  receivePortraitCommunion,
 } from '../cec/worshiperStorage';
 import '../styles/CatholiceCloudPage.css';
 
@@ -56,6 +58,7 @@ function CatholiceCloudPage() {
   const [, setPendingReward] = useState(null);
   const [aspergillumSplash, setAspergillumSplash] = useState(false);
   const pendingAspergillumSplashRef = useRef(false);
+  const [portraitCommunionKind, setPortraitCommunionKind] = useState(null);
 
   const mergeReward = (prev, { awarded = 0, rankUp }) => ({
     pp: (prev?.pp || 0) + awarded,
@@ -146,6 +149,13 @@ function CatholiceCloudPage() {
     applyWorshiper(next, { awarded: points, rankUp });
   };
 
+  const handlePortraitCommunion = () => {
+    if (!worshiper || portraitCommunionKind) return;
+    const { worshiper: next, kind } = receivePortraitCommunion(worshiper);
+    setWorshiper(next);
+    setPortraitCommunionKind(kind);
+  };
+
   useSEO({
     title: 'Catholic e Cloud | citla.li/catholicecloud',
     description: 'Heaven online — a campy Vatican-cloud hangout. Catholics, enjoy this space.',
@@ -232,7 +242,7 @@ function CatholiceCloudPage() {
         </header>
 
         <div className="cec-play-row">
-          <CecWorshiperStage worshiper={worshiper} />
+          <CecWorshiperStage worshiper={worshiper} onPortraitClick={handlePortraitCommunion} />
           <div className="cec-layout">
             <div className="cec-layout-head">
               <EcclesiasticalClock />
@@ -291,6 +301,13 @@ function CatholiceCloudPage() {
           worshiper={worshiper}
           onClose={() => setShowWheel(false)}
           onSpinResult={(points) => handleWheelResult(points)}
+        />
+      )}
+
+      {portraitCommunionKind && (
+        <CecPortraitCommunionPopup
+          kind={portraitCommunionKind}
+          onDismiss={() => setPortraitCommunionKind(null)}
         />
       )}
 
