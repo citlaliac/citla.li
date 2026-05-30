@@ -5,6 +5,7 @@ Catholic e Cloud assets — drop folders:
   buildings/      — custom map building sprites (optional)
   worshipers/     — worshiper appearance sprites (see PUT_IMAGES_HERE inside)
   communion/      — priest0hands.jpg, bloodwine.png, wafer.png (portrait communion)
+  bulletin/       — cork.jpg (seamless tile for Parish Bulletin board)
   wheel/          — wheel-dial.png (optional) + wheel/saints/ portraits
   frame.png       — popup frame (root of this folder)
   manicule.png         — full-size manicule art (source)

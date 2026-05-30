@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { ACTIVITY_REWARDS, canCompleteAction } from './cecConfig';
+import { ACTIVITY_REWARDS, canCompleteAction, formatActionCooldown, actionCooldownRemainingMs } from './cecConfig';
+
+const PUB = process.env.PUBLIC_URL || '';
+const HEAVEN_PANEL_BG = `${PUB}/assets/catholicecloud/background/heaven-bkg.jpg`;
+const HEAVEN_BTN_BG = `${PUB}/assets/catholicecloud/background/heaven-bkg.jpg`;
+/** Seamless tile — drop at public/assets/catholicecloud/bulletin/cork.jpg */
+const CORK_BOARD_BG = `${PUB}/assets/catholicecloud/bulletin/cork.jpg`;
 
 const POLL_MS = 12000;
 const BULLETIN_PP = ACTIVITY_REWARDS.bulletin_post.pp;
@@ -10,6 +16,7 @@ function CecParishBulletin({ worshiper, onPostApproved, onClose }) {
   const [status, setStatus] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const canPost = canCompleteAction(worshiper, 'bulletin_post');
+  const cooldownLeft = formatActionCooldown(actionCooldownRemainingMs(worshiper, 'bulletin_post'));
 
   const fetchEntries = async () => {
     try {
@@ -70,9 +77,12 @@ function CecParishBulletin({ worshiper, onPostApproved, onClose }) {
       aria-modal="true"
       aria-labelledby="cec-bulletin-title"
     >
-      <aside className="cec-bulletin-panel">
+      <aside
+        className="cec-bulletin-panel cec-bulletin-panel--heaven"
+        style={{ '--cec-heaven-panel-bg': `url('${HEAVEN_PANEL_BG}')` }}
+      >
         <div className="cec-bulletin-head">
-          <h2 id="cec-bulletin-title" className="cec-bulletin-title">
+          <h2 id="cec-bulletin-title" className="cec-bulletin-title cec-bulletin-title--hero">
             Parish Bulletin
           </h2>
         </div>
@@ -91,30 +101,45 @@ function CecParishBulletin({ worshiper, onPostApproved, onClose }) {
                 onChange={(e) => setBody(e.target.value)}
                 placeholder="Leave a note for the cloud…"
               />
-              <button type="submit" className="cec-bulletin-submit" disabled={submitting || !body.trim()}>
+              <button
+                type="submit"
+                className="cec-register-submit cec-bulletin-submit"
+                style={{ '--cec-heaven-btn-bg': `url('${HEAVEN_BTN_BG}')` }}
+                disabled={submitting || !body.trim()}
+              >
                 Pin to board (+{BULLETIN_PP} PP)
               </button>
             </form>
           ) : (
-            <p className="cec-bulletin-cap">Bulletin limit reached this visit.</p>
+            <p className="cec-bulletin-cap">
+              {cooldownLeft
+                ? `Pin again in ${cooldownLeft}.`
+                : 'Bulletin pin on cooldown.'}
+            </p>
           )}
           {status && <p className="cec-bulletin-status">{status}</p>}
-          <ul className="cec-bulletin-list">
-            {entries.length === 0 ? (
-              <li className="cec-bulletin-empty">No posts yet. Be the first.</li>
-            ) : (
-              entries.map((entry, i) => (
-                <li key={`${entry.date}-${i}`} className="cec-bulletin-item">
-                  <div className="cec-bulletin-item-head">
-                    <strong>{entry.name}</strong>
-                    <span className="cec-bulletin-item-rank">{entry.rank}</span>
-                    <time className="cec-bulletin-item-date">{entry.date}</time>
-                  </div>
-                  <p>{entry.body}</p>
-                </li>
-              ))
-            )}
-          </ul>
+          <div
+            className="cec-bulletin-board"
+            style={{ '--cec-cork-board-bg': `url('${CORK_BOARD_BG}')` }}
+            aria-label="Cork bulletin board"
+          >
+            <ul className="cec-bulletin-list">
+              {entries.length === 0 ? (
+                <li className="cec-bulletin-empty">No posts yet. Be the first.</li>
+              ) : (
+                entries.map((entry, i) => (
+                  <li key={`${entry.date}-${i}`} className="cec-bulletin-item">
+                    <div className="cec-bulletin-item-head">
+                      <strong>{entry.name}</strong>
+                      <span className="cec-bulletin-item-rank">{entry.rank}</span>
+                      <time className="cec-bulletin-item-date">{entry.date}</time>
+                    </div>
+                    <p>{entry.body}</p>
+                  </li>
+                ))
+              )}
+            </ul>
+          </div>
         </div>
         <button type="button" className="cec-toast-dismiss cec-bulletin-amen" onClick={onClose}>
           Amen
