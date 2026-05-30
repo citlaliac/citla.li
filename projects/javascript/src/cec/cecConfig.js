@@ -537,6 +537,7 @@ export const PORTRAIT_COMMUNION = {
     prompt: 'Drink the Blood of Christ',
     imageFile: 'bloodwine.png',
     emoji: '🍷',
+    bonusPP: 24,
   },
   body: {
     id: 'body',
@@ -544,6 +545,7 @@ export const PORTRAIT_COMMUNION = {
     prompt: 'Receive the Body of Christ',
     imageFile: 'wafer.png',
     emoji: '🫓',
+    bonusPP: 28,
   },
   stuffed: {
     id: 'stuffed',

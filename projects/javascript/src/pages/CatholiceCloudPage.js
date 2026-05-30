@@ -58,7 +58,7 @@ function CatholiceCloudPage() {
   const [, setPendingReward] = useState(null);
   const [aspergillumSplash, setAspergillumSplash] = useState(false);
   const pendingAspergillumSplashRef = useRef(false);
-  const [portraitCommunionKind, setPortraitCommunionKind] = useState(null);
+  const [portraitCommunion, setPortraitCommunion] = useState(null);
 
   const mergeReward = (prev, { awarded = 0, rankUp }) => ({
     pp: (prev?.pp || 0) + awarded,
@@ -150,10 +150,23 @@ function CatholiceCloudPage() {
   };
 
   const handlePortraitCommunion = () => {
-    if (!worshiper || portraitCommunionKind) return;
-    const { worshiper: next, kind } = receivePortraitCommunion(worshiper);
-    setWorshiper(next);
-    setPortraitCommunionKind(kind);
+    if (!worshiper || portraitCommunion) return;
+    const result = receivePortraitCommunion(worshiper);
+    setWorshiper(result.worshiper);
+    setPortraitCommunion({
+      kind: result.kind,
+      awarded: result.awarded,
+      rankUp: result.rankUp,
+    });
+  };
+
+  const dismissPortraitCommunion = () => {
+    if (!portraitCommunion) return;
+    const { awarded, rankUp } = portraitCommunion;
+    setPortraitCommunion(null);
+    if (awarded > 0 || rankUp) {
+      setRewardToast({ pp: awarded, rankUp: rankUp || null });
+    }
   };
 
   useSEO({
@@ -304,10 +317,11 @@ function CatholiceCloudPage() {
         />
       )}
 
-      {portraitCommunionKind && (
+      {portraitCommunion && (
         <CecPortraitCommunionPopup
-          kind={portraitCommunionKind}
-          onDismiss={() => setPortraitCommunionKind(null)}
+          kind={portraitCommunion.kind}
+          bonusPP={portraitCommunion.awarded}
+          onDismiss={dismissPortraitCommunion}
         />
       )}
 

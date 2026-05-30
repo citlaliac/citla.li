@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { PORTRAIT_COMMUNION } from './cecConfig';
 import { communionImageUrl, communionPopupBackgroundUrl } from './cecAssets';
 
-function CecPortraitCommunionPopup({ kind, onDismiss }) {
+function CecPortraitCommunionPopup({ kind, bonusPP = 0, onDismiss }) {
   const isStuffed = kind === 'stuffed';
   const step = PORTRAIT_COMMUNION[kind];
   const src = !isStuffed ? communionImageUrl(step.imageFile) : null;
@@ -50,6 +50,11 @@ function CecPortraitCommunionPopup({ kind, onDismiss }) {
                 {step.title}
               </h2>
               <p className="cec-portrait-communion-prompt">{step.prompt}</p>
+              {bonusPP > 0 && (
+                <p className="cec-portrait-communion-pp">
+                  +{bonusPP} bonus Pontifex Points
+                </p>
+              )}
             </>
           )}
         </div>

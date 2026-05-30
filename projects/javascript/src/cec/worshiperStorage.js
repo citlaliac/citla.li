@@ -6,6 +6,7 @@ import {
   amenDiscoveryKey,
   canAwardAmenDiscovery,
   advancePortraitCommunion,
+  PORTRAIT_COMMUNION,
   canCompleteAction,
   rankFromPoints,
   recordActionLastDone,
@@ -132,6 +133,16 @@ export function registerWorshiper(displayName, skinId = DEFAULT_SKIN_ID) {
 }
 
 export function receivePortraitCommunion(worshiper) {
-  const { worshiper: next, kind } = advancePortraitCommunion(worshiper);
-  return { worshiper: saveWorshiper(next), kind };
+  const { worshiper: advanced, kind } = advancePortraitCommunion(worshiper);
+  const bonusPP =
+    kind === 'blood' || kind === 'body' ? PORTRAIT_COMMUNION[kind].bonusPP ?? 0 : 0;
+  const prevRank = rankFromPoints(worshiper.pontifexPoints);
+  const next = {
+    ...advanced,
+    pontifexPoints: worshiper.pontifexPoints + bonusPP,
+  };
+  const saved = saveWorshiper(next);
+  const newRank = rankFromPoints(saved.pontifexPoints);
+  const rankUp = newRank.id !== prevRank.id ? newRank : null;
+  return { worshiper: saved, kind, awarded: bonusPP, rankUp };
 }

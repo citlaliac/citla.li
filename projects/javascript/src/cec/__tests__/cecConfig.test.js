@@ -9,6 +9,7 @@ import {
   portraitCommunionKindForClick,
   portraitCommunionCycleExpired,
   getPortraitCommunionStep,
+  PORTRAIT_COMMUNION,
   PORTRAIT_COMMUNION_CYCLE_KEY,
   MAP_ACTION_COOLDOWN_MS,
   hasActionDoneRecently,
@@ -164,6 +165,11 @@ describe('cecConfig', () => {
     const w = { actionLastDone: { candle: Date.now() - 1000 } };
     expect(actionCooldownRemainingMs(w, 'candle')).toBeGreaterThan(0);
     expect(actionCooldownRemainingMs(w, 'register')).toBe(0);
+  });
+
+  test('portrait communion bonus PP', () => {
+    expect(PORTRAIT_COMMUNION.blood.bonusPP).toBe(24);
+    expect(PORTRAIT_COMMUNION.body.bonusPP).toBe(28);
   });
 
   test('portrait communion hourly sequence', () => {

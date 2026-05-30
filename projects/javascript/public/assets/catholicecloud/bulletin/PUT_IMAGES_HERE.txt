@@ -1,10 +1,10 @@
 Parish Bulletin cork board (repeating background):
 
-  cork.jpg   — seamless tile (square works best, e.g. 256×256 or 512×512)
+  cork.jpg   — tileable cork texture (current: 1000×667)
 
-The board tiles this image infinitely as posts are added. Until cork.jpg
-is here, a procedural cork color shows underneath.
+The board repeats this image as posts are added. CSS scales tiles by height
+(--cec-cork-tile-h in CatholiceCloudPage.css) and keeps aspect ratio.
 
 Tips:
-  - Use a seamless/tileable cork texture (edges match when repeated).
-  - Avoid strong shadows in the tile itself; paper notes add depth on top.
+  - Seamless edges help avoid visible seams when tiled.
+  - Avoid heavy shadows in the tile; paper notes add depth on top.

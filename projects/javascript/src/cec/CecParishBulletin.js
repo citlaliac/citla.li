@@ -4,7 +4,6 @@ import { ACTIVITY_REWARDS, canCompleteAction, formatActionCooldown, actionCooldo
 const PUB = process.env.PUBLIC_URL || '';
 const HEAVEN_PANEL_BG = `${PUB}/assets/catholicecloud/background/heaven-bkg.jpg`;
 const HEAVEN_BTN_BG = `${PUB}/assets/catholicecloud/background/heaven-bkg.jpg`;
-/** Seamless tile — drop at public/assets/catholicecloud/bulletin/cork.jpg */
 const CORK_BOARD_BG = `${PUB}/assets/catholicecloud/bulletin/cork.jpg`;
 
 const POLL_MS = 12000;
