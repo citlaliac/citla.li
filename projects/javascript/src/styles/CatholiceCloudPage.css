@@ -147,8 +147,16 @@
 }
 
 .cec-page--register .cec-register-panel {
-  background: linear-gradient(165deg, rgba(42, 31, 20, 0.94), rgba(21, 16, 16, 0.96));
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+  background: linear-gradient(
+    165deg,
+    rgba(108, 86, 38, 0.96) 0%,
+    rgba(72, 56, 22, 0.97) 48%,
+    rgba(44, 34, 12, 0.98) 100%
+  );
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 232, 165, 0.28),
+    0 12px 40px rgba(0, 0, 0, 0.42),
+    0 0 36px rgba(212, 175, 55, 0.18);
 }
 
 /* No outline rings or stroke chrome on controls */
@@ -1258,9 +1266,12 @@
   padding: 1.5rem;
   border: none;
   border-radius: 12px;
-  background: linear-gradient(165deg, #2a1f14, #151010);
-  color: #f5edd8;
+  background: linear-gradient(165deg, #5c4824 0%, #3d3014 52%, #26200c 100%);
+  color: #fff8e8;
   text-align: center;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 228, 165, 0.22),
+    0 0 28px rgba(212, 175, 55, 0.14);
 }
 
 .cec-register-title {
@@ -1638,12 +1649,17 @@
   max-height: min(88dvh, 720px);
   padding: clamp(1.5rem, 4vw, 2.25rem) clamp(1.25rem, 4vw, 2rem);
   border-radius: 20px;
-  background: linear-gradient(165deg, rgba(42, 28, 14, 0.97) 0%, rgba(22, 12, 6, 0.98) 100%);
-  color: #ffe9a8;
+  background: linear-gradient(
+    165deg,
+    rgba(98, 78, 32, 0.97) 0%,
+    rgba(68, 52, 20, 0.98) 50%,
+    rgba(42, 32, 10, 0.99) 100%
+  );
+  color: #fff4d0;
   box-shadow:
-    0 0 0 1px rgba(212, 175, 55, 0.25),
-    0 16px 48px rgba(0, 0, 0, 0.5),
-    0 0 40px rgba(180, 140, 40, 0.15);
+    0 0 0 1px rgba(255, 228, 160, 0.35),
+    0 16px 48px rgba(0, 0, 0, 0.48),
+    0 0 44px rgba(212, 175, 55, 0.28);
   animation: cec-frame-majesty 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
@@ -1683,6 +1699,437 @@
   margin-top: 0.25rem;
 }
 
+/* St. Jude — flip after novena; aspergillum — flip until splash (left), then natural (right) */
+.cec-building--st_jude.cec-building--img-flipped .cec-building-img,
+.cec-building--aspergillum.cec-building--img-flipped .cec-building-img {
+  transform: scaleX(-1);
+}
+
+/* Aspergillum — three shakes + holy water on use (2s) */
+.cec-building--aspergillum.cec-building--aspergillum-splash .cec-building-hit {
+  overflow: visible;
+}
+
+.cec-building--aspergillum.cec-building--aspergillum-splash .cec-building-img {
+  position: relative;
+  z-index: 2;
+  transform-origin: 38% 90%;
+  animation: cec-aspergillum-shake 1.45s ease-in-out forwards;
+}
+
+/* Three shakes with ~0.1s pause between each (1.45s total) */
+@keyframes cec-aspergillum-shake {
+  0%,
+  21%,
+  42%,
+  63%,
+  100% {
+    transform: rotate(0deg) translateY(0);
+  }
+  7% {
+    transform: rotate(-18deg) translateY(-7%);
+  }
+  14% {
+    transform: rotate(16deg) translateY(6%);
+  }
+  28% {
+    transform: rotate(-18deg) translateY(-7%);
+  }
+  35% {
+    transform: rotate(16deg) translateY(6%);
+  }
+  49% {
+    transform: rotate(-18deg) translateY(-7%);
+  }
+  56% {
+    transform: rotate(16deg) translateY(6%);
+  }
+}
+
+.cec-aspergillum-splash-fx {
+  position: absolute;
+  inset: -8% -14% -28% -14%;
+  z-index: 1;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.cec-aspergillum-drop {
+  position: absolute;
+  width: clamp(4px, 1.1vw, 7px);
+  height: clamp(5px, 1.4vw, 9px);
+  border-radius: 50% 50% 45% 45%;
+  background: radial-gradient(circle at 35% 28%, #d4f2ff 0%, #5eb8f0 50%, #2a7fc4 100%);
+  box-shadow: 0 0 6px rgba(120, 200, 255, 0.65);
+  opacity: 0;
+  animation: cec-aspergillum-drop 1.75s ease-out var(--delay, 0s) forwards;
+}
+
+@keyframes cec-aspergillum-drop {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.35);
+  }
+  12% {
+    opacity: 0.95;
+    transform: translate(calc(var(--drift) * 0.2), 6%) scale(1);
+  }
+  55% {
+    opacity: 0.75;
+    transform: translate(calc(var(--drift) * 0.65), 28%) scale(0.88);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--drift), 52%) scale(0.45);
+  }
+}
+
+/* Rosary — soft rose glow after decade complete */
+.cec-building--rosary.cec-building--rosary-glow .cec-building-hit {
+  overflow: visible;
+}
+
+.cec-rosary-glow {
+  position: absolute;
+  left: 48%;
+  top: 52%;
+  z-index: 0;
+  width: 132%;
+  height: 98%;
+  transform: translate(-50%, -50%) rotate(-11deg);
+  border-radius: 62% 38% 58% 42% / 44% 56% 48% 52%;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 72% 88% at 38% 42%, rgba(255, 175, 200, 0.52) 0%, transparent 68%),
+    radial-gradient(ellipse 55% 75% at 72% 58%, rgba(235, 130, 165, 0.36) 0%, transparent 62%),
+    radial-gradient(ellipse 90% 60% at 52% 48%, rgba(220, 105, 145, 0.22) 0%, transparent 78%);
+  filter: blur(6px);
+  animation: cec-rosary-glow-pulse 6.5s ease-in-out infinite;
+}
+
+.cec-building--rosary.cec-building--rosary-glow .cec-building-img {
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.4))
+    drop-shadow(-4px 2px 16px rgba(255, 150, 185, 0.42))
+    drop-shadow(6px -2px 28px rgba(255, 120, 160, 0.26));
+}
+
+.cec-building--rosary.cec-building--rosary-glow .cec-building-hit:hover .cec-building-img,
+.cec-building--rosary.cec-building--rosary-glow .cec-building-hit:focus-visible .cec-building-img {
+  filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.4))
+    drop-shadow(-5px 3px 20px rgba(255, 150, 185, 0.52))
+    drop-shadow(8px -3px 34px rgba(255, 120, 160, 0.32));
+}
+
+@keyframes cec-rosary-glow-pulse {
+  0%,
+  100% {
+    opacity: 0.58;
+    transform: translate(-50%, -50%) rotate(-11deg) scale(0.96, 1.02);
+  }
+  50% {
+    opacity: 0.88;
+    transform: translate(-50%, -50%) rotate(-9deg) scale(1.05, 0.98);
+  }
+}
+
+/* Basilica — larger lit image + slow orange glow after communion */
+.cec-building--vatican.cec-building--basilica-visited .cec-building-hit {
+  overflow: visible;
+}
+
+.cec-basilica-glow {
+  position: absolute;
+  left: 52%;
+  top: 48%;
+  z-index: 0;
+  width: 124%;
+  height: 104%;
+  transform: translate(-50%, -50%) rotate(7deg);
+  border-radius: 45% 55% 52% 48% / 58% 42% 60% 40%;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 65% at 55% 35%, rgba(255, 215, 135, 0.55) 0%, transparent 66%),
+    radial-gradient(ellipse 65% 85% at 32% 68%, rgba(255, 168, 55, 0.38) 0%, transparent 64%),
+    radial-gradient(ellipse 95% 70% at 62% 55%, rgba(255, 145, 45, 0.2) 0%, transparent 76%);
+  filter: blur(6px);
+  animation: cec-basilica-glow-pulse 7.5s ease-in-out infinite;
+}
+
+.cec-building--vatican.cec-building--basilica-visited .cec-building-img {
+  position: relative;
+  z-index: 1;
+  transform: scale(1.15);
+  transform-origin: center center;
+}
+
+@keyframes cec-basilica-glow-pulse {
+  0%,
+  100% {
+    opacity: 0.52;
+    transform: translate(-50%, -50%) rotate(7deg) scale(0.97, 1.03);
+  }
+  50% {
+    opacity: 0.88;
+    transform: translate(-50%, -50%) rotate(9deg) scale(1.04, 0.96);
+  }
+}
+
+/* Lit votive candle on map */
+.cec-building--candle-lit .cec-building-img {
+  filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.4))
+    drop-shadow(0 0 14px rgba(255, 180, 60, 0.45));
+}
+
+.cec-candle-flame {
+  position: absolute;
+  top: 32%;
+  left: 50%;
+  width: 11%;
+  height: 13%;
+  transform: translateX(-50%);
+  border-radius: 50% 50% 45% 45%;
+  background: radial-gradient(
+    circle at 50% 80%,
+    #fff8c8 0%,
+    #ffb347 35%,
+    #ff6b1a 70%,
+    transparent 100%
+  );
+  opacity: 0.95;
+  pointer-events: none;
+  animation: cec-candle-flicker 1.1s ease-in-out infinite alternate;
+  filter: blur(0.5px) drop-shadow(0 0 8px rgba(255, 160, 40, 0.85));
+}
+
+@keyframes cec-candle-flicker {
+  from {
+    transform: translateX(-50%) scale(0.92) skewX(-2deg);
+    opacity: 0.82;
+  }
+  to {
+    transform: translateX(-50%) scale(1.08) skewX(2deg);
+    opacity: 1;
+  }
+}
+
+/* Rank-up kaboom (no square card) */
+.cec-reward-overlay--rank-up {
+  background: rgba(6, 2, 14, 0.78);
+  animation: cec-rank-overlay-pulse 0.5s ease forwards;
+}
+
+@keyframes cec-rank-overlay-pulse {
+  from {
+    background: rgba(6, 2, 14, 0);
+  }
+  to {
+    background: rgba(6, 2, 14, 0.78);
+  }
+}
+
+.cec-rank-burst-fx {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.cec-rank-burst-rays {
+  position: absolute;
+  width: min(120vmin, 640px);
+  height: min(120vmin, 640px);
+  background: repeating-conic-gradient(
+    from -4deg,
+    rgba(255, 220, 120, 0.5) 0deg 11deg,
+    transparent 11deg 22deg
+  );
+  mask: radial-gradient(circle, #000 0 22%, transparent 62%);
+  animation: cec-rank-rays-spin 10s linear infinite;
+}
+
+@keyframes cec-rank-rays-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.cec-rank-burst-ring {
+  position: absolute;
+  width: min(72vmin, 420px);
+  height: min(72vmin, 420px);
+  border-radius: 50%;
+  border: 3px solid rgba(255, 215, 100, 0.35);
+  box-shadow:
+    0 0 0 8px rgba(255, 200, 80, 0.12),
+    0 0 60px rgba(255, 180, 40, 0.35);
+  animation: cec-rank-ring-pulse 1.4s ease-in-out infinite alternate;
+}
+
+@keyframes cec-rank-ring-pulse {
+  from {
+    transform: scale(0.92);
+    opacity: 0.65;
+  }
+  to {
+    transform: scale(1.06);
+    opacity: 1;
+  }
+}
+
+.cec-rank-burst-spark {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  font-size: clamp(1rem, 3vw, 1.45rem);
+  color: #ffe9a0;
+  text-shadow: 0 0 12px rgba(255, 200, 80, 0.9);
+  transform: rotate(var(--a)) translateY(calc(-1 * min(34vmin, 200px))) rotate(calc(-1 * var(--a)));
+  animation: cec-rank-spark-pop 0.9s cubic-bezier(0.22, 1, 0.36, 1) var(--d) both;
+}
+
+@keyframes cec-rank-spark-pop {
+  from {
+    opacity: 0;
+    transform: rotate(var(--a)) translateY(0) scale(0.3) rotate(calc(-1 * var(--a)));
+  }
+  70% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.85;
+    transform: rotate(var(--a)) translateY(calc(-1 * min(34vmin, 200px))) scale(1)
+      rotate(calc(-1 * var(--a)));
+  }
+}
+
+/* Rank-up stack: starburst clips portrait only; copy sits below */
+.cec-rank-burst-panel {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+  width: min(520px, 92vw);
+  padding: clamp(0.75rem, 3vw, 1.25rem) clamp(1rem, 4vw, 1.5rem);
+  color: #ffe9a8;
+  background: transparent;
+}
+
+.cec-rank-burst-medallion {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(320px, 68vw);
+  aspect-ratio: 1;
+  background: linear-gradient(
+    165deg,
+    rgba(118, 94, 40, 0.98) 0%,
+    rgba(82, 62, 24, 0.99) 45%,
+    rgba(50, 38, 12, 0.99) 100%
+  );
+  clip-path: polygon(
+    50% 0%,
+    61% 12%,
+    78% 4%,
+    72% 22%,
+    94% 20%,
+    80% 36%,
+    100% 50%,
+    82% 62%,
+    92% 84%,
+    68% 72%,
+    62% 100%,
+    50% 82%,
+    38% 100%,
+    32% 72%,
+    8% 84%,
+    18% 62%,
+    0% 50%,
+    20% 36%,
+    6% 20%,
+    28% 22%,
+    22% 4%,
+    39% 12%
+  );
+  box-shadow:
+    0 0 0 2px rgba(255, 232, 160, 0.55),
+    0 0 52px rgba(255, 200, 80, 0.42),
+    inset 0 0 36px rgba(255, 220, 140, 0.14),
+    0 20px 56px rgba(0, 0, 0, 0.48);
+  animation: cec-rank-kaboom-in 0.75s cubic-bezier(0.18, 1.15, 0.32, 1) forwards;
+}
+
+@keyframes cec-rank-kaboom-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.35) rotate(-8deg);
+    filter: blur(10px);
+  }
+  55% {
+    opacity: 1;
+    transform: scale(1.08) rotate(2deg);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+    filter: blur(0);
+  }
+}
+
+.cec-rank-burst-medallion .cec-portrait--hero {
+  width: min(250px, 80%);
+  height: min(250px, 80%);
+  max-width: none;
+  max-height: none;
+}
+
+.cec-rank-burst-kicker {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255, 220, 140, 0.9);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.75);
+}
+
+.cec-rank-burst-caption {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  width: min(100%, 38ch);
+  padding: 0 0.5rem;
+  text-align: center;
+}
+
+.cec-rank-burst-title {
+  margin: 0;
+  font-size: clamp(1.65rem, 5vw, 2.35rem);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #fff4c8;
+  text-shadow:
+    0 0 24px rgba(255, 200, 80, 0.55),
+    0 2px 12px rgba(0, 0, 0, 0.75);
+}
+
+.cec-reward-overlay--rank-up .cec-rank-burst-caption .cec-reward-rank {
+  margin: 0;
+  font-size: clamp(1.05rem, 3vw, 1.25rem);
+  line-height: 1.45;
+  color: #e8d5a0;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.75);
+}
+
 .cec-wheel-error {
   color: #8b2020;
   font-size: 0.85rem;
@@ -1692,8 +2139,8 @@
 .cec-register-panel--wide {
   max-width: 40rem;
   background:
-    linear-gradient(160deg, rgba(58, 39, 12, 0.22), rgba(20, 14, 8, 0.34)),
-    linear-gradient(145deg, rgba(255, 243, 190, 0.14), rgba(140, 92, 24, 0.14)),
+    linear-gradient(160deg, rgba(120, 96, 42, 0.28), rgba(48, 38, 14, 0.32)),
+    linear-gradient(145deg, rgba(255, 248, 210, 0.22), rgba(212, 175, 55, 0.2)),
     var(--cec-heaven-panel-bg) center / cover no-repeat !important;
   -webkit-backdrop-filter: blur(6px) saturate(1.08);
   backdrop-filter: blur(6px) saturate(1.08);
@@ -2608,6 +3055,24 @@
     padding: 1.25rem 1rem;
   }
 
+  .cec-rank-burst-panel {
+    width: min(100%, 94vw);
+    padding: 0.75rem 0.75rem;
+  }
+
+  .cec-rank-burst-medallion {
+    width: min(280px, 72vw);
+  }
+
+  .cec-rank-burst-medallion .cec-portrait--hero {
+    width: min(220px, 82%);
+    height: min(220px, 82%);
+  }
+
+  .cec-rank-burst-caption {
+    width: min(100%, 34ch);
+  }
+
   .cec-register-panel {
     width: min(100%, 94vw);
     max-height: calc(100dvh - 8.75rem);
@@ -2637,6 +3102,15 @@
   .cec-portrait--hero {
     width: min(80px, 22vw);
     height: min(80px, 22vw);
+  }
+
+  .cec-rank-burst-medallion {
+    width: min(260px, 82vw);
+  }
+
+  .cec-rank-burst-medallion .cec-portrait--hero {
+    width: min(210px, 84%);
+    height: min(210px, 84%);
   }
 
   .cec-wheel-stage {

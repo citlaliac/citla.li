@@ -79,7 +79,7 @@ function CecParishBulletin({ worshiper, onPostApproved, onClose }) {
         <div className="cec-bulletin-body">
           <p className="cec-bulletin-hint">
             Shared notes from worshipers. Pin a note for +{BULLETIN_PP} Pontifex Points (up to{' '}
-            {ACTIVITY_REWARDS.bulletin_post.maxPerSession} per visit).
+            once per hour).
           </p>
           {canPost ? (
             <form className="cec-bulletin-form" onSubmit={handleSubmit}>

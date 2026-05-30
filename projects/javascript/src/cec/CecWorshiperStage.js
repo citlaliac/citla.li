@@ -9,6 +9,7 @@ function CecWorshiperStage({ worshiper }) {
       label: 'Worshiper',
     };
   const ppToNext = upcoming ? upcoming.minPP - worshiper.pontifexPoints : 0;
+  const nextIsBonusLevel = upcoming?.id === 'pope';
 
   return (
     <aside className="cec-worshiper-stage" aria-label="Your worshiper">
@@ -27,14 +28,14 @@ function CecWorshiperStage({ worshiper }) {
 
       {upcoming ? (
         <p className="cec-worshiper-stage-next">
-          Next: <strong>{upcoming.label}</strong>
+          {nextIsBonusLevel ? 'BONUS LEVEL' : 'Next'}: <strong>{upcoming.label}</strong>
           <span className="cec-worshiper-stage-next-pp">
             {ppToNext > 0 ? `${ppToNext} PP to go` : '— rank up!'}
           </span>
         </p>
       ) : (
         <p className="cec-worshiper-stage-next cec-worshiper-stage-next--max">
-          Highest rank this visit
+          {worshiper.rank.id === 'pope' ? 'Supreme pontiff' : 'Highest rank this visit'}
         </p>
       )}
     </aside>

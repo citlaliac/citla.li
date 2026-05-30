@@ -2,6 +2,11 @@ import {
   rankFromPoints,
   rankPromotionMessage,
   canCompleteAction,
+  canAwardAmenDiscovery,
+  actionCooldownRemainingMs,
+  formatActionCooldown,
+  hasActionDoneRecently,
+  hasAmenDiscovery,
   nextRank,
   amenDiscoveryKey,
   avatarById,
@@ -11,6 +16,7 @@ import {
   maxPontifexPointsNonWheelSession,
   maxPontifexPointsFullDay,
   minPontifexPointsPerDay,
+  MAP_ACTION_COOLDOWN_MS,
   ENTRY_WORSHIPER_SKINS,
   RANKS,
   WHEEL_SAINTS_BY_ID,
@@ -21,27 +27,60 @@ describe('cecConfig', () => {
     expect(rankFromPoints(0).id).toBe('cantor');
     expect(rankFromPoints(30).id).toBe('cantor');
     expect(rankFromPoints(500).id).toBe('priest');
+    expect(rankFromPoints(2000).id).toBe('pope');
   });
 
   test('nextRank', () => {
     expect(nextRank(10)?.id).toBe('seminarian');
-    expect(nextRank(500)).toBeNull();
+    expect(nextRank(2000)).toBeNull();
   });
 
   test('rankPromotionMessage', () => {
     expect(rankPromotionMessage('seminarian', 'Maria')).toMatch(/Maria.*admitted to seminary/i);
     expect(rankPromotionMessage('deacon', 'Paul')).toMatch(/Paul.*Diaconate/i);
     expect(rankPromotionMessage('priest', 'Ana')).toMatch(/Ana.*Priesthood/i);
+    expect(rankPromotionMessage('pope', 'Greg')).toMatch(/Greg.*Papacy/i);
     expect(rankPromotionMessage('cantor', 'X')).toBeNull();
   });
 
   test('canCompleteAction', () => {
     const w = {
-      completedActions: ['register', 'bulletin_post', 'bulletin_post'],
+      completedActions: ['register'],
+      actionLastDone: {
+        incense: Date.now() - MAP_ACTION_COOLDOWN_MS - 1000,
+        bulletin_post: Date.now() - 1000,
+      },
     };
     expect(canCompleteAction(w, 'register')).toBe(false);
-    expect(canCompleteAction(w, 'bulletin_post')).toBe(false);
     expect(canCompleteAction(w, 'incense')).toBe(true);
+    expect(canCompleteAction(w, 'bulletin_post')).toBe(false);
+    expect(canCompleteAction({ actionLastDone: {} }, 'rosary')).toBe(true);
+  });
+
+  test('hourly amen discovery', () => {
+    const key = amenDiscoveryKey('vatican');
+    const w = {
+      actionLastDone: { [key]: Date.now() - 1000 },
+    };
+    expect(hasAmenDiscovery(w, 'vatican')).toBe(true);
+    expect(canAwardAmenDiscovery(w, 'vatican')).toBe(false);
+    const cooled = {
+      actionLastDone: { [key]: Date.now() - MAP_ACTION_COOLDOWN_MS - 1 },
+    };
+    expect(hasAmenDiscovery(cooled, 'vatican')).toBe(false);
+    expect(canAwardAmenDiscovery(cooled, 'vatican')).toBe(true);
+  });
+
+  test('hasActionDoneRecently', () => {
+    expect(hasActionDoneRecently({ actionLastDone: { candle: Date.now() - 500 } }, 'candle')).toBe(
+      true
+    );
+    expect(
+      hasActionDoneRecently(
+        { actionLastDone: { candle: Date.now() - MAP_ACTION_COOLDOWN_MS - 1 } },
+        'candle'
+      )
+    ).toBe(false);
   });
 
   test('amenDiscoveryKey', () => {
@@ -72,6 +111,8 @@ describe('cecConfig', () => {
     expect(fairy.imageFile).toBe('fairy-deacon.png');
     const lamb = portraitForWorshiper({ avatarId: 'lamb', pontifexPoints: 90, rank: { id: 'seminarian' } });
     expect(lamb.imageFile).toBe('lamb-seminarian.PNG');
+    const pope = portraitForWorshiper({ avatarId: 'frog', pontifexPoints: 2000, rank: { id: 'pope' } });
+    expect(pope.imageFile).toBe('pope.png');
   });
 
   test('ENTRY_WORSHIPER_SKINS has four entry options', () => {
@@ -84,15 +125,35 @@ describe('cecConfig', () => {
   });
 
   test('full session PP budget reaches Priest without wheel', () => {
-    expect(maxPontifexPointsNonWheelSession()).toBeGreaterThanOrEqual(RANKS[RANKS.length - 1].minPP);
+    const priest = RANKS.find((r) => r.id === 'priest');
+    expect(maxPontifexPointsNonWheelSession()).toBeGreaterThanOrEqual(priest.minPP);
   });
 
   test('core daily loop reaches Priest (map + Amens + wheel, no bulletin)', () => {
-    expect(minPontifexPointsPerDay()).toBeGreaterThanOrEqual(RANKS[RANKS.length - 1].minPP);
+    const priest = RANKS.find((r) => r.id === 'priest');
+    expect(minPontifexPointsPerDay()).toBeGreaterThanOrEqual(priest.minPP);
   });
 
   test('max daily PP includes wheel headroom above Priest', () => {
-    expect(maxPontifexPointsFullDay()).toBeGreaterThan(RANKS[RANKS.length - 1].minPP);
+    const priest = RANKS.find((r) => r.id === 'priest');
+    expect(maxPontifexPointsFullDay()).toBeGreaterThan(priest.minPP);
+  });
+
+  test('pope rank needs more than one map pass', () => {
+    const pope = RANKS.find((r) => r.id === 'pope');
+    expect(maxPontifexPointsNonWheelSession()).toBeLessThan(pope.minPP);
+  });
+
+  test('formatActionCooldown', () => {
+    expect(formatActionCooldown(0)).toBe('');
+    expect(formatActionCooldown(90_000)).toMatch(/minute/);
+    expect(formatActionCooldown(65 * 60 * 1000)).toMatch(/1h/);
+  });
+
+  test('actionCooldownRemainingMs', () => {
+    const w = { actionLastDone: { candle: Date.now() - 1000 } };
+    expect(actionCooldownRemainingMs(w, 'candle')).toBeGreaterThan(0);
+    expect(actionCooldownRemainingMs(w, 'register')).toBe(0);
   });
 
   test('wheel saints match uploaded assets', () => {

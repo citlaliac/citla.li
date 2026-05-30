@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { useSEO } from '../hooks/useSEO';
@@ -11,7 +11,7 @@ import CecSaintWheel from '../cec/CecSaintWheel';
 import CecRankToast from '../cec/CecRankToast';
 import CecShootingStars from '../cec/CecShootingStars';
 import EcclesiasticalClock from '../ecclesiasticalTime/EcclesiasticalClock';
-import { hasAmenDiscovery } from '../cec/cecConfig';
+import { canAwardAmenDiscovery } from '../cec/cecConfig';
 import {
   awardAmenDiscovery,
   awardPoints,
@@ -54,6 +54,8 @@ function CatholiceCloudPage() {
   const [bulletinOpen, setBulletinOpen] = useState(false);
   const [rewardToast, setRewardToast] = useState(null);
   const [, setPendingReward] = useState(null);
+  const [aspergillumSplash, setAspergillumSplash] = useState(false);
+  const pendingAspergillumSplashRef = useRef(false);
 
   const mergeReward = (prev, { awarded = 0, rankUp }) => ({
     pp: (prev?.pp || 0) + awarded,
@@ -87,6 +89,8 @@ function CatholiceCloudPage() {
     [worshiper, applyWorshiper]
   );
 
+  const endAspergillumSplash = useCallback(() => setAspergillumSplash(false), []);
+
   const handleSelectLocation = (loc) => {
     if (loc.actionType === 'bulletin') {
       setBulletinOpen(true);
@@ -97,17 +101,23 @@ function CatholiceCloudPage() {
       return;
     }
     setPendingReward(null);
+    pendingAspergillumSplashRef.current = false;
     setActiveLocation(loc);
   };
 
   const dismissAmen = () => {
     if (!activeLocation) return;
+    const playAspergillumSplash =
+      pendingAspergillumSplashRef.current && activeLocation.id === 'aspergillum';
+    if (playAspergillumSplash) {
+      pendingAspergillumSplashRef.current = false;
+    }
     setAmenSparkle(true);
     setWorshiper((w) => {
       if (!w) return w;
       let next = w;
       let amenPart = { awarded: 0, rankUp: null };
-      if (!hasAmenDiscovery(w, activeLocation.id)) {
+      if (canAwardAmenDiscovery(w, activeLocation.id)) {
         const result = awardAmenDiscovery(w, activeLocation.id);
         next = result.worshiper;
         amenPart = { awarded: result.awarded, rankUp: result.rankUp };
@@ -117,6 +127,9 @@ function CatholiceCloudPage() {
         window.setTimeout(() => {
           setActiveLocation(null);
           setAmenSparkle(false);
+          if (playAspergillumSplash) {
+            setAspergillumSplash(true);
+          }
           if (flush.rankUp) {
             setRewardToast(flush);
           }
@@ -224,7 +237,12 @@ function CatholiceCloudPage() {
             <div className="cec-layout-head">
               <EcclesiasticalClock />
             </div>
-            <CecParishMap worshiper={worshiper} onSelectLocation={handleSelectLocation} />
+            <CecParishMap
+              worshiper={worshiper}
+              onSelectLocation={handleSelectLocation}
+              aspergillumSplash={aspergillumSplash}
+              onAspergillumSplashEnd={endAspergillumSplash}
+            />
           </div>
         </div>
         <p className="cec-bottom-tagline">Heaven on earth? This is heaven online.</p>
@@ -251,7 +269,12 @@ function CatholiceCloudPage() {
           onPartake={() => handleAward('fish_fry', { deferToast: true })}
           onRosaryComplete={() => handleAward('rosary', { deferToast: true })}
           onLightCandle={() => handleAward('candle', { deferToast: true })}
-          onActionDone={() => handleAward(activeLocation.actionId, { deferToast: true })}
+          onActionDone={() => {
+            const { awarded } = handleAward(activeLocation.actionId, { deferToast: true });
+            if (activeLocation.id === 'aspergillum' && awarded > 0) {
+              pendingAspergillumSplashRef.current = true;
+            }
+          }}
         />
       )}
 

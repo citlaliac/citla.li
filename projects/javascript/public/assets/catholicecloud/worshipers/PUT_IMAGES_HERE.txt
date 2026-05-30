@@ -28,6 +28,10 @@ Lamb filenames (must match exactly, including .PNG casing):
   lamb-deacon.png
   lamb-priest.png
 
+Pope (all skins at 2000+ PP):
+
+  pope.png
+
 Tips:
   - Transparent background, roughly square, ~200–400px wide.
   - Large portrait on the left updates when you rank up (frog/fairy/lamb).

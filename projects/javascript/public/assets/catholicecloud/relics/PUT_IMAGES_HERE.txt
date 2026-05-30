@@ -2,9 +2,13 @@ Relic icons — filenames must match HOTSPOTS in CatholiceCloudPage.js.
 
 Current:
   aspergillum.png
-  vatican.png
+  vatican.png (default basilica)
+  basillica-on.png (after communion visit; copy of basillica on.PNG)
   rosary.webp
+  insence-before.png (before incense action)
+  insence_gif.gif (after incense action)
   insence.webp
-  vigil-candle.png
-  st-jude-arm-bone.png
+  votive-candle.png
+  st-jude-arm-bone.png (flips horizontally after novena)
   lent-fish-fry.png
+  fish-eaten.png (after fish fry; copy of fish eaten.PNG)

@@ -5,7 +5,20 @@ export const RANKS = [
   { id: 'seminarian', label: 'Seminarian', minPP: 90 },
   { id: 'deacon', label: 'Deacon', minPP: 220 },
   { id: 'priest', label: 'Priest', minPP: 500 },
+  { id: 'pope', label: 'Pope', minPP: 2000 },
 ];
+
+/** Map actions (and Amens) reset after this cooldown. */
+export const MAP_ACTION_COOLDOWN_MS = 60 * 60 * 1000;
+
+/** Shared Pope portrait — public/assets/catholicecloud/worshipers/pope.png */
+export const POPE_PORTRAIT = {
+  id: 'pope',
+  rankId: 'pope',
+  label: 'Pope',
+  emoji: '👑',
+  imageFile: 'pope.png',
+};
 
 /** Rank-up toast copy — includes worshiper display name. */
 export function rankPromotionMessage(rankId, displayName) {
@@ -17,12 +30,14 @@ export function rankPromotionMessage(rankId, displayName) {
       return `${name}, you've been ordained to the Diaconate.`;
     case 'priest':
       return `${name}, you've been ordained to the Priesthood.`;
+    case 'pope':
+      return `${name}, you have been elevated to the Papacy.`;
     default:
       return null;
   }
 }
 
-/** Tuned so one full day (map + 7 Amens + daily wheel) reaches Priest (500+); bulletin is bonus PP. */
+/** Tuned so one map pass reaches Priest (500+); Pope (2000) needs hourly repeats. Bulletin is bonus PP. */
 export const ACTIVITY_REWARDS = {
   register: { pp: 28, maxPerSession: 1 },
   incense: { pp: 32, maxPerSession: 1 },
@@ -35,7 +50,7 @@ export const ACTIVITY_REWARDS = {
   bulletin_post: { pp: 46, maxPerSession: 2 },
 };
 
-/** amen_${locationId} — first Amen dismiss per map building (7 buildings, not bulletin/wheel) */
+/** amen_${locationId} — Amen discovery PP per map building; resets hourly (not bulletin/wheel). */
 export const AMEN_DISCOVERY_PP = 31;
 
 /** Decorative path edges only (not visit order) */
@@ -56,7 +71,8 @@ export const CEC_LOCATIONS = [
   {
     id: 'incense',
     label: 'Light incense',
-    buildingFile: 'insence_gif.gif',
+    buildingFile: 'insence-before.png',
+    visitedBuildingFile: 'insence_gif.gif',
     fallbackEmoji: '💨',
     top: '5.1%',
     left: '2.6%',
@@ -69,6 +85,7 @@ export const CEC_LOCATIONS = [
     id: 'fish_fry',
     label: 'Friday Fish Fry',
     buildingFile: 'lent-fish-fry.png',
+    visitedBuildingFile: 'fish-eaten.png',
     fallbackEmoji: '🐟',
     top: '65.4%',
     left: '3.9%',
@@ -81,6 +98,7 @@ export const CEC_LOCATIONS = [
     id: 'rosary',
     label: 'Rosary Chapel',
     buildingFile: 'rosary.webp',
+    visitedGlow: true,
     fallbackEmoji: '📿',
     top: '89.8%',
     left: '19.0%',
@@ -92,6 +110,7 @@ export const CEC_LOCATIONS = [
     id: 'vatican',
     label: 'Basilica',
     buildingFile: 'vatican.png',
+    visitedBuildingFile: 'basillica-on.png',
     fallbackEmoji: '🏛️',
     top: '10.0%',
     left: '47.7%',
@@ -104,6 +123,7 @@ export const CEC_LOCATIONS = [
     id: 'aspergillum',
     label: 'Aspergillum splash',
     buildingFile: 'aspergillum.png',
+    flipUntilVisited: true,
     fallbackEmoji: '💧',
     top: '19.9%',
     left: '85.8%',
@@ -115,6 +135,7 @@ export const CEC_LOCATIONS = [
     id: 'st_jude',
     label: 'St. Jude Shrine',
     buildingFile: 'st-jude-arm-bone.png',
+    visitedFlip: true,
     fallbackEmoji: '🦴',
     top: '28.5%',
     left: '67.6%',
@@ -348,6 +369,7 @@ export const RANK_PORTRAITS_BY_ID = {
   ...FROG_PORTRAITS_BY_ID,
   ...FAIRY_PORTRAITS_BY_ID,
   ...LAMB_PORTRAITS_BY_ID,
+  pope: POPE_PORTRAIT,
 };
 
 export const WORSHIPER_PORTRAITS_BY_RANK = FROG_PORTRAITS_BY_RANK;
@@ -369,6 +391,7 @@ export function lambPortraitForRank(rankId) {
 }
 
 export function rankPortraitForSkin(skinId, rankId) {
+  if (rankId === 'pope') return { ...POPE_PORTRAIT, id: `pope_${skinId}` };
   if (skinId === 'frog') return frogPortraitForRank(rankId);
   if (skinId === 'fairy') return fairyPortraitForRank(rankId);
   if (skinId === 'lamb') return lambPortraitForRank(rankId);
@@ -382,6 +405,9 @@ export function portraitForRank(rankId) {
 
 export function portraitForSkinAndRank(skinId, rankId = 'cantor') {
   const skin = VALID_SKIN_IDS.has(skinId) ? skinId : DEFAULT_SKIN_ID;
+  if (rankId === 'pope') {
+    return { ...POPE_PORTRAIT, id: `pope_${skin}` };
+  }
   const rankPortrait = rankPortraitForSkin(skin, rankId);
   if (rankPortrait) return rankPortrait;
   const entry = ENTRY_WORSHIPER_SKINS_BY_ID[skin];
@@ -422,26 +448,84 @@ export function nextRank(pp) {
   return idx < RANKS.length - 1 ? RANKS[idx + 1] : null;
 }
 
+export function getActionLastDone(worshiper, key) {
+  const ts = worshiper?.actionLastDone?.[key];
+  return typeof ts === 'number' && Number.isFinite(ts) ? ts : null;
+}
+
+function isWithinMapCooldown(lastDoneMs) {
+  if (lastDoneMs == null) return false;
+  return Date.now() - lastDoneMs < MAP_ACTION_COOLDOWN_MS;
+}
+
+/** Register is once per browser session; map actions refresh hourly. */
 export function canCompleteAction(worshiper, actionId) {
   const rule = ACTIVITY_REWARDS[actionId];
   if (!rule) return false;
-  const count = worshiper.completedActions.filter((a) => a === actionId).length;
-  return count < rule.maxPerSession;
+  if (actionId === 'register') {
+    return !(worshiper.completedActions || []).includes('register');
+  }
+  const last = getActionLastDone(worshiper, actionId);
+  if (last == null) return true;
+  return !isWithinMapCooldown(last);
+}
+
+export function hasActionDoneRecently(worshiper, actionId) {
+  if (!actionId) return false;
+  return isWithinMapCooldown(getActionLastDone(worshiper, actionId));
 }
 
 export function amenDiscoveryKey(locationId) {
   return `amen_${locationId}`;
 }
 
+export function canAwardAmenDiscovery(worshiper, locationId) {
+  const key = amenDiscoveryKey(locationId);
+  const last = getActionLastDone(worshiper, key);
+  if (last == null) return true;
+  return !isWithinMapCooldown(last);
+}
+
+/** True if this map stop’s Amen was claimed within the last hour. */
 export function hasAmenDiscovery(worshiper, locationId) {
-  return worshiper.completedActions.includes(amenDiscoveryKey(locationId));
+  return isWithinMapCooldown(getActionLastDone(worshiper, amenDiscoveryKey(locationId)));
+}
+
+/** Milliseconds until an action can be done again (0 if ready or unknown). */
+export function actionCooldownRemainingMs(worshiper, actionId) {
+  if (!actionId || actionId === 'register') return 0;
+  const last = getActionLastDone(worshiper, actionId);
+  if (last == null) return 0;
+  const remaining = MAP_ACTION_COOLDOWN_MS - (Date.now() - last);
+  return remaining > 0 ? remaining : 0;
+}
+
+export function formatActionCooldown(remainingMs) {
+  if (!remainingMs || remainingMs <= 0) return '';
+  const totalMin = Math.ceil(remainingMs / 60000);
+  if (totalMin >= 60) {
+    const h = Math.floor(totalMin / 60);
+    const m = totalMin % 60;
+    return m > 0 ? `about ${h}h ${m}m` : `about ${h}h`;
+  }
+  return totalMin <= 1 ? 'about a minute' : `about ${totalMin} minutes`;
+}
+
+export function recordActionLastDone(worshiper, key) {
+  return {
+    ...worshiper,
+    actionLastDone: {
+      ...(worshiper.actionLastDone || {}),
+      [key]: Date.now(),
+    },
+  };
 }
 
 export function locationById(id) {
   return CEC_LOCATIONS.find((l) => l.id === id);
 }
 
-/** Buildings that open the frame popup (Amen dismiss grants discovery once each). */
+/** Buildings that open the frame popup (Amen dismiss grants discovery; hourly cooldown). */
 export const AMEN_DISCOVERABLE_LOCATION_COUNT = CEC_LOCATIONS.filter(
   (l) => l.actionType !== 'bulletin' && l.actionType !== 'wheel'
 ).length;

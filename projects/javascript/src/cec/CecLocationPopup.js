@@ -1,5 +1,10 @@
 import React, { useState } from 'react';
-import { ACTIVITY_REWARDS, canCompleteAction } from './cecConfig';
+import {
+  ACTIVITY_REWARDS,
+  actionCooldownRemainingMs,
+  canCompleteAction,
+  formatActionCooldown,
+} from './cecConfig';
 
 const PUB = process.env.PUBLIC_URL || '';
 const FRAME_POPUP = `${PUB}/assets/catholicecloud/frame.png`;
@@ -19,10 +24,11 @@ function CecLocationPopup({
   onActionDone,
 }) {
   const [rosaryCount, setRosaryCount] = useState(0);
-  const [candleLit, setCandleLit] = useState(false);
-
   const actionId = location.actionId;
   const canDoAction = actionId && canCompleteAction(worshiper, actionId);
+  const candleAlreadyLit =
+    location.actionType === 'candle' && actionId && !canCompleteAction(worshiper, actionId);
+  const [candleLit, setCandleLit] = useState(candleAlreadyLit);
 
   const ppButtonLabel = (fallback) => {
     const pp = ACTIVITY_REWARDS[actionId]?.pp ?? 0;
@@ -76,7 +82,7 @@ function CecLocationPopup({
       return <p className="cec-popup-done">Decade complete.</p>;
     }
     if (location.actionType === 'candle') {
-      if (canDoAction && !candleLit) {
+      if (canDoAction && !candleLit && !candleAlreadyLit) {
         return (
           <button
             type="button"
@@ -90,7 +96,11 @@ function CecLocationPopup({
           </button>
         );
       }
-      return <p className="cec-popup-done">{candleLit ? 'Flame lit.' : 'Candle already lit.'}</p>;
+      return (
+        <p className="cec-popup-done cec-popup-done--candle-lit">
+          {candleLit || candleAlreadyLit ? 'Flame lit.' : 'Candle already lit.'}
+        </p>
+      );
     }
     if (location.actionType === 'amen' && canDoAction) {
       return (
@@ -100,7 +110,13 @@ function CecLocationPopup({
       );
     }
     if (actionId && !canDoAction) {
-      return <p className="cec-popup-done">Visit complete.</p>;
+      const remaining = actionCooldownRemainingMs(worshiper, actionId);
+      const when = formatActionCooldown(remaining);
+      return (
+        <p className="cec-popup-done">
+          {when ? `Available again in ${when}.` : 'Visit complete.'}
+        </p>
+      );
     }
     return null;
   };

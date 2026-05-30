@@ -4,8 +4,10 @@ import {
   DEFAULT_SKIN_ID,
   VALID_SKIN_IDS,
   amenDiscoveryKey,
+  canAwardAmenDiscovery,
   canCompleteAction,
   rankFromPoints,
+  recordActionLastDone,
   todayDateString,
 } from './cecConfig';
 
@@ -25,6 +27,16 @@ function normalizeSkinId(skinId) {
   return DEFAULT_SKIN_ID;
 }
 
+function normalizeWorshiper(worshiper) {
+  const w = { ...worshiper };
+  w.actionLastDone =
+    w.actionLastDone && typeof w.actionLastDone === 'object' ? { ...w.actionLastDone } : {};
+  w.completedActions = Array.isArray(w.completedActions) ? [...w.completedActions] : [];
+  w.avatarId = normalizeSkinId(w.avatarId);
+  w.rank = rankFromPoints(w.pontifexPoints || 0);
+  return w;
+}
+
 export function createWorshiper(displayName, skinId = DEFAULT_SKIN_ID) {
   return {
     sessionId: newSessionId(),
@@ -33,6 +45,7 @@ export function createWorshiper(displayName, skinId = DEFAULT_SKIN_ID) {
     pontifexPoints: 0,
     rank: rankFromPoints(0),
     completedActions: [],
+    actionLastDone: {},
     lastSpinDate: null,
   };
 }
@@ -41,10 +54,8 @@ export function loadWorshiper() {
   try {
     const raw = sessionStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
-    const w = JSON.parse(raw);
+    const w = normalizeWorshiper(JSON.parse(raw));
     if (!w?.sessionId || !w?.displayName) return null;
-    w.avatarId = normalizeSkinId(w.avatarId);
-    w.rank = rankFromPoints(w.pontifexPoints || 0);
     return w;
   } catch {
     return null;
@@ -52,11 +63,7 @@ export function loadWorshiper() {
 }
 
 export function saveWorshiper(worshiper) {
-  const next = {
-    ...worshiper,
-    avatarId: normalizeSkinId(worshiper.avatarId),
-    rank: rankFromPoints(worshiper.pontifexPoints),
-  };
+  const next = normalizeWorshiper(worshiper);
   sessionStorage.setItem(STORAGE_KEY, JSON.stringify(next));
   return next;
 }
@@ -68,10 +75,14 @@ export function awardPoints(worshiper, actionId) {
   const rule = ACTIVITY_REWARDS[actionId];
   const pp = rule.pp;
   const prevRank = rankFromPoints(worshiper.pontifexPoints);
-  const next = {
-    ...worshiper,
+  let next = recordActionLastDone(worshiper, actionId);
+  next = {
+    ...next,
     pontifexPoints: worshiper.pontifexPoints + pp,
-    completedActions: [...worshiper.completedActions, actionId],
+    completedActions:
+      actionId === 'register'
+        ? [...next.completedActions, actionId]
+        : next.completedActions,
   };
   const saved = saveWorshiper(next);
   const newRank = rankFromPoints(saved.pontifexPoints);
@@ -80,15 +91,15 @@ export function awardPoints(worshiper, actionId) {
 }
 
 export function awardAmenDiscovery(worshiper, locationId) {
-  const key = amenDiscoveryKey(locationId);
-  if (worshiper.completedActions.includes(key)) {
+  if (!canAwardAmenDiscovery(worshiper, locationId)) {
     return { worshiper, awarded: 0, rankUp: null };
   }
+  const key = amenDiscoveryKey(locationId);
   const prevRank = rankFromPoints(worshiper.pontifexPoints);
-  const next = {
-    ...worshiper,
+  let next = recordActionLastDone(worshiper, key);
+  next = {
+    ...next,
     pontifexPoints: worshiper.pontifexPoints + AMEN_DISCOVERY_PP,
-    completedActions: [...worshiper.completedActions, key],
   };
   const saved = saveWorshiper(next);
   const newRank = rankFromPoints(saved.pontifexPoints);
