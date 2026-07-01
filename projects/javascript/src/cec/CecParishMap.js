@@ -150,7 +150,6 @@ function CecBuilding({ location, worshiper, onSelect, aspergillumSplash, showHol
 
 function CecParishMap({
   worshiper,
-  reigningPope,
   seasonThemeId,
   hollyMapIds = [],
   onSelectLocation,
@@ -167,15 +166,6 @@ function CecParishMap({
 
   return (
     <div className="cec-playfield cec-playfield--map">
-      {reigningPope && (
-        <p className="cec-map-pope-banner" aria-live="polite">
-          <span className="cec-map-pope-banner-crown" aria-hidden>
-            👑
-          </span>
-          Reigning Pope: <strong>{reigningPope.displayName}</strong>
-          <span className="cec-map-pope-banner-pp">{reigningPope.pontifexPoints} PP</span>
-        </p>
-      )}
       <div className="cec-map-frame">
         <img className="cec-map-base" src={MAP_IMAGE} alt="" draggable={false} />
         <div className="cec-map-stops" role="group" aria-label="Parish map stops">

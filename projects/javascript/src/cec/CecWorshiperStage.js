@@ -3,7 +3,13 @@ import CecWorshiperPortrait from './CecWorshiperPortrait';
 import { ENTRY_WORSHIPER_SKINS_BY_ID, nextRank, POPE_RANK } from './cecConfig';
 import { getSeasonStarNameStyle } from './cecSeasonTheme';
 
-function CecWorshiperStage({ worshiper, reigningPope, onPortraitClick, starPalette = 'gold' }) {
+function CecWorshiperStage({
+  worshiper,
+  reigningPope,
+  onPortraitClick,
+  onLogout,
+  starPalette = 'gold',
+}) {
   const nameStyle = getSeasonStarNameStyle(starPalette);
   const papacyCtx = { accountId: worshiper.accountId, reigningPope };
   const upcoming = nextRank(worshiper.pontifexPoints, papacyCtx);
@@ -39,12 +45,6 @@ function CecWorshiperStage({ worshiper, reigningPope, onPortraitClick, starPalet
 
       <p className="cec-worshiper-stage-rank">{worshiper.rank.label}</p>
 
-      {reigningPope && !isPope && (
-        <p className="cec-worshiper-stage-pope-reign">
-          Reigning Pope: <strong>{reigningPope.displayName}</strong>
-        </p>
-      )}
-
       <div className="cec-worshiper-stage-pp-block">
         <span className="cec-worshiper-stage-pp-label">Pontifex Points</span>
         <strong className="cec-worshiper-stage-pp-value">{worshiper.pontifexPoints}</strong>
@@ -61,6 +61,12 @@ function CecWorshiperStage({ worshiper, reigningPope, onPortraitClick, starPalet
         <p className="cec-worshiper-stage-next cec-worshiper-stage-next--max">
           {isPope ? 'Supreme pontiff' : 'Highest rank this visit'}
         </p>
+      )}
+
+      {worshiper.accountId && onLogout && (
+        <button type="button" className="cec-worshiper-stage-logout" onClick={onLogout}>
+          Log out
+        </button>
       )}
 
       {popeEligibleNotReigning && (

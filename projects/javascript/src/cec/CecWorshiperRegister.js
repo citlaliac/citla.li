@@ -6,6 +6,8 @@ import CecWorshiperPortrait from './CecWorshiperPortrait';
 const PUB = process.env.PUBLIC_URL || '';
 const HEAVEN_BTN_BG = `${PUB}/assets/catholicecloud/background/heaven-bkg.jpg`;
 const HEAVEN_PANEL_BG = `${PUB}/assets/catholicecloud/background/heaven-bkg.jpg`;
+const IS_DEV = process.env.NODE_ENV === 'development';
+const DEV_GUEST_USERNAME = 'citlali';
 
 function CecWorshiperRegister({
   onGuestEnter,
@@ -14,11 +16,11 @@ function CecWorshiperRegister({
   authError,
   authBusy,
 }) {
-  const [name, setName] = useState('');
+  const [name, setName] = useState(IS_DEV ? DEV_GUEST_USERNAME : '');
   const [username, setUsername] = useState('');
   const [skinId, setSkinId] = useState(DEFAULT_SKIN_ID);
   const [authPanel, setAuthPanel] = useState(null);
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(IS_DEV ? DEV_GUEST_USERNAME : '');
   const [password, setPassword] = useState('');
   const trimmedName = name.trim();
   const trimmedUsername = username.trim();
@@ -33,7 +35,8 @@ function CecWorshiperRegister({
     e.preventDefault();
     if (authBusy) return;
     if (authPanel === 'login') {
-      if (!email.trim() || !password) return;
+      if (!email.trim()) return;
+      if (!IS_DEV && !password) return;
       onLogin(email.trim(), password);
       return;
     }
@@ -140,19 +143,23 @@ function CecWorshiperRegister({
         {authPanel && (
           <form className="cec-register-auth-form" onSubmit={handleAuthSubmit}>
             <p className="cec-register-auth-form-hint">
-              {authPanel === 'login' ? 'Optional — email login.' : 'Optional — lock a username forever.'}
+              {authPanel === 'login'
+                ? IS_DEV
+                  ? `Dev login: enter ${DEV_GUEST_USERNAME} (password optional).`
+                  : 'Optional — email login.'
+                : 'Optional — lock a username forever.'}
             </p>
             <label className="cec-register-label cec-register-label--compact" htmlFor="cec-account-email">
-              Email
+              {authPanel === 'login' && IS_DEV ? 'Username or email' : 'Email'}
             </label>
             <input
               id="cec-account-email"
               className="cec-register-input cec-register-input--compact"
-              type="email"
-              autoComplete="email"
+              type={authPanel === 'login' && IS_DEV ? 'text' : 'email'}
+              autoComplete={authPanel === 'login' && IS_DEV ? 'username' : 'email'}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
+              placeholder={authPanel === 'login' && IS_DEV ? DEV_GUEST_USERNAME : 'you@example.com'}
             />
             {authPanel === 'signup' && (
               <>
@@ -194,8 +201,9 @@ function CecWorshiperRegister({
               disabled={
                 authBusy ||
                 !email.trim() ||
-                !password ||
-                (authPanel === 'signup' && (password.length < 8 || !trimmedUsername))
+                (authPanel === 'login'
+                  ? !IS_DEV && !password
+                  : !password || password.length < 8 || !trimmedUsername)
               }
             >
               {authBusy ? '…' : authPanel === 'login' ? 'log in' : 'create account'}

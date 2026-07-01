@@ -72,8 +72,8 @@ function cec_rank_from_points($pp) {
     $ranks = [
         ['id' => 'cantor', 'label' => 'Cantor', 'minPP' => 0],
         ['id' => 'seminarian', 'label' => 'Seminarian', 'minPP' => 120],
-        ['id' => 'deacon', 'label' => 'Deacon', 'minPP' => 300],
-        ['id' => 'priest', 'label' => 'Priest', 'minPP' => 750],
+        ['id' => 'deacon', 'label' => 'Deacon', 'minPP' => 620],
+        ['id' => 'priest', 'label' => 'Priest', 'minPP' => 1150],
         ['id' => 'pope', 'label' => 'Pope', 'minPP' => 3000],
     ];
     $current = $ranks[0];
@@ -118,15 +118,15 @@ function cec_effective_rank($pp, $accountId, $reigningPope) {
         return $base;
     }
     if (!$accountId) {
-        return ['id' => 'priest', 'label' => 'Priest', 'minPP' => 750];
+        return ['id' => 'priest', 'label' => 'Priest', 'minPP' => 1150];
     }
     if (!$reigningPope) {
-        return ['id' => 'priest', 'label' => 'Priest', 'minPP' => 750];
+        return ['id' => 'priest', 'label' => 'Priest', 'minPP' => 1150];
     }
     if ((int) $reigningPope['accountId'] === (int) $accountId) {
         return ['id' => 'pope', 'label' => 'Pope', 'minPP' => cec_pope_min_pp()];
     }
-    return ['id' => 'priest', 'label' => 'Priest', 'minPP' => 750];
+    return ['id' => 'priest', 'label' => 'Priest', 'minPP' => 1150];
 }
 
 function cec_account_session_id($accountId) {
@@ -245,4 +245,22 @@ function cec_display_name_taken($conn, $displayName, $exceptAccountId = null) {
     $row = $stmt->get_result()->fetch_assoc();
     $stmt->close();
     return (bool) $row;
+}
+
+function cec_is_local_request() {
+    $host = $_SERVER['HTTP_HOST'] ?? '';
+    return stripos($host, 'localhost') !== false || stripos($host, '127.0.0.1') !== false;
+}
+
+function cec_dev_guest_name_bypass($displayName) {
+    return cec_is_local_request()
+        && strcasecmp(cec_normalize_display_name($displayName), 'citlali') === 0;
+}
+
+/** Block session-only guests from using a registered username (localhost dev exempts citlali). */
+function cec_guest_session_name_blocked($conn, $displayName) {
+    if (cec_dev_guest_name_bypass($displayName)) {
+        return false;
+    }
+    return cec_display_name_taken($conn, $displayName);
 }

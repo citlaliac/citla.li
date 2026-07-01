@@ -36,6 +36,7 @@ import {
   saveWorshiper,
   normalizeWorshiper,
   receivePortraitCommunion,
+  clearAuth,
   setReigningPope,
   setAccountSyncHandler,
 } from '../cec/worshiperStorage';
@@ -185,6 +186,16 @@ function CatholiceCloudPage() {
       setAuthBusy(false);
     }
   };
+
+  const handleLogout = useCallback(() => {
+    clearAuth();
+    setWorshiper(null);
+    setReigningPopeState(null);
+    setRewardToast(null);
+    setBulletinOpen(false);
+    setShowWheel(false);
+    setActiveLocation(null);
+  }, []);
 
   const handleLogin = async (email, password) => {
     setAuthBusy(true);
@@ -554,6 +565,7 @@ function CatholiceCloudPage() {
             reigningPope={reigningPope}
             starPalette={seasonTheme.starPalette}
             onPortraitClick={handlePortraitCommunion}
+            onLogout={worshiper.accountId ? handleLogout : undefined}
           />
           <div className="cec-layout">
             <div className="cec-layout-head">
@@ -561,13 +573,26 @@ function CatholiceCloudPage() {
             </div>
             <CecParishMap
               worshiper={worshiper}
-              reigningPope={reigningPope}
               seasonThemeId={activeThemeId}
               hollyMapIds={seasonTheme.hollyMapIds}
               onSelectLocation={handleSelectLocation}
               aspergillumSplash={aspergillumSplash}
               onAspergillumSplashEnd={endAspergillumSplash}
             />
+            <div className="cec-layout-foot">
+              <p
+                className="cec-ecclesiastical-season cec-map-current-pope"
+                aria-live="polite"
+                aria-label={
+                  reigningPope
+                    ? `Current Pope: ${reigningPope.displayName}`
+                    : 'No reigning Pope yet'
+                }
+              >
+                Current Pope:{' '}
+                {reigningPope ? <strong>{reigningPope.displayName}</strong> : '—'}
+              </p>
+            </div>
           </div>
         </div>
         <p className="cec-bottom-tagline">Heaven on earth? This is heaven online.</p>

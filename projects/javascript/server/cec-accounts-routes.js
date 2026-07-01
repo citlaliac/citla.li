@@ -7,8 +7,8 @@ const bcrypt = require('bcryptjs');
 const RANKS = [
   { id: 'cantor', label: 'Cantor', minPP: 0 },
   { id: 'seminarian', label: 'Seminarian', minPP: 120 },
-  { id: 'deacon', label: 'Deacon', minPP: 300 },
-  { id: 'priest', label: 'Priest', minPP: 750 },
+  { id: 'deacon', label: 'Deacon', minPP: 620 },
+  { id: 'priest', label: 'Priest', minPP: 1150 },
   { id: 'pope', label: 'Pope', minPP: 3000 },
 ];
 
@@ -85,6 +85,34 @@ function worshiperFromRow(row, reigningPope = null) {
 
 let tablesReady = false;
 
+function isLocalDevCec() {
+  return process.env.NODE_ENV !== 'production';
+}
+
+const DEV_LOGIN_USERNAME = 'citlali';
+const DEV_LOGIN_EMAIL = 'citlali@localhost.dev';
+
+async function ensureDevCitlaliAccount(connection) {
+  if (!isLocalDevCec()) return null;
+  const [rows] = await connection.execute(
+    `SELECT * FROM cec_accounts WHERE display_name = ? AND email IS NOT NULL LIMIT 1`,
+    [DEV_LOGIN_USERNAME]
+  );
+  if (rows[0]) return rows[0];
+
+  const passwordHash = await bcrypt.hash('dev-local-only', 10);
+  const [result] = await connection.execute(
+    `INSERT INTO cec_accounts (email, password_hash, display_name, avatar_id, pontifex_points, completed_actions, action_last_done)
+     VALUES (?, ?, ?, 'frog', 0, '[]', '{}')`,
+    [DEV_LOGIN_EMAIL, passwordHash, DEV_LOGIN_USERNAME]
+  );
+  return fetchAccountById(connection, result.insertId);
+}
+
+function normalizeLoginId(raw) {
+  return String(raw || '').trim().toLowerCase();
+}
+
 async function ensureCecAccountTables(connection) {
   if (tablesReady) return;
   const schemaPath = path.join(__dirname, 'schema-cec-accounts.sql');
@@ -110,6 +138,9 @@ async function ensureCecAccountTables(connection) {
     /* already exists */
   }
   tablesReady = true;
+  if (isLocalDevCec()) {
+    await ensureDevCitlaliAccount(connection);
+  }
 }
 
 function normalizeDisplayName(displayName) {
@@ -232,6 +263,10 @@ function registerCecAccountRoutes(app, getConnection) {
     try {
       const name = normalizeDisplayName(req.query.username || req.query.displayName || '');
       if (!name) return jsonError(res, 'Name is required');
+      if (isLocalDevCec() && normalizeLoginId(name) === DEV_LOGIN_USERNAME) {
+        jsonOk(res, { available: true, taken: false });
+        return;
+      }
       const taken = await displayNameTaken(req.cecDb, name);
       jsonOk(res, { available: !taken, taken });
     } catch (error) {
@@ -276,8 +311,19 @@ function registerCecAccountRoutes(app, getConnection) {
 
   router.post('/auth/login', async (req, res) => {
     try {
-      const email = normalizeEmail(req.body.email);
+      const loginId = normalizeLoginId(req.body.email || req.body.username);
       const password = req.body.password || '';
+
+      if (isLocalDevCec() && loginId === DEV_LOGIN_USERNAME) {
+        const row = await ensureDevCitlaliAccount(req.cecDb);
+        if (!row) return jsonError(res, 'Dev account setup failed', 500);
+        const token = await issueSessionToken(req.cecDb, row.id);
+        const reigningPope = await getReigningPope(req.cecDb);
+        jsonOk(res, { token, worshiper: worshiperFromRow(row, reigningPope), reigningPope });
+        return;
+      }
+
+      const email = normalizeEmail(req.body.email);
       if (!validateEmail(email)) return jsonError(res, 'Valid email is required');
       if (!password) return jsonError(res, 'Password is required');
 

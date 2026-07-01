@@ -49,7 +49,7 @@ function cec_handle_names_check($conn) {
     if ($name === '') {
         cec_accounts_json_error('Name is required');
     }
-    $taken = cec_display_name_taken($conn, $name);
+    $taken = cec_guest_session_name_blocked($conn, $name);
     cec_accounts_json_ok(['available' => !$taken, 'taken' => $taken]);
 }
 

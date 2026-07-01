@@ -3,8 +3,8 @@
 export const RANKS = [
   { id: 'cantor', label: 'Cantor', minPP: 0 },
   { id: 'seminarian', label: 'Seminarian', minPP: 120 },
-  { id: 'deacon', label: 'Deacon', minPP: 300 },
-  { id: 'priest', label: 'Priest', minPP: 750 },
+  { id: 'deacon', label: 'Deacon', minPP: 620 },
+  { id: 'priest', label: 'Priest', minPP: 1150 },
   { id: 'pope', label: 'Pope', minPP: 3000 },
 ];
 
@@ -53,7 +53,7 @@ export function ppToOvertakePope(myPP, reigningPopePP) {
   return Math.max(1, theirs - myPP + 1);
 }
 
-/** Tuned so one map pass nears Deacon; Priest (750) needs a second session; Pope (3000) is contested. */
+/** Tuned so one map pass reaches Seminarian only; Deacon+ need hourly returns. */
 export const ACTIVITY_REWARDS = {
   register: { pp: 28, maxPerSession: 1 },
   incense: { pp: 32, maxPerSession: 1 },

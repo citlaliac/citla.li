@@ -82,6 +82,14 @@ function CecParishBulletin({ worshiper, onPostApproved, onClose }) {
         className="cec-bulletin-panel cec-bulletin-panel--heaven"
         style={{ '--cec-heaven-panel-bg': `url('${HEAVEN_PANEL_BG}')` }}
       >
+        <button
+          type="button"
+          className="cec-bulletin-close"
+          onClick={onClose}
+          aria-label="Close bulletin"
+        >
+          ×
+        </button>
         <div className="cec-bulletin-head">
           <h2 id="cec-bulletin-title" className="cec-bulletin-title cec-bulletin-title--hero">
             Parish Bulletin

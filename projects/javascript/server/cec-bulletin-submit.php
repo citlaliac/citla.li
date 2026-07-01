@@ -43,7 +43,7 @@ try {
     cec_ensure_tables($conn);
     cec_accounts_ensure_tables($conn);
 
-    if (cec_display_name_taken($conn, $displayName)) {
+    if (cec_guest_session_name_blocked($conn, $displayName)) {
         $account = cec_authenticate_request($conn);
         if (
             !$account

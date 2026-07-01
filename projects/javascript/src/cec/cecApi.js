@@ -42,7 +42,18 @@ async function request(url, options = {}) {
   return data;
 }
 
+export const DEV_GUEST_USERNAME = 'citlali';
+
+export function isDevGuestBypassName(name) {
+  return (
+    isDev && String(name || '').trim().toLowerCase() === DEV_GUEST_USERNAME
+  );
+}
+
 export function cecCheckUsernameAvailable(username) {
+  if (isDevGuestBypassName(username)) {
+    return Promise.resolve(true);
+  }
   return request(
     buildUrl('names', { action: 'check', query: { username } })
   ).then((d) => d.available);

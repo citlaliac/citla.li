@@ -36,7 +36,7 @@ Mirrors production PHP (`cec-accounts-api.php`):
 |--------|------|--------|
 | GET | `/api/cec/names/check?username=` | Whether username is free (registered accounts only) |
 | POST | `/api/cec/auth/register` | Body: `{ email, username, password, avatarId }` |
-| POST | `/api/cec/auth/login` | Body: `{ email, password }` |
+| POST | `/api/cec/auth/login` | Body: `{ email, password }` — local dev: `citlali` logs in without a password |
 | GET | `/api/cec/me` | Header: `Authorization: Bearer <token>` |
 | PATCH | `/api/cec/me` | Sync PP, rank progress, cooldowns |
 
