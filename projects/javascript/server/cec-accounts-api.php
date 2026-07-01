@@ -93,6 +93,8 @@ function cec_handle_auth_register($conn) {
     $stmt->close();
 
     $row = cec_fetch_account_by_id($conn, $accountId);
+    cec_touch_account_activity($conn, $accountId);
+    $row = cec_fetch_account_by_id($conn, $accountId);
     $token = cec_issue_session_token($conn, $accountId);
     $reigningPope = cec_get_reigning_pope($conn);
     cec_accounts_json_ok([
@@ -124,6 +126,8 @@ function cec_handle_auth_login($conn) {
         cec_accounts_json_error('Invalid email or password', 401);
     }
 
+    cec_touch_account_activity($conn, (int) $row['id']);
+    $row = cec_fetch_account_by_id($conn, (int) $row['id']);
     $token = cec_issue_session_token($conn, (int) $row['id']);
     $reigningPope = cec_get_reigning_pope($conn);
     cec_accounts_json_ok([
@@ -142,6 +146,8 @@ function cec_handle_me_get($conn) {
     if (!$row) {
         cec_accounts_json_error('Not authenticated', 401);
     }
+    cec_touch_account_activity($conn, (int) $row['id']);
+    $row = cec_fetch_account_by_id($conn, (int) $row['id']);
     $reigningPope = cec_get_reigning_pope($conn);
     cec_accounts_json_ok([
         'worshiper' => cec_worshiper_from_row($row, $reigningPope),
@@ -180,7 +186,8 @@ function cec_handle_me_patch($conn) {
     $stmt = $conn->prepare(
         'UPDATE cec_accounts
          SET display_name = ?, avatar_id = ?, pontifex_points = ?,
-             completed_actions = ?, action_last_done = ?, last_spin_date = ?
+             completed_actions = ?, action_last_done = ?, last_spin_date = ?,
+             last_active_at = NOW()
          WHERE id = ?'
     );
     $stmt->bind_param(

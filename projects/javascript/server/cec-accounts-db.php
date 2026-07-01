@@ -48,6 +48,7 @@ function cec_accounts_ensure_tables($conn) {
         completed_actions JSON NULL,
         action_last_done JSON NULL,
         last_spin_date DATE NULL,
+        last_active_at DATETIME NULL,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         UNIQUE KEY uk_cec_account_email (email),
@@ -89,16 +90,31 @@ function cec_pope_min_pp() {
     return 3000;
 }
 
+function cec_pope_inactivity_months() {
+    return 3;
+}
+
+function cec_touch_account_activity($conn, $accountId) {
+    $id = (int) $accountId;
+    $stmt = $conn->prepare('UPDATE cec_accounts SET last_active_at = NOW() WHERE id = ?');
+    $stmt->bind_param('i', $id);
+    $stmt->execute();
+    $stmt->close();
+}
+
 function cec_get_reigning_pope($conn) {
     $min = cec_pope_min_pp();
+    $months = cec_pope_inactivity_months();
     $stmt = $conn->prepare(
         'SELECT id, display_name, pontifex_points
          FROM cec_accounts
-         WHERE email IS NOT NULL AND pontifex_points >= ?
+         WHERE email IS NOT NULL
+           AND pontifex_points >= ?
+           AND last_active_at >= DATE_SUB(NOW(), INTERVAL ? MONTH)
          ORDER BY pontifex_points DESC, id ASC
          LIMIT 1'
     );
-    $stmt->bind_param('i', $min);
+    $stmt->bind_param('ii', $min, $months);
     $stmt->execute();
     $row = $stmt->get_result()->fetch_assoc();
     $stmt->close();
@@ -215,6 +231,10 @@ function cec_validate_password($password) {
 function cec_accounts_migrate_schema($conn) {
     @$conn->query('ALTER TABLE cec_accounts MODIFY email VARCHAR(255) NULL');
     @$conn->query('ALTER TABLE cec_accounts MODIFY password_hash VARCHAR(255) NULL');
+    @$conn->query('ALTER TABLE cec_accounts ADD COLUMN last_active_at DATETIME NULL AFTER last_spin_date');
+    @$conn->query(
+        'UPDATE cec_accounts SET last_active_at = COALESCE(updated_at, created_at) WHERE last_active_at IS NULL'
+    );
     $idx = $conn->query("SHOW INDEX FROM cec_accounts WHERE Key_name = 'uk_cec_display_name'");
     if ($idx && $idx->num_rows === 0) {
         @$conn->query('ALTER TABLE cec_accounts ADD UNIQUE KEY uk_cec_display_name (display_name)');

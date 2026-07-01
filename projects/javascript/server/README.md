@@ -40,6 +40,6 @@ Mirrors production PHP (`cec-accounts-api.php`):
 | GET | `/api/cec/me` | Header: `Authorization: Bearer <token>` |
 | PATCH | `/api/cec/me` | Sync PP, rank progress, cooldowns |
 
-Tables are created from `schema-cec-accounts.sql` on first request.
+Tables are created from `schema-cec-accounts.sql` on first request. The reigning Pope must have logged in or synced within the last **3 months** (`last_active_at`); otherwise the throne shows as *Sede Vacante*.
 
 Production: `cec-accounts-api.php?resource=auth&action=register|login` and `?resource=me`.

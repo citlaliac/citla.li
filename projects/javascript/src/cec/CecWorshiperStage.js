@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useId } from 'react';
 import CecWorshiperPortrait from './CecWorshiperPortrait';
-import { ENTRY_WORSHIPER_SKINS_BY_ID, nextRank, POPE_RANK } from './cecConfig';
+import { ENTRY_WORSHIPER_SKINS_BY_ID, nextRank, POPE_RANK, papacyRulesBullets } from './cecConfig';
 import { getSeasonStarNameStyle } from './cecSeasonTheme';
 
 function CecWorshiperStage({
@@ -20,6 +20,8 @@ function CecWorshiperStage({
   const ppToNext = upcoming ? upcoming.minPP - worshiper.pontifexPoints : 0;
   const nextIsBonusLevel = upcoming?.id === 'pope';
   const isPope = worshiper.rank.id === 'pope';
+  const papacyRulesId = useId();
+  const papacyRules = papacyRulesBullets();
   const popeEligibleNotReigning =
     worshiper.accountId &&
     (worshiper.pontifexPoints ?? 0) >= POPE_RANK.minPP &&
@@ -43,7 +45,26 @@ function CecWorshiperStage({
         <CecWorshiperPortrait worshiper={worshiper} size="hero" />
       </button>
 
-      <p className="cec-worshiper-stage-rank">{worshiper.rank.label}</p>
+      {isPope ? (
+        <span className="cec-worshiper-stage-rank-wrap">
+          <span
+            className="cec-worshiper-stage-rank cec-worshiper-stage-rank--pope"
+            tabIndex={0}
+            aria-describedby={papacyRulesId}
+          >
+            {worshiper.rank.label}
+          </span>
+          <span className="cec-papacy-rules-tip" id={papacyRulesId} role="tooltip">
+            <ul className="cec-papacy-rules-list">
+              {papacyRules.map((rule) => (
+                <li key={rule}>{rule}</li>
+              ))}
+            </ul>
+          </span>
+        </span>
+      ) : (
+        <p className="cec-worshiper-stage-rank">{worshiper.rank.label}</p>
+      )}
 
       <div className="cec-worshiper-stage-pp-block">
         <span className="cec-worshiper-stage-pp-label">Pontifex Points</span>

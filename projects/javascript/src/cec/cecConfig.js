@@ -11,6 +11,24 @@ export const RANKS = [
 export const POPE_RANK = RANKS.find((r) => r.id === 'pope');
 export const PRIEST_RANK = RANKS.find((r) => r.id === 'priest');
 
+/** Months without login or synced play before a Pope loses the throne. */
+export const POPE_INACTIVITY_MONTHS = 3;
+
+export const SEDE_VACANTE_LABEL = 'Sede Vacante';
+
+/** Short hover bullets for reigning Pope rank. */
+export function papacyRulesBullets() {
+  const pp = POPE_RANK.minPP;
+  const months = POPE_INACTIVITY_MONTHS;
+  return [
+    'One reigning Pope among registered accounts',
+    `Most PP (${pp}+) wins the throne`,
+    'A rival with more PP unseats you',
+    `No login or play for ${months} months — lose the Papacy`,
+    `Throne empty? ${SEDE_VACANTE_LABEL}`,
+  ];
+}
+
 /** Map actions (and Amens) reset after this cooldown. */
 export const MAP_ACTION_COOLDOWN_MS = 60 * 60 * 1000;
 

@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS cec_accounts (
   completed_actions JSON NULL,
   action_last_done JSON NULL,
   last_spin_date DATE NULL,
+  last_active_at DATETIME NULL,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   UNIQUE KEY uk_cec_account_email (email),

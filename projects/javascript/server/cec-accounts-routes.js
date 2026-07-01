@@ -13,6 +13,7 @@ const RANKS = [
 ];
 
 const POPE_MIN_PP = 3000;
+const POPE_INACTIVITY_MONTHS = 3;
 
 function rankFromPoints(pp) {
   let current = RANKS[0];
@@ -31,14 +32,22 @@ function effectiveRank(pp, accountId, reigningPope) {
   return RANKS.find((r) => r.id === 'priest');
 }
 
+async function touchAccountActivity(connection, accountId) {
+  await connection.execute('UPDATE cec_accounts SET last_active_at = NOW() WHERE id = ?', [
+    accountId,
+  ]);
+}
+
 async function getReigningPope(connection) {
   const [rows] = await connection.execute(
     `SELECT id, display_name, pontifex_points
      FROM cec_accounts
-     WHERE email IS NOT NULL AND pontifex_points >= ?
+     WHERE email IS NOT NULL
+       AND pontifex_points >= ?
+       AND last_active_at >= DATE_SUB(NOW(), INTERVAL ? MONTH)
      ORDER BY pontifex_points DESC, id ASC
      LIMIT 1`,
-    [POPE_MIN_PP]
+    [POPE_MIN_PP, POPE_INACTIVITY_MONTHS]
   );
   if (!rows[0]) return null;
   return {
@@ -98,12 +107,15 @@ async function ensureDevCitlaliAccount(connection) {
     `SELECT * FROM cec_accounts WHERE display_name = ? AND email IS NOT NULL LIMIT 1`,
     [DEV_LOGIN_USERNAME]
   );
-  if (rows[0]) return rows[0];
+  if (rows[0]) {
+    await touchAccountActivity(connection, rows[0].id);
+    return fetchAccountById(connection, rows[0].id);
+  }
 
   const passwordHash = await bcrypt.hash('dev-local-only', 10);
   const [result] = await connection.execute(
-    `INSERT INTO cec_accounts (email, password_hash, display_name, avatar_id, pontifex_points, completed_actions, action_last_done)
-     VALUES (?, ?, ?, 'frog', 0, '[]', '{}')`,
+    `INSERT INTO cec_accounts (email, password_hash, display_name, avatar_id, pontifex_points, completed_actions, action_last_done, last_active_at)
+     VALUES (?, ?, ?, 'frog', 0, '[]', '{}', NOW())`,
     [DEV_LOGIN_EMAIL, passwordHash, DEV_LOGIN_USERNAME]
   );
   return fetchAccountById(connection, result.insertId);
@@ -136,6 +148,20 @@ async function ensureCecAccountTables(connection) {
     );
   } catch {
     /* already exists */
+  }
+  try {
+    await connection.query(
+      'ALTER TABLE cec_accounts ADD COLUMN last_active_at DATETIME NULL AFTER last_spin_date'
+    );
+  } catch {
+    /* already migrated */
+  }
+  try {
+    await connection.query(
+      'UPDATE cec_accounts SET last_active_at = COALESCE(updated_at, created_at) WHERE last_active_at IS NULL'
+    );
+  } catch {
+    /* ignore */
   }
   tablesReady = true;
   if (isLocalDevCec()) {
@@ -297,6 +323,7 @@ function registerCecAccountRoutes(app, getConnection) {
         [email, passwordHash, displayName, avatarId]
       );
       const accountId = result.insertId;
+      await touchAccountActivity(req.cecDb, accountId);
       const row = await fetchAccountById(req.cecDb, accountId);
       const token = await issueSessionToken(req.cecDb, accountId);
       const reigningPope = await getReigningPope(req.cecDb);
@@ -318,8 +345,9 @@ function registerCecAccountRoutes(app, getConnection) {
         const row = await ensureDevCitlaliAccount(req.cecDb);
         if (!row) return jsonError(res, 'Dev account setup failed', 500);
         const token = await issueSessionToken(req.cecDb, row.id);
+        const fresh = await fetchAccountById(req.cecDb, row.id);
         const reigningPope = await getReigningPope(req.cecDb);
-        jsonOk(res, { token, worshiper: worshiperFromRow(row, reigningPope), reigningPope });
+        jsonOk(res, { token, worshiper: worshiperFromRow(fresh, reigningPope), reigningPope });
         return;
       }
 
@@ -334,9 +362,11 @@ function registerCecAccountRoutes(app, getConnection) {
       if (!row || !row.password_hash || !(await bcrypt.compare(password, row.password_hash))) {
         return jsonError(res, 'Invalid email or password', 401);
       }
+      await touchAccountActivity(req.cecDb, row.id);
+      const fresh = await fetchAccountById(req.cecDb, row.id);
       const token = await issueSessionToken(req.cecDb, row.id);
       const reigningPope = await getReigningPope(req.cecDb);
-      jsonOk(res, { token, worshiper: worshiperFromRow(row, reigningPope), reigningPope });
+      jsonOk(res, { token, worshiper: worshiperFromRow(fresh, reigningPope), reigningPope });
     } catch (error) {
       jsonError(res, error.message || 'Login failed', 500);
     }
@@ -346,8 +376,10 @@ function registerCecAccountRoutes(app, getConnection) {
     try {
       const row = await authenticateRequest(req.cecDb, req);
       if (!row) return jsonError(res, 'Not authenticated', 401);
+      await touchAccountActivity(req.cecDb, row.id);
+      const fresh = await fetchAccountById(req.cecDb, row.id);
       const reigningPope = await getReigningPope(req.cecDb);
-      jsonOk(res, { worshiper: worshiperFromRow(row, reigningPope), reigningPope });
+      jsonOk(res, { worshiper: worshiperFromRow(fresh, reigningPope), reigningPope });
     } catch (error) {
       jsonError(res, error.message || 'Failed to load account', 500);
     }
@@ -378,7 +410,8 @@ function registerCecAccountRoutes(app, getConnection) {
       await req.cecDb.execute(
         `UPDATE cec_accounts
          SET display_name = ?, avatar_id = ?, pontifex_points = ?,
-             completed_actions = ?, action_last_done = ?, last_spin_date = ?
+             completed_actions = ?, action_last_done = ?, last_spin_date = ?,
+             last_active_at = NOW()
          WHERE id = ?`,
         [
           displayName,

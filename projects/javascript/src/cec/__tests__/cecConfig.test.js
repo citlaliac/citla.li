@@ -4,6 +4,7 @@ import {
   effectiveRank,
   ppToOvertakePope,
   popeDemotionMessage,
+  papacyRulesBullets,
   canCompleteAction,
   canAwardAmenDiscovery,
   actionCooldownRemainingMs,
@@ -66,6 +67,13 @@ describe('cecConfig', () => {
         reigningPope: { accountId: 1, displayName: 'Greg', pontifexPoints: 3100 },
       })?.papacyContest
     ).toBe(true);
+  });
+
+  test('papacyRulesBullets', () => {
+    const rules = papacyRulesBullets();
+    expect(rules.length).toBeGreaterThanOrEqual(4);
+    expect(rules.join(' ')).toMatch(/3000/);
+    expect(rules.join(' ')).toMatch(/Sede Vacante/i);
   });
 
   test('rankPromotionMessage', () => {

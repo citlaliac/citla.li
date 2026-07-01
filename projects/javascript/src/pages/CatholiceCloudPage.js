@@ -22,7 +22,7 @@ import {
 } from '../cec/cecSeasonTheme';
 import EcclesiasticalClock from '../ecclesiasticalTime/EcclesiasticalClock';
 import { useEcclesiasticalTime } from '../ecclesiasticalTime/useEcclesiasticalTime';
-import { canAwardAmenDiscovery } from '../cec/cecConfig';
+import { canAwardAmenDiscovery, SEDE_VACANTE_LABEL } from '../cec/cecConfig';
 import {
   awardAmenDiscovery,
   awardPoints,
@@ -581,16 +581,22 @@ function CatholiceCloudPage() {
             />
             <div className="cec-layout-foot">
               <p
-                className="cec-ecclesiastical-season cec-map-current-pope"
+                className={`cec-ecclesiastical-season cec-map-current-pope${
+                  reigningPope ? '' : ' cec-map-current-pope--vacant'
+                }`}
                 aria-live="polite"
                 aria-label={
                   reigningPope
                     ? `Current Pope: ${reigningPope.displayName}`
-                    : 'No reigning Pope yet'
+                    : `Current Pope: ${SEDE_VACANTE_LABEL}`
                 }
               >
                 Current Pope:{' '}
-                {reigningPope ? <strong>{reigningPope.displayName}</strong> : '—'}
+                {reigningPope ? (
+                  <strong>{reigningPope.displayName}</strong>
+                ) : (
+                  <em className="cec-map-sede-vacante">{SEDE_VACANTE_LABEL}</em>
+                )}
               </p>
             </div>
           </div>
