@@ -1,6 +1,9 @@
 import {
   rankFromPoints,
   rankPromotionMessage,
+  effectiveRank,
+  ppToOvertakePope,
+  popeDemotionMessage,
   canCompleteAction,
   canAwardAmenDiscovery,
   actionCooldownRemainingMs,
@@ -33,13 +36,35 @@ describe('cecConfig', () => {
   test('rankFromPoints', () => {
     expect(rankFromPoints(0).id).toBe('cantor');
     expect(rankFromPoints(30).id).toBe('cantor');
-    expect(rankFromPoints(500).id).toBe('priest');
-    expect(rankFromPoints(2000).id).toBe('pope');
+    expect(rankFromPoints(750).id).toBe('priest');
+    expect(rankFromPoints(3000).id).toBe('pope');
+  });
+
+  test('effectiveRank — contested papacy', () => {
+    const reigning = { accountId: 1, displayName: 'Greg', pontifexPoints: 3100 };
+    expect(effectiveRank(3200, { accountId: 2, reigningPope: reigning }).id).toBe('priest');
+    expect(effectiveRank(3200, { accountId: 1, reigningPope: reigning }).id).toBe('pope');
+    expect(effectiveRank(3200, {}).id).toBe('priest');
+  });
+
+  test('ppToOvertakePope', () => {
+    expect(ppToOvertakePope(3000, 3100)).toBe(101);
   });
 
   test('nextRank', () => {
     expect(nextRank(10)?.id).toBe('seminarian');
-    expect(nextRank(2000)).toBeNull();
+    expect(
+      nextRank(3000, {
+        accountId: 1,
+        reigningPope: { accountId: 1, displayName: 'Greg', pontifexPoints: 3000 },
+      })
+    ).toBeNull();
+    expect(
+      nextRank(3100, {
+        accountId: 2,
+        reigningPope: { accountId: 1, displayName: 'Greg', pontifexPoints: 3100 },
+      })?.papacyContest
+    ).toBe(true);
   });
 
   test('rankPromotionMessage', () => {
@@ -48,6 +73,7 @@ describe('cecConfig', () => {
     expect(rankPromotionMessage('priest', 'Ana')).toMatch(/Ana.*Priesthood/i);
     expect(rankPromotionMessage('pope', 'Greg')).toMatch(/Greg.*Papacy/i);
     expect(rankPromotionMessage('cantor', 'X')).toBeNull();
+    expect(popeDemotionMessage('Ana', 'Greg', 42)).toMatch(/lost the Papacy.*Greg.*42/i);
   });
 
   test('canCompleteAction', () => {
@@ -112,13 +138,13 @@ describe('cecConfig', () => {
   });
 
   test('portraitForWorshiper respects skin', () => {
-    const frog = portraitForWorshiper({ avatarId: 'frog', pontifexPoints: 500, rank: { id: 'priest' } });
+    const frog = portraitForWorshiper({ avatarId: 'frog', pontifexPoints: 750, rank: { id: 'priest' } });
     expect(frog.imageFile).toBe('frog-priest.png');
-    const fairy = portraitForWorshiper({ avatarId: 'fairy', pontifexPoints: 220, rank: { id: 'deacon' } });
+    const fairy = portraitForWorshiper({ avatarId: 'fairy', pontifexPoints: 300, rank: { id: 'deacon' } });
     expect(fairy.imageFile).toBe('fairy-deacon.png');
-    const lamb = portraitForWorshiper({ avatarId: 'lamb', pontifexPoints: 90, rank: { id: 'seminarian' } });
+    const lamb = portraitForWorshiper({ avatarId: 'lamb', pontifexPoints: 120, rank: { id: 'seminarian' } });
     expect(lamb.imageFile).toBe('lamb-seminarian.PNG');
-    const pope = portraitForWorshiper({ avatarId: 'frog', pontifexPoints: 2000, rank: { id: 'pope' } });
+    const pope = portraitForWorshiper({ avatarId: 'frog', pontifexPoints: 3000, rank: { id: 'pope' } });
     expect(pope.imageFile).toBe('pope.png');
   });
 
@@ -135,19 +161,20 @@ describe('cecConfig', () => {
     expect(avatarById('missing').imageFile).toBe('frog-cantor.png');
   });
 
-  test('full session PP budget reaches Priest without wheel', () => {
+  test('full session PP budget does not reach Priest without wheel', () => {
     const priest = RANKS.find((r) => r.id === 'priest');
-    expect(maxPontifexPointsNonWheelSession()).toBeGreaterThanOrEqual(priest.minPP);
+    expect(maxPontifexPointsNonWheelSession()).toBeLessThan(priest.minPP);
   });
 
-  test('core daily loop reaches Priest (map + Amens + wheel, no bulletin)', () => {
+  test('core daily loop needs a second pass for Priest', () => {
     const priest = RANKS.find((r) => r.id === 'priest');
-    expect(minPontifexPointsPerDay()).toBeGreaterThanOrEqual(priest.minPP);
+    expect(minPontifexPointsPerDay()).toBeLessThan(priest.minPP);
+    expect(minPontifexPointsPerDay() * 2).toBeGreaterThanOrEqual(priest.minPP);
   });
 
-  test('max daily PP includes wheel headroom above Priest', () => {
-    const priest = RANKS.find((r) => r.id === 'priest');
-    expect(maxPontifexPointsFullDay()).toBeGreaterThan(priest.minPP);
+  test('max daily PP still below Pope threshold in one day', () => {
+    const pope = RANKS.find((r) => r.id === 'pope');
+    expect(maxPontifexPointsFullDay()).toBeLessThan(pope.minPP);
   });
 
   test('pope rank needs more than one map pass', () => {

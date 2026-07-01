@@ -1,17 +1,24 @@
 import React from 'react';
 import CecWorshiperPortrait from './CecWorshiperPortrait';
-import { ENTRY_WORSHIPER_SKINS_BY_ID, nextRank } from './cecConfig';
+import { ENTRY_WORSHIPER_SKINS_BY_ID, nextRank, POPE_RANK } from './cecConfig';
 import { getSeasonStarNameStyle } from './cecSeasonTheme';
 
-function CecWorshiperStage({ worshiper, onPortraitClick, starPalette = 'gold' }) {
+function CecWorshiperStage({ worshiper, reigningPope, onPortraitClick, starPalette = 'gold' }) {
   const nameStyle = getSeasonStarNameStyle(starPalette);
-  const upcoming = nextRank(worshiper.pontifexPoints);
+  const papacyCtx = { accountId: worshiper.accountId, reigningPope };
+  const upcoming = nextRank(worshiper.pontifexPoints, papacyCtx);
   const skin =
     ENTRY_WORSHIPER_SKINS_BY_ID[worshiper.avatarId] ?? {
       label: 'Worshiper',
     };
   const ppToNext = upcoming ? upcoming.minPP - worshiper.pontifexPoints : 0;
   const nextIsBonusLevel = upcoming?.id === 'pope';
+  const isPope = worshiper.rank.id === 'pope';
+  const popeEligibleNotReigning =
+    worshiper.accountId &&
+    (worshiper.pontifexPoints ?? 0) >= POPE_RANK.minPP &&
+    !isPope &&
+    reigningPope;
 
   return (
     <aside className="cec-worshiper-stage" aria-label="Your worshiper">
@@ -32,6 +39,12 @@ function CecWorshiperStage({ worshiper, onPortraitClick, starPalette = 'gold' })
 
       <p className="cec-worshiper-stage-rank">{worshiper.rank.label}</p>
 
+      {reigningPope && !isPope && (
+        <p className="cec-worshiper-stage-pope-reign">
+          Reigning Pope: <strong>{reigningPope.displayName}</strong>
+        </p>
+      )}
+
       <div className="cec-worshiper-stage-pp-block">
         <span className="cec-worshiper-stage-pp-label">Pontifex Points</span>
         <strong className="cec-worshiper-stage-pp-value">{worshiper.pontifexPoints}</strong>
@@ -46,7 +59,13 @@ function CecWorshiperStage({ worshiper, onPortraitClick, starPalette = 'gold' })
         </p>
       ) : (
         <p className="cec-worshiper-stage-next cec-worshiper-stage-next--max">
-          {worshiper.rank.id === 'pope' ? 'Supreme pontiff' : 'Highest rank this visit'}
+          {isPope ? 'Supreme pontiff' : 'Highest rank this visit'}
+        </p>
+      )}
+
+      {popeEligibleNotReigning && (
+        <p className="cec-worshiper-stage-papacy-hint">
+          Outrank {reigningPope.displayName} to reclaim the Papacy.
         </p>
       )}
     </aside>

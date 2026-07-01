@@ -2,11 +2,14 @@
 
 export const RANKS = [
   { id: 'cantor', label: 'Cantor', minPP: 0 },
-  { id: 'seminarian', label: 'Seminarian', minPP: 90 },
-  { id: 'deacon', label: 'Deacon', minPP: 220 },
-  { id: 'priest', label: 'Priest', minPP: 500 },
-  { id: 'pope', label: 'Pope', minPP: 2000 },
+  { id: 'seminarian', label: 'Seminarian', minPP: 120 },
+  { id: 'deacon', label: 'Deacon', minPP: 300 },
+  { id: 'priest', label: 'Priest', minPP: 750 },
+  { id: 'pope', label: 'Pope', minPP: 3000 },
 ];
+
+export const POPE_RANK = RANKS.find((r) => r.id === 'pope');
+export const PRIEST_RANK = RANKS.find((r) => r.id === 'priest');
 
 /** Map actions (and Amens) reset after this cooldown. */
 export const MAP_ACTION_COOLDOWN_MS = 60 * 60 * 1000;
@@ -37,7 +40,20 @@ export function rankPromotionMessage(rankId, displayName) {
   }
 }
 
-/** Tuned so one map pass reaches Priest (500+); Pope (2000) needs hourly repeats. Bulletin is bonus PP. */
+export function popeDemotionMessage(displayName, reigningPopeName, pointsNeeded) {
+  const name = (displayName || 'Worshiper').trim() || 'Worshiper';
+  const pope = (reigningPopeName || 'another worshiper').trim() || 'another worshiper';
+  const need = Math.max(1, pointsNeeded);
+  return `${name}, you have lost the Papacy. ${pope} now reigns. Earn ${need} more Pontifex Points to reclaim it.`;
+}
+
+/** PP needed to overtake the reigning pope (must exceed their total). */
+export function ppToOvertakePope(myPP, reigningPopePP) {
+  const theirs = Math.max(0, reigningPopePP ?? 0);
+  return Math.max(1, theirs - myPP + 1);
+}
+
+/** Tuned so one map pass nears Deacon; Priest (750) needs a second session; Pope (3000) is contested. */
 export const ACTIVITY_REWARDS = {
   register: { pp: 28, maxPerSession: 1 },
   incense: { pp: 32, maxPerSession: 1 },
@@ -439,6 +455,7 @@ export function avatarById(id) {
   return FROG_PORTRAITS[0];
 }
 
+/** Point thresholds only — ignores papacy contest. */
 export function rankFromPoints(pp) {
   let current = RANKS[0];
   for (const r of RANKS) {
@@ -447,10 +464,48 @@ export function rankFromPoints(pp) {
   return current;
 }
 
-export function nextRank(pp) {
-  const current = rankFromPoints(pp);
+/**
+ * Effective rank for display — only one registered account holds Pope at a time.
+ * @param {number} pp
+ * @param {{ accountId?: number, reigningPope?: { accountId: number, displayName: string, pontifexPoints: number } | null }} [ctx]
+ */
+export function effectiveRank(pp, ctx = {}) {
+  const base = rankFromPoints(pp);
+  if (base.id !== 'pope') return base;
+
+  const { accountId, reigningPope } = ctx;
+  if (!accountId) return PRIEST_RANK;
+  if (!reigningPope) return PRIEST_RANK;
+  if (reigningPope.accountId === accountId) return POPE_RANK;
+  return PRIEST_RANK;
+}
+
+export function isPopeHolder(worshiper, reigningPope) {
+  return (
+    !!worshiper?.accountId &&
+    !!reigningPope &&
+    reigningPope.accountId === worshiper.accountId &&
+    (worshiper.pontifexPoints ?? 0) >= POPE_RANK.minPP
+  );
+}
+
+export function nextRank(pp, ctx = {}) {
+  const current = effectiveRank(pp, ctx);
+  if (current.id === 'pope') return null;
+
   const idx = RANKS.findIndex((r) => r.id === current.id);
-  return idx < RANKS.length - 1 ? RANKS[idx + 1] : null;
+  const byPoints = idx < RANKS.length - 1 ? RANKS[idx + 1] : null;
+
+  if (current.id === 'priest' && pp >= POPE_RANK.minPP) {
+    const reigningPP = ctx.reigningPope?.pontifexPoints ?? 0;
+    const targetPP =
+      reigningPP > 0 && ctx.reigningPope?.accountId !== ctx.accountId
+        ? reigningPP + 1
+        : POPE_RANK.minPP;
+    return { ...POPE_RANK, minPP: targetPP, papacyContest: true };
+  }
+
+  return byPoints;
 }
 
 export function getActionLastDone(worshiper, key) {

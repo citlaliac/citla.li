@@ -12,6 +12,9 @@ function buildUrl(resource, { action = '', query = {} } = {}) {
     if (resource === 'me') {
       return `${cecApiBase()}/me`;
     }
+    if (resource === 'pope') {
+      return `${cecApiBase()}/pope`;
+    }
     if (resource === 'names') {
       const qs = new URLSearchParams(query).toString();
       return `${cecApiBase()}/names/check${qs ? `?${qs}` : ''}`;
@@ -57,6 +60,10 @@ export function cecLoginAccount({ email, password }) {
     method: 'POST',
     body: JSON.stringify({ email, password }),
   });
+}
+
+export function cecFetchReigningPope() {
+  return request(buildUrl('pope')).then((d) => d.reigningPope ?? null);
 }
 
 export function cecFetchAccount(token) {

@@ -6,13 +6,13 @@ const bcrypt = require('bcryptjs');
 
 const RANKS = [
   { id: 'cantor', label: 'Cantor', minPP: 0 },
-  { id: 'seminarian', label: 'Seminarian', minPP: 90 },
-  { id: 'deacon', label: 'Deacon', minPP: 220 },
-  { id: 'priest', label: 'Priest', minPP: 500 },
-  { id: 'pope', label: 'Pope', minPP: 2000 },
+  { id: 'seminarian', label: 'Seminarian', minPP: 120 },
+  { id: 'deacon', label: 'Deacon', minPP: 300 },
+  { id: 'priest', label: 'Priest', minPP: 750 },
+  { id: 'pope', label: 'Pope', minPP: 3000 },
 ];
 
-let tablesReady = false;
+const POPE_MIN_PP = 3000;
 
 function rankFromPoints(pp) {
   let current = RANKS[0];
@@ -22,11 +22,37 @@ function rankFromPoints(pp) {
   return current;
 }
 
+function effectiveRank(pp, accountId, reigningPope) {
+  const base = rankFromPoints(pp);
+  if (base.id !== 'pope') return base;
+  if (!accountId) return RANKS.find((r) => r.id === 'priest');
+  if (!reigningPope) return RANKS.find((r) => r.id === 'priest');
+  if (reigningPope.accountId === accountId) return RANKS.find((r) => r.id === 'pope');
+  return RANKS.find((r) => r.id === 'priest');
+}
+
+async function getReigningPope(connection) {
+  const [rows] = await connection.execute(
+    `SELECT id, display_name, pontifex_points
+     FROM cec_accounts
+     WHERE email IS NOT NULL AND pontifex_points >= ?
+     ORDER BY pontifex_points DESC, id ASC
+     LIMIT 1`,
+    [POPE_MIN_PP]
+  );
+  if (!rows[0]) return null;
+  return {
+    accountId: Number(rows[0].id),
+    displayName: rows[0].display_name,
+    pontifexPoints: Number(rows[0].pontifex_points) || 0,
+  };
+}
+
 function accountSessionId(accountId) {
   return `cec-acc-${accountId}`;
 }
 
-function worshiperFromRow(row) {
+function worshiperFromRow(row, reigningPope = null) {
   let completedActions = row.completed_actions;
   let actionLastDone = row.action_last_done;
   if (typeof completedActions === 'string') {
@@ -50,12 +76,14 @@ function worshiperFromRow(row) {
     displayName: row.display_name,
     avatarId: row.avatar_id,
     pontifexPoints: pp,
-    rank: rankFromPoints(pp),
+    rank: effectiveRank(pp, Number(row.id), reigningPope),
     completedActions: Array.isArray(completedActions) ? completedActions : [],
     actionLastDone: actionLastDone && typeof actionLastDone === 'object' ? actionLastDone : {},
     lastSpinDate: row.last_spin_date || null,
   };
 }
+
+let tablesReady = false;
 
 async function ensureCecAccountTables(connection) {
   if (tablesReady) return;
@@ -191,6 +219,15 @@ function registerCecAccountRoutes(app, getConnection) {
     }
   });
 
+  router.get('/pope', async (req, res) => {
+    try {
+      const reigningPope = await getReigningPope(req.cecDb);
+      jsonOk(res, { reigningPope });
+    } catch (error) {
+      jsonError(res, error.message || 'Failed to load pope', 500);
+    }
+  });
+
   router.get('/names/check', async (req, res) => {
     try {
       const name = normalizeDisplayName(req.query.username || req.query.displayName || '');
@@ -227,7 +264,8 @@ function registerCecAccountRoutes(app, getConnection) {
       const accountId = result.insertId;
       const row = await fetchAccountById(req.cecDb, accountId);
       const token = await issueSessionToken(req.cecDb, accountId);
-      jsonOk(res, { token, worshiper: worshiperFromRow(row) });
+      const reigningPope = await getReigningPope(req.cecDb);
+      jsonOk(res, { token, worshiper: worshiperFromRow(row, reigningPope), reigningPope });
     } catch (error) {
       if (error.code === 'ER_DUP_ENTRY') {
         return jsonError(res, 'Email or username is already in use', 409);
@@ -251,7 +289,8 @@ function registerCecAccountRoutes(app, getConnection) {
         return jsonError(res, 'Invalid email or password', 401);
       }
       const token = await issueSessionToken(req.cecDb, row.id);
-      jsonOk(res, { token, worshiper: worshiperFromRow(row) });
+      const reigningPope = await getReigningPope(req.cecDb);
+      jsonOk(res, { token, worshiper: worshiperFromRow(row, reigningPope), reigningPope });
     } catch (error) {
       jsonError(res, error.message || 'Login failed', 500);
     }
@@ -261,7 +300,8 @@ function registerCecAccountRoutes(app, getConnection) {
     try {
       const row = await authenticateRequest(req.cecDb, req);
       if (!row) return jsonError(res, 'Not authenticated', 401);
-      jsonOk(res, { worshiper: worshiperFromRow(row) });
+      const reigningPope = await getReigningPope(req.cecDb);
+      jsonOk(res, { worshiper: worshiperFromRow(row, reigningPope), reigningPope });
     } catch (error) {
       jsonError(res, error.message || 'Failed to load account', 500);
     }
@@ -305,7 +345,8 @@ function registerCecAccountRoutes(app, getConnection) {
         ]
       );
       const updated = await fetchAccountById(req.cecDb, row.id);
-      jsonOk(res, { worshiper: worshiperFromRow(updated) });
+      const reigningPope = await getReigningPope(req.cecDb);
+      jsonOk(res, { worshiper: worshiperFromRow(updated, reigningPope), reigningPope });
     } catch (error) {
       jsonError(res, error.message || 'Failed to save account', 500);
     }
@@ -314,4 +355,4 @@ function registerCecAccountRoutes(app, getConnection) {
   app.use('/api/cec', router);
 }
 
-module.exports = { registerCecAccountRoutes, rankFromPoints, worshiperFromRow };
+module.exports = { registerCecAccountRoutes, rankFromPoints, effectiveRank, worshiperFromRow };

@@ -30,12 +30,22 @@ import {
   loadWorshiper,
   registerWorshiper,
   applyAccountWorshiper,
+  applyReigningPope,
   getAuthToken,
   setAuthToken,
   saveWorshiper,
+  normalizeWorshiper,
   receivePortraitCommunion,
+  setReigningPope,
+  setAccountSyncHandler,
 } from '../cec/worshiperStorage';
-import { cecRegisterAccount, cecLoginAccount, cecFetchAccount, cecCheckUsernameAvailable } from '../cec/cecApi';
+import {
+  cecRegisterAccount,
+  cecLoginAccount,
+  cecFetchAccount,
+  cecFetchReigningPope,
+  cecCheckUsernameAvailable,
+} from '../cec/cecApi';
 import '../styles/CatholiceCloudPage.css';
 
 const PUB = process.env.PUBLIC_URL || '';
@@ -93,6 +103,7 @@ function CatholiceCloudPage() {
   const [showWheel, setShowWheel] = useState(false);
   const [bulletinOpen, setBulletinOpen] = useState(false);
   const [rewardToast, setRewardToast] = useState(null);
+  const [reigningPope, setReigningPopeState] = useState(null);
   const [, setPendingReward] = useState(null);
   const [aspergillumSplash, setAspergillumSplash] = useState(false);
   const pendingAspergillumSplashRef = useRef(false);
@@ -109,22 +120,28 @@ function CatholiceCloudPage() {
   const heavenOnlyBg = skyOverlay === 'heaven' && seasonBgPhotos.length === 0;
   const showProceduralClouds = !seasonBgPhotos.includes('clouds');
 
-  const mergeReward = (prev, { awarded = 0, rankUp }) => ({
+  const mergeReward = (prev, { awarded = 0, rankUp, papacyLost }) => ({
     pp: (prev?.pp || 0) + awarded,
     rankUp: rankUp || prev?.rankUp || null,
+    papacyLost: papacyLost || prev?.papacyLost || null,
   });
+
+  const showRankToast = useCallback((toast) => {
+    if (!toast?.rankUp && !toast?.papacyLost && !toast?.pp) return;
+    setRewardToast(toast);
+  }, []);
 
   const applyWorshiper = useCallback((next, reward, deferToast = false) => {
     setWorshiper(next);
     if (!reward) return;
-    const hasReward = !!reward.rankUp;
+    const hasReward = !!reward.rankUp || !!reward.papacyLost;
     if (!hasReward) return;
     if (deferToast) {
       setPendingReward((prev) => mergeReward(prev, reward));
       return;
     }
-    setRewardToast(mergeReward(null, reward));
-  }, []);
+    showRankToast(mergeReward(null, reward));
+  }, [showRankToast]);
 
   const handleGuestEnter = async (name, skinId) => {
     setAuthBusy(true);
@@ -147,16 +164,21 @@ function CatholiceCloudPage() {
     setAuthBusy(true);
     setAuthError('');
     try {
-      const { token, worshiper: accountWorshiper } = await cecRegisterAccount({
+      const { token, worshiper: accountWorshiper, reigningPope: pope } = await cecRegisterAccount({
         email,
         password,
         username,
         avatarId: skinId,
       });
       setAuthToken(token);
-      let w = applyAccountWorshiper(accountWorshiper);
-      const { worshiper: afterReg } = awardPoints(w, 'register');
+      if (pope !== undefined) {
+        setReigningPope(pope);
+        setReigningPopeState(pope);
+      }
+      let w = applyAccountWorshiper(accountWorshiper, pope);
+      const { worshiper: afterReg, rankUp, papacyLost } = awardPoints(w, 'register');
       setWorshiper(afterReg);
+      if (rankUp || papacyLost) showRankToast({ pp: 0, rankUp, papacyLost });
     } catch (err) {
       setAuthError(err.message || 'Could not create account');
     } finally {
@@ -168,9 +190,16 @@ function CatholiceCloudPage() {
     setAuthBusy(true);
     setAuthError('');
     try {
-      const { token, worshiper: accountWorshiper } = await cecLoginAccount({ email, password });
+      const { token, worshiper: accountWorshiper, reigningPope: pope } = await cecLoginAccount({
+        email,
+        password,
+      });
       setAuthToken(token);
-      const w = applyAccountWorshiper(accountWorshiper);
+      if (pope !== undefined) {
+        setReigningPope(pope);
+        setReigningPopeState(pope);
+      }
+      const w = applyAccountWorshiper(accountWorshiper, pope);
       setWorshiper(saveWorshiper(w));
     } catch (err) {
       setAuthError(err.message || 'Could not log in');
@@ -182,8 +211,8 @@ function CatholiceCloudPage() {
   const handleAward = useCallback(
     (actionId, { deferToast } = {}) => {
       if (!worshiper) return { awarded: 0 };
-      const { worshiper: next, awarded, rankUp } = awardPoints(worshiper, actionId);
-      applyWorshiper(next, { awarded, rankUp }, deferToast);
+      const { worshiper: next, awarded, rankUp, papacyLost } = awardPoints(worshiper, actionId);
+      applyWorshiper(next, { awarded, rankUp, papacyLost }, deferToast);
       return { awarded };
     },
     [worshiper, applyWorshiper]
@@ -216,11 +245,15 @@ function CatholiceCloudPage() {
     setWorshiper((w) => {
       if (!w) return w;
       let next = w;
-      let amenPart = { awarded: 0, rankUp: null };
+      let amenPart = { awarded: 0, rankUp: null, papacyLost: null };
       if (canAwardAmenDiscovery(w, activeLocation.id)) {
         const result = awardAmenDiscovery(w, activeLocation.id);
         next = result.worshiper;
-        amenPart = { awarded: result.awarded, rankUp: result.rankUp };
+        amenPart = {
+          awarded: result.awarded,
+          rankUp: result.rankUp,
+          papacyLost: result.papacyLost,
+        };
       }
       setPendingReward((prev) => {
         const flush = mergeReward(prev, amenPart);
@@ -230,8 +263,8 @@ function CatholiceCloudPage() {
           if (playAspergillumSplash) {
             setAspergillumSplash(true);
           }
-          if (flush.rankUp) {
-            setRewardToast(flush);
+          if (flush.rankUp || flush.papacyLost) {
+            showRankToast(flush);
           }
         }, AMEN_BURST_MS);
         return null;
@@ -242,8 +275,8 @@ function CatholiceCloudPage() {
 
   const handleWheelResult = (points) => {
     if (!worshiper) return;
-    const { worshiper: next, rankUp } = addWheelPoints(worshiper, points);
-    applyWorshiper(next, { awarded: points, rankUp });
+    const { worshiper: next, rankUp, papacyLost } = addWheelPoints(worshiper, points);
+    applyWorshiper(next, { awarded: points, rankUp, papacyLost });
   };
 
   const handlePortraitCommunion = () => {
@@ -254,15 +287,16 @@ function CatholiceCloudPage() {
       kind: result.kind,
       awarded: result.awarded,
       rankUp: result.rankUp,
+      papacyLost: result.papacyLost,
     });
   };
 
   const dismissPortraitCommunion = () => {
     if (!portraitCommunion) return;
-    const { awarded, rankUp } = portraitCommunion;
+    const { awarded, rankUp, papacyLost } = portraitCommunion;
     setPortraitCommunion(null);
-    if (awarded > 0 || rankUp) {
-      setRewardToast({ pp: awarded, rankUp: rankUp || null });
+    if (awarded > 0 || rankUp || papacyLost) {
+      showRankToast({ pp: awarded, rankUp: rankUp || null, papacyLost: papacyLost || null });
     }
   };
 
@@ -284,6 +318,83 @@ function CatholiceCloudPage() {
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
+    cecFetchReigningPope()
+      .then((pope) => {
+        if (cancelled) return;
+        setReigningPope(pope);
+        setReigningPopeState(pope);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    setReigningPope(reigningPope);
+    setWorshiper((w) => {
+      if (!w) return w;
+      const next = normalizeWorshiper(w);
+      return next.rank.id === w.rank.id ? w : next;
+    });
+  }, [reigningPope]);
+
+  useEffect(() => {
+    setAccountSyncHandler((data) => {
+      if (data.reigningPope === undefined) return;
+      setReigningPopeState((prevPope) => {
+        setWorshiper((w) => {
+          if (!w) return w;
+          const result = applyReigningPope(w, data.reigningPope);
+          if (result.papacyLost) {
+            showRankToast({ pp: 0, papacyLost: result.papacyLost });
+          } else if (result.rankUp) {
+            showRankToast({ pp: 0, rankUp: result.rankUp });
+          }
+          return result.worshiper;
+        });
+        return data.reigningPope;
+      });
+    });
+    return () => setAccountSyncHandler(null);
+  }, [showRankToast]);
+
+  useEffect(() => {
+    if (!worshiper?.accountId) return undefined;
+    let cancelled = false;
+    const poll = () => {
+      cecFetchReigningPope()
+        .then((pope) => {
+          if (cancelled) return;
+          setReigningPopeState((prevPope) => {
+            const sameHolder =
+              prevPope?.accountId === pope?.accountId &&
+              prevPope?.pontifexPoints === pope?.pontifexPoints;
+            if (sameHolder) return prevPope ?? pope;
+            setWorshiper((w) => {
+              if (!w) return w;
+              const result = applyReigningPope(w, pope);
+              if (result.papacyLost) {
+                showRankToast({ pp: 0, papacyLost: result.papacyLost });
+              } else if (result.rankUp) {
+                showRankToast({ pp: 0, rankUp: result.rankUp });
+              }
+              return result.worshiper;
+            });
+            return pope;
+          });
+        })
+        .catch(() => {});
+    };
+    const id = window.setInterval(poll, 45000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(id);
+    };
+  }, [worshiper?.accountId, showRankToast]);
+
+  useEffect(() => {
     const token = getAuthToken();
     if (!token) {
       setAuthChecking(false);
@@ -295,9 +406,13 @@ function CatholiceCloudPage() {
     }
     let cancelled = false;
     cecFetchAccount(token)
-      .then(({ worshiper: accountWorshiper }) => {
+      .then(({ worshiper: accountWorshiper, reigningPope: pope }) => {
         if (cancelled) return;
-        setWorshiper(saveWorshiper(applyAccountWorshiper(accountWorshiper)));
+        if (pope !== undefined) {
+          setReigningPope(pope);
+          setReigningPopeState(pope);
+        }
+        setWorshiper(saveWorshiper(applyAccountWorshiper(accountWorshiper, pope)));
       })
       .catch(() => {
         if (!cancelled) setAuthToken(null);
@@ -436,6 +551,7 @@ function CatholiceCloudPage() {
         <div className="cec-play-row">
           <CecWorshiperStage
             worshiper={worshiper}
+            reigningPope={reigningPope}
             starPalette={seasonTheme.starPalette}
             onPortraitClick={handlePortraitCommunion}
           />
@@ -445,6 +561,7 @@ function CatholiceCloudPage() {
             </div>
             <CecParishMap
               worshiper={worshiper}
+              reigningPope={reigningPope}
               seasonThemeId={activeThemeId}
               hollyMapIds={seasonTheme.hollyMapIds}
               onSelectLocation={handleSelectLocation}
@@ -463,6 +580,7 @@ function CatholiceCloudPage() {
           worshiper={worshiper}
           pp={rewardToast.pp}
           rank={rewardToast.rankUp}
+          papacyLost={rewardToast.papacyLost}
           onDone={() => setRewardToast(null)}
         />
       )}

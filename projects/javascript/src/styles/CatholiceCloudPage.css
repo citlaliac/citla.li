@@ -1859,6 +1859,52 @@
   background: transparent;
 }
 
+.cec-map-pope-banner {
+  margin: 0 0 0.55rem;
+  padding: 0.45rem 0.75rem;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  color: rgba(255, 244, 210, 0.92);
+  text-align: center;
+  border-radius: 999px;
+  background: linear-gradient(
+    135deg,
+    rgba(42, 28, 8, 0.72) 0%,
+    rgba(68, 48, 14, 0.55) 50%,
+    rgba(42, 28, 8, 0.72) 100%
+  );
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+}
+
+.cec-map-pope-banner-crown {
+  margin-right: 0.25rem;
+}
+
+.cec-map-pope-banner-pp {
+  margin-left: 0.45rem;
+  opacity: 0.75;
+  font-size: 0.78rem;
+}
+
+.cec-worshiper-stage-pope-reign,
+.cec-worshiper-stage-papacy-hint {
+  margin: 0.35rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: rgba(255, 236, 190, 0.82);
+  text-align: center;
+}
+
+.cec-worshiper-stage-papacy-hint {
+  font-style: italic;
+  opacity: 0.9;
+}
+
+.cec-reward-overlay--papacy-lost .cec-rank-burst-ring {
+  border-color: rgba(180, 140, 90, 0.55);
+}
+
 .cec-map-frame {
   position: relative;
   width: 100%;

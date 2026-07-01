@@ -71,10 +71,10 @@ function cec_accounts_ensure_tables($conn) {
 function cec_rank_from_points($pp) {
     $ranks = [
         ['id' => 'cantor', 'label' => 'Cantor', 'minPP' => 0],
-        ['id' => 'seminarian', 'label' => 'Seminarian', 'minPP' => 90],
-        ['id' => 'deacon', 'label' => 'Deacon', 'minPP' => 220],
-        ['id' => 'priest', 'label' => 'Priest', 'minPP' => 500],
-        ['id' => 'pope', 'label' => 'Pope', 'minPP' => 2000],
+        ['id' => 'seminarian', 'label' => 'Seminarian', 'minPP' => 120],
+        ['id' => 'deacon', 'label' => 'Deacon', 'minPP' => 300],
+        ['id' => 'priest', 'label' => 'Priest', 'minPP' => 750],
+        ['id' => 'pope', 'label' => 'Pope', 'minPP' => 3000],
     ];
     $current = $ranks[0];
     foreach ($ranks as $rank) {
@@ -85,11 +85,55 @@ function cec_rank_from_points($pp) {
     return $current;
 }
 
+function cec_pope_min_pp() {
+    return 3000;
+}
+
+function cec_get_reigning_pope($conn) {
+    $min = cec_pope_min_pp();
+    $stmt = $conn->prepare(
+        'SELECT id, display_name, pontifex_points
+         FROM cec_accounts
+         WHERE email IS NOT NULL AND pontifex_points >= ?
+         ORDER BY pontifex_points DESC, id ASC
+         LIMIT 1'
+    );
+    $stmt->bind_param('i', $min);
+    $stmt->execute();
+    $row = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    if (!$row) {
+        return null;
+    }
+    return [
+        'accountId' => (int) $row['id'],
+        'displayName' => $row['display_name'],
+        'pontifexPoints' => (int) $row['pontifex_points'],
+    ];
+}
+
+function cec_effective_rank($pp, $accountId, $reigningPope) {
+    $base = cec_rank_from_points($pp);
+    if ($base['id'] !== 'pope') {
+        return $base;
+    }
+    if (!$accountId) {
+        return ['id' => 'priest', 'label' => 'Priest', 'minPP' => 750];
+    }
+    if (!$reigningPope) {
+        return ['id' => 'priest', 'label' => 'Priest', 'minPP' => 750];
+    }
+    if ((int) $reigningPope['accountId'] === (int) $accountId) {
+        return ['id' => 'pope', 'label' => 'Pope', 'minPP' => cec_pope_min_pp()];
+    }
+    return ['id' => 'priest', 'label' => 'Priest', 'minPP' => 750];
+}
+
 function cec_account_session_id($accountId) {
     return 'cec-acc-' . (int) $accountId;
 }
 
-function cec_worshiper_from_row($row) {
+function cec_worshiper_from_row($row, $reigningPope = null) {
     $pp = (int) $row['pontifex_points'];
     $completed = $row['completed_actions'] ?? '[]';
     $actionLast = $row['action_last_done'] ?? '{}';
@@ -112,7 +156,7 @@ function cec_worshiper_from_row($row) {
         'displayName' => $row['display_name'],
         'avatarId' => $row['avatar_id'],
         'pontifexPoints' => $pp,
-        'rank' => cec_rank_from_points($pp),
+        'rank' => cec_effective_rank($pp, (int) $row['id'], $reigningPope),
         'completedActions' => $completed,
         'actionLastDone' => $actionLast,
         'lastSpinDate' => $row['last_spin_date'] ?: null,

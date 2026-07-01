@@ -1,21 +1,35 @@
 import React, { useEffect, useMemo } from 'react';
 import CecWorshiperPortrait from './CecWorshiperPortrait';
-import { rankPromotionMessage } from './cecConfig';
+import { popeDemotionMessage, rankPromotionMessage } from './cecConfig';
 
 const RANK_UP_MS = 6200;
 const REWARD_MS = 4500;
+const PAPACY_LOST_MS = 7200;
 const BURST_SPARKS = ['✦', '✧', '★', '☆', '✶', '⋆', '˖', '﹡'];
 
-function CecRankToast({ worshiper, pp = 0, rank, onDone }) {
+function CecRankToast({ worshiper, pp = 0, rank, papacyLost, onDone }) {
   const isRankUp = !!rank;
+  const isPapacyLost = !!papacyLost;
 
   useEffect(() => {
-    const t = window.setTimeout(onDone, isRankUp ? RANK_UP_MS : REWARD_MS);
+    const ms = isPapacyLost ? PAPACY_LOST_MS : isRankUp ? RANK_UP_MS : REWARD_MS;
+    const t = window.setTimeout(onDone, ms);
     return () => window.clearTimeout(t);
-  }, [onDone, isRankUp]);
+  }, [onDone, isRankUp, isPapacyLost]);
 
-  const previewWorshiper = rank ? { ...worshiper, rank } : worshiper;
+  const previewWorshiper = rank
+    ? { ...worshiper, rank }
+    : isPapacyLost
+      ? { ...worshiper, rank: { id: 'priest', label: 'Priest' } }
+      : worshiper;
   const promotionLine = rank ? rankPromotionMessage(rank.id, worshiper.displayName) : null;
+  const demotionLine = papacyLost
+    ? popeDemotionMessage(
+        worshiper.displayName,
+        papacyLost.reigningPopeName,
+        papacyLost.pointsNeeded
+      )
+    : null;
 
   const sparks = useMemo(
     () =>
@@ -27,15 +41,19 @@ function CecRankToast({ worshiper, pp = 0, rank, onDone }) {
     []
   );
 
+  const showBurst = isRankUp || isPapacyLost;
+
   return (
     <div
-      className={`cec-reward-overlay${isRankUp ? ' cec-reward-overlay--rank-up' : ''}`}
+      className={`cec-reward-overlay${showBurst ? ' cec-reward-overlay--rank-up' : ''}${
+        isPapacyLost ? ' cec-reward-overlay--papacy-lost' : ''
+      }`}
       role="dialog"
       aria-modal="true"
       aria-labelledby="cec-reward-title"
       onClick={onDone}
     >
-      {isRankUp && (
+      {showBurst && (
         <div className="cec-rank-burst-fx" aria-hidden>
           <div className="cec-rank-burst-rays" />
           <div className="cec-rank-burst-ring" />
@@ -52,10 +70,23 @@ function CecRankToast({ worshiper, pp = 0, rank, onDone }) {
       )}
 
       <div
-        className={isRankUp ? 'cec-rank-burst-panel' : 'cec-reward-panel'}
+        className={showBurst ? 'cec-rank-burst-panel' : 'cec-reward-panel'}
         onClick={(e) => e.stopPropagation()}
       >
-        {isRankUp ? (
+        {isPapacyLost ? (
+          <>
+            <p className="cec-rank-burst-kicker">The Papacy Has Passed</p>
+            <div className="cec-rank-burst-medallion">
+              <CecWorshiperPortrait worshiper={previewWorshiper} size="hero" />
+            </div>
+            <div className="cec-rank-burst-caption">
+              <p className="cec-rank-burst-title" id="cec-reward-title">
+                Priest
+              </p>
+              <p className="cec-reward-rank">{demotionLine}</p>
+            </div>
+          </>
+        ) : isRankUp ? (
           <>
             <p className="cec-rank-burst-kicker">Your Calling Deepens</p>
             <div className="cec-rank-burst-medallion">

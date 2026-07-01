@@ -7,8 +7,8 @@ describe('CEC account helpers', () => {
   });
 
   test('rankFromPoints advances at thresholds', () => {
-    expect(rankFromPoints(90).id).toBe('seminarian');
-    expect(rankFromPoints(2000).id).toBe('pope');
+    expect(rankFromPoints(120).id).toBe('seminarian');
+    expect(rankFromPoints(3000).id).toBe('pope');
   });
 
   test('applyAccountWorshiper normalizes server payload', () => {

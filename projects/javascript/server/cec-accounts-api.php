@@ -31,8 +31,10 @@ try {
         } else {
             cec_accounts_json_error('Method not allowed', 405);
         }
+    } elseif ($resource === 'pope' && $method === 'GET') {
+        cec_handle_pope_get($conn);
     } else {
-        cec_accounts_json_error('Unknown resource. Use resource=auth|names|me', 404);
+        cec_accounts_json_error('Unknown resource. Use resource=auth|names|me|pope', 404);
     }
 
     $conn->close();
@@ -92,9 +94,11 @@ function cec_handle_auth_register($conn) {
 
     $row = cec_fetch_account_by_id($conn, $accountId);
     $token = cec_issue_session_token($conn, $accountId);
+    $reigningPope = cec_get_reigning_pope($conn);
     cec_accounts_json_ok([
         'token' => $token,
-        'worshiper' => cec_worshiper_from_row($row),
+        'worshiper' => cec_worshiper_from_row($row, $reigningPope),
+        'reigningPope' => $reigningPope,
     ]);
 }
 
@@ -121,10 +125,16 @@ function cec_handle_auth_login($conn) {
     }
 
     $token = cec_issue_session_token($conn, (int) $row['id']);
+    $reigningPope = cec_get_reigning_pope($conn);
     cec_accounts_json_ok([
         'token' => $token,
-        'worshiper' => cec_worshiper_from_row($row),
+        'worshiper' => cec_worshiper_from_row($row, $reigningPope),
+        'reigningPope' => $reigningPope,
     ]);
+}
+
+function cec_handle_pope_get($conn) {
+    cec_accounts_json_ok(['reigningPope' => cec_get_reigning_pope($conn)]);
 }
 
 function cec_handle_me_get($conn) {
@@ -132,7 +142,11 @@ function cec_handle_me_get($conn) {
     if (!$row) {
         cec_accounts_json_error('Not authenticated', 401);
     }
-    cec_accounts_json_ok(['worshiper' => cec_worshiper_from_row($row)]);
+    $reigningPope = cec_get_reigning_pope($conn);
+    cec_accounts_json_ok([
+        'worshiper' => cec_worshiper_from_row($row, $reigningPope),
+        'reigningPope' => $reigningPope,
+    ]);
 }
 
 function cec_handle_me_patch($conn) {
@@ -183,7 +197,11 @@ function cec_handle_me_patch($conn) {
     $stmt->close();
 
     $updated = cec_fetch_account_by_id($conn, $accountId);
-    cec_accounts_json_ok(['worshiper' => cec_worshiper_from_row($updated)]);
+    $reigningPope = cec_get_reigning_pope($conn);
+    cec_accounts_json_ok([
+        'worshiper' => cec_worshiper_from_row($updated, $reigningPope),
+        'reigningPope' => $reigningPope,
+    ]);
 }
 
 function cec_fetch_account_by_id($conn, $accountId) {
