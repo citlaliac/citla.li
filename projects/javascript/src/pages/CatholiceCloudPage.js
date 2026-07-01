@@ -14,6 +14,11 @@ import CecPortraitCommunionPopup from '../cec/CecPortraitCommunionPopup';
 import CecShootingStars from '../cec/CecShootingStars';
 import CecSeasonAmbience from '../cec/CecSeasonAmbience';
 import CecSeasonDebugPicker from '../cec/CecSeasonDebugPicker';
+import CecRotateOverlay from '../cec/CecRotateOverlay';
+import {
+  useCecLandscapeLockOnPlay,
+  useCecRotateGate,
+} from '../cec/useCecMobileOrientation';
 import {
   getCecSeasonTheme,
   getSeasonBackgroundPhotos,
@@ -120,6 +125,9 @@ function CatholiceCloudPage() {
   const showSkyOverlay = skyOverlay !== null;
   const heavenOnlyBg = skyOverlay === 'heaven' && seasonBgPhotos.length === 0;
   const showProceduralClouds = !seasonBgPhotos.includes('clouds');
+  const inPlay = Boolean(worshiper);
+  const { showRotateGate, tryLandscape, continuePortrait } = useCecRotateGate(inPlay);
+  useCecLandscapeLockOnPlay(inPlay && !showRotateGate);
 
   const mergeReward = (prev, { awarded = 0, rankUp, papacyLost }) => ({
     pp: (prev?.pp || 0) + awarded,
@@ -471,7 +479,7 @@ function CatholiceCloudPage() {
   }
 
   return (
-    <div className="cec-page" style={CEC_PAGE_STYLE}>
+    <div className="cec-page cec-page--play" style={CEC_PAGE_STYLE}>
       <div
         className={`cec-bg-stack${singleBgPhoto ? ' cec-bg-stack--single-photo' : ''}${
           showSkyOverlay ? ' cec-bg-stack--heaven-overlay' : ''
@@ -656,6 +664,13 @@ function CatholiceCloudPage() {
           kind={portraitCommunion.kind}
           bonusPP={portraitCommunion.awarded}
           onDismiss={dismissPortraitCommunion}
+        />
+      )}
+
+      {showRotateGate && (
+        <CecRotateOverlay
+          onTryLandscape={tryLandscape}
+          onContinuePortrait={continuePortrait}
         />
       )}
 
