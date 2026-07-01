@@ -7,15 +7,42 @@ const PUB = process.env.PUBLIC_URL || '';
 const HEAVEN_BTN_BG = `${PUB}/assets/catholicecloud/background/heaven-bkg.jpg`;
 const HEAVEN_PANEL_BG = `${PUB}/assets/catholicecloud/background/heaven-bkg.jpg`;
 
-function CecWorshiperRegister({ onRegister }) {
+function CecWorshiperRegister({
+  onGuestEnter,
+  onRegister,
+  onLogin,
+  authError,
+  authBusy,
+}) {
   const [name, setName] = useState('');
   const [skinId, setSkinId] = useState(DEFAULT_SKIN_ID);
+  const [authPanel, setAuthPanel] = useState(null);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const trimmedName = name.trim();
 
-  const handleSubmit = (e) => {
+  const handleEnter = (e) => {
     e.preventDefault();
-    const trimmed = name.trim();
-    if (trimmed) onRegister(trimmed, skinId);
+    if (!trimmedName || authBusy) return;
+    onGuestEnter(trimmedName, skinId);
+  };
+
+  const handleAuthSubmit = (e) => {
+    e.preventDefault();
+    if (authBusy) return;
+    if (authPanel === 'login') {
+      if (!email.trim() || !password) return;
+      onLogin(email.trim(), password);
+      return;
+    }
+    if (authPanel === 'signup') {
+      if (!email.trim() || password.length < 8 || !trimmedName) return;
+      onRegister(email.trim(), password, trimmedName, skinId);
+    }
+  };
+
+  const openPanel = (panel) => {
+    setAuthPanel((current) => (current === panel ? null : panel));
   };
 
   return (
@@ -53,7 +80,7 @@ function CecWorshiperRegister({ onRegister }) {
           <CecWorshiperPortrait skinId={skinId} rankId="cantor" size="hero" />
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleEnter}>
           <label className="cec-register-label" htmlFor="cec-worshiper-name">
             Select a name for your worshiper
           </label>
@@ -66,15 +93,91 @@ function CecWorshiperRegister({ onRegister }) {
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. Sister Agnes"
           />
+
+          {authError && !authPanel && (
+            <p className="cec-register-auth-error" role="alert">
+              {authError}
+            </p>
+          )}
+
           <button
             type="submit"
             className="cec-register-submit"
-            disabled={!name.trim()}
+            disabled={!trimmedName || authBusy}
             style={{ '--cec-heaven-btn-bg': `url('${HEAVEN_BTN_BG}')` }}
           >
-            Enter the cloud
+            {authBusy && !authPanel ? 'Please wait…' : 'Enter the cloud'}
           </button>
         </form>
+
+        <div className="cec-register-auth-links">
+          <button
+            type="button"
+            className={`cec-register-auth-link${authPanel === 'login' ? ' cec-register-auth-link--active' : ''}`}
+            onClick={() => openPanel('login')}
+          >
+            log in
+          </button>
+          <span className="cec-register-auth-sep" aria-hidden="true">
+            ·
+          </span>
+          <button
+            type="button"
+            className={`cec-register-auth-link${authPanel === 'signup' ? ' cec-register-auth-link--active' : ''}`}
+            onClick={() => openPanel('signup')}
+          >
+            sign up
+          </button>
+        </div>
+
+        {authPanel && (
+          <form className="cec-register-auth-form" onSubmit={handleAuthSubmit}>
+            <p className="cec-register-auth-form-hint">
+              {authPanel === 'login' ? 'Optional — email login.' : 'Optional — save across devices.'}
+            </p>
+            <label className="cec-register-label cec-register-label--compact" htmlFor="cec-account-email">
+              Email
+            </label>
+            <input
+              id="cec-account-email"
+              className="cec-register-input cec-register-input--compact"
+              type="email"
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+            />
+            <label className="cec-register-label cec-register-label--compact" htmlFor="cec-account-password">
+              Password
+            </label>
+            <input
+              id="cec-account-password"
+              className="cec-register-input cec-register-input--compact"
+              type="password"
+              autoComplete={authPanel === 'signup' ? 'new-password' : 'current-password'}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder={authPanel === 'signup' ? 'At least 8 characters' : 'Your password'}
+            />
+            {authError && (
+              <p className="cec-register-auth-error" role="alert">
+                {authError}
+              </p>
+            )}
+            <button
+              type="submit"
+              className="cec-register-auth-submit"
+              disabled={
+                authBusy ||
+                !email.trim() ||
+                !password ||
+                (authPanel === 'signup' && (password.length < 8 || !trimmedName))
+              }
+            >
+              {authBusy ? '…' : authPanel === 'login' ? 'log in' : 'create account'}
+            </button>
+          </form>
+        )}
       </div>
     </div>
   );

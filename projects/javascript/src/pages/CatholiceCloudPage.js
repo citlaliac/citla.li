@@ -28,9 +28,13 @@ import {
   awardPoints,
   addWheelPoints,
   loadWorshiper,
-  registerWorshiper,
+  applyAccountWorshiper,
+  getAuthToken,
+  setAuthToken,
+  saveWorshiper,
   receivePortraitCommunion,
 } from '../cec/worshiperStorage';
+import { cecRegisterAccount, cecLoginAccount, cecFetchAccount, cecGuestEnter } from '../cec/cecApi';
 import '../styles/CatholiceCloudPage.css';
 
 const PUB = process.env.PUBLIC_URL || '';
@@ -80,6 +84,9 @@ const SPRINKLES = [
 
 function CatholiceCloudPage() {
   const [worshiper, setWorshiper] = useState(() => loadWorshiper());
+  const [authChecking, setAuthChecking] = useState(() => !!getAuthToken() && !loadWorshiper());
+  const [authError, setAuthError] = useState('');
+  const [authBusy, setAuthBusy] = useState(false);
   const [activeLocation, setActiveLocation] = useState(null);
   const [amenSparkle, setAmenSparkle] = useState(false);
   const [showWheel, setShowWheel] = useState(false);
@@ -118,9 +125,59 @@ function CatholiceCloudPage() {
     setRewardToast(mergeReward(null, reward));
   }, []);
 
-  const handleRegister = (name, skinId) => {
-    const w = registerWorshiper(name, skinId);
-    setWorshiper(w);
+  const handleGuestEnter = async (name, skinId) => {
+    setAuthBusy(true);
+    setAuthError('');
+    try {
+      const { token, worshiper: accountWorshiper } = await cecGuestEnter({
+        displayName: name,
+        avatarId: skinId,
+      });
+      setAuthToken(token);
+      let w = applyAccountWorshiper(accountWorshiper);
+      const { worshiper: afterReg } = awardPoints(w, 'register');
+      setWorshiper(afterReg);
+    } catch (err) {
+      setAuthError(err.message || 'Could not enter the cloud');
+    } finally {
+      setAuthBusy(false);
+    }
+  };
+
+  const handleRegister = async (email, password, name, skinId) => {
+    setAuthBusy(true);
+    setAuthError('');
+    try {
+      const { token, worshiper: accountWorshiper } = await cecRegisterAccount({
+        email,
+        password,
+        displayName: name,
+        avatarId: skinId,
+      });
+      setAuthToken(token);
+      let w = applyAccountWorshiper(accountWorshiper);
+      const { worshiper: afterReg } = awardPoints(w, 'register');
+      setWorshiper(afterReg);
+    } catch (err) {
+      setAuthError(err.message || 'Could not create account');
+    } finally {
+      setAuthBusy(false);
+    }
+  };
+
+  const handleLogin = async (email, password) => {
+    setAuthBusy(true);
+    setAuthError('');
+    try {
+      const { token, worshiper: accountWorshiper } = await cecLoginAccount({ email, password });
+      setAuthToken(token);
+      const w = applyAccountWorshiper(accountWorshiper);
+      setWorshiper(saveWorshiper(w));
+    } catch (err) {
+      setAuthError(err.message || 'Could not log in');
+    } finally {
+      setAuthBusy(false);
+    }
   };
 
   const handleAward = useCallback(
@@ -227,6 +284,43 @@ function CatholiceCloudPage() {
     window.scrollTo(0, 0);
   }, []);
 
+  useEffect(() => {
+    const token = getAuthToken();
+    if (!token) {
+      setAuthChecking(false);
+      return undefined;
+    }
+    if (loadWorshiper()) {
+      setAuthChecking(false);
+      return undefined;
+    }
+    let cancelled = false;
+    cecFetchAccount(token)
+      .then(({ worshiper: accountWorshiper }) => {
+        if (cancelled) return;
+        setWorshiper(saveWorshiper(applyAccountWorshiper(accountWorshiper)));
+      })
+      .catch(() => {
+        if (!cancelled) setAuthToken(null);
+      })
+      .finally(() => {
+        if (!cancelled) setAuthChecking(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (authChecking) {
+    return (
+      <div className="cec-page cec-page--register" style={CEC_PAGE_STYLE}>
+        <Header />
+        <p className="cec-register-auth-loading">Loading your worshiper…</p>
+        <Footer />
+      </div>
+    );
+  }
+
   if (!worshiper) {
     return (
       <div className="cec-page cec-page--register" style={CEC_PAGE_STYLE}>
@@ -239,7 +333,13 @@ function CatholiceCloudPage() {
           <div className="cec-bg-layer cec-bg-layer--vignette" />
         </div>
         <Header />
-        <CecWorshiperRegister onRegister={handleRegister} />
+        <CecWorshiperRegister
+          onGuestEnter={handleGuestEnter}
+          onRegister={handleRegister}
+          onLogin={handleLogin}
+          authError={authError}
+          authBusy={authBusy}
+        />
         <Footer />
       </div>
     );

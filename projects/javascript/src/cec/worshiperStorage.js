@@ -12,8 +12,10 @@ import {
   recordActionLastDone,
   todayDateString,
 } from './cecConfig';
+import { cecSyncAccount } from './cecApi';
 
 const STORAGE_KEY = 'cec_worshiper';
+const AUTH_TOKEN_KEY = 'cec_auth_token';
 
 function newSessionId() {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
@@ -37,6 +39,54 @@ function normalizeWorshiper(worshiper) {
   w.avatarId = normalizeSkinId(w.avatarId);
   w.rank = rankFromPoints(w.pontifexPoints || 0);
   return w;
+}
+
+export function getAuthToken() {
+  try {
+    return localStorage.getItem(AUTH_TOKEN_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function setAuthToken(token) {
+  try {
+    if (token) {
+      localStorage.setItem(AUTH_TOKEN_KEY, token);
+    } else {
+      localStorage.removeItem(AUTH_TOKEN_KEY);
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
+export function clearAuth() {
+  setAuthToken(null);
+  try {
+    sessionStorage.removeItem(STORAGE_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
+export function applyAccountWorshiper(serverWorshiper) {
+  return normalizeWorshiper({
+    ...serverWorshiper,
+    avatarId: normalizeSkinId(serverWorshiper.avatarId),
+  });
+}
+
+let syncTimer = null;
+
+function scheduleAccountSync(worshiper) {
+  if (!worshiper?.accountId) return;
+  const token = getAuthToken();
+  if (!token) return;
+  if (syncTimer) window.clearTimeout(syncTimer);
+  syncTimer = window.setTimeout(() => {
+    cecSyncAccount(token, worshiper).catch(() => {});
+  }, 400);
 }
 
 export function createWorshiper(displayName, skinId = DEFAULT_SKIN_ID) {
@@ -67,6 +117,7 @@ export function loadWorshiper() {
 export function saveWorshiper(worshiper) {
   const next = normalizeWorshiper(worshiper);
   sessionStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  scheduleAccountSync(next);
   return next;
 }
 

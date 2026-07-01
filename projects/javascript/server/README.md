@@ -27,3 +27,19 @@ Mirrors production PHP (`meals-api.php`, `meals-recipe-import.php`):
 Tables are created automatically from `schema-meals.sql` on first request (requires `MYSQL_PASSWORD` in `.env`).
 
 Production: run `schema-meals.sql` on MySQL once, then deploy `*.php` via the GitHub Actions workflow.
+
+## Catholic e Cloud accounts (local dev)
+
+Mirrors production PHP (`cec-accounts-api.php`):
+
+| Method | Path | Notes |
+|--------|------|--------|
+| POST | `/api/cec/auth/guest` | Body: `{ displayName, avatarId }` — name must be unique |
+| POST | `/api/cec/auth/register` | Body: `{ email, password, displayName, avatarId }` |
+| POST | `/api/cec/auth/login` | Body: `{ email, password }` |
+| GET | `/api/cec/me` | Header: `Authorization: Bearer <token>` |
+| PATCH | `/api/cec/me` | Sync PP, rank progress, cooldowns |
+
+Tables are created from `schema-cec-accounts.sql` on first request.
+
+Production: `cec-accounts-api.php?resource=auth&action=register|login` and `?resource=me`.

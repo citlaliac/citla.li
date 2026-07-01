@@ -187,6 +187,9 @@ app.post('/api/track-visitor', async (req, res) => {
 const { registerMealsRoutes } = require('./meals-routes');
 registerMealsRoutes(app, getConnection);
 
+const { registerCecAccountRoutes } = require('./cec-accounts-routes');
+registerCecAccountRoutes(app, getConnection);
+
 /**
  * Liturgical calendar proxy (Church Calendar API — avoids browser CORS).
  * GET /api/liturgical/today
