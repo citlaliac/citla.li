@@ -187,10 +187,14 @@ function cec_display_name_taken($conn, $displayName, $exceptAccountId = null) {
         return false;
     }
     if ($exceptAccountId) {
-        $stmt = $conn->prepare('SELECT id FROM cec_accounts WHERE display_name = ? AND id != ? LIMIT 1');
+        $stmt = $conn->prepare(
+            'SELECT id FROM cec_accounts WHERE display_name = ? AND email IS NOT NULL AND id != ? LIMIT 1'
+        );
         $stmt->bind_param('si', $name, $exceptAccountId);
     } else {
-        $stmt = $conn->prepare('SELECT id FROM cec_accounts WHERE display_name = ? LIMIT 1');
+        $stmt = $conn->prepare(
+            'SELECT id FROM cec_accounts WHERE display_name = ? AND email IS NOT NULL LIMIT 1'
+        );
         $stmt->bind_param('s', $name);
     }
     $stmt->execute();

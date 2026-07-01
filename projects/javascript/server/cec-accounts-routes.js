@@ -95,13 +95,13 @@ async function displayNameTaken(connection, displayName, exceptAccountId = null)
   if (!name) return false;
   if (exceptAccountId) {
     const [rows] = await connection.execute(
-      'SELECT id FROM cec_accounts WHERE display_name = ? AND id != ? LIMIT 1',
+      'SELECT id FROM cec_accounts WHERE display_name = ? AND email IS NOT NULL AND id != ? LIMIT 1',
       [name, exceptAccountId]
     );
     return rows.length > 0;
   }
   const [rows] = await connection.execute(
-    'SELECT id FROM cec_accounts WHERE display_name = ? LIMIT 1',
+    'SELECT id FROM cec_accounts WHERE display_name = ? AND email IS NOT NULL LIMIT 1',
     [name]
   );
   return rows.length > 0;
@@ -191,27 +191,14 @@ function registerCecAccountRoutes(app, getConnection) {
     }
   });
 
-  router.post('/auth/guest', async (req, res) => {
+  router.get('/names/check', async (req, res) => {
     try {
-      const displayName = normalizeDisplayName(req.body.displayName);
-      const avatarId = String(req.body.avatarId || 'frog').trim();
-      if (!displayName) return jsonError(res, 'Display name is required');
-      if (await displayNameTaken(req.cecDb, displayName)) {
-        return jsonError(res, 'That name is already taken — try another', 409);
-      }
-      const [result] = await req.cecDb.execute(
-        `INSERT INTO cec_accounts (email, password_hash, display_name, avatar_id, pontifex_points, completed_actions, action_last_done)
-         VALUES (NULL, NULL, ?, ?, 0, '[]', '{}')`,
-        [displayName, avatarId]
-      );
-      const row = await fetchAccountById(req.cecDb, result.insertId);
-      const token = await issueSessionToken(req.cecDb, row.id);
-      jsonOk(res, { token, worshiper: worshiperFromRow(row) });
+      const name = normalizeDisplayName(req.query.username || req.query.displayName || '');
+      if (!name) return jsonError(res, 'Name is required');
+      const taken = await displayNameTaken(req.cecDb, name);
+      jsonOk(res, { available: !taken, taken });
     } catch (error) {
-      if (error.code === 'ER_DUP_ENTRY') {
-        return jsonError(res, 'That name is already taken — try another', 409);
-      }
-      jsonError(res, error.message || 'Could not create worshiper', 500);
+      jsonError(res, error.message || 'Name check failed', 500);
     }
   });
 
@@ -219,17 +206,16 @@ function registerCecAccountRoutes(app, getConnection) {
     try {
       const email = normalizeEmail(req.body.email);
       const password = req.body.password || '';
-      let displayName = String(req.body.displayName || '').trim();
+      let displayName = normalizeDisplayName(req.body.username || req.body.displayName || '');
       const avatarId = String(req.body.avatarId || 'frog').trim();
 
       if (!validateEmail(email)) return jsonError(res, 'Valid email is required');
       if (!validatePassword(password)) {
         return jsonError(res, 'Password must be at least 8 characters');
       }
-      if (!displayName) return jsonError(res, 'Display name is required');
-      displayName = normalizeDisplayName(displayName);
+      if (!displayName) return jsonError(res, 'Username is required');
       if (await displayNameTaken(req.cecDb, displayName)) {
-        return jsonError(res, 'That name is already taken — try another', 409);
+        return jsonError(res, 'That username is already taken — try another', 409);
       }
 
       const passwordHash = await bcrypt.hash(password, 10);
@@ -244,7 +230,7 @@ function registerCecAccountRoutes(app, getConnection) {
       jsonOk(res, { token, worshiper: worshiperFromRow(row) });
     } catch (error) {
       if (error.code === 'ER_DUP_ENTRY') {
-        return jsonError(res, 'Email or display name is already in use', 409);
+        return jsonError(res, 'Email or username is already in use', 409);
       }
       jsonError(res, error.message || 'Registration failed', error.status || 500);
     }

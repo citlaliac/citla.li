@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/perspective-helper.php';
+require_once __DIR__ . '/cec-accounts-db.php';
 
 cec_send_json_cors('POST, OPTIONS');
 cec_handle_options();
@@ -40,6 +41,17 @@ try {
 
     $conn = cec_db_connect($envVars);
     cec_ensure_tables($conn);
+    cec_accounts_ensure_tables($conn);
+
+    if (cec_display_name_taken($conn, $displayName)) {
+        $account = cec_authenticate_request($conn);
+        if (
+            !$account
+            || strcasecmp((string) $account['display_name'], $displayName) !== 0
+        ) {
+            throw new Exception('That name is reserved for a registered worshiper');
+        }
+    }
 
     $stmt = $conn->prepare(
         'INSERT INTO cec_bulletin (session_id, display_name, rank_label, body, is_moderated, moderation_status)

@@ -28,13 +28,14 @@ import {
   awardPoints,
   addWheelPoints,
   loadWorshiper,
+  registerWorshiper,
   applyAccountWorshiper,
   getAuthToken,
   setAuthToken,
   saveWorshiper,
   receivePortraitCommunion,
 } from '../cec/worshiperStorage';
-import { cecRegisterAccount, cecLoginAccount, cecFetchAccount, cecGuestEnter } from '../cec/cecApi';
+import { cecRegisterAccount, cecLoginAccount, cecFetchAccount, cecCheckUsernameAvailable } from '../cec/cecApi';
 import '../styles/CatholiceCloudPage.css';
 
 const PUB = process.env.PUBLIC_URL || '';
@@ -129,14 +130,12 @@ function CatholiceCloudPage() {
     setAuthBusy(true);
     setAuthError('');
     try {
-      const { token, worshiper: accountWorshiper } = await cecGuestEnter({
-        displayName: name,
-        avatarId: skinId,
-      });
-      setAuthToken(token);
-      let w = applyAccountWorshiper(accountWorshiper);
-      const { worshiper: afterReg } = awardPoints(w, 'register');
-      setWorshiper(afterReg);
+      const available = await cecCheckUsernameAvailable(name);
+      if (!available) {
+        setAuthError('That name belongs to a registered worshiper — pick another');
+        return;
+      }
+      setWorshiper(registerWorshiper(name, skinId));
     } catch (err) {
       setAuthError(err.message || 'Could not enter the cloud');
     } finally {
@@ -144,14 +143,14 @@ function CatholiceCloudPage() {
     }
   };
 
-  const handleRegister = async (email, password, name, skinId) => {
+  const handleRegister = async (email, password, username, skinId) => {
     setAuthBusy(true);
     setAuthError('');
     try {
       const { token, worshiper: accountWorshiper } = await cecRegisterAccount({
         email,
         password,
-        displayName: name,
+        username,
         avatarId: skinId,
       });
       setAuthToken(token);

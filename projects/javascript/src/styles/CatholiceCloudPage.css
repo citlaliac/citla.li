@@ -307,6 +307,14 @@
   font-size: clamp(0.96rem, 2.1vw, 1.1rem);
 }
 
+.cec-register-name-hint {
+  margin: 0.2rem 0 0.55rem;
+  font-size: 0.72rem;
+  line-height: 1.28;
+  color: rgba(245, 237, 216, 0.45);
+  text-align: center;
+}
+
 .cec-register-auth-links {
   display: flex;
   gap: 0.25rem;

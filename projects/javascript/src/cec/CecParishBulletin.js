@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ACTIVITY_REWARDS, canCompleteAction, formatActionCooldown, actionCooldownRemainingMs } from './cecConfig';
+import { cecAuthHeaders } from './cecApi';
 
 const PUB = process.env.PUBLIC_URL || '';
 const HEAVEN_PANEL_BG = `${PUB}/assets/catholicecloud/background/heaven-bkg.jpg`;
@@ -42,7 +43,7 @@ function CecParishBulletin({ worshiper, onPostApproved, onClose }) {
     try {
       const res = await fetch('/cec-bulletin-submit.php', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...cecAuthHeaders() },
         body: JSON.stringify({
           sessionId: worshiper.sessionId,
           displayName: worshiper.displayName,

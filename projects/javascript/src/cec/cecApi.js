@@ -12,6 +12,10 @@ function buildUrl(resource, { action = '', query = {} } = {}) {
     if (resource === 'me') {
       return `${cecApiBase()}/me`;
     }
+    if (resource === 'names') {
+      const qs = new URLSearchParams(query).toString();
+      return `${cecApiBase()}/names/check${qs ? `?${qs}` : ''}`;
+    }
     return cecApiBase();
   }
   const params = new URLSearchParams({ resource, ...query });
@@ -35,17 +39,16 @@ async function request(url, options = {}) {
   return data;
 }
 
-export function cecGuestEnter({ displayName, avatarId }) {
-  return request(buildUrl('auth', { action: 'guest' }), {
-    method: 'POST',
-    body: JSON.stringify({ displayName, avatarId }),
-  });
+export function cecCheckUsernameAvailable(username) {
+  return request(
+    buildUrl('names', { action: 'check', query: { username } })
+  ).then((d) => d.available);
 }
 
-export function cecRegisterAccount({ email, password, displayName, avatarId }) {
+export function cecRegisterAccount({ email, password, username, avatarId }) {
   return request(buildUrl('auth', { action: 'register' }), {
     method: 'POST',
-    body: JSON.stringify({ email, password, displayName, avatarId }),
+    body: JSON.stringify({ email, password, username, avatarId }),
   });
 }
 
@@ -75,4 +78,13 @@ export function cecSyncAccount(token, worshiper) {
       lastSpinDate: worshiper.lastSpinDate,
     }),
   });
+}
+
+export function cecAuthHeaders() {
+  try {
+    const token = localStorage.getItem('cec_auth_token');
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  } catch {
+    return {};
+  }
 }

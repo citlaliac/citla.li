@@ -18,11 +18,11 @@ try {
             cec_handle_auth_register($conn);
         } elseif ($action === 'login') {
             cec_handle_auth_login($conn);
-        } elseif ($action === 'guest') {
-            cec_handle_auth_guest($conn);
         } else {
-            cec_accounts_json_error('Use action=register, action=login, or action=guest', 404);
+            cec_accounts_json_error('Use action=register or action=login', 404);
         }
+    } elseif ($resource === 'names' && $method === 'GET' && $action === 'check') {
+        cec_handle_names_check($conn);
     } elseif ($resource === 'me') {
         if ($method === 'GET') {
             cec_handle_me_get($conn);
@@ -32,7 +32,7 @@ try {
             cec_accounts_json_error('Method not allowed', 405);
         }
     } else {
-        cec_accounts_json_error('Unknown resource. Use resource=auth|me', 404);
+        cec_accounts_json_error('Unknown resource. Use resource=auth|names|me', 404);
     }
 
     $conn->close();
@@ -42,49 +42,20 @@ try {
     echo json_encode(['success' => false, 'error' => $e->getMessage()]);
 }
 
-function cec_handle_auth_guest($conn) {
-    $body = cec_accounts_read_json_body();
-    $displayName = cec_normalize_display_name($body['displayName'] ?? '');
-    $avatarId = trim((string) ($body['avatarId'] ?? 'frog'));
-
-    if ($displayName === '') {
-        cec_accounts_json_error('Display name is required');
+function cec_handle_names_check($conn) {
+    $name = cec_normalize_display_name($_GET['username'] ?? $_GET['displayName'] ?? '');
+    if ($name === '') {
+        cec_accounts_json_error('Name is required');
     }
-    if (cec_display_name_taken($conn, $displayName)) {
-        cec_accounts_json_error('That name is already taken — try another', 409);
-    }
-
-    $emptyJson = '[]';
-    $emptyObj = '{}';
-    $zero = 0;
-
-    $stmt = $conn->prepare(
-        'INSERT INTO cec_accounts (email, password_hash, display_name, avatar_id, pontifex_points, completed_actions, action_last_done)
-         VALUES (NULL, NULL, ?, ?, ?, ?, ?)'
-    );
-    $stmt->bind_param('ssiss', $displayName, $avatarId, $zero, $emptyJson, $emptyObj);
-    if (!$stmt->execute()) {
-        if ($conn->errno === 1062) {
-            cec_accounts_json_error('That name is already taken — try another', 409);
-        }
-        throw new Exception('Could not create worshiper');
-    }
-    $accountId = (int) $stmt->insert_id;
-    $stmt->close();
-
-    $row = cec_fetch_account_by_id($conn, $accountId);
-    $token = cec_issue_session_token($conn, $accountId);
-    cec_accounts_json_ok([
-        'token' => $token,
-        'worshiper' => cec_worshiper_from_row($row),
-    ]);
+    $taken = cec_display_name_taken($conn, $name);
+    cec_accounts_json_ok(['available' => !$taken, 'taken' => $taken]);
 }
 
 function cec_handle_auth_register($conn) {
     $body = cec_accounts_read_json_body();
     $email = cec_normalize_email($body['email'] ?? '');
     $password = $body['password'] ?? '';
-    $displayName = trim((string) ($body['displayName'] ?? ''));
+    $displayName = cec_normalize_display_name($body['username'] ?? $body['displayName'] ?? '');
     $avatarId = trim((string) ($body['avatarId'] ?? 'frog'));
 
     if (!cec_validate_email($email)) {
@@ -94,11 +65,10 @@ function cec_handle_auth_register($conn) {
         cec_accounts_json_error('Password must be at least 8 characters');
     }
     if ($displayName === '') {
-        cec_accounts_json_error('Display name is required');
+        cec_accounts_json_error('Username is required');
     }
-    $displayName = cec_normalize_display_name($displayName);
     if (cec_display_name_taken($conn, $displayName)) {
-        cec_accounts_json_error('That name is already taken — try another', 409);
+        cec_accounts_json_error('That username is already taken — try another', 409);
     }
 
     $hash = password_hash($password, PASSWORD_DEFAULT);
@@ -113,7 +83,7 @@ function cec_handle_auth_register($conn) {
     $stmt->bind_param('ssssiss', $email, $hash, $displayName, $avatarId, $zero, $emptyJson, $emptyObj);
     if (!$stmt->execute()) {
         if ($conn->errno === 1062) {
-            cec_accounts_json_error('Email or display name is already in use', 409);
+            cec_accounts_json_error('Email or username is already in use', 409);
         }
         throw new Exception('Registration failed');
     }

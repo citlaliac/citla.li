@@ -68,7 +68,7 @@ function cec_send_json_cors($methods = 'GET, POST, OPTIONS') {
     }
     header('Content-Type: application/json');
     header('Access-Control-Allow-Methods: ' . $methods);
-    header('Access-Control-Allow-Headers: Content-Type');
+    header('Access-Control-Allow-Headers: Content-Type, Authorization');
 }
 
 function cec_handle_options() {

@@ -34,8 +34,8 @@ Mirrors production PHP (`cec-accounts-api.php`):
 
 | Method | Path | Notes |
 |--------|------|--------|
-| POST | `/api/cec/auth/guest` | Body: `{ displayName, avatarId }` — name must be unique |
-| POST | `/api/cec/auth/register` | Body: `{ email, password, displayName, avatarId }` |
+| GET | `/api/cec/names/check?username=` | Whether username is free (registered accounts only) |
+| POST | `/api/cec/auth/register` | Body: `{ email, username, password, avatarId }` |
 | POST | `/api/cec/auth/login` | Body: `{ email, password }` |
 | GET | `/api/cec/me` | Header: `Authorization: Bearer <token>` |
 | PATCH | `/api/cec/me` | Sync PP, rank progress, cooldowns |

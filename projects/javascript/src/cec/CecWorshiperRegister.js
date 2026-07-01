@@ -15,11 +15,13 @@ function CecWorshiperRegister({
   authBusy,
 }) {
   const [name, setName] = useState('');
+  const [username, setUsername] = useState('');
   const [skinId, setSkinId] = useState(DEFAULT_SKIN_ID);
   const [authPanel, setAuthPanel] = useState(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const trimmedName = name.trim();
+  const trimmedUsername = username.trim();
 
   const handleEnter = (e) => {
     e.preventDefault();
@@ -36,8 +38,8 @@ function CecWorshiperRegister({
       return;
     }
     if (authPanel === 'signup') {
-      if (!email.trim() || password.length < 8 || !trimmedName) return;
-      onRegister(email.trim(), password, trimmedName, skinId);
+      if (!email.trim() || password.length < 8 || !trimmedUsername) return;
+      onRegister(email.trim(), password, trimmedUsername, skinId);
     }
   };
 
@@ -76,13 +78,15 @@ function CecWorshiperRegister({
         </fieldset>
 
         <div className="cec-register-preview" aria-live="polite">
-          <p className="cec-register-preview-name">{trimmedName || '\u00A0'}</p>
+          <p className="cec-register-preview-name">
+            {(authPanel === 'signup' ? trimmedUsername : trimmedName) || '\u00A0'}
+          </p>
           <CecWorshiperPortrait skinId={skinId} rankId="cantor" size="hero" />
         </div>
 
         <form onSubmit={handleEnter}>
           <label className="cec-register-label" htmlFor="cec-worshiper-name">
-            Select a name for your worshiper
+            Name for this visit
           </label>
           <input
             id="cec-worshiper-name"
@@ -93,6 +97,9 @@ function CecWorshiperRegister({
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. Sister Agnes"
           />
+          <p className="cec-register-name-hint">
+            Session only. Registered usernames cannot be used here.
+          </p>
 
           {authError && !authPanel && (
             <p className="cec-register-auth-error" role="alert">
@@ -133,7 +140,7 @@ function CecWorshiperRegister({
         {authPanel && (
           <form className="cec-register-auth-form" onSubmit={handleAuthSubmit}>
             <p className="cec-register-auth-form-hint">
-              {authPanel === 'login' ? 'Optional — email login.' : 'Optional — save across devices.'}
+              {authPanel === 'login' ? 'Optional — email login.' : 'Optional — lock a username forever.'}
             </p>
             <label className="cec-register-label cec-register-label--compact" htmlFor="cec-account-email">
               Email
@@ -147,6 +154,23 @@ function CecWorshiperRegister({
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
             />
+            {authPanel === 'signup' && (
+              <>
+                <label className="cec-register-label cec-register-label--compact" htmlFor="cec-account-username">
+                  Username
+                </label>
+                <input
+                  id="cec-account-username"
+                  className="cec-register-input cec-register-input--compact"
+                  type="text"
+                  maxLength={24}
+                  autoComplete="username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="e.g. Sister Agnes"
+                />
+              </>
+            )}
             <label className="cec-register-label cec-register-label--compact" htmlFor="cec-account-password">
               Password
             </label>
@@ -171,7 +195,7 @@ function CecWorshiperRegister({
                 authBusy ||
                 !email.trim() ||
                 !password ||
-                (authPanel === 'signup' && (password.length < 8 || !trimmedName))
+                (authPanel === 'signup' && (password.length < 8 || !trimmedUsername))
               }
             >
               {authBusy ? '…' : authPanel === 'login' ? 'log in' : 'create account'}
