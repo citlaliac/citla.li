@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { DEFAULT_SKIN_ID, REGISTER_WORSHIPER_SKINS } from './cecConfig';
+import CecBrandTitle from './CecBrandTitle';
 import CecWorshiperPortrait from './CecWorshiperPortrait';
 
 const PUB = process.env.PUBLIC_URL || '';
@@ -19,9 +20,7 @@ function CecWorshiperRegister({ onRegister }) {
 
   return (
     <div className="cec-register-overlay" role="dialog" aria-modal="true" aria-labelledby="cec-register-title">
-      <h2 id="cec-register-title" className="cec-register-title cec-register-title--hero">
-        Pick a worshiper to enter the catholid e cloud
-      </h2>
+      <CecBrandTitle as="h2" id="cec-register-title" className="cec-register-title cec-brand-title" />
       <div
         className="cec-register-panel cec-register-panel--wide"
         style={{ '--cec-heaven-panel-bg': `url('${HEAVEN_PANEL_BG}')` }}

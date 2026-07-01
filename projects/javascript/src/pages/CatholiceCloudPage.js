@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { useSEO } from '../hooks/useSEO';
+import CecBrandTitle from '../cec/CecBrandTitle';
 import CecWorshiperRegister from '../cec/CecWorshiperRegister';
 import CecWorshiperStage from '../cec/CecWorshiperStage';
 import CecParishMap from '../cec/CecParishMap';
@@ -329,7 +330,7 @@ function CatholiceCloudPage() {
 
       <main className="cec-main">
         <header className="cec-banner">
-          <h1 className="cec-title">catholic e cloud</h1>
+          <CecBrandTitle as="h1" className="cec-title cec-brand-title" />
           <p className="cec-subtitle">A cool online space for Catholics to hang out.</p>
         </header>
 

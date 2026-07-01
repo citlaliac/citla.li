@@ -28,7 +28,7 @@ app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
     ? 'https://citla.li' 
     : 'http://localhost:3000',
-  methods: ['GET', 'POST', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Accept'],
   credentials: true
 }));
@@ -183,6 +183,9 @@ app.post('/api/track-visitor', async (req, res) => {
     }
   }
 });
+
+const { registerMealsRoutes } = require('./meals-routes');
+registerMealsRoutes(app, getConnection);
 
 /**
  * Liturgical calendar proxy (Church Calendar API — avoids browser CORS).
