@@ -39,6 +39,7 @@ import {
   getAuthToken,
   setAuthToken,
   saveWorshiper,
+  saveWorshiperLocal,
   normalizeWorshiper,
   receivePortraitCommunion,
   clearAuth,
@@ -101,7 +102,7 @@ const SPRINKLES = [
 
 function CatholiceCloudPage() {
   const [worshiper, setWorshiper] = useState(() => loadWorshiper());
-  const [authChecking, setAuthChecking] = useState(() => !!getAuthToken() && !loadWorshiper());
+  const [authChecking, setAuthChecking] = useState(() => !!getAuthToken());
   const [authError, setAuthError] = useState('');
   const [authBusy, setAuthBusy] = useState(false);
   const [activeLocation, setActiveLocation] = useState(null);
@@ -219,7 +220,7 @@ function CatholiceCloudPage() {
         setReigningPopeState(pope);
       }
       const w = applyAccountWorshiper(accountWorshiper, pope);
-      setWorshiper(saveWorshiper(w));
+      setWorshiper(saveWorshiperLocal(w));
     } catch (err) {
       setAuthError(err.message || 'Could not log in');
     } finally {
@@ -361,19 +362,22 @@ function CatholiceCloudPage() {
 
   useEffect(() => {
     setAccountSyncHandler((data) => {
-      if (data.reigningPope === undefined) return;
-      setReigningPopeState((prevPope) => {
-        setWorshiper((w) => {
-          if (!w) return w;
-          const result = applyReigningPope(w, data.reigningPope);
-          if (result.papacyLost) {
-            showRankToast({ pp: 0, papacyLost: result.papacyLost });
-          } else if (result.rankUp) {
-            showRankToast({ pp: 0, rankUp: result.rankUp });
-          }
-          return result.worshiper;
-        });
-        return data.reigningPope;
+      if (data.reigningPope !== undefined) {
+        setReigningPopeState(data.reigningPope);
+      }
+      setWorshiper((w) => {
+        let next = w;
+        if (data.worshiper && w?.accountId) {
+          next = saveWorshiperLocal(applyAccountWorshiper(data.worshiper, data.reigningPope));
+        }
+        if (data.reigningPope === undefined) return next;
+        const result = applyReigningPope(next, data.reigningPope);
+        if (result.papacyLost) {
+          showRankToast({ pp: 0, papacyLost: result.papacyLost });
+        } else if (result.rankUp) {
+          showRankToast({ pp: 0, rankUp: result.rankUp });
+        }
+        return saveWorshiperLocal(result.worshiper);
       });
     });
     return () => setAccountSyncHandler(null);
@@ -419,10 +423,6 @@ function CatholiceCloudPage() {
       setAuthChecking(false);
       return undefined;
     }
-    if (loadWorshiper()) {
-      setAuthChecking(false);
-      return undefined;
-    }
     let cancelled = false;
     cecFetchAccount(token)
       .then(({ worshiper: accountWorshiper, reigningPope: pope }) => {
@@ -431,7 +431,7 @@ function CatholiceCloudPage() {
           setReigningPope(pope);
           setReigningPopeState(pope);
         }
-        setWorshiper(saveWorshiper(applyAccountWorshiper(accountWorshiper, pope)));
+        setWorshiper(saveWorshiperLocal(applyAccountWorshiper(accountWorshiper, pope)));
       })
       .catch(() => {
         if (!cancelled) setAuthToken(null);

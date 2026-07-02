@@ -208,11 +208,20 @@ export function loadWorshiper() {
   }
 }
 
-export function saveWorshiper(worshiper) {
+function persistWorshiper(worshiper, { sync = true } = {}) {
   const next = normalizeWorshiper(worshiper);
   sessionStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-  scheduleAccountSync(next);
+  if (sync) scheduleAccountSync(next);
   return next;
+}
+
+export function saveWorshiper(worshiper) {
+  return persistWorshiper(worshiper, { sync: true });
+}
+
+/** Persist account state locally without pushing to the server (e.g. after GET /me). */
+export function saveWorshiperLocal(worshiper) {
+  return persistWorshiper(worshiper, { sync: false });
 }
 
 export function awardPoints(worshiper, actionId) {

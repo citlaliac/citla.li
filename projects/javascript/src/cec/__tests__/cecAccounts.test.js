@@ -1,5 +1,5 @@
 import { rankFromPoints } from '../cecConfig';
-import { applyAccountWorshiper } from '../worshiperStorage';
+import { applyAccountWorshiper, saveWorshiperLocal } from '../worshiperStorage';
 
 describe('CEC account helpers', () => {
   test('rankFromPoints matches Cantor at zero', () => {
@@ -26,5 +26,22 @@ describe('CEC account helpers', () => {
     expect(w.accountId).toBe(3);
     expect(w.pontifexPoints).toBe(42);
     expect(w.rank.id).toBe('cantor');
+  });
+
+  test('saveWorshiperLocal keeps server PP over stale local session', () => {
+    const server = applyAccountWorshiper({
+      accountId: 3,
+      sessionId: 'cec-acc-3',
+      displayName: 'Friend',
+      avatarId: 'frog',
+      pontifexPoints: 500,
+      rank: { id: 'deacon', label: 'Deacon', minPP: 620 },
+      completedActions: ['register'],
+      actionLastDone: {},
+      lastSpinDate: null,
+    });
+    const saved = saveWorshiperLocal(server);
+    expect(saved.pontifexPoints).toBe(500);
+    expect(saved.rank.id).toBe('seminarian');
   });
 });

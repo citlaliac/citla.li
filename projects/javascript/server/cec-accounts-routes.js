@@ -396,8 +396,8 @@ function registerCecAccountRoutes(app, getConnection) {
       ).slice(0, 24);
       const avatarId = body.avatarId != null ? String(body.avatarId).trim() : row.avatar_id;
       const pontifexPoints = Math.max(
-        0,
-        body.pontifexPoints != null ? parseInt(body.pontifexPoints, 10) || 0 : row.pontifex_points
+        Number(row.pontifex_points) || 0,
+        body.pontifexPoints != null ? parseInt(body.pontifexPoints, 10) || 0 : Number(row.pontifex_points) || 0
       );
       const completedActions = JSON.stringify(
         body.completedActions != null ? body.completedActions : JSON.parse(row.completed_actions || '[]')

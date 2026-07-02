@@ -171,7 +171,7 @@ function cec_handle_me_patch($conn) {
         ? trim((string) $body['avatarId'])
         : $row['avatar_id'];
     $pontifexPoints = array_key_exists('pontifexPoints', $body)
-        ? max(0, (int) $body['pontifexPoints'])
+        ? max((int) $row['pontifex_points'], max(0, (int) $body['pontifexPoints']))
         : (int) $row['pontifex_points'];
     $completedActions = array_key_exists('completedActions', $body)
         ? json_encode($body['completedActions'])
