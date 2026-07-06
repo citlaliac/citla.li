@@ -29,7 +29,7 @@ app.use(cors({
     ? 'https://citla.li' 
     : 'http://localhost:3000',
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Accept'],
+  allowedHeaders: ['Content-Type', 'Accept', 'Authorization'],
   credentials: true
 }));
 
@@ -189,6 +189,9 @@ registerMealsRoutes(app, getConnection);
 
 const { registerCecAccountRoutes } = require('./cec-accounts-routes');
 registerCecAccountRoutes(app, getConnection);
+
+const { registerFinanceRoutes } = require('./finance-routes');
+registerFinanceRoutes(app, getConnection);
 
 /**
  * Liturgical calendar proxy (Church Calendar API — avoids browser CORS).

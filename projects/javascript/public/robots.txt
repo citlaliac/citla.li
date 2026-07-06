@@ -27,6 +27,7 @@ User-agent: YandexBot
 Allow: /
 
 # Block access to admin or private areas (if any exist in the future)
+Disallow: /finance
 Disallow: /admin/
 Disallow: /private/
 Disallow: /api/

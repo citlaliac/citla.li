@@ -1,0 +1,361 @@
+<?php
+/**
+ * Personal finance module — DB, auth, Plaid, export helpers.
+ */
+
+require_once __DIR__ . '/perspective-helper.php';
+
+function finance_send_json_cors($methods = 'GET, POST, PATCH, OPTIONS') {
+    $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+    $allowed = ['https://citla.li', 'http://localhost:3000'];
+    if (in_array($origin, $allowed, true)) {
+        header('Access-Control-Allow-Origin: ' . $origin);
+    } else {
+        header('Access-Control-Allow-Origin: https://citla.li');
+    }
+    header('Content-Type: application/json; charset=utf-8');
+    header('Access-Control-Allow-Methods: ' . $methods);
+    header('Access-Control-Allow-Headers: Content-Type, Authorization');
+}
+
+function finance_read_json_body() {
+    $raw = file_get_contents('php://input');
+    $data = json_decode($raw, true);
+    return is_array($data) ? $data : [];
+}
+
+function finance_json_ok($data = []) {
+    echo json_encode(array_merge(['success' => true], $data));
+    exit();
+}
+
+function finance_json_error($message, $status = 400) {
+    http_response_code($status);
+    echo json_encode(['success' => false, 'error' => $message]);
+    exit();
+}
+
+function finance_hash_token($token) {
+    return hash('sha256', $token);
+}
+
+function finance_categories_seed() {
+    return [
+        ['groceries', 'Groceries', 1, 1, 0, 'spending'],
+        ['restaurants', 'Restaurants', 2, 1, 0, 'spending'],
+        ['transportation', 'Transportation', 3, 1, 0, 'spending'],
+        ['self-care', 'Self Care', 4, 1, 0, 'spending'],
+        ['amazon', 'Amazon', 5, 0, 0, 'spending'],
+        ['home-goods', 'Home Goods', 6, 0, 0, 'spending'],
+        ['oops-splurge', 'Oops / Splurge', 7, 0, 0, 'spending'],
+        ['entertainment', 'Entertainment', 8, 0, 0, 'spending'],
+        ['clothing', 'Clothing', 9, 0, 0, 'spending'],
+        ['utilities', 'Utilities', 10, 0, 0, 'spending'],
+        ['rent', 'Rent', 11, 0, 0, 'spending'],
+        ['healthcare', 'Healthcare', 12, 0, 0, 'spending'],
+        ['travel-vacation', 'Travel / Vacation', 13, 0, 0, 'spending'],
+        ['education-classes', 'Education / Classes', 14, 0, 0, 'spending'],
+        ['savings', 'Savings', 15, 0, 0, 'moved'],
+        ['investments', 'Investments', 16, 0, 0, 'moved'],
+        ['cash', 'Cash', 17, 0, 0, 'spending'],
+        ['ignore', 'Ignore / Do Not Count', 18, 0, 1, 'ignore'],
+    ];
+}
+
+function finance_ensure_tables($conn) {
+    $schema = file_get_contents(__DIR__ . '/schema-finance.sql');
+    foreach (array_filter(array_map('trim', explode(';', $schema))) as $stmt) {
+        if ($stmt === '' || strpos($stmt, '--') === 0) {
+            continue;
+        }
+        $conn->query($stmt);
+    }
+    $res = $conn->query('SELECT COUNT(*) AS c FROM finance_categories');
+    $row = $res ? $res->fetch_assoc() : ['c' => 0];
+    if ((int) $row['c'] === 0) {
+        $stmt = $conn->prepare(
+            'INSERT INTO finance_categories (slug, label, sort_order, is_pinned, exclude_from_reports, report_group)
+             VALUES (?, ?, ?, ?, ?, ?)'
+        );
+        foreach (finance_categories_seed() as $cat) {
+            $stmt->bind_param('ssiiis', $cat[0], $cat[1], $cat[2], $cat[3], $cat[4], $cat[5]);
+            $stmt->execute();
+        }
+        $stmt->close();
+    }
+}
+
+function finance_env($key) {
+    static $env = null;
+    if ($env === null) {
+        $env = cec_load_env();
+    }
+    return $env[$key] ?? getenv($key) ?: '';
+}
+
+function finance_verify_password($password) {
+    $hash = finance_env('FINANCE_ADMIN_PASSWORD_HASH');
+    if ($hash !== '') {
+        return password_verify($password, $hash);
+    }
+    $plain = finance_env('FINANCE_ADMIN_PASSWORD');
+    return $plain !== '' && hash_equals($plain, $password);
+}
+
+function finance_issue_session($conn) {
+    $token = bin2hex(random_bytes(32));
+    $hash = finance_hash_token($token);
+    $expires = date('Y-m-d H:i:s', time() + 90 * 24 * 60 * 60);
+    $stmt = $conn->prepare('INSERT INTO finance_sessions (token_hash, expires_at) VALUES (?, ?)');
+    $stmt->bind_param('ss', $hash, $expires);
+    $stmt->execute();
+    $stmt->close();
+    return $token;
+}
+
+function finance_authenticate($conn) {
+    $header = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+    if (preg_match('/^Bearer\s+(\S+)$/i', $header, $m)) {
+        $hash = finance_hash_token($m[1]);
+        $stmt = $conn->prepare(
+            'SELECT id FROM finance_sessions WHERE token_hash = ? AND expires_at > NOW() LIMIT 1'
+        );
+        $stmt->bind_param('s', $hash);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $ok = (bool) $res->fetch_assoc();
+        $stmt->close();
+        return $ok;
+    }
+    return false;
+}
+
+function finance_encryption_key() {
+    $raw = finance_env('FINANCE_ENCRYPTION_KEY');
+    if (!preg_match('/^[0-9a-fA-F]{64}$/', $raw)) {
+        throw new Exception('FINANCE_ENCRYPTION_KEY must be 64 hex characters');
+    }
+    return hex2bin($raw);
+}
+
+function finance_encrypt_secret($plain) {
+    $key = finance_encryption_key();
+    $iv = random_bytes(12);
+    $tag = '';
+    $cipher = openssl_encrypt($plain, 'aes-256-gcm', $key, OPENSSL_RAW_DATA, $iv, $tag);
+    return base64_encode($iv . $tag . $cipher);
+}
+
+function finance_decrypt_secret($encoded) {
+    $key = finance_encryption_key();
+    $buf = base64_decode($encoded, true);
+    $iv = substr($buf, 0, 12);
+    $tag = substr($buf, 12, 16);
+    $data = substr($buf, 28);
+    $plain = openssl_decrypt($data, 'aes-256-gcm', $key, OPENSSL_RAW_DATA, $iv, $tag);
+    if ($plain === false) {
+        throw new Exception('Could not decrypt Plaid token');
+    }
+    return $plain;
+}
+
+function finance_plaid_base_url() {
+    $env = strtolower(finance_env('PLAID_ENV') ?: 'sandbox');
+    if ($env === 'production') {
+        return 'https://production.plaid.com';
+    }
+    if ($env === 'development') {
+        return 'https://development.plaid.com';
+    }
+    return 'https://sandbox.plaid.com';
+}
+
+function finance_plaid_request($path, $body) {
+    $clientId = finance_env('PLAID_CLIENT_ID');
+    $secret = finance_env('PLAID_SECRET');
+    if ($clientId === '' || $secret === '') {
+        throw new Exception('PLAID_CLIENT_ID and PLAID_SECRET must be set');
+    }
+    $payload = array_merge(['client_id' => $clientId, 'secret' => $secret], $body);
+    $ch = curl_init(finance_plaid_base_url() . $path);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST => true,
+        CURLOPT_POSTFIELDS => json_encode($payload),
+        CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
+    ]);
+    $response = curl_exec($ch);
+    $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    $data = json_decode($response, true);
+    if ($code < 200 || $code >= 300) {
+        $msg = $data['error_message'] ?? $data['display_message'] ?? $data['error_code'] ?? 'Plaid error';
+        throw new Exception($msg);
+    }
+    return is_array($data) ? $data : [];
+}
+
+function finance_upsert_transaction($conn, $plaidItemDbId, $txn) {
+    $merchant = mb_substr($txn['merchant_name'] ?? $txn['name'] ?? 'Unknown', 0, 255);
+    $amount = (float) ($txn['amount'] ?? 0);
+    $date = $txn['date'] ?? date('Y-m-d');
+    $pending = !empty($txn['pending']) ? 1 : 0;
+    $txnId = $txn['transaction_id'] ?? '';
+    $stmt = $conn->prepare(
+        'INSERT INTO finance_transactions
+            (plaid_transaction_id, plaid_item_id, txn_date, amount, merchant_name, pending)
+         VALUES (?, ?, ?, ?, ?, ?)
+         ON DUPLICATE KEY UPDATE
+            txn_date = VALUES(txn_date),
+            amount = VALUES(amount),
+            merchant_name = VALUES(merchant_name),
+            pending = VALUES(pending)'
+    );
+    $stmt->bind_param('sisdsi', $txnId, $plaidItemDbId, $date, $amount, $merchant, $pending);
+    $stmt->execute();
+    $stmt->close();
+}
+
+function finance_sync_all($conn) {
+    $res = $conn->query('SELECT * FROM finance_plaid_items');
+    $added = 0;
+    $modified = 0;
+    $items = 0;
+    while ($item = $res->fetch_assoc()) {
+        $items += 1;
+        try {
+            $accessToken = finance_decrypt_secret($item['access_token_enc']);
+        } catch (Exception $e) {
+            continue;
+        }
+        $cursor = $item['transactions_cursor'] ?: null;
+        $hasMore = true;
+        while ($hasMore) {
+            $body = ['access_token' => $accessToken];
+            if ($cursor) {
+                $body['cursor'] = $cursor;
+            }
+            $data = finance_plaid_request('/transactions/sync', $body);
+            foreach ($data['added'] ?? [] as $txn) {
+                finance_upsert_transaction($conn, (int) $item['id'], $txn);
+                $added += 1;
+            }
+            foreach ($data['modified'] ?? [] as $txn) {
+                finance_upsert_transaction($conn, (int) $item['id'], $txn);
+                $modified += 1;
+            }
+            $cursor = $data['next_cursor'] ?? null;
+            $hasMore = !empty($data['has_more']);
+        }
+        $stmt = $conn->prepare(
+            'UPDATE finance_plaid_items SET transactions_cursor = ?, last_synced_at = NOW() WHERE id = ?'
+        );
+        $stmt->bind_param('si', $cursor, $item['id']);
+        $stmt->execute();
+        $stmt->close();
+    }
+    return ['added' => $added, 'modified' => $modified, 'items' => $items];
+}
+
+function finance_category_from_row($row) {
+    return [
+        'id' => (int) $row['id'],
+        'slug' => $row['slug'],
+        'label' => $row['label'],
+        'sortOrder' => (int) $row['sort_order'],
+        'isPinned' => (bool) $row['is_pinned'],
+        'excludeFromReports' => (bool) $row['exclude_from_reports'],
+        'reportGroup' => $row['report_group'],
+    ];
+}
+
+function finance_transaction_from_row($row) {
+    return [
+        'id' => (int) $row['id'],
+        'plaidTransactionId' => $row['plaid_transaction_id'],
+        'date' => $row['txn_date'],
+        'amount' => (float) $row['amount'],
+        'merchantName' => $row['merchant_name'],
+        'pending' => (bool) $row['pending'],
+        'categoryId' => $row['category_id'] !== null ? (int) $row['category_id'] : null,
+        'categorizedAt' => $row['categorized_at'],
+        'exportedAt' => $row['exported_at'],
+    ];
+}
+
+function finance_build_csv($rows) {
+    $lines = ['date,merchant,amount,category'];
+    foreach ($rows as $r) {
+        $merchant = str_replace('"', '""', $r['merchant_name'] ?? '');
+        $category = str_replace('"', '""', $r['category_label'] ?? '');
+        $lines[] = $r['txn_date'] . ',"' . $merchant . '",' . $r['amount'] . ',"' . $category . '"';
+    }
+    return implode("\n", $lines) . "\n";
+}
+
+function finance_google_access_token() {
+    $email = finance_env('GOOGLE_SERVICE_ACCOUNT_EMAIL');
+    $key = finance_env('GOOGLE_PRIVATE_KEY');
+    if ($email === '' || $key === '') {
+        throw new Exception('Google Drive export is not configured');
+    }
+    $key = str_replace('\\n', "\n", $key);
+    $now = time();
+    $header = rtrim(strtr(base64_encode(json_encode(['alg' => 'RS256', 'typ' => 'JWT'])), '+/', '-_'), '=');
+    $claim = rtrim(strtr(base64_encode(json_encode([
+        'iss' => $email,
+        'scope' => 'https://www.googleapis.com/auth/drive.file',
+        'aud' => 'https://oauth2.googleapis.com/token',
+        'iat' => $now,
+        'exp' => $now + 3600,
+    ])), '+/', '-_'), '=');
+    $input = $header . '.' . $claim;
+    openssl_sign($input, $signature, $key, OPENSSL_ALGO_SHA256);
+    $jwt = $input . '.' . rtrim(strtr(base64_encode($signature), '+/', '-_'), '=');
+    $ch = curl_init('https://oauth2.googleapis.com/token');
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST => true,
+        CURLOPT_POSTFIELDS => http_build_query([
+            'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+            'assertion' => $jwt,
+        ]),
+    ]);
+    $response = curl_exec($ch);
+    curl_close($ch);
+    $data = json_decode($response, true);
+    if (empty($data['access_token'])) {
+        throw new Exception('Could not obtain Google access token');
+    }
+    return $data['access_token'];
+}
+
+function finance_upload_csv_drive($filename, $csv) {
+    $folderId = finance_env('FINANCE_GDRIVE_FOLDER_ID');
+    if ($folderId === '') {
+        throw new Exception('FINANCE_GDRIVE_FOLDER_ID is not set');
+    }
+    $token = finance_google_access_token();
+    $boundary = 'finance_' . bin2hex(random_bytes(8));
+    $metadata = json_encode(['name' => $filename, 'parents' => [$folderId]]);
+    $body = "--{$boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n{$metadata}\r\n"
+        . "--{$boundary}\r\nContent-Type: text/csv\r\n\r\n{$csv}\r\n--{$boundary}--";
+    $ch = curl_init('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart');
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST => true,
+        CURLOPT_POSTFIELDS => $body,
+        CURLOPT_HTTPHEADER => [
+            'Authorization: Bearer ' . $token,
+            'Content-Type: multipart/related; boundary=' . $boundary,
+        ],
+    ]);
+    $response = curl_exec($ch);
+    $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    if ($code < 200 || $code >= 300) {
+        throw new Exception('Google Drive upload failed');
+    }
+    $data = json_decode($response, true);
+    return $data['id'] ?? null;
+}

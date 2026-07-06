@@ -43,3 +43,39 @@ Mirrors production PHP (`cec-accounts-api.php`):
 Tables are created from `schema-cec-accounts.sql` on first request. The reigning Pope must have logged in or synced within the last **3 months** (`last_active_at`); otherwise the throne shows as *Sede Vacante*.
 
 Production: `cec-accounts-api.php?resource=auth&action=register|login` and `?resource=me`.
+
+## Personal finance (local dev)
+
+Private module at `/finance` (not linked from site nav). Mirrors `finance-api.php`.
+
+| Method | Path | Notes |
+|--------|------|--------|
+| POST | `/api/finance/auth/login` | Body: `{ password }` |
+| GET | `/api/finance/categories` | Bearer token |
+| POST | `/api/finance/plaid/link-token` | Plaid Link token |
+| POST | `/api/finance/plaid/exchange` | Body: `{ publicToken, institutionName }` |
+| GET | `/api/finance/plaid/items` | Linked institutions |
+| POST | `/api/finance/sync` | Pull transactions from Plaid |
+| GET | `/api/finance/transactions?status=uncategorized` | Inbox |
+| PATCH | `/api/finance/transactions/:id` | Body: `{ categoryId }` |
+| GET | `/api/finance/reports?month=YYYY-MM` | Monthly totals |
+| POST | `/api/finance/export?month=YYYY-MM` | Google Drive CSV; add `&download=1` for file download |
+
+### `.env` (finance)
+
+```env
+FINANCE_ADMIN_PASSWORD=your-dev-password
+# Or for production:
+FINANCE_ADMIN_PASSWORD_HASH=
+FINANCE_ENCRYPTION_KEY=   # openssl rand -hex 32
+PLAID_CLIENT_ID=
+PLAID_SECRET=
+PLAID_ENV=sandbox
+FINANCE_GDRIVE_FOLDER_ID=
+GOOGLE_SERVICE_ACCOUNT_EMAIL=
+GOOGLE_PRIVATE_KEY=
+```
+
+Generate a password hash: `node -e "console.log(require('bcryptjs').hashSync('your-password', 10))"`
+
+Tables seed from `schema-finance.sql` on first request. Production: `finance-api.php?resource=...&action=...`
