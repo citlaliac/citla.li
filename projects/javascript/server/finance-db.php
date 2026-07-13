@@ -130,12 +130,49 @@ function finance_ensure_tables($conn) {
     }
 }
 
-function finance_env($key) {
+/**
+ * Load finance env vars with INI_SCANNER_RAW + quote trimming.
+ * Default parse_ini_file can swallow/mangle secrets that contain $ or similar.
+ */
+function finance_load_env_file() {
     static $env = null;
-    if ($env === null) {
-        $env = cec_load_env();
+    if ($env !== null) {
+        return $env;
     }
-    return $env[$key] ?? getenv($key) ?: '';
+    $envFile = __DIR__ . '/.env';
+    if (!file_exists($envFile)) {
+        throw new Exception('.env file not found');
+    }
+    $parsed = parse_ini_file($envFile, false, INI_SCANNER_RAW);
+    if ($parsed === false) {
+        throw new Exception('Failed to parse .env file');
+    }
+    foreach ($parsed as $k => $v) {
+        if (!is_string($v)) {
+            continue;
+        }
+        $v = trim($v);
+        $len = strlen($v);
+        if ($len >= 2) {
+            $first = $v[0];
+            $last = $v[$len - 1];
+            if (($first === '"' && $last === '"') || ($first === "'" && $last === "'")) {
+                $v = substr($v, 1, -1);
+            }
+        }
+        $parsed[$k] = $v;
+    }
+    $env = $parsed;
+    return $env;
+}
+
+function finance_env($key) {
+    $env = finance_load_env_file();
+    $value = $env[$key] ?? getenv($key);
+    if ($value === false || $value === null) {
+        return '';
+    }
+    return is_string($value) ? trim($value) : (string) $value;
 }
 
 function finance_verify_password($password) {
@@ -219,7 +256,16 @@ function finance_plaid_request($path, $body) {
     $clientId = finance_env('PLAID_CLIENT_ID');
     $secret = finance_env('PLAID_SECRET');
     if ($clientId === '' || $secret === '') {
-        throw new Exception('PLAID_CLIENT_ID and PLAID_SECRET must be set');
+        $missing = [];
+        if ($clientId === '') {
+            $missing[] = 'PLAID_CLIENT_ID';
+        }
+        if ($secret === '') {
+            $missing[] = 'PLAID_SECRET';
+        }
+        throw new Exception(
+            implode(' and ', $missing) . ' empty in public_html/.env — check spelling and save the file'
+        );
     }
     $payload = array_merge(['client_id' => $clientId, 'secret' => $secret], $body);
     $ch = curl_init(finance_plaid_base_url() . $path);
