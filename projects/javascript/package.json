@@ -27,7 +27,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.22.2",
-    "googleapis": "^128.0.0",
+    "googleapis": "^173.0.0",
     "leaflet": "^1.9.4",
     "nodemailer": "^9.0.1",
     "react": "^18.2.0",
@@ -63,7 +63,9 @@
   "overrides": {
     "nth-check": "^2.1.1",
     "postcss": "^8.5.10",
-    "webpack-dev-server": "4.15.2"
+    "webpack-dev-server": "4.15.2",
+    "serialize-javascript": "^7.0.7",
+    "path-to-regexp": "0.1.13"
   },
   "private": true,
   "proxy": "http://localhost:8000"
