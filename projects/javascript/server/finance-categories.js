@@ -17,10 +17,12 @@ const FINANCE_CATEGORIES = [
   { slug: 'savings', label: 'Savings', sortOrder: 15, isPinned: false, excludeFromReports: false, reportGroup: 'moved' },
   { slug: 'investments', label: 'Investments', sortOrder: 16, isPinned: false, excludeFromReports: false, reportGroup: 'moved' },
   { slug: 'cash', label: 'Cash', sortOrder: 17, isPinned: false, excludeFromReports: false, reportGroup: 'spending' },
+  { slug: 'gifts-donations', label: 'Gifts / Donations', sortOrder: 18, isPinned: false, excludeFromReports: false, reportGroup: 'spending' },
+  { slug: 'income', label: 'Income', sortOrder: 19, isPinned: false, excludeFromReports: false, reportGroup: 'income' },
   {
     slug: 'ignore',
     label: 'Ignore / Do Not Count',
-    sortOrder: 18,
+    sortOrder: 20,
     isPinned: false,
     excludeFromReports: true,
     reportGroup: 'ignore',

@@ -386,12 +386,29 @@
 }
 
 .finance-report-row {
-  padding: 0.75rem 0.85rem;
+  padding: 0;
   border-bottom: 1px solid #f0ebe3;
 }
 
 .finance-report-row:last-child {
   border-bottom: none;
+}
+
+.finance-report-row-btn {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0.75rem 0.85rem;
+  border: none;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+
+.finance-report-row-btn:active {
+  background: #faf7f2;
 }
 
 .finance-report-row-top {
@@ -406,6 +423,29 @@
   padding: 0.75rem 0.85rem;
   margin: 0;
   border-bottom: 1px solid #f0ebe3;
+}
+
+.finance-report-txn-count {
+  margin: 0.35rem 0 0;
+  font-size: 0.75rem;
+  color: #8a8278;
+}
+
+.finance-back-btn {
+  border: none;
+  background: transparent;
+  color: #1a1a1a;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.35rem 0;
+  text-align: left;
+}
+
+.finance-txn-date-inline {
+  font-weight: 400;
+  color: #8a8278;
+  font-size: 0.82rem;
 }
 
 .finance-bar-track {

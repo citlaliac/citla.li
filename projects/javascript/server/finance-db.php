@@ -58,7 +58,9 @@ function finance_categories_seed() {
         ['savings', 'Savings', 15, 0, 0, 'moved'],
         ['investments', 'Investments', 16, 0, 0, 'moved'],
         ['cash', 'Cash', 17, 0, 0, 'spending'],
-        ['ignore', 'Ignore / Do Not Count', 18, 0, 1, 'ignore'],
+        ['gifts-donations', 'Gifts / Donations', 18, 0, 0, 'spending'],
+        ['income', 'Income', 19, 0, 0, 'income'],
+        ['ignore', 'Ignore / Do Not Count', 20, 0, 1, 'ignore'],
     ];
 }
 
@@ -120,6 +122,17 @@ function finance_ensure_tables($conn) {
     if ((int) $row['c'] === 0) {
         $stmt = $conn->prepare(
             'INSERT INTO finance_categories (slug, label, sort_order, is_pinned, exclude_from_reports, report_group)
+             VALUES (?, ?, ?, ?, ?, ?)'
+        );
+        foreach (finance_categories_seed() as $cat) {
+            $stmt->bind_param('ssiiis', $cat[0], $cat[1], $cat[2], $cat[3], $cat[4], $cat[5]);
+            $stmt->execute();
+        }
+        $stmt->close();
+    } else {
+        // Insert any newly added seed categories on existing DBs (UNIQUE slug is safe).
+        $stmt = $conn->prepare(
+            'INSERT IGNORE INTO finance_categories (slug, label, sort_order, is_pinned, exclude_from_reports, report_group)
              VALUES (?, ?, ?, ?, ?, ?)'
         );
         foreach (finance_categories_seed() as $cat) {

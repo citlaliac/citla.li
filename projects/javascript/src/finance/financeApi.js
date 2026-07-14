@@ -1,7 +1,7 @@
 import { financeApiUrl } from './financeConfig';
 import {
   DEMO_CATEGORIES,
-  DEMO_REPORT,
+  DEMO_CATEGORIZED,
   DEMO_TRANSACTIONS,
 } from './financeDemoData';
 
@@ -11,6 +11,8 @@ const DEMO_TOKEN = 'demo-local-preview';
 export const isFinanceDemo = process.env.REACT_APP_FINANCE_DEMO === 'true';
 
 let demoInbox = [...DEMO_TRANSACTIONS];
+/** Mutable categorized list for demo report drill-down + recategorize. */
+let demoCategorized = DEMO_CATEGORIZED.map((t) => ({ ...t }));
 
 function demoDelay(data, ms = 180) {
   return new Promise((resolve) => {
@@ -122,17 +124,44 @@ export function financeSync() {
   return financeRequest(financeApiUrl('sync'), { method: 'POST' });
 }
 
-export function financeFetchTransactions(status = 'uncategorized') {
+/**
+ * @param {string|object} statusOrFilters - legacy status string, or { status, month, categoryId }
+ */
+export function financeFetchTransactions(statusOrFilters = 'uncategorized') {
+  const filters =
+    typeof statusOrFilters === 'string'
+      ? { status: statusOrFilters }
+      : { status: 'all', ...statusOrFilters };
+
   if (isFinanceDemo) {
-    const transactions = status === 'uncategorized' ? [...demoInbox] : [];
-    return demoDelay({ success: true, transactions });
+    let list = [];
+    if (filters.status === 'uncategorized') {
+      list = [...demoInbox];
+    } else if (filters.categoryId != null) {
+      list = demoCategorized.filter((t) => t.categoryId === Number(filters.categoryId));
+      if (filters.month) {
+        list = list.filter((t) => String(t.date).startsWith(filters.month));
+      }
+    } else if (filters.status === 'categorized') {
+      list = [...demoCategorized];
+    }
+    return demoDelay({ success: true, transactions: list });
   }
-  return financeRequest(financeApiUrl('transactions', { query: { status } }));
+
+  const query = {};
+  if (filters.status && filters.status !== 'all') query.status = filters.status;
+  if (filters.month) query.month = filters.month;
+  if (filters.categoryId != null) query.categoryId = String(filters.categoryId);
+  return financeRequest(financeApiUrl('transactions', { query }));
 }
 
 export function financeCategorizeTransaction(id, categoryId) {
   if (isFinanceDemo) {
     demoInbox = demoInbox.filter((t) => t.id !== id);
+    const fromCategorized = demoCategorized.find((t) => t.id === id);
+    if (fromCategorized) {
+      fromCategorized.categoryId = categoryId;
+    }
     return demoDelay({ success: true, id, categoryId });
   }
   return financeRequest(financeApiUrl('transactions', { id }), {
@@ -143,7 +172,43 @@ export function financeCategorizeTransaction(id, categoryId) {
 
 export function financeFetchReport(month) {
   if (isFinanceDemo) {
-    return demoDelay({ success: true, month, ...DEMO_REPORT });
+    // Rebuild spending totals from mutable demoCategorized so recategorize updates the report.
+    const spendingMap = new Map();
+    const movedMap = new Map();
+    const incomeMap = new Map();
+    for (const txn of demoCategorized) {
+      if (month && !String(txn.date).startsWith(month)) continue;
+      const cat = DEMO_CATEGORIES.find((c) => c.id === txn.categoryId);
+      if (!cat || cat.excludeFromReports) continue;
+      const map =
+        cat.reportGroup === 'moved'
+          ? movedMap
+          : cat.reportGroup === 'income'
+            ? incomeMap
+            : spendingMap;
+      const prev = map.get(cat.id) || {
+        categoryId: cat.id,
+        label: cat.label,
+        total: 0,
+        txnCount: 0,
+      };
+      prev.total += Number(txn.amount) || 0;
+      prev.txnCount += 1;
+      map.set(cat.id, prev);
+    }
+    const spending = [...spendingMap.values()].sort((a, b) => b.total - a.total);
+    const moved = [...movedMap.values()].sort((a, b) => b.total - a.total);
+    const income = [...incomeMap.values()].sort((a, b) => b.total - a.total);
+    return demoDelay({
+      success: true,
+      month,
+      spending,
+      moved,
+      income,
+      spendingTotal: spending.reduce((s, r) => s + r.total, 0),
+      incomeTotal: income.reduce((s, r) => s + r.total, 0),
+      ignoredTotal: 0,
+    });
   }
   return financeRequest(financeApiUrl('reports', { query: { month } }));
 }

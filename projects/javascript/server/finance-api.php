@@ -88,18 +88,60 @@ try {
     } elseif ($resource === 'sync' && $method === 'POST') {
         finance_json_ok(finance_sync_all($conn));
     } elseif ($resource === 'transactions' && $method === 'GET') {
+        // Optional filters: status, month (YYYY-MM), categoryId — for report drill-down / recategorize.
         $status = $_GET['status'] ?? 'all';
-        $sql = 'SELECT * FROM finance_transactions';
+        $month = isset($_GET['month']) ? trim($_GET['month']) : '';
+        $categoryId = isset($_GET['categoryId']) ? (int) $_GET['categoryId'] : 0;
+
+        $where = [];
+        $types = '';
+        $params = [];
+
         if ($status === 'uncategorized') {
-            $sql .= ' WHERE category_id IS NULL';
+            $where[] = 'category_id IS NULL';
         } elseif ($status === 'categorized') {
-            $sql .= ' WHERE category_id IS NOT NULL';
+            $where[] = 'category_id IS NOT NULL';
+        }
+        if ($month !== '') {
+            if (!preg_match('/^\d{4}-\d{2}$/', $month)) {
+                finance_json_error('month must be YYYY-MM');
+            }
+            $where[] = "DATE_FORMAT(txn_date, '%Y-%m') = ?";
+            $types .= 's';
+            $params[] = $month;
+        }
+        if ($categoryId > 0) {
+            $where[] = 'category_id = ?';
+            $types .= 'i';
+            $params[] = $categoryId;
+        }
+
+        $sql = 'SELECT * FROM finance_transactions';
+        if (count($where) > 0) {
+            $sql .= ' WHERE ' . implode(' AND ', $where);
         }
         $sql .= ' ORDER BY txn_date DESC, id DESC LIMIT 500';
-        $res = $conn->query($sql);
+
         $transactions = [];
-        while ($row = $res->fetch_assoc()) {
-            $transactions[] = finance_transaction_from_row($row);
+        if ($types !== '') {
+            $stmt = $conn->prepare($sql);
+            // mysqli bind_param needs references; build args array carefully.
+            $bindArgs = [$types];
+            foreach ($params as $i => $_) {
+                $bindArgs[] = &$params[$i];
+            }
+            call_user_func_array([$stmt, 'bind_param'], $bindArgs);
+            $stmt->execute();
+            $res = $stmt->get_result();
+            while ($row = $res->fetch_assoc()) {
+                $transactions[] = finance_transaction_from_row($row);
+            }
+            $stmt->close();
+        } else {
+            $res = $conn->query($sql);
+            while ($row = $res->fetch_assoc()) {
+                $transactions[] = finance_transaction_from_row($row);
+            }
         }
         finance_json_ok(['transactions' => $transactions]);
     } elseif ($resource === 'transactions' && $method === 'PATCH') {
@@ -140,6 +182,7 @@ try {
         $res = $stmt->get_result();
         $spending = [];
         $moved = [];
+        $income = [];
         $ignored = 0.0;
         while ($row = $res->fetch_assoc()) {
             $entry = [
@@ -153,17 +196,22 @@ try {
                 $ignored += $entry['total'];
             } elseif ($row['report_group'] === 'moved') {
                 $moved[] = $entry;
+            } elseif ($row['report_group'] === 'income') {
+                $income[] = $entry;
             } else {
                 $spending[] = $entry;
             }
         }
         $stmt->close();
         $spendingTotal = array_sum(array_column($spending, 'total'));
+        $incomeTotal = array_sum(array_column($income, 'total'));
         finance_json_ok([
             'month' => $month,
             'spending' => $spending,
             'moved' => $moved,
+            'income' => $income,
             'spendingTotal' => $spendingTotal,
+            'incomeTotal' => $incomeTotal,
             'ignoredTotal' => $ignored,
         ]);
     } elseif ($resource === 'export' && $method === 'POST') {

@@ -65,6 +65,22 @@ async function ensureFinanceTables(connection) {
         ]
       );
     }
+  } else {
+    // Insert any newly added seed categories on existing DBs.
+    for (const cat of FINANCE_CATEGORIES) {
+      await connection.execute(
+        `INSERT IGNORE INTO finance_categories (slug, label, sort_order, is_pinned, exclude_from_reports, report_group)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [
+          cat.slug,
+          cat.label,
+          cat.sortOrder,
+          cat.isPinned ? 1 : 0,
+          cat.excludeFromReports ? 1 : 0,
+          cat.reportGroup,
+        ]
+      );
+    }
   }
   tablesReady = true;
 }
@@ -325,13 +341,32 @@ function registerFinanceRoutes(app, getConnection) {
 
   router.get('/transactions', async (req, res) => {
     try {
+      // Optional filters: status, month (YYYY-MM), categoryId — for report drill-down / recategorize.
       const status = req.query.status || 'all';
-      let sql = `SELECT t.* FROM finance_transactions t`;
+      const month = String(req.query.month || '').trim();
+      const categoryId = parseInt(req.query.categoryId, 10) || 0;
+      let sql = 'SELECT t.* FROM finance_transactions t';
+      const where = [];
       const params = [];
+
       if (status === 'uncategorized') {
-        sql += ' WHERE t.category_id IS NULL';
+        where.push('t.category_id IS NULL');
       } else if (status === 'categorized') {
-        sql += ' WHERE t.category_id IS NOT NULL';
+        where.push('t.category_id IS NOT NULL');
+      }
+      if (month) {
+        if (!/^\d{4}-\d{2}$/.test(month)) {
+          return jsonError(res, 'month must be YYYY-MM');
+        }
+        where.push("DATE_FORMAT(t.txn_date, '%Y-%m') = ?");
+        params.push(month);
+      }
+      if (categoryId > 0) {
+        where.push('t.category_id = ?');
+        params.push(categoryId);
+      }
+      if (where.length > 0) {
+        sql += ` WHERE ${where.join(' AND ')}`;
       }
       sql += ' ORDER BY t.txn_date DESC, t.id DESC LIMIT 500';
       const [rows] = await req.financeDb.execute(sql, params);
@@ -384,6 +419,7 @@ function registerFinanceRoutes(app, getConnection) {
       );
       const spending = [];
       const moved = [];
+      const income = [];
       let ignored = 0;
       for (const row of rows) {
         const entry = {
@@ -397,12 +433,23 @@ function registerFinanceRoutes(app, getConnection) {
           ignored += entry.total;
         } else if (row.report_group === 'moved') {
           moved.push(entry);
+        } else if (row.report_group === 'income') {
+          income.push(entry);
         } else {
           spending.push(entry);
         }
       }
       const spendingTotal = spending.reduce((s, r) => s + r.total, 0);
-      jsonOk(res, { month, spending, moved, spendingTotal, ignoredTotal: ignored });
+      const incomeTotal = income.reduce((s, r) => s + r.total, 0);
+      jsonOk(res, {
+        month,
+        spending,
+        moved,
+        income,
+        spendingTotal,
+        incomeTotal,
+        ignoredTotal: ignored,
+      });
     } catch (err) {
       jsonError(res, err.message || 'Failed to load report', 500);
     }
