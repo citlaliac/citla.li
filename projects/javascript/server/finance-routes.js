@@ -219,6 +219,111 @@ function resolveDateWindow(range, month) {
   };
 }
 
+/** Rolling window ending today (for merchants / hot categories). */
+function lastNMonthsWindow(n) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const start = new Date(today);
+  start.setMonth(start.getMonth() - Number(n));
+  const toIso = (d) => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  };
+  return { start: toIso(start), end: toIso(today) };
+}
+
+function monthKeysBetween(startIso, endIso) {
+  const keys = [];
+  const cur = new Date(`${String(startIso).slice(0, 7)}-01T00:00:00`);
+  const end = new Date(`${String(endIso).slice(0, 7)}-01T00:00:00`);
+  while (cur <= end) {
+    const y = cur.getFullYear();
+    const m = String(cur.getMonth() + 1).padStart(2, '0');
+    keys.push(`${y}-${m}`);
+    cur.setMonth(cur.getMonth() + 1);
+  }
+  return keys;
+}
+
+function monthShortLabel(ym) {
+  const d = new Date(`${ym}-01T00:00:00`);
+  return d.toLocaleString('en-US', { month: 'short' });
+}
+
+const SPENDING_JOIN = `
+  FROM finance_transactions t
+  JOIN finance_categories c ON c.id = t.category_id
+  WHERE t.category_id IS NOT NULL
+    AND c.exclude_from_reports = 0
+    AND c.report_group = 'spending'`;
+
+async function monthlySpendSeries(db, start, end) {
+  const [rows] = await db.execute(
+    `SELECT DATE_FORMAT(t.txn_date, '%Y-%m') AS ym, SUM(t.amount) AS total
+     ${SPENDING_JOIN}
+       AND t.txn_date >= ? AND t.txn_date <= ?
+     GROUP BY ym
+     ORDER BY ym ASC`,
+    [start, end]
+  );
+  const byMonth = Object.fromEntries(rows.map((r) => [r.ym, Number(r.total)]));
+  const keys = monthKeysBetween(start, end);
+  const monthlySpend = keys.map((ym) => ({
+    month: ym,
+    label: monthShortLabel(ym),
+    total: byMonth[ym] || 0,
+  }));
+  const sum = monthlySpend.reduce((s, r) => s + r.total, 0);
+  const monthBucketCount = Math.max(keys.length, 1);
+  return {
+    monthlySpend,
+    avgMonthlySpend: sum / monthBucketCount,
+    monthBucketCount,
+  };
+}
+
+async function topMerchants(db, start, end, limit = 5) {
+  const safeLimit = Math.max(1, Math.min(20, Number(limit) || 5));
+  const [rows] = await db.execute(
+    `SELECT t.merchant_name AS merchantName, SUM(t.amount) AS total, COUNT(*) AS txnCount
+     ${SPENDING_JOIN}
+       AND t.txn_date >= ? AND t.txn_date <= ?
+       AND t.merchant_name IS NOT NULL AND TRIM(t.merchant_name) <> ''
+       AND UPPER(t.merchant_name) NOT LIKE '%MTA%'
+     GROUP BY t.merchant_name
+     ORDER BY total DESC
+     LIMIT ${safeLimit}`,
+    [start, end]
+  );
+  return rows.map((r) => ({
+    merchantName: r.merchantName,
+    total: Number(r.total),
+    txnCount: Number(r.txnCount),
+  }));
+}
+
+async function hotCategories(db, start, end, limit = 3) {
+  const safeLimit = Math.max(1, Math.min(20, Number(limit) || 3));
+  const [rows] = await db.execute(
+    `SELECT c.id, c.label, c.slug, COUNT(*) AS txnCount, SUM(t.amount) AS total
+     ${SPENDING_JOIN}
+       AND t.txn_date >= ? AND t.txn_date <= ?
+     GROUP BY c.id, c.label, c.slug
+     ORDER BY txnCount DESC, total DESC
+     LIMIT ${safeLimit}`,
+    [start, end]
+  );
+  return rows.map((r) => ({
+    categoryId: Number(r.id),
+    label: r.label,
+    slug: r.slug,
+    txnCount: Number(r.txnCount),
+    total: Number(r.total),
+  }));
+}
+
 async function upsertPlaidTransaction(connection, plaidItemDbId, txn) {
   const merchant = (txn.merchant_name || txn.name || 'Unknown').slice(0, 255);
   const amount = Number(txn.amount) || 0;
@@ -588,6 +693,9 @@ function registerFinanceRoutes(app, getConnection) {
       }
       const spendingTotal = spending.reduce((s, r) => s + r.total, 0);
       const incomeTotal = income.reduce((s, r) => s + r.total, 0);
+      for (const row of spending) {
+        row.pct = spendingTotal > 0 ? Math.round((1000 * row.total) / spendingTotal) / 10 : 0;
+      }
 
       const [vendorRows] = await req.financeDb.execute(
         `SELECT vendor_tag AS slug, SUM(amount) AS total, COUNT(*) AS txn_count
@@ -607,6 +715,18 @@ function registerFinanceRoutes(app, getConnection) {
         txnCount: Number(row.txn_count),
       }));
 
+      const series = await monthlySpendSeries(req.financeDb, window.start, window.end);
+      const topMerchantsByWindow = {};
+      for (const n of [1, 6, 12]) {
+        const w = lastNMonthsWindow(n);
+        topMerchantsByWindow[String(n)] = await topMerchants(req.financeDb, w.start, w.end, 5);
+      }
+      const hotCategoriesByWindow = {};
+      for (const n of [3, 6, 12]) {
+        const w = lastNMonthsWindow(n);
+        hotCategoriesByWindow[String(n)] = await hotCategories(req.financeDb, w.start, w.end, 3);
+      }
+
       jsonOk(res, {
         range: window.range,
         month: window.month,
@@ -621,6 +741,11 @@ function registerFinanceRoutes(app, getConnection) {
         spendingTotal,
         incomeTotal,
         ignoredTotal: ignored,
+        monthlySpend: series.monthlySpend,
+        avgMonthlySpend: series.avgMonthlySpend,
+        monthBucketCount: series.monthBucketCount,
+        topMerchants: topMerchantsByWindow,
+        hotCategories: hotCategoriesByWindow,
       });
     } catch (err) {
       jsonError(res, err.message || 'Failed to load report', 500);

@@ -1,4 +1,10 @@
-import { financeApiUrl, resolveReportWindow } from './financeConfig';
+import {
+  financeApiUrl,
+  lastNMonthsWindow,
+  monthKeysBetween,
+  monthShortLabel,
+  resolveReportWindow,
+} from './financeConfig';
 import {
   DEMO_CATEGORIES,
   DEMO_CATEGORIZED,
@@ -260,6 +266,10 @@ export function financeFetchReport(rangeOrMonth) {
     const moved = [...movedMap.values()].sort((a, b) => b.total - a.total);
     const income = [...incomeMap.values()].sort((a, b) => b.total - a.total);
     const ignored = [...ignoredMap.values()].sort((a, b) => b.total - a.total);
+    const spendingTotal = spending.reduce((s, r) => s + r.total, 0);
+    for (const row of spending) {
+      row.pct = spendingTotal > 0 ? Math.round((1000 * row.total) / spendingTotal) / 10 : 0;
+    }
     const vendorMap = new Map();
     for (const txn of demoCategorized) {
       if (!inWindow(txn.date) || !txn.vendorTag) continue;
@@ -275,6 +285,84 @@ export function financeFetchReport(rangeOrMonth) {
       vendorMap.set(txn.vendorTag, prev);
     }
     const vendors = [...vendorMap.values()].sort((a, b) => b.total - a.total);
+
+    const isSpendTxn = (txn) => {
+      const cat = DEMO_CATEGORIES.find((c) => c.id === txn.categoryId);
+      return cat && !cat.excludeFromReports && cat.reportGroup === 'spending';
+    };
+
+    const buildMonthly = (start, end) => {
+      const keys = monthKeysBetween(start, end);
+      const byMonth = Object.fromEntries(keys.map((k) => [k, 0]));
+      for (const txn of demoCategorized) {
+        const d = String(txn.date).slice(0, 10);
+        if (d < start || d > end || !isSpendTxn(txn)) continue;
+        const ym = d.slice(0, 7);
+        if (byMonth[ym] != null) byMonth[ym] += Number(txn.amount) || 0;
+      }
+      const monthlySpend = keys.map((ym) => ({
+        month: ym,
+        label: monthShortLabel(ym),
+        total: byMonth[ym] || 0,
+      }));
+      const sum = monthlySpend.reduce((s, r) => s + r.total, 0);
+      const monthBucketCount = Math.max(keys.length, 1);
+      return {
+        monthlySpend,
+        avgMonthlySpend: sum / monthBucketCount,
+        monthBucketCount,
+      };
+    };
+
+    const series = buildMonthly(window.start, window.end);
+
+    const buildMerchants = (start, end) => {
+      const map = new Map();
+      for (const txn of demoCategorized) {
+        const d = String(txn.date).slice(0, 10);
+        if (d < start || d > end || !isSpendTxn(txn)) continue;
+        const name = txn.merchantName || '';
+        if (!name || /mta/i.test(name)) continue;
+        const prev = map.get(name) || { merchantName: name, total: 0, txnCount: 0 };
+        prev.total += Number(txn.amount) || 0;
+        prev.txnCount += 1;
+        map.set(name, prev);
+      }
+      return [...map.values()].sort((a, b) => b.total - a.total).slice(0, 5);
+    };
+
+    const buildHot = (start, end) => {
+      const map = new Map();
+      for (const txn of demoCategorized) {
+        const d = String(txn.date).slice(0, 10);
+        if (d < start || d > end || !isSpendTxn(txn)) continue;
+        const cat = DEMO_CATEGORIES.find((c) => c.id === txn.categoryId);
+        if (!cat) continue;
+        const prev = map.get(cat.id) || {
+          categoryId: cat.id,
+          label: cat.label,
+          slug: cat.slug,
+          txnCount: 0,
+          total: 0,
+        };
+        prev.txnCount += 1;
+        prev.total += Number(txn.amount) || 0;
+        map.set(cat.id, prev);
+      }
+      return [...map.values()].sort((a, b) => b.txnCount - a.txnCount || b.total - a.total).slice(0, 3);
+    };
+
+    const topMerchants = {};
+    for (const n of [1, 6, 12]) {
+      const w = lastNMonthsWindow(n);
+      topMerchants[String(n)] = buildMerchants(w.start, w.end);
+    }
+    const hotCategories = {};
+    for (const n of [3, 6, 12]) {
+      const w = lastNMonthsWindow(n);
+      hotCategories[String(n)] = buildHot(w.start, w.end);
+    }
+
     return demoDelay({
       success: true,
       range: window.range,
@@ -287,9 +375,14 @@ export function financeFetchReport(rangeOrMonth) {
       income,
       ignored,
       vendors,
-      spendingTotal: spending.reduce((s, r) => s + r.total, 0),
+      spendingTotal,
       incomeTotal: income.reduce((s, r) => s + r.total, 0),
       ignoredTotal: ignored.reduce((s, r) => s + r.total, 0),
+      monthlySpend: series.monthlySpend,
+      avgMonthlySpend: series.avgMonthlySpend,
+      monthBucketCount: series.monthBucketCount,
+      topMerchants,
+      hotCategories,
     });
   }
 

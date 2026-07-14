@@ -373,6 +373,156 @@ function finance_resolve_date_window($range, $month) {
     ];
 }
 
+/**
+ * Rolling window ending today for merchant / hot-category insights.
+ * @return array{start:string,end:string}
+ */
+function finance_last_n_months_window($n) {
+    $today = new DateTimeImmutable('today');
+    $start = $today->modify('-' . (int) $n . ' months');
+    return [
+        'start' => $start->format('Y-m-d'),
+        'end' => $today->format('Y-m-d'),
+    ];
+}
+
+/**
+ * Calendar month keys from start..end inclusive (YYYY-MM).
+ * @return string[]
+ */
+function finance_month_keys_between($startIso, $endIso) {
+    $keys = [];
+    $cur = DateTimeImmutable::createFromFormat('!Y-m-d', substr($startIso, 0, 7) . '-01');
+    $end = DateTimeImmutable::createFromFormat('!Y-m-d', substr($endIso, 0, 7) . '-01');
+    if (!$cur || !$end) {
+        return $keys;
+    }
+    while ($cur <= $end) {
+        $keys[] = $cur->format('Y-m');
+        $cur = $cur->modify('+1 month');
+    }
+    return $keys;
+}
+
+/**
+ * Short month label e.g. Jan, Feb.
+ */
+function finance_month_short_label($ym) {
+    $d = DateTimeImmutable::createFromFormat('!Y-m-d', $ym . '-01');
+    return $d ? $d->format('M') : $ym;
+}
+
+/**
+ * Spending-only SQL fragment (ignore / income / moved excluded).
+ */
+function finance_spending_join_sql() {
+    return "FROM finance_transactions t
+             JOIN finance_categories c ON c.id = t.category_id
+             WHERE t.category_id IS NOT NULL
+               AND c.exclude_from_reports = 0
+               AND c.report_group = 'spending'";
+}
+
+/**
+ * Filled monthly spending series + average for a window.
+ * @return array{monthlySpend:array,avgMonthlySpend:float,monthBucketCount:int}
+ */
+function finance_monthly_spend_series($conn, $start, $end) {
+    $sql = 'SELECT DATE_FORMAT(t.txn_date, \'%Y-%m\') AS ym, SUM(t.amount) AS total '
+        . finance_spending_join_sql()
+        . ' AND t.txn_date >= ? AND t.txn_date <= ?
+           GROUP BY ym
+           ORDER BY ym ASC';
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('ss', $start, $end);
+    $stmt->execute();
+    $res = $stmt->get_result();
+    $byMonth = [];
+    while ($row = $res->fetch_assoc()) {
+        $byMonth[$row['ym']] = (float) $row['total'];
+    }
+    $stmt->close();
+
+    $keys = finance_month_keys_between($start, $end);
+    $series = [];
+    $sum = 0.0;
+    foreach ($keys as $ym) {
+        $total = $byMonth[$ym] ?? 0.0;
+        $sum += $total;
+        $series[] = [
+            'month' => $ym,
+            'label' => finance_month_short_label($ym),
+            'total' => $total,
+        ];
+    }
+    $count = max(count($keys), 1);
+    return [
+        'monthlySpend' => $series,
+        'avgMonthlySpend' => $sum / $count,
+        'monthBucketCount' => $count,
+    ];
+}
+
+/**
+ * Top merchants by spend (excludes MTA / transit noise).
+ * @return array
+ */
+function finance_top_merchants($conn, $start, $end, $limit = 5) {
+    $limit = max(1, min(20, (int) $limit));
+    $sql = 'SELECT t.merchant_name AS merchantName, SUM(t.amount) AS total, COUNT(*) AS txnCount '
+        . finance_spending_join_sql()
+        . " AND t.txn_date >= ? AND t.txn_date <= ?
+             AND t.merchant_name IS NOT NULL AND TRIM(t.merchant_name) <> ''
+             AND UPPER(t.merchant_name) NOT LIKE '%MTA%'
+           GROUP BY t.merchant_name
+           ORDER BY total DESC
+           LIMIT {$limit}";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('ss', $start, $end);
+    $stmt->execute();
+    $res = $stmt->get_result();
+    $out = [];
+    while ($row = $res->fetch_assoc()) {
+        $out[] = [
+            'merchantName' => $row['merchantName'],
+            'total' => (float) $row['total'],
+            'txnCount' => (int) $row['txnCount'],
+        ];
+    }
+    $stmt->close();
+    return $out;
+}
+
+/**
+ * Top categories by transaction count (for future pin / reorder hints).
+ * @return array
+ */
+function finance_hot_categories($conn, $start, $end, $limit = 3) {
+    $limit = max(1, min(20, (int) $limit));
+    $sql = 'SELECT c.id, c.label, c.slug, COUNT(*) AS txnCount, SUM(t.amount) AS total '
+        . finance_spending_join_sql()
+        . " AND t.txn_date >= ? AND t.txn_date <= ?
+           GROUP BY c.id, c.label, c.slug
+           ORDER BY txnCount DESC, total DESC
+           LIMIT {$limit}";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('ss', $start, $end);
+    $stmt->execute();
+    $res = $stmt->get_result();
+    $out = [];
+    while ($row = $res->fetch_assoc()) {
+        $out[] = [
+            'categoryId' => (int) $row['id'],
+            'label' => $row['label'],
+            'slug' => $row['slug'],
+            'txnCount' => (int) $row['txnCount'],
+            'total' => (float) $row['total'],
+        ];
+    }
+    $stmt->close();
+    return $out;
+}
+
 function finance_plaid_base_url() {
     $env = strtolower(finance_env('PLAID_ENV') ?: 'sandbox');
     if ($env === 'production') {

@@ -317,6 +317,32 @@ try {
         }
         $vStmt->close();
 
+        // Attach % of spend for category bars.
+        foreach ($spending as &$spendRow) {
+            $spendRow['pct'] =
+                $spendingTotal > 0
+                    ? round(100.0 * $spendRow['total'] / $spendingTotal, 1)
+                    : 0.0;
+        }
+        unset($spendRow);
+
+        // Monthly series + average for the active report window.
+        $series = finance_monthly_spend_series($conn, $start, $end);
+
+        // Top merchants for fixed 1 / 6 / 12 month windows (excl. MTA).
+        $topMerchants = [];
+        foreach ([1, 6, 12] as $n) {
+            $w = finance_last_n_months_window($n);
+            $topMerchants[(string) $n] = finance_top_merchants($conn, $w['start'], $w['end'], 5);
+        }
+
+        // Hottest categories by txn count (hints for future pin order).
+        $hotCategories = [];
+        foreach ([3, 6, 12] as $n) {
+            $w = finance_last_n_months_window($n);
+            $hotCategories[(string) $n] = finance_hot_categories($conn, $w['start'], $w['end'], 3);
+        }
+
         finance_json_ok([
             'range' => $window['range'],
             'month' => $window['month'],
@@ -331,6 +357,11 @@ try {
             'spendingTotal' => $spendingTotal,
             'incomeTotal' => $incomeTotal,
             'ignoredTotal' => $ignored,
+            'monthlySpend' => $series['monthlySpend'],
+            'avgMonthlySpend' => $series['avgMonthlySpend'],
+            'monthBucketCount' => $series['monthBucketCount'],
+            'topMerchants' => $topMerchants,
+            'hotCategories' => $hotCategories,
         ]);
     } elseif ($resource === 'export' && $method === 'POST') {
         $month = trim($_GET['month'] ?? '');

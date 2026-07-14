@@ -2,6 +2,8 @@ import React, { useCallback, useEffect, useState } from 'react';
 import {
   currentMonthKey,
   formatMoney,
+  HOT_CATEGORY_RANGE_OPTIONS,
+  MERCHANT_RANGE_OPTIONS,
   REPORT_RANGE_OPTIONS,
 } from './financeConfig';
 import {
@@ -12,6 +14,7 @@ import {
   financeFlipTransactionAmount,
 } from './financeApi';
 import FinanceCategoryPicker from './FinanceCategoryPicker';
+import FinanceSpendChart from './FinanceSpendChart';
 
 /**
  * Spending report with timeframe presets (month / last 6 / last 12 / YTD),
@@ -33,6 +36,9 @@ function FinanceReportPage() {
   const [selectedTxn, setSelectedTxn] = useState(null);
   const [pendingVendorTag, setPendingVendorTag] = useState(null);
   const [busyId, setBusyId] = useState(null);
+  // Independent of main report range — local chip state for insight panels.
+  const [merchantMonths, setMerchantMonths] = useState(6);
+  const [hotMonths, setHotMonths] = useState(6);
 
   // Shared filters for report + drill-down fetches.
   const windowFilters = useCallback(() => {
@@ -225,38 +231,54 @@ function FinanceReportPage() {
     </div>
   );
 
-  const renderRows = (rows, { onOpen, keyField = 'categoryId' } = {}) => {
+  const renderRows = (rows, { onOpen, keyField = 'categoryId', showPct = false } = {}) => {
     if (!rows || rows.length === 0) {
       return <p className="finance-muted">None in this period.</p>;
     }
     const localMax = rows.reduce((m, r) => Math.max(m, r.total), 0) || 1;
     return (
       <ul className="finance-report-list">
-        {rows.map((row) => (
-          <li key={row[keyField] || row.slug} className="finance-report-row">
-            <button
-              type="button"
-              className="finance-report-row-btn"
-              onClick={() => onOpen(row)}
-            >
+        {rows.map((row) => {
+          const label = row.label || row.merchantName;
+          const key = row[keyField] || row.slug || row.merchantName;
+          const barWidth = Math.min(
+            100,
+            showPct && row.pct != null ? row.pct : (row.total / localMax) * 100
+          );
+          const body = (
+            <>
               <div className="finance-report-row-top">
-                <span>{row.label}</span>
-                <span>{formatMoney(row.total)}</span>
+                <span>{label}</span>
+                <span>
+                  {formatMoney(row.total)}
+                  {showPct && row.pct != null ? (
+                    <span className="finance-report-pct"> · {row.pct}%</span>
+                  ) : null}
+                </span>
               </div>
               <div className="finance-bar-track">
-                <div
-                  className="finance-bar-fill"
-                  style={{ width: `${Math.min(100, (row.total / localMax) * 100)}%` }}
-                />
+                <div className="finance-bar-fill" style={{ width: `${barWidth}%` }} />
               </div>
               {row.txnCount != null && (
                 <p className="finance-report-txn-count">
-                  {row.txnCount} charge{row.txnCount === 1 ? '' : 's'} · tap to edit
+                  {row.txnCount} charge{row.txnCount === 1 ? '' : 's'}
+                  {onOpen ? ' · tap to edit' : ''}
                 </p>
               )}
-            </button>
-          </li>
-        ))}
+            </>
+          );
+          return (
+            <li key={key} className="finance-report-row">
+              {onOpen ? (
+                <button type="button" className="finance-report-row-btn" onClick={() => onOpen(row)}>
+                  {body}
+                </button>
+              ) : (
+                <div className="finance-report-row-btn finance-report-row-btn--static">{body}</div>
+              )}
+            </li>
+          );
+        })}
       </ul>
     );
   };
@@ -385,14 +407,80 @@ function FinanceReportPage() {
           <p className="finance-report-total">
             Spending total: <strong>{formatMoney(report.spendingTotal)}</strong>
           </p>
+          {report.avgMonthlySpend != null && (
+            <p className="finance-report-avg">
+              Avg / month: <strong>{formatMoney(report.avgMonthlySpend)}</strong>
+              {report.monthBucketCount > 1
+                ? ` · across ${report.monthBucketCount} months`
+                : ''}
+            </p>
+          )}
+
+          <section className="finance-report-section">
+            <h3 className="finance-report-subtitle">Spend over time</h3>
+            <FinanceSpendChart
+              series={report.monthlySpend || []}
+              avgMonthlySpend={report.avgMonthlySpend || 0}
+            />
+          </section>
 
           <section className="finance-report-section">
             <h3 className="finance-report-subtitle">By category</h3>
             {report.spending.length === 0 ? (
               <p className="finance-muted">No categorized spending in this period.</p>
             ) : (
-              renderRows(report.spending, { onOpen: openCategory })
+              renderRows(report.spending, { onOpen: openCategory, showPct: true })
             )}
+          </section>
+
+          <section className="finance-report-section">
+            <div className="finance-insight-head">
+              <h3 className="finance-report-subtitle">Top merchants</h3>
+              <div className="finance-range-chips finance-range-chips--compact" role="group" aria-label="Merchant timeframe">
+                {MERCHANT_RANGE_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    className={`finance-range-chip${merchantMonths === opt.id ? ' is-active' : ''}`}
+                    aria-pressed={merchantMonths === opt.id}
+                    onClick={() => setMerchantMonths(opt.id)}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <p className="finance-muted finance-report-ignored-note">
+              Excludes MTA · last {merchantMonths} month{merchantMonths === 1 ? '' : 's'}
+            </p>
+            {renderRows(report.topMerchants?.[String(merchantMonths)] || [], {
+              keyField: 'merchantName',
+            })}
+          </section>
+
+          <section className="finance-report-section">
+            <div className="finance-insight-head">
+              <h3 className="finance-report-subtitle">Most used categories</h3>
+              <div className="finance-range-chips finance-range-chips--compact" role="group" aria-label="Hot category timeframe">
+                {HOT_CATEGORY_RANGE_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    className={`finance-range-chip${hotMonths === opt.id ? ' is-active' : ''}`}
+                    aria-pressed={hotMonths === opt.id}
+                    onClick={() => setHotMonths(opt.id)}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <p className="finance-muted finance-report-ignored-note">
+              By charge count · handy later for pinning inbox buttons
+            </p>
+            {renderRows(report.hotCategories?.[String(hotMonths)] || [], {
+              onOpen: openCategory,
+            })}
           </section>
 
           {report.vendors?.length > 0 && (

@@ -48,11 +48,52 @@ export const REPORT_RANGE_OPTIONS = [
   { id: 'ytd', label: 'Year to date' },
 ];
 
+/** Top-merchant insight windows (independent of main report range). */
+export const MERCHANT_RANGE_OPTIONS = [
+  { id: 1, label: '1 mo' },
+  { id: 6, label: '6 mo' },
+  { id: 12, label: '12 mo' },
+];
+
+/** Hot-category (by txn count) insight windows. */
+export const HOT_CATEGORY_RANGE_OPTIONS = [
+  { id: 3, label: '3 mo' },
+  { id: 6, label: '6 mo' },
+  { id: 12, label: '12 mo' },
+];
+
 function toIsoDate(d) {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, '0');
   const day = String(d.getDate()).padStart(2, '0');
   return `${y}-${m}-${day}`;
+}
+
+/** Rolling N-month window ending today (client mirror of server insights). */
+export function lastNMonthsWindow(n) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const start = new Date(today);
+  start.setMonth(start.getMonth() - Number(n));
+  return { start: toIsoDate(start), end: toIsoDate(today) };
+}
+
+export function monthKeysBetween(startIso, endIso) {
+  const keys = [];
+  const cur = new Date(`${String(startIso).slice(0, 7)}-01T00:00:00`);
+  const end = new Date(`${String(endIso).slice(0, 7)}-01T00:00:00`);
+  while (cur <= end) {
+    const y = cur.getFullYear();
+    const m = String(cur.getMonth() + 1).padStart(2, '0');
+    keys.push(`${y}-${m}`);
+    cur.setMonth(cur.getMonth() + 1);
+  }
+  return keys;
+}
+
+export function monthShortLabel(ym) {
+  const d = new Date(`${ym}-01T00:00:00`);
+  return d.toLocaleString('en-US', { month: 'short' });
 }
 
 /**

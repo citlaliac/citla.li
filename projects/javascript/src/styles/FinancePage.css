@@ -251,6 +251,96 @@
   font-size: 0.82rem;
 }
 
+.finance-report-avg {
+  margin: 0 0 1rem;
+  font-size: 0.95rem;
+  color: #5c5650;
+}
+
+.finance-report-pct {
+  font-weight: 600;
+  color: #8a847c;
+  font-size: 0.88em;
+}
+
+.finance-insight-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 0.75rem;
+  margin-bottom: 0.35rem;
+}
+
+.finance-insight-head .finance-report-subtitle {
+  margin: 0;
+}
+
+.finance-range-chips--compact {
+  flex: 0 0 auto;
+}
+
+.finance-range-chips--compact .finance-range-chip {
+  flex: 0 0 auto;
+  padding: 0.35rem 0.55rem;
+  font-size: 0.72rem;
+}
+
+.finance-spend-chart {
+  margin: 0.35rem 0 0.25rem;
+  padding: 0.65rem 0.5rem 0.35rem;
+  border-radius: 0.85rem;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.finance-spend-chart-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 160px;
+}
+
+.finance-spend-chart-line {
+  stroke: #2c2418;
+  stroke-width: 2.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.finance-spend-chart-dot {
+  fill: #2c2418;
+}
+
+.finance-spend-chart-avg {
+  stroke: #c4a574;
+  stroke-width: 1.25;
+  stroke-dasharray: 4 4;
+}
+
+.finance-spend-chart-xlabel {
+  fill: #8a847c;
+  font-size: 9px;
+}
+
+.finance-spend-chart-legend {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.15rem;
+  padding: 0 0.25rem;
+  font-size: 0.75rem;
+  color: #8a847c;
+}
+
+.finance-report-row-btn--static {
+  cursor: default;
+}
+
+.finance-report-row-btn--static:active {
+  transform: none;
+}
+
 .finance-charge-card {
   padding: 1.35rem 1rem 1.5rem;
   margin-bottom: 1.25rem;
