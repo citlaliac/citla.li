@@ -473,6 +473,125 @@ function finance_monthly_spend_series($conn, $start, $end) {
 }
 
 /**
+ * Daily spending totals for a calendar window (costs only).
+ * @return array<int,float> map day-of-month => total
+ */
+function finance_daily_spend_map($conn, $start, $end) {
+    $sql = 'SELECT DAY(t.txn_date) AS day_num, SUM(t.amount) AS total '
+        . finance_spending_join_sql()
+        . ' AND t.txn_date >= ? AND t.txn_date <= ?
+           GROUP BY DAY(t.txn_date)
+           ORDER BY day_num ASC';
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('ss', $start, $end);
+    $stmt->execute();
+    $res = $stmt->get_result();
+    $map = [];
+    while ($row = $res->fetch_assoc()) {
+        $map[(int) $row['day_num']] = (float) $row['total'];
+    }
+    $stmt->close();
+    return $map;
+}
+
+/**
+ * Cumulative daily spend for a month vs the prior month (same day numbers).
+ * Caps the current month at today when viewing the live month.
+ *
+ * @return array{dailySpend:array,priorDailySpend:array,pace:array}|null
+ */
+function finance_month_spend_pace($conn, $monthKey) {
+    if (!preg_match('/^\d{4}-\d{2}$/', $monthKey)) {
+        return null;
+    }
+    $parts = explode('-', $monthKey);
+    $y = (int) $parts[0];
+    $m = (int) $parts[1];
+    $thisStart = sprintf('%04d-%02d-01', $y, $m);
+    $lastDayOfMonth = (int) date('t', strtotime($thisStart));
+    $today = new DateTimeImmutable('today');
+    $isCurrentMonth = ((int) $today->format('Y') === $y && (int) $today->format('n') === $m);
+    $throughDay = $isCurrentMonth
+        ? min((int) $today->format('j'), $lastDayOfMonth)
+        : $lastDayOfMonth;
+    $thisEnd = sprintf('%04d-%02d-%02d', $y, $m, $throughDay);
+
+    // Prior calendar month, aligned to the same day count.
+    $priorAnchor = (new DateTimeImmutable($thisStart))->modify('-1 month');
+    $py = (int) $priorAnchor->format('Y');
+    $pm = (int) $priorAnchor->format('n');
+    $priorLast = (int) $priorAnchor->format('t');
+    $priorThrough = min($throughDay, $priorLast);
+    $priorStart = sprintf('%04d-%02d-01', $py, $pm);
+    $priorEnd = sprintf('%04d-%02d-%02d', $py, $pm, $priorThrough);
+
+    $thisMap = finance_daily_spend_map($conn, $thisStart, $thisEnd);
+    $priorMap = finance_daily_spend_map($conn, $priorStart, $priorEnd);
+
+    $build = function ($map, $days) {
+        $out = [];
+        $cum = 0.0;
+        for ($d = 1; $d <= $days; $d++) {
+            $dayTotal = $map[$d] ?? 0.0;
+            $cum += $dayTotal;
+            $out[] = [
+                'day' => $d,
+                'label' => (string) $d,
+                'total' => $dayTotal,
+                'cumulative' => $cum,
+            ];
+        }
+        return $out;
+    };
+
+    $dailySpend = $build($thisMap, $throughDay);
+    $priorDailySpend = $build($priorMap, $priorThrough);
+    $thisTotal = $throughDay > 0 ? $dailySpend[$throughDay - 1]['cumulative'] : 0.0;
+    $priorTotal = $priorThrough > 0 ? $priorDailySpend[$priorThrough - 1]['cumulative'] : 0.0;
+    $delta = $thisTotal - $priorTotal;
+    $pctVsPrior = $priorTotal > 0 ? round(100.0 * $delta / $priorTotal, 1) : null;
+
+    return [
+        'dailySpend' => $dailySpend,
+        'priorDailySpend' => $priorDailySpend,
+        'pace' => [
+            'throughDay' => $throughDay,
+            'thisMonthTotal' => $thisTotal,
+            'priorMonthTotal' => $priorTotal,
+            'priorMonthLabel' => $priorAnchor->format('M Y'),
+            'delta' => $delta,
+            'pctVsPrior' => $pctVsPrior,
+        ],
+    ];
+}
+
+/**
+ * How spend + investments relate to income for the report window.
+ * Uses absolute totals so Plaid sign flips still compare sensibly.
+ *
+ * @return array
+ */
+function finance_allocation_summary($spendingTotal, $incomeTotal, $investedTotal) {
+    $spend = abs((float) $spendingTotal);
+    $income = abs((float) $incomeTotal);
+    $invested = abs((float) $investedTotal);
+    $pct = function ($part, $whole) {
+        if ($whole <= 0) {
+            return null;
+        }
+        return round(100.0 * $part / $whole, 1);
+    };
+    return [
+        'spendingAbs' => $spend,
+        'incomeAbs' => $income,
+        'investedAbs' => $invested,
+        'pctSpentOfIncome' => $pct($spend, $income),
+        'pctInvestedOfIncome' => $pct($invested, $income),
+        'pctAllocatedOfIncome' => $pct($spend + $invested, $income),
+    ];
+}
+
+/**
  * Top merchants by spend (excludes MTA / transit noise).
  * @return array
  */

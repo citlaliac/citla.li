@@ -296,6 +296,7 @@ try {
         $stmt->close();
         $spendingTotal = array_sum(array_column($spending, 'total'));
         $incomeTotal = array_sum(array_column($income, 'total'));
+        $investedTotal = array_sum(array_column($moved, 'total'));
 
         // Store / vendor tag totals for spending only (excludes income + investments).
         $vendors = [];
@@ -337,6 +338,19 @@ try {
         // Monthly series + average for the active report window.
         $series = finance_monthly_spend_series($conn, $start, $end);
 
+        // Month view: day-by-day cumulative spend vs prior month.
+        $dailySpend = [];
+        $priorDailySpend = [];
+        $pace = null;
+        if ($window['range'] === 'month' && !empty($window['month'])) {
+            $pacePack = finance_month_spend_pace($conn, $window['month']);
+            if ($pacePack) {
+                $dailySpend = $pacePack['dailySpend'];
+                $priorDailySpend = $pacePack['priorDailySpend'];
+                $pace = $pacePack['pace'];
+            }
+        }
+
         // Top merchants for fixed 1 / 6 / 12 month windows (excl. MTA).
         $topMerchants = [];
         foreach ([1, 6, 12] as $n) {
@@ -351,6 +365,8 @@ try {
             $hotCategories[(string) $n] = finance_hot_categories($conn, $w['start'], $w['end'], 3);
         }
 
+        $allocation = finance_allocation_summary($spendingTotal, $incomeTotal, $investedTotal);
+
         finance_json_ok([
             'range' => $window['range'],
             'month' => $window['month'],
@@ -364,10 +380,15 @@ try {
             'vendors' => $vendors,
             'spendingTotal' => $spendingTotal,
             'incomeTotal' => $incomeTotal,
+            'investedTotal' => $investedTotal,
             'ignoredTotal' => $ignored,
+            'allocation' => $allocation,
             'monthlySpend' => $series['monthlySpend'],
             'avgMonthlySpend' => $series['avgMonthlySpend'],
             'monthBucketCount' => $series['monthBucketCount'],
+            'dailySpend' => $dailySpend,
+            'priorDailySpend' => $priorDailySpend,
+            'pace' => $pace,
             'topMerchants' => $topMerchants,
             'hotCategories' => $hotCategories,
         ]);

@@ -421,10 +421,25 @@ function FinanceReportPage() {
 
           <section className="finance-report-section">
             <h3 className="finance-report-subtitle">Spend over time</h3>
-            <FinanceSpendChart
-              series={report.monthlySpend || []}
-              avgMonthlySpend={report.avgMonthlySpend || 0}
-            />
+            {range === 'month' && (report.dailySpend?.length || 0) > 0 ? (
+              <>
+                <p className="finance-muted finance-report-ignored-note">
+                  Cumulative spend · vs same days last month
+                </p>
+                <FinanceSpendChart
+                  mode="pace"
+                  series={report.dailySpend}
+                  compareSeries={report.priorDailySpend || []}
+                  pace={report.pace}
+                />
+              </>
+            ) : (
+              <FinanceSpendChart
+                mode="monthly"
+                series={report.monthlySpend || []}
+                avgMonthlySpend={report.avgMonthlySpend || 0}
+              />
+            )}
           </section>
 
           <section className="finance-report-section">
@@ -527,6 +542,67 @@ function FinanceReportPage() {
               <p className="finance-muted">Nothing ignored in this period.</p>
             ) : (
               renderRows(report.ignored, { onOpen: openCategory })
+            )}
+          </section>
+
+          {/* Allocation vs income — always last so the main spend story stays above. */}
+          <section className="finance-report-section finance-report-section--allocation">
+            <h3 className="finance-report-subtitle">Vs income</h3>
+            <p className="finance-muted finance-report-ignored-note">
+              Share of income going to spend and investments this period
+            </p>
+            {(!report.allocation || report.allocation.incomeAbs <= 0) ? (
+              <p className="finance-muted">
+                Add income categorizations to see spend / invest %.
+              </p>
+            ) : (
+              <ul className="finance-alloc-list">
+                <li className="finance-alloc-row">
+                  <span className="finance-alloc-label">Income</span>
+                  <span className="finance-alloc-value">
+                    {formatMoney(report.allocation.incomeAbs)}
+                  </span>
+                </li>
+                <li className="finance-alloc-row">
+                  <span className="finance-alloc-label">
+                    Spent
+                    {report.allocation.pctSpentOfIncome != null && (
+                      <em className="finance-alloc-pct">
+                        {' '}
+                        {report.allocation.pctSpentOfIncome}%
+                      </em>
+                    )}
+                  </span>
+                  <span className="finance-alloc-value">
+                    {formatMoney(report.allocation.spendingAbs)}
+                  </span>
+                </li>
+                <li className="finance-alloc-row">
+                  <span className="finance-alloc-label">
+                    Invested
+                    {report.allocation.pctInvestedOfIncome != null && (
+                      <em className="finance-alloc-pct">
+                        {' '}
+                        {report.allocation.pctInvestedOfIncome}%
+                      </em>
+                    )}
+                  </span>
+                  <span className="finance-alloc-value">
+                    {formatMoney(report.allocation.investedAbs)}
+                  </span>
+                </li>
+                {report.allocation.pctAllocatedOfIncome != null && (
+                  <li className="finance-alloc-row finance-alloc-row--summary">
+                    <span className="finance-alloc-label">
+                      Spent + invested
+                      <em className="finance-alloc-pct">
+                        {' '}
+                        {report.allocation.pctAllocatedOfIncome}% of income
+                      </em>
+                    </span>
+                  </li>
+                )}
+              </ul>
             )}
           </section>
         </>

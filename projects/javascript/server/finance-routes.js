@@ -292,6 +292,102 @@ async function monthlySpendSeries(db, start, end) {
   };
 }
 
+/** Day-of-month → spend total map for costs-only transactions. */
+async function dailySpendMap(db, start, end) {
+  const [rows] = await db.execute(
+    `SELECT DAY(t.txn_date) AS day_num, SUM(t.amount) AS total
+     ${SPENDING_JOIN}
+       AND t.txn_date >= ? AND t.txn_date <= ?
+     GROUP BY DAY(t.txn_date)
+     ORDER BY day_num ASC`,
+    [start, end]
+  );
+  return Object.fromEntries(rows.map((r) => [Number(r.day_num), Number(r.total)]));
+}
+
+function buildCumulativeDays(map, days) {
+  const out = [];
+  let cum = 0;
+  for (let d = 1; d <= days; d += 1) {
+    const dayTotal = map[d] || 0;
+    cum += dayTotal;
+    out.push({
+      day: d,
+      label: String(d),
+      total: dayTotal,
+      cumulative: cum,
+    });
+  }
+  return out;
+}
+
+/**
+ * Cumulative daily spend for monthKey vs the prior month through the same day.
+ */
+async function monthSpendPace(db, monthKey) {
+  if (!/^\d{4}-\d{2}$/.test(monthKey)) return null;
+  const [y, m] = monthKey.split('-').map(Number);
+  const thisStart = `${monthKey}-01`;
+  const lastDayOfMonth = new Date(y, m, 0).getDate();
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const isCurrentMonth = today.getFullYear() === y && today.getMonth() + 1 === m;
+  const throughDay = isCurrentMonth
+    ? Math.min(today.getDate(), lastDayOfMonth)
+    : lastDayOfMonth;
+  const thisEnd = `${monthKey}-${String(throughDay).padStart(2, '0')}`;
+
+  const priorAnchor = new Date(y, m - 2, 1);
+  const py = priorAnchor.getFullYear();
+  const pm = priorAnchor.getMonth() + 1;
+  const priorLast = new Date(py, pm, 0).getDate();
+  const priorThrough = Math.min(throughDay, priorLast);
+  const priorMonthKey = `${py}-${String(pm).padStart(2, '0')}`;
+  const priorStart = `${priorMonthKey}-01`;
+  const priorEnd = `${priorMonthKey}-${String(priorThrough).padStart(2, '0')}`;
+
+  const [thisMap, priorMap] = await Promise.all([
+    dailySpendMap(db, thisStart, thisEnd),
+    dailySpendMap(db, priorStart, priorEnd),
+  ]);
+
+  const dailySpend = buildCumulativeDays(thisMap, throughDay);
+  const priorDailySpend = buildCumulativeDays(priorMap, priorThrough);
+  const thisTotal = throughDay > 0 ? dailySpend[throughDay - 1].cumulative : 0;
+  const priorTotal = priorThrough > 0 ? priorDailySpend[priorThrough - 1].cumulative : 0;
+  const delta = thisTotal - priorTotal;
+  const pctVsPrior = priorTotal > 0 ? Math.round((1000 * delta) / priorTotal) / 10 : null;
+
+  return {
+    dailySpend,
+    priorDailySpend,
+    pace: {
+      throughDay,
+      thisMonthTotal: thisTotal,
+      priorMonthTotal: priorTotal,
+      priorMonthLabel: priorAnchor.toLocaleString('en-US', { month: 'short', year: 'numeric' }),
+      delta,
+      pctVsPrior,
+    },
+  };
+}
+
+/** Spend / invest as % of income (absolute totals so signs don't break ratios). */
+function allocationSummary(spendingTotal, incomeTotal, investedTotal) {
+  const spend = Math.abs(Number(spendingTotal) || 0);
+  const income = Math.abs(Number(incomeTotal) || 0);
+  const invested = Math.abs(Number(investedTotal) || 0);
+  const pct = (part, whole) => (whole > 0 ? Math.round((1000 * part) / whole) / 10 : null);
+  return {
+    spendingAbs: spend,
+    incomeAbs: income,
+    investedAbs: invested,
+    pctSpentOfIncome: pct(spend, income),
+    pctInvestedOfIncome: pct(invested, income),
+    pctAllocatedOfIncome: pct(spend + invested, income),
+  };
+}
+
 async function topMerchants(db, start, end, limit = 5) {
   const safeLimit = Math.max(1, Math.min(20, Number(limit) || 5));
   const [rows] = await db.execute(
@@ -714,6 +810,7 @@ function registerFinanceRoutes(app, getConnection) {
       }
       const spendingTotal = spending.reduce((s, r) => s + r.total, 0);
       const incomeTotal = income.reduce((s, r) => s + r.total, 0);
+      const investedTotal = moved.reduce((s, r) => s + r.total, 0);
       for (const row of spending) {
         row.pct = spendingTotal > 0 ? Math.round((1000 * row.total) / spendingTotal) / 10 : 0;
       }
@@ -737,6 +834,19 @@ function registerFinanceRoutes(app, getConnection) {
       }));
 
       const series = await monthlySpendSeries(req.financeDb, window.start, window.end);
+
+      let dailySpend = [];
+      let priorDailySpend = [];
+      let pace = null;
+      if (window.range === 'month' && window.month) {
+        const pacePack = await monthSpendPace(req.financeDb, window.month);
+        if (pacePack) {
+          dailySpend = pacePack.dailySpend;
+          priorDailySpend = pacePack.priorDailySpend;
+          pace = pacePack.pace;
+        }
+      }
+
       const topMerchantsByWindow = {};
       for (const n of [1, 6, 12]) {
         const w = lastNMonthsWindow(n);
@@ -761,10 +871,15 @@ function registerFinanceRoutes(app, getConnection) {
         vendors,
         spendingTotal,
         incomeTotal,
+        investedTotal,
         ignoredTotal: ignored,
+        allocation: allocationSummary(spendingTotal, incomeTotal, investedTotal),
         monthlySpend: series.monthlySpend,
         avgMonthlySpend: series.avgMonthlySpend,
         monthBucketCount: series.monthBucketCount,
+        dailySpend,
+        priorDailySpend,
+        pace,
         topMerchants: topMerchantsByWindow,
         hotCategories: hotCategoriesByWindow,
       });

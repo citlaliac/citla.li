@@ -50,4 +50,12 @@ export const DEMO_CATEGORIZED = [
   { id: 213, merchantName: 'Cafe near office', amount: 14.0, date: '2026-07-03', pending: false, categoryId: 11 },
   { id: 214, merchantName: '401k', amount: 200.0, date: '2026-07-01', pending: false, categoryId: 18 },
   { id: 215, merchantName: 'CC payment', amount: 500.0, date: '2026-07-01', pending: false, categoryId: 20 },
+  { id: 216, merchantName: 'Payroll', amount: 4200.0, date: '2026-07-01', pending: false, categoryId: 16 },
+  // Prior-month sample so the pace chart has a comparison line in demo.
+  { id: 301, merchantName: 'Trader Joe\'s', amount: 52.0, date: '2026-06-03', pending: false, categoryId: 1 },
+  { id: 302, merchantName: 'Whole Foods', amount: 70.0, date: '2026-06-08', pending: false, categoryId: 1 },
+  { id: 303, merchantName: 'Sweetgreen', amount: 28.0, date: '2026-06-10', pending: false, categoryId: 2 },
+  { id: 304, merchantName: 'Rent', amount: 2100.0, date: '2026-06-01', pending: false, categoryId: 17 },
+  { id: 305, merchantName: 'Payroll', amount: 4200.0, date: '2026-06-01', pending: false, categoryId: 16 },
+  { id: 306, merchantName: '401k', amount: 200.0, date: '2026-06-01', pending: false, categoryId: 18 },
 ];

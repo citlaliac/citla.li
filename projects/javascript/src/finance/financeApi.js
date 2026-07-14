@@ -294,9 +294,25 @@ export function financeFetchReport(rangeOrMonth) {
     const income = [...incomeMap.values()].sort((a, b) => b.total - a.total);
     const ignored = [...ignoredMap.values()].sort((a, b) => b.total - a.total);
     const spendingTotal = spending.reduce((s, r) => s + r.total, 0);
+    const incomeTotal = income.reduce((s, r) => s + r.total, 0);
+    const investedTotal = moved.reduce((s, r) => s + r.total, 0);
     for (const row of spending) {
       row.pct = spendingTotal > 0 ? Math.round((1000 * row.total) / spendingTotal) / 10 : 0;
     }
+
+    const spendAbs = Math.abs(spendingTotal);
+    const incomeAbs = Math.abs(incomeTotal);
+    const investedAbs = Math.abs(investedTotal);
+    const pctOfIncome = (part) =>
+      incomeAbs > 0 ? Math.round((1000 * part) / incomeAbs) / 10 : null;
+    const allocation = {
+      spendingAbs: spendAbs,
+      incomeAbs,
+      investedAbs,
+      pctSpentOfIncome: pctOfIncome(spendAbs),
+      pctInvestedOfIncome: pctOfIncome(investedAbs),
+      pctAllocatedOfIncome: pctOfIncome(spendAbs + investedAbs),
+    };
 
     /** Demo spend rule: only report_group === spending (not income / investments / ignore). */
     const isSpendTxn = (txn) => {
@@ -345,6 +361,80 @@ export function financeFetchReport(rangeOrMonth) {
     };
 
     const series = buildMonthly(window.start, window.end);
+
+    /** Build cumulative day-by-day series for a month (demo pace chart). */
+    const buildPaceForMonth = (monthKey) => {
+      if (!/^\d{4}-\d{2}$/.test(monthKey)) return null;
+      const [y, m] = monthKey.split('-').map(Number);
+      const lastDay = new Date(y, m, 0).getDate();
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const isCurrent = today.getFullYear() === y && today.getMonth() + 1 === m;
+      const throughDay = isCurrent ? Math.min(today.getDate(), lastDay) : lastDay;
+      const thisEnd = `${monthKey}-${String(throughDay).padStart(2, '0')}`;
+      const thisStart = `${monthKey}-01`;
+
+      const prior = new Date(y, m - 2, 1);
+      const py = prior.getFullYear();
+      const pm = prior.getMonth() + 1;
+      const priorLast = new Date(py, pm, 0).getDate();
+      const priorThrough = Math.min(throughDay, priorLast);
+      const priorKey = `${py}-${String(pm).padStart(2, '0')}`;
+      const priorStart = `${priorKey}-01`;
+      const priorEnd = `${priorKey}-${String(priorThrough).padStart(2, '0')}`;
+
+      const dayMap = (start, end) => {
+        const map = {};
+        for (const txn of demoCategorized) {
+          const d = String(txn.date).slice(0, 10);
+          if (d < start || d > end || !isSpendTxn(txn)) continue;
+          const day = Number(d.slice(8, 10));
+          map[day] = (map[day] || 0) + (Number(txn.amount) || 0);
+        }
+        return map;
+      };
+
+      const fill = (map, days) => {
+        const out = [];
+        let cum = 0;
+        for (let d = 1; d <= days; d += 1) {
+          const dayTotal = map[d] || 0;
+          cum += dayTotal;
+          out.push({ day: d, label: String(d), total: dayTotal, cumulative: cum });
+        }
+        return out;
+      };
+
+      const dailySpend = fill(dayMap(thisStart, thisEnd), throughDay);
+      const priorDailySpend = fill(dayMap(priorStart, priorEnd), priorThrough);
+      const thisTotal = throughDay > 0 ? dailySpend[throughDay - 1].cumulative : 0;
+      const priorTotal = priorThrough > 0 ? priorDailySpend[priorThrough - 1].cumulative : 0;
+      const delta = thisTotal - priorTotal;
+      return {
+        dailySpend,
+        priorDailySpend,
+        pace: {
+          throughDay,
+          thisMonthTotal: thisTotal,
+          priorMonthTotal: priorTotal,
+          priorMonthLabel: prior.toLocaleString('en-US', { month: 'short', year: 'numeric' }),
+          delta,
+          pctVsPrior: priorTotal > 0 ? Math.round((1000 * delta) / priorTotal) / 10 : null,
+        },
+      };
+    };
+
+    let dailySpend = [];
+    let priorDailySpend = [];
+    let pace = null;
+    if (window.range === 'month' && window.month) {
+      const pacePack = buildPaceForMonth(window.month);
+      if (pacePack) {
+        dailySpend = pacePack.dailySpend;
+        priorDailySpend = pacePack.priorDailySpend;
+        pace = pacePack.pace;
+      }
+    }
 
     const buildMerchants = (start, end) => {
       const map = new Map();
@@ -406,11 +496,16 @@ export function financeFetchReport(rangeOrMonth) {
       ignored,
       vendors,
       spendingTotal,
-      incomeTotal: income.reduce((s, r) => s + r.total, 0),
+      incomeTotal,
+      investedTotal,
       ignoredTotal: ignored.reduce((s, r) => s + r.total, 0),
+      allocation,
       monthlySpend: series.monthlySpend,
       avgMonthlySpend: series.avgMonthlySpend,
       monthBucketCount: series.monthBucketCount,
+      dailySpend,
+      priorDailySpend,
+      pace,
       topMerchants,
       hotCategories,
     });
