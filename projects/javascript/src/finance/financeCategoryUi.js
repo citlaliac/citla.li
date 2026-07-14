@@ -1,11 +1,11 @@
 /**
  * Client-side styles for category / vendor chips.
- * Colors live on the shared seed so inbox + report stay consistent without a DB color column.
+ * Colors come from the shared seed under src/ (CRA cannot import from server/).
  */
 import {
   FINANCE_CATEGORIES,
   FINANCE_VENDOR_TAGS,
-} from '../../server/finance-categories';
+} from './financeCategoriesShared';
 
 const COLOR_BY_SLUG = {
   ...Object.fromEntries(FINANCE_CATEGORIES.map((c) => [c.slug, c.color])),

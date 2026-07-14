@@ -40,7 +40,7 @@ function finance_hash_token($token) {
 }
 
 function finance_categories_seed() {
-    // Keep in sync with server/finance-categories.js (emoji baked into label).
+    // Keep in sync with src/finance/financeCategoriesShared.js (emoji baked into label).
     return [
         ['groceries', '🛒 Groceries', 1, 1, 0, 'spending'],
         ['restaurants', '🍽️ Restaurants', 2, 1, 0, 'spending'],

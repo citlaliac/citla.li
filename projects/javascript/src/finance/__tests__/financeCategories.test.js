@@ -1,4 +1,4 @@
-import { FINANCE_CATEGORIES, FINANCE_VENDOR_TAGS } from '../../../server/finance-categories';
+import { FINANCE_CATEGORIES, FINANCE_VENDOR_TAGS } from '../financeCategoriesShared';
 
 describe('finance categories seed', () => {
   test('has 20 categories with top pinned and no retired slugs', () => {
