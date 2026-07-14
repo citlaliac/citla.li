@@ -3,6 +3,7 @@ import {
   DEMO_CATEGORIES,
   DEMO_CATEGORIZED,
   DEMO_TRANSACTIONS,
+  DEMO_VENDOR_TAGS,
 } from './financeDemoData';
 
 const TOKEN_KEY = 'finance_auth_token';
@@ -79,7 +80,11 @@ export function financeLogin(password) {
 
 export function financeFetchCategories() {
   if (isFinanceDemo) {
-    return demoDelay({ success: true, categories: DEMO_CATEGORIES });
+    return demoDelay({
+      success: true,
+      categories: DEMO_CATEGORIES,
+      vendorTags: DEMO_VENDOR_TAGS,
+    });
   }
   return financeRequest(financeApiUrl('categories'));
 }
@@ -142,6 +147,11 @@ export function financeFetchTransactions(statusOrFilters = 'uncategorized') {
       if (filters.month) {
         list = list.filter((t) => String(t.date).startsWith(filters.month));
       }
+    } else if (filters.vendorTag) {
+      list = demoCategorized.filter((t) => t.vendorTag === filters.vendorTag);
+      if (filters.month) {
+        list = list.filter((t) => String(t.date).startsWith(filters.month));
+      }
     } else if (filters.status === 'categorized') {
       list = [...demoCategorized];
     }
@@ -152,21 +162,48 @@ export function financeFetchTransactions(statusOrFilters = 'uncategorized') {
   if (filters.status && filters.status !== 'all') query.status = filters.status;
   if (filters.month) query.month = filters.month;
   if (filters.categoryId != null) query.categoryId = String(filters.categoryId);
+  if (filters.vendorTag) query.vendorTag = filters.vendorTag;
   return financeRequest(financeApiUrl('transactions', { query }));
 }
 
-export function financeCategorizeTransaction(id, categoryId) {
+export function financeCategorizeTransaction(id, categoryId, { vendorTag } = {}) {
   if (isFinanceDemo) {
     demoInbox = demoInbox.filter((t) => t.id !== id);
     const fromCategorized = demoCategorized.find((t) => t.id === id);
     if (fromCategorized) {
       fromCategorized.categoryId = categoryId;
+      if (vendorTag !== undefined) fromCategorized.vendorTag = vendorTag || null;
     }
-    return demoDelay({ success: true, id, categoryId });
+    return demoDelay({ success: true, id, categoryId, vendorTag: vendorTag || null });
+  }
+  const body = { categoryId };
+  if (vendorTag !== undefined) body.vendorTag = vendorTag || '';
+  return financeRequest(financeApiUrl('transactions', { id }), {
+    method: 'PATCH',
+    body: JSON.stringify(body),
+  });
+}
+
+/** Flip transaction amount sign (+/−). Survives sync via amount_manual on the server. */
+export function financeFlipTransactionAmount(id) {
+  if (isFinanceDemo) {
+    const flipIn = (list) => {
+      const row = list.find((t) => t.id === id);
+      if (row) {
+        row.amount = -Number(row.amount);
+        row.amountManual = true;
+      }
+      return row;
+    };
+    const updated = flipIn(demoInbox) || flipIn(demoCategorized);
+    return demoDelay({
+      success: true,
+      transaction: updated || { id, amount: 0 },
+    });
   }
   return financeRequest(financeApiUrl('transactions', { id }), {
     method: 'PATCH',
-    body: JSON.stringify({ categoryId }),
+    body: JSON.stringify({ flipAmount: true }),
   });
 }
 
@@ -199,12 +236,29 @@ export function financeFetchReport(month) {
     const spending = [...spendingMap.values()].sort((a, b) => b.total - a.total);
     const moved = [...movedMap.values()].sort((a, b) => b.total - a.total);
     const income = [...incomeMap.values()].sort((a, b) => b.total - a.total);
+    const vendorMap = new Map();
+    for (const txn of demoCategorized) {
+      if (month && !String(txn.date).startsWith(month)) continue;
+      if (!txn.vendorTag) continue;
+      const tag = DEMO_VENDOR_TAGS.find((t) => t.slug === txn.vendorTag);
+      const prev = vendorMap.get(txn.vendorTag) || {
+        slug: txn.vendorTag,
+        label: tag?.label || txn.vendorTag,
+        total: 0,
+        txnCount: 0,
+      };
+      prev.total += Number(txn.amount) || 0;
+      prev.txnCount += 1;
+      vendorMap.set(txn.vendorTag, prev);
+    }
+    const vendors = [...vendorMap.values()].sort((a, b) => b.total - a.total);
     return demoDelay({
       success: true,
       month,
       spending,
       moved,
       income,
+      vendors,
       spendingTotal: spending.reduce((s, r) => s + r.total, 0),
       incomeTotal: income.reduce((s, r) => s + r.total, 0),
       ignoredTotal: 0,

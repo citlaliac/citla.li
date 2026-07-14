@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcryptjs');
 const { google } = require('googleapis');
-const { FINANCE_CATEGORIES } = require('./finance-categories');
+const { FINANCE_CATEGORIES, FINANCE_VENDOR_TAGS } = require('./finance-categories');
 const { encryptSecret, decryptSecret } = require('./finance-crypto');
 const { createLinkToken, exchangePublicToken, syncTransactions } = require('./finance-plaid');
 
@@ -49,6 +49,29 @@ async function ensureFinanceTables(connection) {
   for (const stmt of statements) {
     await connection.query(stmt);
   }
+  // Existing installs: add amount_manual so Venmo sign flips survive Plaid sync.
+  const [cols] = await connection.execute(
+    "SHOW COLUMNS FROM finance_transactions LIKE 'amount_manual'"
+  );
+  if (!cols.length) {
+    await connection.query(
+      'ALTER TABLE finance_transactions ADD COLUMN amount_manual TINYINT(1) NOT NULL DEFAULT 0 AFTER amount'
+    );
+  }
+  const [vendorCols] = await connection.execute(
+    "SHOW COLUMNS FROM finance_transactions LIKE 'vendor_tag'"
+  );
+  if (!vendorCols.length) {
+    await connection.query(
+      'ALTER TABLE finance_transactions ADD COLUMN vendor_tag VARCHAR(32) NULL AFTER merchant_name'
+    );
+  }
+  await connection.execute(
+    `UPDATE finance_transactions t
+     JOIN finance_categories c ON c.id = t.category_id
+     SET t.vendor_tag = 'amazon'
+     WHERE c.slug = 'amazon' AND (t.vendor_tag IS NULL OR t.vendor_tag = '')`
+  );
   const [rows] = await connection.execute('SELECT COUNT(*) AS c FROM finance_categories');
   if (Number(rows[0].c) === 0) {
     for (const cat of FINANCE_CATEGORIES) {
@@ -126,7 +149,9 @@ function transactionFromRow(row) {
     plaidTransactionId: row.plaid_transaction_id,
     date: row.txn_date instanceof Date ? row.txn_date.toISOString().slice(0, 10) : String(row.txn_date),
     amount: Number(row.amount),
+    amountManual: !!row.amount_manual,
     merchantName: row.merchant_name,
+    vendorTag: row.vendor_tag || null,
     pending: !!row.pending,
     categoryId: row.category_id != null ? Number(row.category_id) : null,
     categorizedAt: row.categorized_at,
@@ -139,13 +164,14 @@ async function upsertPlaidTransaction(connection, plaidItemDbId, txn) {
   const amount = Number(txn.amount) || 0;
   const date = txn.date;
   const pending = txn.pending ? 1 : 0;
+  // Preserve user-flipped amounts (amount_manual=1) so Plaid sync does not undo Venmo sign fixes.
   await connection.execute(
     `INSERT INTO finance_transactions
       (plaid_transaction_id, plaid_item_id, txn_date, amount, merchant_name, pending)
      VALUES (?, ?, ?, ?, ?, ?)
      ON DUPLICATE KEY UPDATE
        txn_date = VALUES(txn_date),
-       amount = VALUES(amount),
+       amount = IF(amount_manual = 1, amount, VALUES(amount)),
        merchant_name = VALUES(merchant_name),
        pending = VALUES(pending)`,
     [txn.transaction_id, plaidItemDbId, date, amount, merchant, pending]
@@ -277,7 +303,12 @@ function registerFinanceRoutes(app, getConnection) {
       const [rows] = await req.financeDb.execute(
         'SELECT * FROM finance_categories ORDER BY is_pinned DESC, sort_order ASC, id ASC'
       );
-      jsonOk(res, { categories: rows.map(categoryFromRow) });
+      // Amazon is a vendor tag now — hide legacy slug from the category picker.
+      const categories = rows.filter((r) => r.slug !== 'amazon').map(categoryFromRow);
+      jsonOk(res, {
+        categories,
+        vendorTags: FINANCE_VENDOR_TAGS.map((t) => ({ slug: t.slug, label: t.label })),
+      });
     } catch (err) {
       jsonError(res, err.message || 'Failed to load categories', 500);
     }
@@ -345,6 +376,7 @@ function registerFinanceRoutes(app, getConnection) {
       const status = req.query.status || 'all';
       const month = String(req.query.month || '').trim();
       const categoryId = parseInt(req.query.categoryId, 10) || 0;
+      const vendorTag = String(req.query.vendorTag || '').trim();
       let sql = 'SELECT t.* FROM finance_transactions t';
       const where = [];
       const params = [];
@@ -365,6 +397,10 @@ function registerFinanceRoutes(app, getConnection) {
         where.push('t.category_id = ?');
         params.push(categoryId);
       }
+      if (vendorTag) {
+        where.push('t.vendor_tag = ?');
+        params.push(vendorTag);
+      }
       if (where.length > 0) {
         sql += ` WHERE ${where.join(' AND ')}`;
       }
@@ -379,24 +415,64 @@ function registerFinanceRoutes(app, getConnection) {
   router.patch('/transactions/:id', async (req, res) => {
     try {
       const id = parseInt(req.params.id, 10);
-      const categoryId = parseInt(req.body?.categoryId, 10);
-      if (!id || !categoryId) return jsonError(res, 'Invalid transaction or category');
-      const [cats] = await req.financeDb.execute(
-        'SELECT id FROM finance_categories WHERE id = ? LIMIT 1',
-        [categoryId]
-      );
-      if (!cats[0]) return jsonError(res, 'Category not found', 404);
+      if (!id) return jsonError(res, 'Invalid transaction');
+
+      const sets = [];
+      const params = [];
+      const body = req.body || {};
+
+      if (body.flipAmount) {
+        sets.push('amount = -amount', 'amount_manual = 1');
+      } else if (body.amount != null && Number.isFinite(Number(body.amount))) {
+        sets.push('amount = ?', 'amount_manual = 1');
+        params.push(Number(body.amount));
+      }
+
+      if (body.categoryId != null) {
+        const categoryId = parseInt(body.categoryId, 10);
+        if (!categoryId) return jsonError(res, 'Invalid category');
+        const [cats] = await req.financeDb.execute(
+          'SELECT id FROM finance_categories WHERE id = ? LIMIT 1',
+          [categoryId]
+        );
+        if (!cats[0]) return jsonError(res, 'Category not found', 404);
+        sets.push('category_id = ?', 'categorized_at = NOW()');
+        params.push(categoryId);
+      }
+
+      if (Object.prototype.hasOwnProperty.call(body, 'vendorTag')) {
+        const vendorTag = String(body.vendorTag || '').trim();
+        const allowed = FINANCE_VENDOR_TAGS.map((t) => t.slug);
+        if (vendorTag === '') {
+          sets.push('vendor_tag = NULL');
+        } else if (!allowed.includes(vendorTag)) {
+          return jsonError(res, 'Invalid vendorTag');
+        } else {
+          sets.push('vendor_tag = ?');
+          params.push(vendorTag);
+        }
+      }
+
+      if (sets.length === 0) return jsonError(res, 'Nothing to update');
+
+      params.push(id);
       const [result] = await req.financeDb.execute(
-        'UPDATE finance_transactions SET category_id = ?, categorized_at = NOW() WHERE id = ?',
-        [categoryId, id]
+        `UPDATE finance_transactions SET ${sets.join(', ')} WHERE id = ?`,
+        params
       );
-      if (result.affectedRows === 0) return jsonError(res, 'Transaction not found', 404);
+      if (result.affectedRows === 0) {
+        const [existing] = await req.financeDb.execute(
+          'SELECT id FROM finance_transactions WHERE id = ? LIMIT 1',
+          [id]
+        );
+        if (!existing[0]) return jsonError(res, 'Transaction not found', 404);
+      }
       const [rows] = await req.financeDb.execute('SELECT * FROM finance_transactions WHERE id = ?', [
         id,
       ]);
       jsonOk(res, { transaction: transactionFromRow(rows[0]) });
     } catch (err) {
-      jsonError(res, err.message || 'Failed to categorize', 500);
+      jsonError(res, err.message || 'Failed to update transaction', 500);
     }
   });
 
@@ -441,11 +517,31 @@ function registerFinanceRoutes(app, getConnection) {
       }
       const spendingTotal = spending.reduce((s, r) => s + r.total, 0);
       const incomeTotal = income.reduce((s, r) => s + r.total, 0);
+
+      const [vendorRows] = await req.financeDb.execute(
+        `SELECT vendor_tag AS slug, SUM(amount) AS total, COUNT(*) AS txn_count
+         FROM finance_transactions
+         WHERE category_id IS NOT NULL
+           AND vendor_tag IS NOT NULL AND vendor_tag <> ''
+           AND DATE_FORMAT(txn_date, '%Y-%m') = ?
+         GROUP BY vendor_tag
+         ORDER BY total DESC`,
+        [month]
+      );
+      const labelBySlug = Object.fromEntries(FINANCE_VENDOR_TAGS.map((t) => [t.slug, t.label]));
+      const vendors = vendorRows.map((row) => ({
+        slug: row.slug,
+        label: labelBySlug[row.slug] || row.slug,
+        total: Number(row.total),
+        txnCount: Number(row.txn_count),
+      }));
+
       jsonOk(res, {
         month,
         spending,
         moved,
         income,
+        vendors,
         spendingTotal,
         incomeTotal,
         ignoredTotal: ignored,

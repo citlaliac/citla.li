@@ -221,6 +221,36 @@
   line-height: 1.05;
 }
 
+.finance-charge-amount--btn {
+  display: block;
+  width: 100%;
+  padding: 0.15rem 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  font-size: 2.75rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+
+.finance-charge-amount--btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.finance-charge-amount--btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.finance-charge-hint {
+  margin: 0.35rem 0 0;
+  color: #8a8278;
+  font-size: 0.78rem;
+}
+
 .finance-charge-date {
   margin: 0.5rem 0 0;
   color: #8a8278;
@@ -289,6 +319,58 @@
 
 .finance-cat-btn--oops {
   background: #ffd4cc;
+  font-weight: 700;
+}
+
+.finance-vendor-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-bottom: 0.65rem;
+}
+
+.finance-cat-btn--vendor {
+  background: #ffe8a3;
+  border: 1px solid #e6d48a;
+  min-width: 5.5rem;
+}
+
+.finance-cat-btn--vendor.is-active {
+  outline: 2px solid #1a1a1a;
+  outline-offset: 1px;
+}
+
+.finance-vendor-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.65rem;
+  background: #fff8e1;
+  color: #5c4b00;
+  font-size: 0.88rem;
+}
+
+.finance-vendor-clear {
+  border: none;
+  background: transparent;
+  color: #5c4b00;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 0.82rem;
+}
+
+.finance-vendor-chip {
+  margin: 0 0 0.35rem;
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: #ffe8a3;
+  color: #5c4b00;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 

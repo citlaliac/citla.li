@@ -5,13 +5,16 @@ import {
   financeCategorizeTransaction,
   financeFetchCategories,
   financeFetchTransactions,
+  financeFlipTransactionAmount,
   financeSync,
 } from './financeApi';
 
 function FinanceInboxPage() {
   const [transactions, setTransactions] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [vendorTags, setVendorTags] = useState([]);
   const [expanded, setExpanded] = useState(false);
+  const [pendingVendorTag, setPendingVendorTag] = useState(null);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState('');
@@ -26,6 +29,7 @@ function FinanceInboxPage() {
         financeFetchTransactions('uncategorized'),
       ]);
       setCategories(catRes.categories || []);
+      setVendorTags(catRes.vendorTags || []);
       setTransactions(txnRes.transactions || []);
       setActiveId((txnRes.transactions || [])[0]?.id ?? null);
     } catch (err) {
@@ -56,19 +60,53 @@ function FinanceInboxPage() {
   const pinned = categories.filter((c) => c.isPinned);
   const rest = categories.filter((c) => !c.isPinned);
   const activeTxn = transactions.find((t) => t.id === activeId) || transactions[0];
+  const pendingVendorLabel =
+    vendorTags.find((t) => t.slug === pendingVendorTag)?.label || pendingVendorTag;
 
   const pickCategory = async (categoryId) => {
     if (!activeTxn || busyId) return;
     setBusyId(activeTxn.id);
     setError('');
     try {
-      await financeCategorizeTransaction(activeTxn.id, categoryId);
+      await financeCategorizeTransaction(activeTxn.id, categoryId, {
+        vendorTag: pendingVendorTag || '',
+      });
       const next = transactions.filter((t) => t.id !== activeTxn.id);
       setTransactions(next);
       setActiveId(next[0]?.id ?? null);
       setExpanded(false);
+      setPendingVendorTag(null);
     } catch (err) {
       setError(err.message || 'Could not save category');
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  // Amazon (and future stores): pick tag first, then a real spend category.
+  const startVendorTag = (slug) => {
+    setPendingVendorTag(slug);
+    setExpanded(true);
+  };
+
+  const clearVendorTag = () => setPendingVendorTag(null);
+
+  // Tap amount to flip +/− (Venmo self-transfers often come in with the wrong sign).
+  const flipAmount = async () => {
+    if (!activeTxn || busyId) return;
+    setBusyId(activeTxn.id);
+    setError('');
+    try {
+      const data = await financeFlipTransactionAmount(activeTxn.id);
+      const nextAmount =
+        data.transaction?.amount != null ? data.transaction.amount : -Number(activeTxn.amount);
+      setTransactions((prev) =>
+        prev.map((t) =>
+          t.id === activeTxn.id ? { ...t, amount: nextAmount, amountManual: true } : t
+        )
+      );
+    } catch (err) {
+      setError(err.message || 'Could not flip amount');
     } finally {
       setBusyId(null);
     }
@@ -120,10 +158,31 @@ function FinanceInboxPage() {
         <>
           <div className="finance-charge-card">
             <p className="finance-charge-merchant">{activeTxn.merchantName}</p>
-            <p className="finance-charge-amount">{formatMoney(activeTxn.amount)}</p>
+            <button
+              type="button"
+              className="finance-charge-amount finance-charge-amount--btn"
+              onClick={flipAmount}
+              disabled={busyId === activeTxn.id}
+              title="Tap to flip + / −"
+              aria-label="Flip amount sign"
+            >
+              {formatMoney(activeTxn.amount)}
+            </button>
+            <p className="finance-charge-hint">Tap amount to flip + / −</p>
             <p className="finance-charge-date">{activeTxn.date}</p>
             {activeTxn.pending && <span className="finance-pending">Pending</span>}
           </div>
+
+          {pendingVendorTag && (
+            <div className="finance-vendor-banner">
+              <span>
+                Tagged <strong>{pendingVendorLabel}</strong> — now pick what it was
+              </span>
+              <button type="button" className="finance-vendor-clear" onClick={clearVendorTag}>
+                Clear
+              </button>
+            </div>
+          )}
 
           <div className="finance-category-grid finance-category-grid--pinned">
             {pinned.map((cat) => (
@@ -148,21 +207,40 @@ function FinanceInboxPage() {
               More categories
             </button>
           ) : (
-            <div className="finance-category-grid">
-              {rest.map((cat) => (
-                <button
-                  key={cat.id}
-                  type="button"
-                  className={`finance-cat-btn finance-cat-btn--secondary${
-                    cat.slug === 'oops-splurge' ? ' finance-cat-btn--oops' : ''
-                  }`}
-                  disabled={busyId === activeTxn.id}
-                  onClick={() => pickCategory(cat.id)}
-                >
-                  {cat.label}
-                </button>
-              ))}
-            </div>
+            <>
+              {vendorTags.length > 0 && (
+                <div className="finance-vendor-row">
+                  {vendorTags.map((tag) => (
+                    <button
+                      key={tag.slug}
+                      type="button"
+                      className={`finance-cat-btn finance-cat-btn--vendor${
+                        pendingVendorTag === tag.slug ? ' is-active' : ''
+                      }`}
+                      disabled={busyId === activeTxn.id}
+                      onClick={() => startVendorTag(tag.slug)}
+                    >
+                      {tag.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+              <div className="finance-category-grid">
+                {rest.map((cat) => (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    className={`finance-cat-btn finance-cat-btn--secondary${
+                      cat.slug === 'oops-splurge' ? ' finance-cat-btn--oops' : ''
+                    }`}
+                    disabled={busyId === activeTxn.id}
+                    onClick={() => pickCategory(cat.id)}
+                  >
+                    {cat.label}
+                  </button>
+                ))}
+              </div>
+            </>
           )}
 
           {transactions.length > 1 && (
@@ -175,6 +253,7 @@ function FinanceInboxPage() {
                     onClick={() => {
                       setActiveId(t.id);
                       setExpanded(false);
+                      setPendingVendorTag(null);
                     }}
                   >
                     <span>{t.merchantName}</span>

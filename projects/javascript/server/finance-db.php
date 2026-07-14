@@ -45,22 +45,29 @@ function finance_categories_seed() {
         ['restaurants', 'Restaurants', 2, 1, 0, 'spending'],
         ['transportation', 'Transportation', 3, 1, 0, 'spending'],
         ['self-care', 'Self Care', 4, 1, 0, 'spending'],
-        ['amazon', 'Amazon', 5, 0, 0, 'spending'],
-        ['home-goods', 'Home Goods', 6, 0, 0, 'spending'],
-        ['oops-splurge', 'Oops / Splurge', 7, 0, 0, 'spending'],
-        ['entertainment', 'Entertainment', 8, 0, 0, 'spending'],
-        ['clothing', 'Clothing', 9, 0, 0, 'spending'],
-        ['utilities', 'Utilities', 10, 0, 0, 'spending'],
-        ['rent', 'Rent', 11, 0, 0, 'spending'],
-        ['healthcare', 'Healthcare', 12, 0, 0, 'spending'],
-        ['travel-vacation', 'Travel / Vacation', 13, 0, 0, 'spending'],
-        ['education-classes', 'Education / Classes', 14, 0, 0, 'spending'],
+        ['home-goods', 'Home Goods', 5, 0, 0, 'spending'],
+        ['oops-splurge', 'Oops / Splurge', 6, 0, 0, 'spending'],
+        ['entertainment', 'Entertainment', 7, 0, 0, 'spending'],
+        ['clothing', 'Clothing', 8, 0, 0, 'spending'],
+        ['utilities', 'Utilities', 9, 0, 0, 'spending'],
+        ['rent', 'Rent', 10, 0, 0, 'spending'],
+        ['healthcare', 'Healthcare', 11, 0, 0, 'spending'],
+        ['travel-vacation', 'Travel / Vacation', 12, 0, 0, 'spending'],
+        ['education-classes', 'Education / Classes', 13, 0, 0, 'spending'],
+        ['work-lunch', 'Work Lunch / Cost', 14, 0, 0, 'spending'],
         ['savings', 'Savings', 15, 0, 0, 'moved'],
         ['investments', 'Investments', 16, 0, 0, 'moved'],
         ['cash', 'Cash', 17, 0, 0, 'spending'],
         ['gifts-donations', 'Gifts / Donations', 18, 0, 0, 'spending'],
         ['income', 'Income', 19, 0, 0, 'income'],
         ['ignore', 'Ignore / Do Not Count', 20, 0, 1, 'ignore'],
+    ];
+}
+
+/** Vendor tags for two-step labeling (Amazon → Home Goods, etc.). */
+function finance_vendor_tags() {
+    return [
+        ['amazon', 'Amazon'],
     ];
 }
 
@@ -103,7 +110,9 @@ function finance_ensure_tables($conn) {
         plaid_item_id INT NOT NULL,
         txn_date DATE NOT NULL,
         amount DECIMAL(12, 2) NOT NULL,
+        amount_manual TINYINT(1) NOT NULL DEFAULT 0,
         merchant_name VARCHAR(255) NOT NULL DEFAULT \'\',
+        vendor_tag VARCHAR(32) NULL,
         pending TINYINT(1) NOT NULL DEFAULT 0,
         category_id INT NULL,
         categorized_at DATETIME NULL,
@@ -117,6 +126,28 @@ function finance_ensure_tables($conn) {
         CONSTRAINT fk_finance_txn_item FOREIGN KEY (plaid_item_id) REFERENCES finance_plaid_items (id) ON DELETE CASCADE,
         CONSTRAINT fk_finance_txn_category FOREIGN KEY (category_id) REFERENCES finance_categories (id) ON DELETE SET NULL
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
+
+    // Existing installs: add amount_manual so Venmo sign flips survive Plaid sync.
+    $col = $conn->query("SHOW COLUMNS FROM finance_transactions LIKE 'amount_manual'");
+    if ($col && $col->num_rows === 0) {
+        $conn->query(
+            'ALTER TABLE finance_transactions ADD COLUMN amount_manual TINYINT(1) NOT NULL DEFAULT 0 AFTER amount'
+        );
+    }
+    $vendorCol = $conn->query("SHOW COLUMNS FROM finance_transactions LIKE 'vendor_tag'");
+    if ($vendorCol && $vendorCol->num_rows === 0) {
+        $conn->query(
+            'ALTER TABLE finance_transactions ADD COLUMN vendor_tag VARCHAR(32) NULL AFTER merchant_name'
+        );
+    }
+
+    // Existing Amazon-category charges keep their category for now; also stamp vendor_tag for store reports.
+    $conn->query(
+        "UPDATE finance_transactions t
+         JOIN finance_categories c ON c.id = t.category_id
+         SET t.vendor_tag = 'amazon'
+         WHERE c.slug = 'amazon' AND (t.vendor_tag IS NULL OR t.vendor_tag = '')"
+    );
     $res = $conn->query('SELECT COUNT(*) AS c FROM finance_categories');
     $row = $res ? $res->fetch_assoc() : ['c' => 0];
     if ((int) $row['c'] === 0) {
@@ -305,13 +336,14 @@ function finance_upsert_transaction($conn, $plaidItemDbId, $txn) {
     $date = $txn['date'] ?? date('Y-m-d');
     $pending = !empty($txn['pending']) ? 1 : 0;
     $txnId = $txn['transaction_id'] ?? '';
+    // Preserve user-flipped amounts (amount_manual=1) so Plaid sync does not undo Venmo sign fixes.
     $stmt = $conn->prepare(
         'INSERT INTO finance_transactions
             (plaid_transaction_id, plaid_item_id, txn_date, amount, merchant_name, pending)
          VALUES (?, ?, ?, ?, ?, ?)
          ON DUPLICATE KEY UPDATE
             txn_date = VALUES(txn_date),
-            amount = VALUES(amount),
+            amount = IF(amount_manual = 1, amount, VALUES(amount)),
             merchant_name = VALUES(merchant_name),
             pending = VALUES(pending)'
     );
@@ -379,7 +411,9 @@ function finance_transaction_from_row($row) {
         'plaidTransactionId' => $row['plaid_transaction_id'],
         'date' => $row['txn_date'],
         'amount' => (float) $row['amount'],
+        'amountManual' => !empty($row['amount_manual']),
         'merchantName' => $row['merchant_name'],
+        'vendorTag' => $row['vendor_tag'] ?? null,
         'pending' => (bool) $row['pending'],
         'categoryId' => $row['category_id'] !== null ? (int) $row['category_id'] : null,
         'categorizedAt' => $row['categorized_at'],

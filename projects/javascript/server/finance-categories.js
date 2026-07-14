@@ -4,16 +4,16 @@ const FINANCE_CATEGORIES = [
   { slug: 'restaurants', label: 'Restaurants', sortOrder: 2, isPinned: true, excludeFromReports: false, reportGroup: 'spending' },
   { slug: 'transportation', label: 'Transportation', sortOrder: 3, isPinned: true, excludeFromReports: false, reportGroup: 'spending' },
   { slug: 'self-care', label: 'Self Care', sortOrder: 4, isPinned: true, excludeFromReports: false, reportGroup: 'spending' },
-  { slug: 'amazon', label: 'Amazon', sortOrder: 5, isPinned: false, excludeFromReports: false, reportGroup: 'spending' },
-  { slug: 'home-goods', label: 'Home Goods', sortOrder: 6, isPinned: false, excludeFromReports: false, reportGroup: 'spending' },
-  { slug: 'oops-splurge', label: 'Oops / Splurge', sortOrder: 7, isPinned: false, excludeFromReports: false, reportGroup: 'spending' },
-  { slug: 'entertainment', label: 'Entertainment', sortOrder: 8, isPinned: false, excludeFromReports: false, reportGroup: 'spending' },
-  { slug: 'clothing', label: 'Clothing', sortOrder: 9, isPinned: false, excludeFromReports: false, reportGroup: 'spending' },
-  { slug: 'utilities', label: 'Utilities', sortOrder: 10, isPinned: false, excludeFromReports: false, reportGroup: 'spending' },
-  { slug: 'rent', label: 'Rent', sortOrder: 11, isPinned: false, excludeFromReports: false, reportGroup: 'spending' },
-  { slug: 'healthcare', label: 'Healthcare', sortOrder: 12, isPinned: false, excludeFromReports: false, reportGroup: 'spending' },
-  { slug: 'travel-vacation', label: 'Travel / Vacation', sortOrder: 13, isPinned: false, excludeFromReports: false, reportGroup: 'spending' },
-  { slug: 'education-classes', label: 'Education / Classes', sortOrder: 14, isPinned: false, excludeFromReports: false, reportGroup: 'spending' },
+  { slug: 'home-goods', label: 'Home Goods', sortOrder: 5, isPinned: false, excludeFromReports: false, reportGroup: 'spending' },
+  { slug: 'oops-splurge', label: 'Oops / Splurge', sortOrder: 6, isPinned: false, excludeFromReports: false, reportGroup: 'spending' },
+  { slug: 'entertainment', label: 'Entertainment', sortOrder: 7, isPinned: false, excludeFromReports: false, reportGroup: 'spending' },
+  { slug: 'clothing', label: 'Clothing', sortOrder: 8, isPinned: false, excludeFromReports: false, reportGroup: 'spending' },
+  { slug: 'utilities', label: 'Utilities', sortOrder: 9, isPinned: false, excludeFromReports: false, reportGroup: 'spending' },
+  { slug: 'rent', label: 'Rent', sortOrder: 10, isPinned: false, excludeFromReports: false, reportGroup: 'spending' },
+  { slug: 'healthcare', label: 'Healthcare', sortOrder: 11, isPinned: false, excludeFromReports: false, reportGroup: 'spending' },
+  { slug: 'travel-vacation', label: 'Travel / Vacation', sortOrder: 12, isPinned: false, excludeFromReports: false, reportGroup: 'spending' },
+  { slug: 'education-classes', label: 'Education / Classes', sortOrder: 13, isPinned: false, excludeFromReports: false, reportGroup: 'spending' },
+  { slug: 'work-lunch', label: 'Work Lunch / Cost', sortOrder: 14, isPinned: false, excludeFromReports: false, reportGroup: 'spending' },
   { slug: 'savings', label: 'Savings', sortOrder: 15, isPinned: false, excludeFromReports: false, reportGroup: 'moved' },
   { slug: 'investments', label: 'Investments', sortOrder: 16, isPinned: false, excludeFromReports: false, reportGroup: 'moved' },
   { slug: 'cash', label: 'Cash', sortOrder: 17, isPinned: false, excludeFromReports: false, reportGroup: 'spending' },
@@ -29,4 +29,10 @@ const FINANCE_CATEGORIES = [
   },
 ];
 
-module.exports = { FINANCE_CATEGORIES };
+/**
+ * Vendor tags (e.g. Amazon) — not spend categories.
+ * Flow: tap tag → pick real category (Home Goods, etc.). Reports can still total by vendor.
+ */
+const FINANCE_VENDOR_TAGS = [{ slug: 'amazon', label: 'Amazon' }];
+
+module.exports = { FINANCE_CATEGORIES, FINANCE_VENDOR_TAGS };

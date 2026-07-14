@@ -39,9 +39,17 @@ try {
         );
         $categories = [];
         while ($row = $res->fetch_assoc()) {
+            // Amazon is a vendor tag now — hide legacy slug from the category picker.
+            if ($row['slug'] === 'amazon') {
+                continue;
+            }
             $categories[] = finance_category_from_row($row);
         }
-        finance_json_ok(['categories' => $categories]);
+        $vendorTags = [];
+        foreach (finance_vendor_tags() as $tag) {
+            $vendorTags[] = ['slug' => $tag[0], 'label' => $tag[1]];
+        }
+        finance_json_ok(['categories' => $categories, 'vendorTags' => $vendorTags]);
     } elseif ($resource === 'plaid' && $method === 'POST' && $action === 'link-token') {
         $data = finance_plaid_request('/link/token/create', [
             'user' => ['client_user_id' => 'citlali-finance-admin'],
@@ -92,6 +100,7 @@ try {
         $status = $_GET['status'] ?? 'all';
         $month = isset($_GET['month']) ? trim($_GET['month']) : '';
         $categoryId = isset($_GET['categoryId']) ? (int) $_GET['categoryId'] : 0;
+        $vendorTag = isset($_GET['vendorTag']) ? trim($_GET['vendorTag']) : '';
 
         $where = [];
         $types = '';
@@ -114,6 +123,11 @@ try {
             $where[] = 'category_id = ?';
             $types .= 'i';
             $params[] = $categoryId;
+        }
+        if ($vendorTag !== '') {
+            $where[] = 'vendor_tag = ?';
+            $types .= 's';
+            $params[] = $vendorTag;
         }
 
         $sql = 'SELECT * FROM finance_transactions';
@@ -147,17 +161,73 @@ try {
     } elseif ($resource === 'transactions' && $method === 'PATCH') {
         $id = (int) ($_GET['id'] ?? 0);
         $body = finance_read_json_body();
-        $categoryId = (int) ($body['categoryId'] ?? 0);
-        if ($id <= 0 || $categoryId <= 0) {
-            finance_json_error('Invalid transaction or category');
+        if ($id <= 0) {
+            finance_json_error('Invalid transaction');
         }
-        $stmt = $conn->prepare(
-            'UPDATE finance_transactions SET category_id = ?, categorized_at = NOW() WHERE id = ?'
-        );
-        $stmt->bind_param('ii', $categoryId, $id);
+
+        $sets = [];
+        $types = '';
+        $params = [];
+
+        // Flip sign (+/−) for Venmo and similar Plaid quirks; marks amount_manual so sync keeps it.
+        if (!empty($body['flipAmount'])) {
+            $sets[] = 'amount = -amount';
+            $sets[] = 'amount_manual = 1';
+        } elseif (array_key_exists('amount', $body) && is_numeric($body['amount'])) {
+            $sets[] = 'amount = ?';
+            $sets[] = 'amount_manual = 1';
+            $types .= 'd';
+            $params[] = (float) $body['amount'];
+        }
+
+        if (array_key_exists('categoryId', $body)) {
+            $categoryId = (int) $body['categoryId'];
+            if ($categoryId <= 0) {
+                finance_json_error('Invalid category');
+            }
+            $sets[] = 'category_id = ?';
+            $sets[] = 'categorized_at = NOW()';
+            $types .= 'i';
+            $params[] = $categoryId;
+        }
+
+        if (array_key_exists('vendorTag', $body)) {
+            $vendorTag = trim((string) ($body['vendorTag'] ?? ''));
+            $allowed = [];
+            foreach (finance_vendor_tags() as $tag) {
+                $allowed[] = $tag[0];
+            }
+            if ($vendorTag === '') {
+                $sets[] = 'vendor_tag = NULL';
+            } elseif (!in_array($vendorTag, $allowed, true)) {
+                finance_json_error('Invalid vendorTag');
+            } else {
+                $sets[] = 'vendor_tag = ?';
+                $types .= 's';
+                $params[] = $vendorTag;
+            }
+        }
+
+        if (count($sets) === 0) {
+            finance_json_error('Nothing to update');
+        }
+
+        $types .= 'i';
+        $params[] = $id;
+        $sql = 'UPDATE finance_transactions SET ' . implode(', ', $sets) . ' WHERE id = ?';
+        $stmt = $conn->prepare($sql);
+        $bindArgs = [$types];
+        foreach ($params as $i => $_) {
+            $bindArgs[] = &$params[$i];
+        }
+        call_user_func_array([$stmt, 'bind_param'], $bindArgs);
         $stmt->execute();
         if ($stmt->affected_rows === 0) {
-            finance_json_error('Transaction not found', 404);
+            // Flip -amount when amount is 0 still "affects" 0 rows in some MySQL modes; re-check existence.
+            $check = $conn->query('SELECT id FROM finance_transactions WHERE id = ' . $id . ' LIMIT 1');
+            if (!$check || !$check->fetch_assoc()) {
+                finance_json_error('Transaction not found', 404);
+            }
         }
         $stmt->close();
         $res = $conn->query('SELECT * FROM finance_transactions WHERE id = ' . $id);
@@ -205,11 +275,42 @@ try {
         $stmt->close();
         $spendingTotal = array_sum(array_column($spending, 'total'));
         $incomeTotal = array_sum(array_column($income, 'total'));
+
+        // Store / vendor tag totals (e.g. Amazon), independent of spend category.
+        $vendors = [];
+        $vStmt = $conn->prepare(
+            "SELECT vendor_tag AS slug, SUM(amount) AS total, COUNT(*) AS txn_count
+             FROM finance_transactions
+             WHERE category_id IS NOT NULL
+               AND vendor_tag IS NOT NULL AND vendor_tag <> ''
+               AND DATE_FORMAT(txn_date, '%Y-%m') = ?
+             GROUP BY vendor_tag
+             ORDER BY total DESC"
+        );
+        $vStmt->bind_param('s', $month);
+        $vStmt->execute();
+        $vRes = $vStmt->get_result();
+        $labelBySlug = [];
+        foreach (finance_vendor_tags() as $tag) {
+            $labelBySlug[$tag[0]] = $tag[1];
+        }
+        while ($vRow = $vRes->fetch_assoc()) {
+            $slug = $vRow['slug'];
+            $vendors[] = [
+                'slug' => $slug,
+                'label' => $labelBySlug[$slug] ?? $slug,
+                'total' => (float) $vRow['total'],
+                'txnCount' => (int) $vRow['txn_count'],
+            ];
+        }
+        $vStmt->close();
+
         finance_json_ok([
             'month' => $month,
             'spending' => $spending,
             'moved' => $moved,
             'income' => $income,
+            'vendors' => $vendors,
             'spendingTotal' => $spendingTotal,
             'incomeTotal' => $incomeTotal,
             'ignoredTotal' => $ignored,

@@ -1,15 +1,11 @@
-import { FINANCE_CATEGORIES } from '../../../server/finance-categories';
+import { FINANCE_CATEGORIES, FINANCE_VENDOR_TAGS } from '../../../server/finance-categories';
 
 describe('finance categories seed', () => {
-  test('has 20 categories with 4 pinned', () => {
+  test('has 20 categories with 4 pinned and no Amazon spend category', () => {
     expect(FINANCE_CATEGORIES).toHaveLength(20);
     expect(FINANCE_CATEGORIES.filter((c) => c.isPinned)).toHaveLength(4);
-    expect(FINANCE_CATEGORIES.filter((c) => c.isPinned).map((c) => c.slug)).toEqual([
-      'groceries',
-      'restaurants',
-      'transportation',
-      'self-care',
-    ]);
+    expect(FINANCE_CATEGORIES.some((c) => c.slug === 'amazon')).toBe(false);
+    expect(FINANCE_CATEGORIES.some((c) => c.slug === 'work-lunch')).toBe(true);
   });
 
   test('ignore category is excluded from reports', () => {
@@ -17,10 +13,9 @@ describe('finance categories seed', () => {
     expect(ignore?.excludeFromReports).toBe(true);
   });
 
-  test('includes home goods, gifts, and income', () => {
-    expect(FINANCE_CATEGORIES.some((c) => c.slug === 'home-goods')).toBe(true);
+  test('Amazon is a vendor tag, not a category', () => {
+    expect(FINANCE_VENDOR_TAGS.some((t) => t.slug === 'amazon')).toBe(true);
     expect(FINANCE_CATEGORIES.some((c) => c.slug === 'gifts-donations')).toBe(true);
-    const income = FINANCE_CATEGORIES.find((c) => c.slug === 'income');
-    expect(income?.reportGroup).toBe('income');
+    expect(FINANCE_CATEGORIES.find((c) => c.slug === 'income')?.reportGroup).toBe('income');
   });
 });

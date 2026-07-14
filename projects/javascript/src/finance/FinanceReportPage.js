@@ -5,25 +5,28 @@ import {
   financeFetchCategories,
   financeFetchReport,
   financeFetchTransactions,
+  financeFlipTransactionAmount,
 } from './financeApi';
 
 /**
- * Monthly report with category drill-down and recategorize.
- * Views: overview → category transactions → edit one charge.
+ * Monthly report with category/vendor drill-down and recategorize.
+ * Views: overview → filtered transactions → edit one charge.
  */
 function FinanceReportPage() {
   const [month, setMonth] = useState(currentMonthKey());
   const [report, setReport] = useState(null);
   const [categories, setCategories] = useState([]);
+  const [vendorTags, setVendorTags] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Drill-down: null overview | { categoryId, label } list | + selectedTxn edit
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [categoryTxns, setCategoryTxns] = useState([]);
+  // Drill-down filter: { kind: 'category', categoryId, label } | { kind: 'vendor', vendorTag, label }
+  const [selectedFilter, setSelectedFilter] = useState(null);
+  const [listTxns, setListTxns] = useState([]);
   const [txnsLoading, setTxnsLoading] = useState(false);
   const [selectedTxn, setSelectedTxn] = useState(null);
   const [expanded, setExpanded] = useState(false);
+  const [pendingVendorTag, setPendingVendorTag] = useState(null);
   const [busyId, setBusyId] = useState(null);
 
   const loadReport = useCallback(async () => {
@@ -36,6 +39,7 @@ function FinanceReportPage() {
       ]);
       setReport(reportData);
       setCategories(catData.categories || []);
+      setVendorTags(catData.vendorTags || []);
     } catch (err) {
       setError(err.message || 'Could not load report');
     } finally {
@@ -47,44 +51,62 @@ function FinanceReportPage() {
     loadReport();
   }, [loadReport]);
 
-  // Reset drill-down when month changes.
   useEffect(() => {
-    setSelectedCategory(null);
+    setSelectedFilter(null);
     setSelectedTxn(null);
-    setCategoryTxns([]);
+    setListTxns([]);
     setExpanded(false);
+    setPendingVendorTag(null);
   }, [month]);
 
   const openCategory = async (row) => {
-    setSelectedCategory({ categoryId: row.categoryId, label: row.label });
+    setSelectedFilter({ kind: 'category', categoryId: row.categoryId, label: row.label });
     setSelectedTxn(null);
     setExpanded(false);
+    setPendingVendorTag(null);
     setTxnsLoading(true);
     setError('');
     try {
-      const data = await financeFetchTransactions({
-        month,
-        categoryId: row.categoryId,
-      });
-      setCategoryTxns(data.transactions || []);
+      const data = await financeFetchTransactions({ month, categoryId: row.categoryId });
+      setListTxns(data.transactions || []);
     } catch (err) {
       setError(err.message || 'Could not load transactions');
-      setCategoryTxns([]);
+      setListTxns([]);
+    } finally {
+      setTxnsLoading(false);
+    }
+  };
+
+  const openVendor = async (row) => {
+    setSelectedFilter({ kind: 'vendor', vendorTag: row.slug, label: row.label });
+    setSelectedTxn(null);
+    setExpanded(false);
+    setPendingVendorTag(null);
+    setTxnsLoading(true);
+    setError('');
+    try {
+      const data = await financeFetchTransactions({ month, vendorTag: row.slug });
+      setListTxns(data.transactions || []);
+    } catch (err) {
+      setError(err.message || 'Could not load transactions');
+      setListTxns([]);
     } finally {
       setTxnsLoading(false);
     }
   };
 
   const backToOverview = () => {
-    setSelectedCategory(null);
+    setSelectedFilter(null);
     setSelectedTxn(null);
-    setCategoryTxns([]);
+    setListTxns([]);
     setExpanded(false);
+    setPendingVendorTag(null);
   };
 
-  const backToCategoryList = () => {
+  const backToList = () => {
     setSelectedTxn(null);
     setExpanded(false);
+    setPendingVendorTag(null);
   };
 
   const pickCategory = async (categoryId) => {
@@ -92,16 +114,37 @@ function FinanceReportPage() {
     setBusyId(selectedTxn.id);
     setError('');
     try {
-      await financeCategorizeTransaction(selectedTxn.id, categoryId);
-      // Stay in category view if still same category; otherwise remove from list.
-      if (selectedCategory && categoryId === selectedCategory.categoryId) {
+      const vendorTag =
+        pendingVendorTag !== null
+          ? pendingVendorTag
+          : selectedTxn.vendorTag || '';
+      await financeCategorizeTransaction(selectedTxn.id, categoryId, { vendorTag });
+
+      const nextVendor =
+        pendingVendorTag !== null ? pendingVendorTag || null : selectedTxn.vendorTag || null;
+      const stillInList =
+        selectedFilter?.kind === 'category'
+          ? categoryId === selectedFilter.categoryId
+          : selectedFilter?.kind === 'vendor'
+            ? nextVendor === selectedFilter.vendorTag
+            : false;
+
+      if (stillInList) {
+        const updated = {
+          ...selectedTxn,
+          categoryId,
+          vendorTag: nextVendor,
+        };
+        setListTxns((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
         setSelectedTxn(null);
         setExpanded(false);
+        setPendingVendorTag(null);
       } else {
-        const next = categoryTxns.filter((t) => t.id !== selectedTxn.id);
-        setCategoryTxns(next);
+        const next = listTxns.filter((t) => t.id !== selectedTxn.id);
+        setListTxns(next);
         setSelectedTxn(null);
         setExpanded(false);
+        setPendingVendorTag(null);
         if (next.length === 0) {
           await loadReport();
           backToOverview();
@@ -116,10 +159,33 @@ function FinanceReportPage() {
     }
   };
 
+  const flipSelectedAmount = async () => {
+    if (!selectedTxn || busyId) return;
+    setBusyId(selectedTxn.id);
+    setError('');
+    try {
+      const data = await financeFlipTransactionAmount(selectedTxn.id);
+      const nextAmount =
+        data.transaction?.amount != null
+          ? data.transaction.amount
+          : -Number(selectedTxn.amount);
+      const updated = { ...selectedTxn, amount: nextAmount, amountManual: true };
+      setSelectedTxn(updated);
+      setListTxns((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
+      await loadReport();
+    } catch (err) {
+      setError(err.message || 'Could not flip amount');
+    } finally {
+      setBusyId(null);
+    }
+  };
+
   const pinned = categories.filter((c) => c.isPinned);
   const rest = categories.filter((c) => !c.isPinned);
+  const pendingVendorLabel =
+    vendorTags.find((t) => t.slug === pendingVendorTag)?.label || pendingVendorTag;
 
-  const renderCategoryRows = (rows) => {
+  const renderRows = (rows, { onOpen, keyField = 'categoryId' } = {}) => {
     if (!rows || rows.length === 0) {
       return <p className="finance-muted">None this month.</p>;
     }
@@ -127,11 +193,11 @@ function FinanceReportPage() {
     return (
       <ul className="finance-report-list">
         {rows.map((row) => (
-          <li key={row.categoryId} className="finance-report-row">
+          <li key={row[keyField] || row.slug} className="finance-report-row">
             <button
               type="button"
               className="finance-report-row-btn"
-              onClick={() => openCategory(row)}
+              onClick={() => onOpen(row)}
             >
               <div className="finance-report-row-top">
                 <span>{row.label}</span>
@@ -155,13 +221,12 @@ function FinanceReportPage() {
     );
   };
 
-  // --- Edit one transaction ---
   if (selectedTxn) {
     return (
       <div className="finance-report">
         <header className="finance-report-head">
-          <button type="button" className="finance-back-btn" onClick={backToCategoryList}>
-            ← {selectedCategory?.label || 'Back'}
+          <button type="button" className="finance-back-btn" onClick={backToList}>
+            ← {selectedFilter?.label || 'Back'}
           </button>
         </header>
         <h2 className="finance-section-title">Change category</h2>
@@ -169,9 +234,40 @@ function FinanceReportPage() {
 
         <div className="finance-charge-card">
           <p className="finance-charge-merchant">{selectedTxn.merchantName}</p>
-          <p className="finance-charge-amount">{formatMoney(selectedTxn.amount)}</p>
+          {selectedTxn.vendorTag && (
+            <p className="finance-vendor-chip">
+              {vendorTags.find((t) => t.slug === selectedTxn.vendorTag)?.label ||
+                selectedTxn.vendorTag}
+            </p>
+          )}
+          <button
+            type="button"
+            className="finance-charge-amount finance-charge-amount--btn"
+            onClick={flipSelectedAmount}
+            disabled={busyId === selectedTxn.id}
+            title="Tap to flip + / −"
+            aria-label="Flip amount sign"
+          >
+            {formatMoney(selectedTxn.amount)}
+          </button>
+          <p className="finance-charge-hint">Tap amount to flip + / −</p>
           <p className="finance-charge-date">{selectedTxn.date}</p>
         </div>
+
+        {pendingVendorTag && (
+          <div className="finance-vendor-banner">
+            <span>
+              Tagged <strong>{pendingVendorLabel}</strong> — now pick what it was
+            </span>
+            <button
+              type="button"
+              className="finance-vendor-clear"
+              onClick={() => setPendingVendorTag(null)}
+            >
+              Clear
+            </button>
+          </div>
+        )}
 
         <div className="finance-category-grid finance-category-grid--pinned">
           {pinned.map((cat) => (
@@ -192,28 +288,46 @@ function FinanceReportPage() {
             More categories
           </button>
         ) : (
-          <div className="finance-category-grid">
-            {rest.map((cat) => (
-              <button
-                key={cat.id}
-                type="button"
-                className={`finance-cat-btn finance-cat-btn--secondary${
-                  cat.slug === 'oops-splurge' ? ' finance-cat-btn--oops' : ''
-                }`}
-                disabled={busyId === selectedTxn.id}
-                onClick={() => pickCategory(cat.id)}
-              >
-                {cat.label}
-              </button>
-            ))}
-          </div>
+          <>
+            {vendorTags.length > 0 && (
+              <div className="finance-vendor-row">
+                {vendorTags.map((tag) => (
+                  <button
+                    key={tag.slug}
+                    type="button"
+                    className={`finance-cat-btn finance-cat-btn--vendor${
+                      pendingVendorTag === tag.slug ? ' is-active' : ''
+                    }`}
+                    disabled={busyId === selectedTxn.id}
+                    onClick={() => setPendingVendorTag(tag.slug)}
+                  >
+                    {tag.label}
+                  </button>
+                ))}
+              </div>
+            )}
+            <div className="finance-category-grid">
+              {rest.map((cat) => (
+                <button
+                  key={cat.id}
+                  type="button"
+                  className={`finance-cat-btn finance-cat-btn--secondary${
+                    cat.slug === 'oops-splurge' ? ' finance-cat-btn--oops' : ''
+                  }`}
+                  disabled={busyId === selectedTxn.id}
+                  onClick={() => pickCategory(cat.id)}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+          </>
         )}
       </div>
     );
   }
 
-  // --- Transaction list for one category ---
-  if (selectedCategory) {
+  if (selectedFilter) {
     return (
       <div className="finance-report">
         <header className="finance-report-head">
@@ -228,24 +342,33 @@ function FinanceReportPage() {
             aria-label="Report month"
           />
         </header>
-        <h2 className="finance-section-title">{selectedCategory.label}</h2>
+        <h2 className="finance-section-title">{selectedFilter.label}</h2>
         <p className="finance-muted">Tap a charge to recategorize it.</p>
         {error && <p className="finance-error">{error}</p>}
         {txnsLoading && <p className="finance-muted">Loading…</p>}
-        {!txnsLoading && categoryTxns.length === 0 && (
-          <p className="finance-muted">No charges in this category for {month}.</p>
+        {!txnsLoading && listTxns.length === 0 && (
+          <p className="finance-muted">No charges here for {month}.</p>
         )}
-        {!txnsLoading && categoryTxns.length > 0 && (
+        {!txnsLoading && listTxns.length > 0 && (
           <ul className="finance-report-list">
-            {categoryTxns.map((t) => (
+            {listTxns.map((t) => (
               <li key={t.id}>
                 <button
                   type="button"
                   className="finance-queue-item"
-                  onClick={() => setSelectedTxn(t)}
+                  onClick={() => {
+                    setSelectedTxn(t);
+                    setPendingVendorTag(t.vendorTag || null);
+                  }}
                 >
                   <span>
                     <strong>{t.merchantName}</strong>
+                    {t.vendorTag && (
+                      <span className="finance-txn-date-inline">
+                        {' '}
+                        · {vendorTags.find((v) => v.slug === t.vendorTag)?.label || t.vendorTag}
+                      </span>
+                    )}
                     <span className="finance-txn-date-inline"> · {t.date}</span>
                   </span>
                   <span>{formatMoney(t.amount)}</span>
@@ -258,7 +381,6 @@ function FinanceReportPage() {
     );
   }
 
-  // --- Overview ---
   return (
     <div className="finance-report">
       <header className="finance-report-head">
@@ -285,21 +407,28 @@ function FinanceReportPage() {
             {report.spending.length === 0 ? (
               <p className="finance-muted">No categorized spending this month.</p>
             ) : (
-              renderCategoryRows(report.spending)
+              renderRows(report.spending, { onOpen: openCategory })
             )}
           </section>
+
+          {report.vendors?.length > 0 && (
+            <section className="finance-report-section">
+              <h3 className="finance-report-subtitle">By store</h3>
+              {renderRows(report.vendors, { onOpen: openVendor, keyField: 'slug' })}
+            </section>
+          )}
 
           {report.moved?.length > 0 && (
             <section className="finance-report-section">
               <h3 className="finance-report-subtitle">Moved money</h3>
-              {renderCategoryRows(report.moved)}
+              {renderRows(report.moved, { onOpen: openCategory })}
             </section>
           )}
 
           {report.income?.length > 0 && (
             <section className="finance-report-section">
               <h3 className="finance-report-subtitle">Income</h3>
-              {renderCategoryRows(report.income)}
+              {renderRows(report.income, { onOpen: openCategory })}
             </section>
           )}
         </>
