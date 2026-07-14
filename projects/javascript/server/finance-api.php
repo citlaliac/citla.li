@@ -25,8 +25,15 @@ try {
         if (!finance_verify_password($password)) {
             finance_json_error('Invalid password', 401);
         }
-        $token = finance_issue_session($conn);
-        finance_json_ok(['token' => $token]);
+        // rememberMe → 30 days; otherwise 1-day session (browser quit can still clear client token).
+        $rememberMe = !empty($body['rememberMe']);
+        $days = isset($body['rememberDays']) ? (int) $body['rememberDays'] : ($rememberMe ? 30 : 1);
+        $session = finance_issue_session($conn, $days);
+        finance_json_ok([
+            'token' => $session['token'],
+            'expiresAt' => $session['expiresAt'],
+            'days' => $session['days'],
+        ]);
     }
 
     if (!finance_authenticate($conn)) {
@@ -277,10 +284,12 @@ try {
                 $ignoredRows[] = $entry;
                 $ignored += $entry['total'];
             } elseif ($row['report_group'] === 'moved') {
+                // Investments / transfers — not "spend".
                 $moved[] = $entry;
             } elseif ($row['report_group'] === 'income') {
                 $income[] = $entry;
             } else {
+                // Actual costs (groceries, rent, etc.).
                 $spending[] = $entry;
             }
         }
@@ -288,15 +297,14 @@ try {
         $spendingTotal = array_sum(array_column($spending, 'total'));
         $incomeTotal = array_sum(array_column($income, 'total'));
 
-        // Store / vendor tag totals (e.g. Amazon), independent of spend category.
+        // Store / vendor tag totals for spending only (excludes income + investments).
         $vendors = [];
         $vStmt = $conn->prepare(
-            "SELECT vendor_tag AS slug, SUM(amount) AS total, COUNT(*) AS txn_count
-             FROM finance_transactions
-             WHERE category_id IS NOT NULL
-               AND vendor_tag IS NOT NULL AND vendor_tag <> ''
-               AND txn_date >= ? AND txn_date <= ?
-             GROUP BY vendor_tag
+            'SELECT t.vendor_tag AS slug, SUM(t.amount) AS total, COUNT(*) AS txn_count '
+            . finance_spending_join_sql()
+            . " AND t.vendor_tag IS NOT NULL AND t.vendor_tag <> ''
+               AND t.txn_date >= ? AND t.txn_date <= ?
+             GROUP BY t.vendor_tag
              ORDER BY total DESC"
         );
         $vStmt->bind_param('ss', $start, $end);

@@ -251,15 +251,23 @@ function finance_verify_password($password) {
     return $plain !== '' && hash_equals($plain, $password);
 }
 
-function finance_issue_session($conn) {
+function finance_issue_session($conn, $days = 30) {
     $token = bin2hex(random_bytes(32));
     $hash = finance_hash_token($token);
-    $expires = date('Y-m-d H:i:s', time() + 90 * 24 * 60 * 60);
+    // Clamp so clients can request short session (1 day) or longer remember-me.
+    $days = (int) $days;
+    if ($days < 1) {
+        $days = 1;
+    }
+    if ($days > 90) {
+        $days = 90;
+    }
+    $expires = date('Y-m-d H:i:s', time() + $days * 24 * 60 * 60);
     $stmt = $conn->prepare('INSERT INTO finance_sessions (token_hash, expires_at) VALUES (?, ?)');
     $stmt->bind_param('ss', $hash, $expires);
     $stmt->execute();
     $stmt->close();
-    return $token;
+    return ['token' => $token, 'expiresAt' => $expires, 'days' => $days];
 }
 
 function finance_authenticate($conn) {
@@ -413,7 +421,8 @@ function finance_month_short_label($ym) {
 }
 
 /**
- * Spending-only SQL fragment (ignore / income / moved excluded).
+ * Spending totals = costs only (report_group = spending).
+ * Income, investments (moved), and ignore never roll into spendingTotal / monthly charts.
  */
 function finance_spending_join_sql() {
     return "FROM finance_transactions t

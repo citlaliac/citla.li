@@ -13,6 +13,8 @@ import {
 } from './financeDemoData';
 
 const TOKEN_KEY = 'finance_auth_token';
+/** How long “keep me signed in” lasts on the server (days). */
+export const FINANCE_REMEMBER_DAYS = 30;
 const DEMO_TOKEN = 'demo-local-preview';
 
 export const isFinanceDemo = process.env.REACT_APP_FINANCE_DEMO === 'true';
@@ -27,20 +29,35 @@ function demoDelay(data, ms = 180) {
   });
 }
 
+/** Prefer durable localStorage; fall back to tab sessionStorage. */
 export function getFinanceToken() {
   try {
-    return localStorage.getItem(TOKEN_KEY);
+    return localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY);
   } catch {
     return null;
   }
 }
 
-export function setFinanceToken(token) {
+/**
+ * Persist session token. remember=true → localStorage (survives browser restart);
+ * remember=false → sessionStorage (cleared when the tab/window closes).
+ */
+export function setFinanceToken(token, { remember = true } = {}) {
   try {
-    if (token) localStorage.setItem(TOKEN_KEY, token);
-    else localStorage.removeItem(TOKEN_KEY);
+    if (!token) {
+      localStorage.removeItem(TOKEN_KEY);
+      sessionStorage.removeItem(TOKEN_KEY);
+      return;
+    }
+    if (remember) {
+      localStorage.setItem(TOKEN_KEY, token);
+      sessionStorage.removeItem(TOKEN_KEY);
+    } else {
+      sessionStorage.setItem(TOKEN_KEY, token);
+      localStorage.removeItem(TOKEN_KEY);
+    }
   } catch {
-    /* ignore */
+    /* ignore quota / private mode */
   }
 }
 
@@ -70,17 +87,27 @@ async function financeRequest(url, options = {}) {
   return data;
 }
 
-export function financeLogin(password) {
+/**
+ * @param {string} password
+ * @param {{ rememberMe?: boolean, rememberDays?: number }} [opts]
+ */
+export function financeLogin(password, opts = {}) {
+  const rememberMe = opts.rememberMe !== false;
+  const rememberDays = opts.rememberDays ?? (rememberMe ? FINANCE_REMEMBER_DAYS : 1);
   if (isFinanceDemo) {
     if (!password) return Promise.reject(new Error('Password is required'));
-    return demoDelay({ success: true, token: DEMO_TOKEN }).then((data) => {
-      setFinanceToken(DEMO_TOKEN);
+    return demoDelay({
+      success: true,
+      token: DEMO_TOKEN,
+      days: rememberDays,
+    }).then((data) => {
+      setFinanceToken(DEMO_TOKEN, { remember: rememberMe });
       return data;
     });
   }
   return financeRequest(financeApiUrl('auth', { action: 'login' }), {
     method: 'POST',
-    body: JSON.stringify({ password }),
+    body: JSON.stringify({ password, rememberMe, rememberDays }),
   });
 }
 
@@ -270,9 +297,17 @@ export function financeFetchReport(rangeOrMonth) {
     for (const row of spending) {
       row.pct = spendingTotal > 0 ? Math.round((1000 * row.total) / spendingTotal) / 10 : 0;
     }
+
+    /** Demo spend rule: only report_group === spending (not income / investments / ignore). */
+    const isSpendTxn = (txn) => {
+      const cat = DEMO_CATEGORIES.find((c) => c.id === txn.categoryId);
+      return cat && !cat.excludeFromReports && cat.reportGroup === 'spending';
+    };
+
+    // Store chips only count spend (same as production report).
     const vendorMap = new Map();
     for (const txn of demoCategorized) {
-      if (!inWindow(txn.date) || !txn.vendorTag) continue;
+      if (!inWindow(txn.date) || !txn.vendorTag || !isSpendTxn(txn)) continue;
       const tag = DEMO_VENDOR_TAGS.find((t) => t.slug === txn.vendorTag);
       const prev = vendorMap.get(txn.vendorTag) || {
         slug: txn.vendorTag,
@@ -285,11 +320,6 @@ export function financeFetchReport(rangeOrMonth) {
       vendorMap.set(txn.vendorTag, prev);
     }
     const vendors = [...vendorMap.values()].sort((a, b) => b.total - a.total);
-
-    const isSpendTxn = (txn) => {
-      const cat = DEMO_CATEGORIES.find((c) => c.id === txn.categoryId);
-      return cat && !cat.excludeFromReports && cat.reportGroup === 'spending';
-    };
 
     const buildMonthly = (start, end) => {
       const keys = monthKeysBetween(start, end);

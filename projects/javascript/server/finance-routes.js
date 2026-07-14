@@ -121,15 +121,22 @@ async function ensureFinanceTables(connection) {
   tablesReady = true;
 }
 
-async function issueSessionToken(connection) {
+/**
+ * Issue a finance session. remember-me defaults to 30 days; short session = 1 day.
+ * @returns {{ token: string, expiresAt: Date, days: number }}
+ */
+async function issueSessionToken(connection, days = 30) {
+  let sessionDays = Number(days);
+  if (!Number.isFinite(sessionDays) || sessionDays < 1) sessionDays = 1;
+  if (sessionDays > 90) sessionDays = 90;
   const token = crypto.randomBytes(32).toString('hex');
   const tokenHash = hashToken(token);
-  const expires = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000);
+  const expires = new Date(Date.now() + sessionDays * 24 * 60 * 60 * 1000);
   await connection.execute(
     'INSERT INTO finance_sessions (token_hash, expires_at) VALUES (?, ?)',
     [tokenHash, expires]
   );
-  return token;
+  return { token, expiresAt: expires, days: sessionDays };
 }
 
 async function authenticateFinance(connection, req) {
@@ -252,6 +259,7 @@ function monthShortLabel(ym) {
   return d.toLocaleString('en-US', { month: 'short' });
 }
 
+/** Costs only — income, investments (moved), and ignore are excluded from spend metrics. */
 const SPENDING_JOIN = `
   FROM finance_transactions t
   JOIN finance_categories c ON c.id = t.category_id
@@ -447,8 +455,19 @@ function registerFinanceRoutes(app, getConnection) {
       if (!password) return jsonError(res, 'Password is required');
       const ok = await verifyAdminPassword(password);
       if (!ok) return jsonError(res, 'Invalid password', 401);
-      const token = await issueSessionToken(req.financeDb);
-      jsonOk(res, { token });
+      // rememberMe → 30 days; otherwise 1-day server session.
+      const rememberMe = Boolean(req.body?.rememberMe);
+      const requestedDays = req.body?.rememberDays != null
+        ? Number(req.body.rememberDays)
+        : rememberMe
+          ? 30
+          : 1;
+      const session = await issueSessionToken(req.financeDb, requestedDays);
+      jsonOk(res, {
+        token: session.token,
+        expiresAt: session.expiresAt,
+        days: session.days,
+      });
     } catch (err) {
       jsonError(res, err.message || 'Login failed', 500);
     }
@@ -684,10 +703,12 @@ function registerFinanceRoutes(app, getConnection) {
           ignoredRows.push(entry);
           ignored += entry.total;
         } else if (row.report_group === 'moved') {
+          // Investments — not counted as spend.
           moved.push(entry);
         } else if (row.report_group === 'income') {
           income.push(entry);
         } else {
+          // Actual costs (groceries, rent, etc.).
           spending.push(entry);
         }
       }
@@ -697,13 +718,13 @@ function registerFinanceRoutes(app, getConnection) {
         row.pct = spendingTotal > 0 ? Math.round((1000 * row.total) / spendingTotal) / 10 : 0;
       }
 
+      // Vendor totals use spending categories only (not income / investments).
       const [vendorRows] = await req.financeDb.execute(
-        `SELECT vendor_tag AS slug, SUM(amount) AS total, COUNT(*) AS txn_count
-         FROM finance_transactions
-         WHERE category_id IS NOT NULL
-           AND vendor_tag IS NOT NULL AND vendor_tag <> ''
-           AND txn_date >= ? AND txn_date <= ?
-         GROUP BY vendor_tag
+        `SELECT t.vendor_tag AS slug, SUM(t.amount) AS total, COUNT(*) AS txn_count
+         ${SPENDING_JOIN}
+           AND t.vendor_tag IS NOT NULL AND t.vendor_tag <> ''
+           AND t.txn_date >= ? AND t.txn_date <= ?
+         GROUP BY t.vendor_tag
          ORDER BY total DESC`,
         [window.start, window.end]
       );

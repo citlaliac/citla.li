@@ -407,6 +407,9 @@ function FinanceReportPage() {
           <p className="finance-report-total">
             Spending total: <strong>{formatMoney(report.spendingTotal)}</strong>
           </p>
+          <p className="finance-muted finance-report-ignored-note">
+            Costs only · income and investments stay out of this total
+          </p>
           {report.avgMonthlySpend != null && (
             <p className="finance-report-avg">
               Avg / month: <strong>{formatMoney(report.avgMonthlySpend)}</strong>
@@ -492,7 +495,10 @@ function FinanceReportPage() {
 
           {report.moved?.length > 0 && (
             <section className="finance-report-section">
-              <h3 className="finance-report-subtitle">Moved money</h3>
+              <h3 className="finance-report-subtitle">Investments</h3>
+              <p className="finance-muted finance-report-ignored-note">
+                Not counted in spending
+              </p>
               {renderRows(report.moved, { onOpen: openCategory })}
             </section>
           )}
@@ -500,6 +506,9 @@ function FinanceReportPage() {
           {report.income?.length > 0 && (
             <section className="finance-report-section">
               <h3 className="finance-report-subtitle">Income</h3>
+              <p className="finance-muted finance-report-ignored-note">
+                Not counted in spending
+              </p>
               {renderRows(report.income, { onOpen: openCategory })}
             </section>
           )}

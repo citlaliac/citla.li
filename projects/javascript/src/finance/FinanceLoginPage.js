@@ -1,9 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { financeLogin, isFinanceDemo, setFinanceToken } from './financeApi';
+import {
+  FINANCE_REMEMBER_DAYS,
+  financeLogin,
+  isFinanceDemo,
+  setFinanceToken,
+} from './financeApi';
 
 function FinanceLoginPage() {
   const [password, setPassword] = useState('');
+  // Checked by default: stay signed in for FINANCE_REMEMBER_DAYS on this browser.
+  const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const navigate = useNavigate();
@@ -13,8 +20,12 @@ function FinanceLoginPage() {
     setBusy(true);
     setError('');
     try {
-      const { token } = await financeLogin(password);
-      setFinanceToken(token);
+      const { token } = await financeLogin(password, {
+        rememberMe,
+        rememberDays: rememberMe ? FINANCE_REMEMBER_DAYS : 1,
+      });
+      // Demo login already stored the token; live API still needs client persist.
+      if (token) setFinanceToken(token, { remember: rememberMe });
       navigate('/finance/inbox', { replace: true });
     } catch (err) {
       setError(err.message || 'Login failed');
@@ -42,6 +53,20 @@ function FinanceLoginPage() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
+        <label className="finance-remember" htmlFor="finance-remember">
+          <input
+            id="finance-remember"
+            type="checkbox"
+            checked={rememberMe}
+            onChange={(e) => setRememberMe(e.target.checked)}
+          />
+          <span>Keep me signed in for {FINANCE_REMEMBER_DAYS} days</span>
+        </label>
+        {!rememberMe && (
+          <p className="finance-muted finance-remember-hint">
+            Session ends when you close this tab
+          </p>
+        )}
         {error && <p className="finance-error">{error}</p>}
         <button className="finance-btn finance-btn--primary" type="submit" disabled={busy}>
           {busy ? 'Signing in…' : 'Sign in'}
