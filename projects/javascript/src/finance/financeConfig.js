@@ -40,6 +40,78 @@ export function currentMonthKey() {
   return `${d.getFullYear()}-${m}`;
 }
 
+/** Report timeframe presets shown in the UI. */
+export const REPORT_RANGE_OPTIONS = [
+  { id: 'month', label: 'Month' },
+  { id: 'last6', label: 'Last 6 months' },
+  { id: 'last12', label: 'Last 12 months' },
+  { id: 'ytd', label: 'Year to date' },
+];
+
+function toIsoDate(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+/**
+ * Resolve a report window for API calls and local filtering.
+ * @returns {{ range: string, month: string|null, start: string, end: string, label: string }}
+ */
+export function resolveReportWindow(rangeId, monthKey = currentMonthKey()) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const end = toIsoDate(today);
+  const range = rangeId || 'month';
+
+  if (range === 'last6') {
+    const start = new Date(today);
+    start.setMonth(start.getMonth() - 6);
+    return {
+      range,
+      month: null,
+      start: toIsoDate(start),
+      end,
+      label: 'Last 6 months',
+    };
+  }
+  if (range === 'last12') {
+    const start = new Date(today);
+    start.setMonth(start.getMonth() - 12);
+    return {
+      range,
+      month: null,
+      start: toIsoDate(start),
+      end,
+      label: 'Last 12 months',
+    };
+  }
+  if (range === 'ytd') {
+    const start = new Date(today.getFullYear(), 0, 1);
+    return {
+      range,
+      month: null,
+      start: toIsoDate(start),
+      end,
+      label: 'Year to date',
+    };
+  }
+
+  // Single calendar month (default).
+  const month = monthKey || currentMonthKey();
+  const [y, m] = month.split('-').map(Number);
+  const startDate = new Date(y, m - 1, 1);
+  const endDate = new Date(y, m, 0);
+  return {
+    range: 'month',
+    month,
+    start: toIsoDate(startDate),
+    end: toIsoDate(endDate),
+    label: month,
+  };
+}
+
 export function formatMoney(amount) {
   const n = Number(amount) || 0;
   return new Intl.NumberFormat('en-US', {

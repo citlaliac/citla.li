@@ -1,5 +1,9 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { currentMonthKey, formatMoney } from './financeConfig';
+import {
+  currentMonthKey,
+  formatMoney,
+  REPORT_RANGE_OPTIONS,
+} from './financeConfig';
 import {
   financeCategorizeTransaction,
   financeFetchCategories,
@@ -9,10 +13,11 @@ import {
 } from './financeApi';
 
 /**
- * Monthly report with category/vendor drill-down and recategorize.
- * Views: overview → filtered transactions → edit one charge.
+ * Spending report with timeframe presets (month / last 6 / last 12 / YTD),
+ * category/vendor drill-down, and recategorize.
  */
 function FinanceReportPage() {
+  const [range, setRange] = useState('month');
   const [month, setMonth] = useState(currentMonthKey());
   const [report, setReport] = useState(null);
   const [categories, setCategories] = useState([]);
@@ -29,12 +34,19 @@ function FinanceReportPage() {
   const [pendingVendorTag, setPendingVendorTag] = useState(null);
   const [busyId, setBusyId] = useState(null);
 
+  // Shared filters for report + drill-down fetches.
+  const windowFilters = useCallback(() => {
+    const filters = { range };
+    if (range === 'month') filters.month = month;
+    return filters;
+  }, [range, month]);
+
   const loadReport = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
       const [reportData, catData] = await Promise.all([
-        financeFetchReport(month),
+        financeFetchReport(windowFilters()),
         financeFetchCategories(),
       ]);
       setReport(reportData);
@@ -45,19 +57,20 @@ function FinanceReportPage() {
     } finally {
       setLoading(false);
     }
-  }, [month]);
+  }, [windowFilters]);
 
   useEffect(() => {
     loadReport();
   }, [loadReport]);
 
+  // Reset drill-down when the selected timeframe changes.
   useEffect(() => {
     setSelectedFilter(null);
     setSelectedTxn(null);
     setListTxns([]);
     setExpanded(false);
     setPendingVendorTag(null);
-  }, [month]);
+  }, [range, month]);
 
   const openCategory = async (row) => {
     setSelectedFilter({ kind: 'category', categoryId: row.categoryId, label: row.label });
@@ -67,7 +80,10 @@ function FinanceReportPage() {
     setTxnsLoading(true);
     setError('');
     try {
-      const data = await financeFetchTransactions({ month, categoryId: row.categoryId });
+      const data = await financeFetchTransactions({
+        ...windowFilters(),
+        categoryId: row.categoryId,
+      });
       setListTxns(data.transactions || []);
     } catch (err) {
       setError(err.message || 'Could not load transactions');
@@ -85,7 +101,10 @@ function FinanceReportPage() {
     setTxnsLoading(true);
     setError('');
     try {
-      const data = await financeFetchTransactions({ month, vendorTag: row.slug });
+      const data = await financeFetchTransactions({
+        ...windowFilters(),
+        vendorTag: row.slug,
+      });
       setListTxns(data.transactions || []);
     } catch (err) {
       setError(err.message || 'Could not load transactions');
@@ -180,14 +199,44 @@ function FinanceReportPage() {
     }
   };
 
+  const windowLabel = report?.label || (range === 'month' ? month : 'this period');
+
   const pinned = categories.filter((c) => c.isPinned);
   const rest = categories.filter((c) => !c.isPinned);
   const pendingVendorLabel =
     vendorTags.find((t) => t.slug === pendingVendorTag)?.label || pendingVendorTag;
 
+  // Range chips + optional month picker (shown on overview and list views).
+  const renderRangeControls = () => (
+    <div className="finance-range-controls">
+      <div className="finance-range-chips" role="group" aria-label="Report timeframe">
+        {REPORT_RANGE_OPTIONS.map((opt) => (
+          <button
+            key={opt.id}
+            type="button"
+            className={`finance-range-chip${range === opt.id ? ' is-active' : ''}`}
+            aria-pressed={range === opt.id}
+            onClick={() => setRange(opt.id)}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+      {range === 'month' && (
+        <input
+          className="finance-month-input"
+          type="month"
+          value={month}
+          onChange={(e) => setMonth(e.target.value)}
+          aria-label="Report month"
+        />
+      )}
+    </div>
+  );
+
   const renderRows = (rows, { onOpen, keyField = 'categoryId' } = {}) => {
     if (!rows || rows.length === 0) {
-      return <p className="finance-muted">None this month.</p>;
+      return <p className="finance-muted">None in this period.</p>;
     }
     const localMax = rows.reduce((m, r) => Math.max(m, r.total), 0) || 1;
     return (
@@ -330,24 +379,18 @@ function FinanceReportPage() {
   if (selectedFilter) {
     return (
       <div className="finance-report">
-        <header className="finance-report-head">
+        <header className="finance-report-head finance-report-head--stack">
           <button type="button" className="finance-back-btn" onClick={backToOverview}>
             ← Report
           </button>
-          <input
-            className="finance-month-input"
-            type="month"
-            value={month}
-            onChange={(e) => setMonth(e.target.value)}
-            aria-label="Report month"
-          />
+          {renderRangeControls()}
         </header>
         <h2 className="finance-section-title">{selectedFilter.label}</h2>
         <p className="finance-muted">Tap a charge to recategorize it.</p>
         {error && <p className="finance-error">{error}</p>}
         {txnsLoading && <p className="finance-muted">Loading…</p>}
         {!txnsLoading && listTxns.length === 0 && (
-          <p className="finance-muted">No charges here for {month}.</p>
+          <p className="finance-muted">No charges here for {windowLabel}.</p>
         )}
         {!txnsLoading && listTxns.length > 0 && (
           <ul className="finance-report-list">
@@ -383,14 +426,9 @@ function FinanceReportPage() {
 
   return (
     <div className="finance-report">
-      <header className="finance-report-head">
-        <h2 className="finance-section-title">Monthly report</h2>
-        <input
-          className="finance-month-input"
-          type="month"
-          value={month}
-          onChange={(e) => setMonth(e.target.value)}
-        />
+      <header className="finance-report-head finance-report-head--stack">
+        <h2 className="finance-section-title">Report</h2>
+        {renderRangeControls()}
       </header>
 
       {loading && <p className="finance-muted">Loading…</p>}
@@ -398,6 +436,7 @@ function FinanceReportPage() {
 
       {report && !loading && (
         <>
+          <p className="finance-report-window-label">{windowLabel}</p>
           <p className="finance-report-total">
             Spending total: <strong>{formatMoney(report.spendingTotal)}</strong>
           </p>
@@ -405,7 +444,7 @@ function FinanceReportPage() {
           <section className="finance-report-section">
             <h3 className="finance-report-subtitle">By category</h3>
             {report.spending.length === 0 ? (
-              <p className="finance-muted">No categorized spending this month.</p>
+              <p className="finance-muted">No categorized spending in this period.</p>
             ) : (
               renderRows(report.spending, { onOpen: openCategory })
             )}

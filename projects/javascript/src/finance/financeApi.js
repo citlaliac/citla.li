@@ -1,4 +1,4 @@
-import { financeApiUrl } from './financeConfig';
+import { financeApiUrl, resolveReportWindow } from './financeConfig';
 import {
   DEMO_CATEGORIES,
   DEMO_CATEGORIZED,
@@ -130,7 +130,7 @@ export function financeSync() {
 }
 
 /**
- * @param {string|object} statusOrFilters - legacy status string, or { status, month, categoryId }
+ * @param {string|object} statusOrFilters - legacy status string, or { status, range, month, categoryId, vendorTag }
  */
 export function financeFetchTransactions(statusOrFilters = 'uncategorized') {
   const filters =
@@ -138,20 +138,26 @@ export function financeFetchTransactions(statusOrFilters = 'uncategorized') {
       ? { status: statusOrFilters }
       : { status: 'all', ...statusOrFilters };
 
+  const window =
+    filters.range || filters.month
+      ? resolveReportWindow(filters.range || 'month', filters.month)
+      : null;
+  const inWindow = (date) => {
+    if (!window) return true;
+    const d = String(date).slice(0, 10);
+    return d >= window.start && d <= window.end;
+  };
+
   if (isFinanceDemo) {
     let list = [];
     if (filters.status === 'uncategorized') {
       list = [...demoInbox];
     } else if (filters.categoryId != null) {
       list = demoCategorized.filter((t) => t.categoryId === Number(filters.categoryId));
-      if (filters.month) {
-        list = list.filter((t) => String(t.date).startsWith(filters.month));
-      }
+      list = list.filter((t) => inWindow(t.date));
     } else if (filters.vendorTag) {
       list = demoCategorized.filter((t) => t.vendorTag === filters.vendorTag);
-      if (filters.month) {
-        list = list.filter((t) => String(t.date).startsWith(filters.month));
-      }
+      list = list.filter((t) => inWindow(t.date));
     } else if (filters.status === 'categorized') {
       list = [...demoCategorized];
     }
@@ -160,6 +166,7 @@ export function financeFetchTransactions(statusOrFilters = 'uncategorized') {
 
   const query = {};
   if (filters.status && filters.status !== 'all') query.status = filters.status;
+  if (filters.range) query.range = filters.range;
   if (filters.month) query.month = filters.month;
   if (filters.categoryId != null) query.categoryId = String(filters.categoryId);
   if (filters.vendorTag) query.vendorTag = filters.vendorTag;
@@ -207,14 +214,27 @@ export function financeFlipTransactionAmount(id) {
   });
 }
 
-export function financeFetchReport(month) {
+/**
+ * @param {string|{ range?: string, month?: string }} rangeOrMonth - month key or { range, month }
+ */
+export function financeFetchReport(rangeOrMonth) {
+  const opts =
+    typeof rangeOrMonth === 'string'
+      ? { range: 'month', month: rangeOrMonth }
+      : { range: 'month', ...rangeOrMonth };
+  const window = resolveReportWindow(opts.range, opts.month);
+
   if (isFinanceDemo) {
     // Rebuild spending totals from mutable demoCategorized so recategorize updates the report.
+    const inWindow = (date) => {
+      const d = String(date).slice(0, 10);
+      return d >= window.start && d <= window.end;
+    };
     const spendingMap = new Map();
     const movedMap = new Map();
     const incomeMap = new Map();
     for (const txn of demoCategorized) {
-      if (month && !String(txn.date).startsWith(month)) continue;
+      if (!inWindow(txn.date)) continue;
       const cat = DEMO_CATEGORIES.find((c) => c.id === txn.categoryId);
       if (!cat || cat.excludeFromReports) continue;
       const map =
@@ -238,8 +258,7 @@ export function financeFetchReport(month) {
     const income = [...incomeMap.values()].sort((a, b) => b.total - a.total);
     const vendorMap = new Map();
     for (const txn of demoCategorized) {
-      if (month && !String(txn.date).startsWith(month)) continue;
-      if (!txn.vendorTag) continue;
+      if (!inWindow(txn.date) || !txn.vendorTag) continue;
       const tag = DEMO_VENDOR_TAGS.find((t) => t.slug === txn.vendorTag);
       const prev = vendorMap.get(txn.vendorTag) || {
         slug: txn.vendorTag,
@@ -254,7 +273,11 @@ export function financeFetchReport(month) {
     const vendors = [...vendorMap.values()].sort((a, b) => b.total - a.total);
     return demoDelay({
       success: true,
-      month,
+      range: window.range,
+      month: window.month,
+      start: window.start,
+      end: window.end,
+      label: window.label,
       spending,
       moved,
       income,
@@ -264,7 +287,10 @@ export function financeFetchReport(month) {
       ignoredTotal: 0,
     });
   }
-  return financeRequest(financeApiUrl('reports', { query: { month } }));
+
+  const query = { range: window.range };
+  if (window.month) query.month = window.month;
+  return financeRequest(financeApiUrl('reports', { query }));
 }
 
 export function financeExportMonth(month, { download = false } = {}) {

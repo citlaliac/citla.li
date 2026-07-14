@@ -159,6 +159,53 @@ function transactionFromRow(row) {
   };
 }
 
+/** Resolve report / drill-down window: month | last6 | last12 | ytd. */
+function resolveDateWindow(range, month) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const toIso = (d) => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  };
+  const end = toIso(today);
+  const r = String(range || '').trim() || 'month';
+
+  if (r === 'last6') {
+    const start = new Date(today);
+    start.setMonth(start.getMonth() - 6);
+    return { start: toIso(start), end, range: 'last6', month: null, label: 'Last 6 months' };
+  }
+  if (r === 'last12') {
+    const start = new Date(today);
+    start.setMonth(start.getMonth() - 12);
+    return { start: toIso(start), end, range: 'last12', month: null, label: 'Last 12 months' };
+  }
+  if (r === 'ytd') {
+    const start = new Date(today.getFullYear(), 0, 1);
+    return { start: toIso(start), end, range: 'ytd', month: null, label: 'Year to date' };
+  }
+
+  let monthKey = String(month || '').trim();
+  if (!monthKey) {
+    monthKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+  }
+  if (!/^\d{4}-\d{2}$/.test(monthKey)) {
+    throw new Error('month must be YYYY-MM');
+  }
+  const [y, m] = monthKey.split('-').map(Number);
+  const startDate = new Date(y, m - 1, 1);
+  const endDate = new Date(y, m, 0);
+  return {
+    start: toIso(startDate),
+    end: toIso(endDate),
+    range: 'month',
+    month: monthKey,
+    label: monthKey,
+  };
+}
+
 async function upsertPlaidTransaction(connection, plaidItemDbId, txn) {
   const merchant = (txn.merchant_name || txn.name || 'Unknown').slice(0, 255);
   const amount = Number(txn.amount) || 0;
@@ -372,8 +419,9 @@ function registerFinanceRoutes(app, getConnection) {
 
   router.get('/transactions', async (req, res) => {
     try {
-      // Optional filters: status, month (YYYY-MM), categoryId — for report drill-down / recategorize.
+      // Optional filters: status, range/month, categoryId, vendorTag — for report drill-down.
       const status = req.query.status || 'all';
+      const range = String(req.query.range || '').trim();
       const month = String(req.query.month || '').trim();
       const categoryId = parseInt(req.query.categoryId, 10) || 0;
       const vendorTag = String(req.query.vendorTag || '').trim();
@@ -386,12 +434,15 @@ function registerFinanceRoutes(app, getConnection) {
       } else if (status === 'categorized') {
         where.push('t.category_id IS NOT NULL');
       }
-      if (month) {
-        if (!/^\d{4}-\d{2}$/.test(month)) {
-          return jsonError(res, 'month must be YYYY-MM');
+      if (range || month) {
+        let window;
+        try {
+          window = resolveDateWindow(range, month);
+        } catch (err) {
+          return jsonError(res, err.message || 'Invalid date range');
         }
-        where.push("DATE_FORMAT(t.txn_date, '%Y-%m') = ?");
-        params.push(month);
+        where.push('t.txn_date >= ? AND t.txn_date <= ?');
+        params.push(window.start, window.end);
       }
       if (categoryId > 0) {
         where.push('t.category_id = ?');
@@ -404,7 +455,7 @@ function registerFinanceRoutes(app, getConnection) {
       if (where.length > 0) {
         sql += ` WHERE ${where.join(' AND ')}`;
       }
-      sql += ' ORDER BY t.txn_date DESC, t.id DESC LIMIT 500';
+      sql += ' ORDER BY t.txn_date DESC, t.id DESC LIMIT 2000';
       const [rows] = await req.financeDb.execute(sql, params);
       jsonOk(res, { transactions: rows.map(transactionFromRow) });
     } catch (err) {
@@ -478,9 +529,13 @@ function registerFinanceRoutes(app, getConnection) {
 
   router.get('/reports', async (req, res) => {
     try {
+      const range = String(req.query.range || '').trim();
       const month = String(req.query.month || '').trim();
-      if (!/^\d{4}-\d{2}$/.test(month)) {
-        return jsonError(res, 'month must be YYYY-MM');
+      let window;
+      try {
+        window = resolveDateWindow(range, month);
+      } catch (err) {
+        return jsonError(res, err.message || 'Invalid date range');
       }
       const [rows] = await req.financeDb.execute(
         `SELECT c.id, c.label, c.slug, c.report_group, c.exclude_from_reports,
@@ -488,10 +543,10 @@ function registerFinanceRoutes(app, getConnection) {
          FROM finance_transactions t
          JOIN finance_categories c ON c.id = t.category_id
          WHERE t.category_id IS NOT NULL
-           AND DATE_FORMAT(t.txn_date, '%Y-%m') = ?
+           AND t.txn_date >= ? AND t.txn_date <= ?
          GROUP BY c.id, c.label, c.slug, c.report_group, c.exclude_from_reports
          ORDER BY c.report_group ASC, total DESC`,
-        [month]
+        [window.start, window.end]
       );
       const spending = [];
       const moved = [];
@@ -523,10 +578,10 @@ function registerFinanceRoutes(app, getConnection) {
          FROM finance_transactions
          WHERE category_id IS NOT NULL
            AND vendor_tag IS NOT NULL AND vendor_tag <> ''
-           AND DATE_FORMAT(txn_date, '%Y-%m') = ?
+           AND txn_date >= ? AND txn_date <= ?
          GROUP BY vendor_tag
          ORDER BY total DESC`,
-        [month]
+        [window.start, window.end]
       );
       const labelBySlug = Object.fromEntries(FINANCE_VENDOR_TAGS.map((t) => [t.slug, t.label]));
       const vendors = vendorRows.map((row) => ({
@@ -537,7 +592,11 @@ function registerFinanceRoutes(app, getConnection) {
       }));
 
       jsonOk(res, {
-        month,
+        range: window.range,
+        month: window.month,
+        start: window.start,
+        end: window.end,
+        label: window.label,
         spending,
         moved,
         income,

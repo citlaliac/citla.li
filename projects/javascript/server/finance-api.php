@@ -96,8 +96,9 @@ try {
     } elseif ($resource === 'sync' && $method === 'POST') {
         finance_json_ok(finance_sync_all($conn));
     } elseif ($resource === 'transactions' && $method === 'GET') {
-        // Optional filters: status, month (YYYY-MM), categoryId — for report drill-down / recategorize.
+        // Optional filters: status, range/month, categoryId, vendorTag — for report drill-down.
         $status = $_GET['status'] ?? 'all';
+        $range = isset($_GET['range']) ? trim($_GET['range']) : '';
         $month = isset($_GET['month']) ? trim($_GET['month']) : '';
         $categoryId = isset($_GET['categoryId']) ? (int) $_GET['categoryId'] : 0;
         $vendorTag = isset($_GET['vendorTag']) ? trim($_GET['vendorTag']) : '';
@@ -111,13 +112,16 @@ try {
         } elseif ($status === 'categorized') {
             $where[] = 'category_id IS NOT NULL';
         }
-        if ($month !== '') {
-            if (!preg_match('/^\d{4}-\d{2}$/', $month)) {
-                finance_json_error('month must be YYYY-MM');
+        if ($range !== '' || $month !== '') {
+            try {
+                $window = finance_resolve_date_window($range, $month);
+            } catch (Exception $e) {
+                finance_json_error($e->getMessage());
             }
-            $where[] = "DATE_FORMAT(txn_date, '%Y-%m') = ?";
-            $types .= 's';
-            $params[] = $month;
+            $where[] = 'txn_date >= ? AND txn_date <= ?';
+            $types .= 'ss';
+            $params[] = $window['start'];
+            $params[] = $window['end'];
         }
         if ($categoryId > 0) {
             $where[] = 'category_id = ?';
@@ -134,12 +138,11 @@ try {
         if (count($where) > 0) {
             $sql .= ' WHERE ' . implode(' AND ', $where);
         }
-        $sql .= ' ORDER BY txn_date DESC, id DESC LIMIT 500';
+        $sql .= ' ORDER BY txn_date DESC, id DESC LIMIT 2000';
 
         $transactions = [];
         if ($types !== '') {
             $stmt = $conn->prepare($sql);
-            // mysqli bind_param needs references; build args array carefully.
             $bindArgs = [$types];
             foreach ($params as $i => $_) {
                 $bindArgs[] = &$params[$i];
@@ -234,20 +237,26 @@ try {
         $row = $res->fetch_assoc();
         finance_json_ok(['transaction' => finance_transaction_from_row($row)]);
     } elseif ($resource === 'reports' && $method === 'GET') {
+        $range = isset($_GET['range']) ? trim($_GET['range']) : '';
         $month = trim($_GET['month'] ?? '');
-        if (!preg_match('/^\d{4}-\d{2}$/', $month)) {
-            finance_json_error('month must be YYYY-MM');
+        try {
+            $window = finance_resolve_date_window($range, $month);
+        } catch (Exception $e) {
+            finance_json_error($e->getMessage());
         }
+        $start = $window['start'];
+        $end = $window['end'];
         $stmt = $conn->prepare(
             "SELECT c.id, c.label, c.slug, c.report_group, c.exclude_from_reports,
                     SUM(t.amount) AS total, COUNT(*) AS txn_count
              FROM finance_transactions t
              JOIN finance_categories c ON c.id = t.category_id
-             WHERE t.category_id IS NOT NULL AND DATE_FORMAT(t.txn_date, '%Y-%m') = ?
+             WHERE t.category_id IS NOT NULL
+               AND t.txn_date >= ? AND t.txn_date <= ?
              GROUP BY c.id, c.label, c.slug, c.report_group, c.exclude_from_reports
              ORDER BY c.report_group ASC, total DESC"
         );
-        $stmt->bind_param('s', $month);
+        $stmt->bind_param('ss', $start, $end);
         $stmt->execute();
         $res = $stmt->get_result();
         $spending = [];
@@ -283,11 +292,11 @@ try {
              FROM finance_transactions
              WHERE category_id IS NOT NULL
                AND vendor_tag IS NOT NULL AND vendor_tag <> ''
-               AND DATE_FORMAT(txn_date, '%Y-%m') = ?
+               AND txn_date >= ? AND txn_date <= ?
              GROUP BY vendor_tag
              ORDER BY total DESC"
         );
-        $vStmt->bind_param('s', $month);
+        $vStmt->bind_param('ss', $start, $end);
         $vStmt->execute();
         $vRes = $vStmt->get_result();
         $labelBySlug = [];
@@ -306,7 +315,11 @@ try {
         $vStmt->close();
 
         finance_json_ok([
-            'month' => $month,
+            'range' => $window['range'],
+            'month' => $window['month'],
+            'start' => $window['start'],
+            'end' => $window['end'],
+            'label' => $window['label'],
             'spending' => $spending,
             'moved' => $moved,
             'income' => $income,

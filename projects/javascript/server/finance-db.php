@@ -285,6 +285,71 @@ function finance_decrypt_secret($encoded) {
     return $plain;
 }
 
+/**
+ * Resolve report / drill-down date window from query params.
+ * range: month | last6 | last12 | ytd
+ * month: YYYY-MM (required when range is month or omitted with month set)
+ * @return array{start:string,end:string,range:string,month:?string,label:string}
+ */
+function finance_resolve_date_window($range, $month) {
+    $today = new DateTimeImmutable('today');
+    $range = trim((string) $range);
+    $month = trim((string) $month);
+    if ($range === '') {
+        $range = $month !== '' ? 'month' : 'month';
+    }
+
+    if ($range === 'last6') {
+        $start = $today->modify('-6 months');
+        return [
+            'start' => $start->format('Y-m-d'),
+            'end' => $today->format('Y-m-d'),
+            'range' => 'last6',
+            'month' => null,
+            'label' => 'Last 6 months',
+        ];
+    }
+    if ($range === 'last12') {
+        $start = $today->modify('-12 months');
+        return [
+            'start' => $start->format('Y-m-d'),
+            'end' => $today->format('Y-m-d'),
+            'range' => 'last12',
+            'month' => null,
+            'label' => 'Last 12 months',
+        ];
+    }
+    if ($range === 'ytd') {
+        $start = new DateTimeImmutable($today->format('Y') . '-01-01');
+        return [
+            'start' => $start->format('Y-m-d'),
+            'end' => $today->format('Y-m-d'),
+            'range' => 'ytd',
+            'month' => null,
+            'label' => 'Year to date',
+        ];
+    }
+
+    if ($month === '') {
+        $month = $today->format('Y-m');
+    }
+    if (!preg_match('/^\d{4}-\d{2}$/', $month)) {
+        throw new Exception('month must be YYYY-MM');
+    }
+    $start = DateTimeImmutable::createFromFormat('!Y-m-d', $month . '-01');
+    if (!$start) {
+        throw new Exception('Invalid month');
+    }
+    $end = $start->modify('last day of this month');
+    return [
+        'start' => $start->format('Y-m-d'),
+        'end' => $end->format('Y-m-d'),
+        'range' => 'month',
+        'month' => $month,
+        'label' => $month,
+    ];
+}
+
 function finance_plaid_base_url() {
     $env = strtolower(finance_env('PLAID_ENV') ?: 'sandbox');
     if ($env === 'production') {
