@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS finance_sessions (
 CREATE TABLE IF NOT EXISTS finance_categories (
   id INT AUTO_INCREMENT PRIMARY KEY,
   slug VARCHAR(48) NOT NULL,
-  label VARCHAR(64) NOT NULL,
+  label VARCHAR(96) NOT NULL,
   sort_order INT NOT NULL DEFAULT 0,
   is_pinned TINYINT(1) NOT NULL DEFAULT 0,
   exclude_from_reports TINYINT(1) NOT NULL DEFAULT 0,

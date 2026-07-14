@@ -40,35 +40,41 @@ function finance_hash_token($token) {
 }
 
 function finance_categories_seed() {
+    // Keep in sync with server/finance-categories.js (emoji baked into label).
     return [
-        ['groceries', 'Groceries', 1, 1, 0, 'spending'],
-        ['restaurants', 'Restaurants', 2, 1, 0, 'spending'],
-        ['transportation', 'Transportation', 3, 1, 0, 'spending'],
-        ['self-care', 'Self Care', 4, 1, 0, 'spending'],
-        ['home-goods', 'Home Goods', 5, 0, 0, 'spending'],
-        ['oops-splurge', 'Oops / Splurge', 6, 0, 0, 'spending'],
-        ['entertainment', 'Entertainment', 7, 0, 0, 'spending'],
-        ['clothing', 'Clothing', 8, 0, 0, 'spending'],
-        ['utilities', 'Utilities', 9, 0, 0, 'spending'],
-        ['rent', 'Rent', 10, 0, 0, 'spending'],
-        ['healthcare', 'Healthcare', 11, 0, 0, 'spending'],
-        ['travel-vacation', 'Travel / Vacation', 12, 0, 0, 'spending'],
-        ['education-classes', 'Education / Classes', 13, 0, 0, 'spending'],
-        ['work-lunch', 'Work Lunch / Cost', 14, 0, 0, 'spending'],
-        ['savings', 'Savings', 15, 0, 0, 'moved'],
-        ['investments', 'Investments', 16, 0, 0, 'moved'],
-        ['cash', 'Cash', 17, 0, 0, 'spending'],
-        ['gifts-donations', 'Gifts / Donations', 18, 0, 0, 'spending'],
-        ['income', 'Income', 19, 0, 0, 'income'],
-        ['ignore', 'Ignore / Do Not Count', 20, 0, 1, 'ignore'],
+        ['groceries', '🛒 Groceries', 1, 1, 0, 'spending'],
+        ['restaurants', '🍽️ Restaurants', 2, 1, 0, 'spending'],
+        ['travel-vacation', '✈️ Travel / Vacation', 3, 1, 0, 'spending'],
+        ['utilities', '💡 Utilities', 4, 1, 0, 'spending'],
+        ['transportation', '🚗 Transportation', 5, 0, 0, 'spending'],
+        ['self-care', '💆 Self Care', 6, 0, 0, 'spending'],
+        ['oops-splurge', '💅 Oops / Splurge', 7, 0, 0, 'spending'],
+        ['clothing', '👗 Clothing', 8, 0, 0, 'spending'],
+        ['home-goods', '🏠 Home Goods', 9, 0, 0, 'spending'],
+        ['entertainment', '🎬 Entertainment', 10, 0, 0, 'spending'],
+        ['work-lunch', '🍱 Work Lunch / Cost', 11, 0, 0, 'spending'],
+        ['subscriptions', '🔁 Subscriptions', 12, 0, 0, 'spending'],
+        ['healthcare', '🩺 Healthcare', 13, 0, 0, 'spending'],
+        ['education-classes', '📚 Education / Classes', 14, 0, 0, 'spending'],
+        ['business', '💼 Business', 15, 0, 0, 'spending'],
+        ['income', '💵 Income', 16, 0, 0, 'income'],
+        ['rent', '🔑 Rent', 17, 0, 0, 'spending'],
+        ['investments', '📈 Investments', 18, 0, 0, 'moved'],
+        ['gifts-donations', '🎁 Gifts / Donations', 19, 0, 0, 'spending'],
+        ['ignore', '🙈 Ignore / Do Not Count', 20, 0, 1, 'ignore'],
     ];
 }
 
 /** Vendor tags for two-step labeling (Amazon → Home Goods, etc.). */
 function finance_vendor_tags() {
     return [
-        ['amazon', 'Amazon'],
+        ['amazon', '📦 Amazon'],
     ];
+}
+
+/** Retired categories — removed on seed sync when possible. */
+function finance_categories_removed_slugs() {
+    return ['cash', 'savings'];
 }
 
 function finance_ensure_tables($conn) {
@@ -92,6 +98,9 @@ function finance_ensure_tables($conn) {
         report_group VARCHAR(16) NOT NULL DEFAULT \'spending\',
         UNIQUE KEY uk_finance_category_slug (slug)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
+
+    // Allow emoji + longer labels (existing installs may still be VARCHAR(64)).
+    $conn->query('ALTER TABLE finance_categories MODIFY label VARCHAR(96) NOT NULL');
 
     $conn->query('CREATE TABLE IF NOT EXISTS finance_plaid_items (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -161,16 +170,30 @@ function finance_ensure_tables($conn) {
         }
         $stmt->close();
     } else {
-        // Insert any newly added seed categories on existing DBs (UNIQUE slug is safe).
+        // Upsert seed so existing DBs pick up reorders, emojis, and new categories.
         $stmt = $conn->prepare(
-            'INSERT IGNORE INTO finance_categories (slug, label, sort_order, is_pinned, exclude_from_reports, report_group)
-             VALUES (?, ?, ?, ?, ?, ?)'
+            'INSERT INTO finance_categories (slug, label, sort_order, is_pinned, exclude_from_reports, report_group)
+             VALUES (?, ?, ?, ?, ?, ?)
+             ON DUPLICATE KEY UPDATE
+               label = VALUES(label),
+               sort_order = VALUES(sort_order),
+               is_pinned = VALUES(is_pinned),
+               exclude_from_reports = VALUES(exclude_from_reports),
+               report_group = VALUES(report_group)'
         );
         foreach (finance_categories_seed() as $cat) {
             $stmt->bind_param('ssiiis', $cat[0], $cat[1], $cat[2], $cat[3], $cat[4], $cat[5]);
             $stmt->execute();
         }
         $stmt->close();
+    }
+
+    // Drop retired categories (cash/savings) when safe; ON DELETE SET NULL clears any rare links.
+    foreach (finance_categories_removed_slugs() as $slug) {
+        $del = $conn->prepare('DELETE FROM finance_categories WHERE slug = ?');
+        $del->bind_param('s', $slug);
+        $del->execute();
+        $del->close();
     }
 }
 

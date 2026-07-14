@@ -246,6 +246,11 @@
   color: #8a847c;
 }
 
+.finance-report-ignored-note {
+  margin: 0 0 0.75rem;
+  font-size: 0.82rem;
+}
+
 .finance-charge-card {
   padding: 1.35rem 1rem 1.5rem;
   margin-bottom: 1.25rem;
@@ -324,10 +329,6 @@
   gap: 0.55rem;
 }
 
-.finance-category-grid--pinned {
-  margin-bottom: 0.65rem;
-}
-
 .finance-cat-btn {
   min-height: 52px;
   padding: 0.6rem 0.55rem;
@@ -335,59 +336,32 @@
   border-radius: 0.75rem;
   background: #efe9df;
   color: #1a1a1a;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 600;
+  line-height: 1.25;
   cursor: pointer;
-  transition: transform 0.1s ease, background 0.1s ease;
+  transition: transform 0.1s ease, filter 0.1s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .finance-cat-btn:active:not(:disabled) {
   transform: scale(0.97);
 }
 
-.finance-category-grid--pinned .finance-cat-btn:nth-child(1) {
-  background: #d8f0d4;
+.finance-cat-btn:disabled {
+  opacity: 0.55;
+  cursor: wait;
 }
 
-.finance-category-grid--pinned .finance-cat-btn:nth-child(2) {
-  background: #ffe4c7;
-}
-
-.finance-category-grid--pinned .finance-cat-btn:nth-child(3) {
-  background: #d4e8ff;
-}
-
-.finance-category-grid--pinned .finance-cat-btn:nth-child(4) {
-  background: #f5d4e8;
-}
-
-.finance-cat-btn--secondary {
-  background: #fff;
-  border: 1px solid #e8e2d8;
-  font-weight: 500;
-}
-
+/* Accent weight for Oops without overriding the assigned color. */
 .finance-cat-btn--oops {
-  background: #ffd4cc;
   font-weight: 700;
-}
-
-.finance-vendor-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.55rem;
-  margin-bottom: 0.65rem;
-}
-
-.finance-cat-btn--vendor {
-  background: #ffe8a3;
-  border: 1px solid #e6d48a;
-  min-width: 5.5rem;
 }
 
 .finance-cat-btn--vendor.is-active {
   outline: 2px solid #1a1a1a;
-  outline-offset: 1px;
+  outline-offset: 2px;
+  filter: brightness(0.97);
 }
 
 .finance-vendor-banner {
@@ -422,20 +396,6 @@
   color: #5c4b00;
   font-size: 0.75rem;
   font-weight: 700;
-}
-
-.finance-expand-btn {
-  width: 100%;
-  margin: 0.25rem 0 0.85rem;
-  padding: 0.65rem;
-  border: none;
-  background: transparent;
-  color: #6b6560;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 3px;
 }
 
 .finance-queue {

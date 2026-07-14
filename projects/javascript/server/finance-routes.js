@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcryptjs');
 const { google } = require('googleapis');
-const { FINANCE_CATEGORIES, FINANCE_VENDOR_TAGS } = require('./finance-categories');
+const { FINANCE_CATEGORIES, FINANCE_VENDOR_TAGS, FINANCE_CATEGORY_SLUGS_REMOVED } = require('./finance-categories');
 const { encryptSecret, decryptSecret } = require('./finance-crypto');
 const { createLinkToken, exchangePublicToken, syncTransactions } = require('./finance-plaid');
 
@@ -66,6 +66,8 @@ async function ensureFinanceTables(connection) {
       'ALTER TABLE finance_transactions ADD COLUMN vendor_tag VARCHAR(32) NULL AFTER merchant_name'
     );
   }
+  // Widen label for emoji prefixes on existing installs.
+  await connection.query('ALTER TABLE finance_categories MODIFY label VARCHAR(96) NOT NULL');
   await connection.execute(
     `UPDATE finance_transactions t
      JOIN finance_categories c ON c.id = t.category_id
@@ -89,11 +91,17 @@ async function ensureFinanceTables(connection) {
       );
     }
   } else {
-    // Insert any newly added seed categories on existing DBs.
+    // Upsert seed so existing DBs pick up reorders, emojis, and new categories.
     for (const cat of FINANCE_CATEGORIES) {
       await connection.execute(
-        `INSERT IGNORE INTO finance_categories (slug, label, sort_order, is_pinned, exclude_from_reports, report_group)
-         VALUES (?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO finance_categories (slug, label, sort_order, is_pinned, exclude_from_reports, report_group)
+         VALUES (?, ?, ?, ?, ?, ?)
+         ON DUPLICATE KEY UPDATE
+           label = VALUES(label),
+           sort_order = VALUES(sort_order),
+           is_pinned = VALUES(is_pinned),
+           exclude_from_reports = VALUES(exclude_from_reports),
+           report_group = VALUES(report_group)`,
         [
           cat.slug,
           cat.label,
@@ -104,6 +112,11 @@ async function ensureFinanceTables(connection) {
         ]
       );
     }
+  }
+
+  // Drop retired categories (cash/savings); FK sets orphan category_id to NULL.
+  for (const slug of FINANCE_CATEGORY_SLUGS_REMOVED) {
+    await connection.execute('DELETE FROM finance_categories WHERE slug = ?', [slug]);
   }
   tablesReady = true;
 }
@@ -551,6 +564,7 @@ function registerFinanceRoutes(app, getConnection) {
       const spending = [];
       const moved = [];
       const income = [];
+      const ignoredRows = [];
       let ignored = 0;
       for (const row of rows) {
         const entry = {
@@ -560,7 +574,9 @@ function registerFinanceRoutes(app, getConnection) {
           total: Number(row.total),
           txnCount: Number(row.txn_count),
         };
-        if (row.exclude_from_reports) {
+        // Listed for review; not counted in spending totals.
+        if (row.exclude_from_reports || row.report_group === 'ignore') {
+          ignoredRows.push(entry);
           ignored += entry.total;
         } else if (row.report_group === 'moved') {
           moved.push(entry);
@@ -600,6 +616,7 @@ function registerFinanceRoutes(app, getConnection) {
         spending,
         moved,
         income,
+        ignored: ignoredRows,
         vendors,
         spendingTotal,
         incomeTotal,

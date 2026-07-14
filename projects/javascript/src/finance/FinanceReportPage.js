@@ -11,6 +11,7 @@ import {
   financeFetchTransactions,
   financeFlipTransactionAmount,
 } from './financeApi';
+import FinanceCategoryPicker from './FinanceCategoryPicker';
 
 /**
  * Spending report with timeframe presets (month / last 6 / last 12 / YTD),
@@ -30,7 +31,6 @@ function FinanceReportPage() {
   const [listTxns, setListTxns] = useState([]);
   const [txnsLoading, setTxnsLoading] = useState(false);
   const [selectedTxn, setSelectedTxn] = useState(null);
-  const [expanded, setExpanded] = useState(false);
   const [pendingVendorTag, setPendingVendorTag] = useState(null);
   const [busyId, setBusyId] = useState(null);
 
@@ -68,14 +68,12 @@ function FinanceReportPage() {
     setSelectedFilter(null);
     setSelectedTxn(null);
     setListTxns([]);
-    setExpanded(false);
     setPendingVendorTag(null);
   }, [range, month]);
 
   const openCategory = async (row) => {
     setSelectedFilter({ kind: 'category', categoryId: row.categoryId, label: row.label });
     setSelectedTxn(null);
-    setExpanded(false);
     setPendingVendorTag(null);
     setTxnsLoading(true);
     setError('');
@@ -96,7 +94,6 @@ function FinanceReportPage() {
   const openVendor = async (row) => {
     setSelectedFilter({ kind: 'vendor', vendorTag: row.slug, label: row.label });
     setSelectedTxn(null);
-    setExpanded(false);
     setPendingVendorTag(null);
     setTxnsLoading(true);
     setError('');
@@ -118,13 +115,11 @@ function FinanceReportPage() {
     setSelectedFilter(null);
     setSelectedTxn(null);
     setListTxns([]);
-    setExpanded(false);
     setPendingVendorTag(null);
   };
 
   const backToList = () => {
     setSelectedTxn(null);
-    setExpanded(false);
     setPendingVendorTag(null);
   };
 
@@ -156,13 +151,11 @@ function FinanceReportPage() {
         };
         setListTxns((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
         setSelectedTxn(null);
-        setExpanded(false);
         setPendingVendorTag(null);
       } else {
         const next = listTxns.filter((t) => t.id !== selectedTxn.id);
         setListTxns(next);
         setSelectedTxn(null);
-        setExpanded(false);
         setPendingVendorTag(null);
         if (next.length === 0) {
           await loadReport();
@@ -201,8 +194,6 @@ function FinanceReportPage() {
 
   const windowLabel = report?.label || (range === 'month' ? month : 'this period');
 
-  const pinned = categories.filter((c) => c.isPinned);
-  const rest = categories.filter((c) => !c.isPinned);
   const pendingVendorLabel =
     vendorTags.find((t) => t.slug === pendingVendorTag)?.label || pendingVendorTag;
 
@@ -318,60 +309,14 @@ function FinanceReportPage() {
           </div>
         )}
 
-        <div className="finance-category-grid finance-category-grid--pinned">
-          {pinned.map((cat) => (
-            <button
-              key={cat.id}
-              type="button"
-              className="finance-cat-btn"
-              disabled={busyId === selectedTxn.id}
-              onClick={() => pickCategory(cat.id)}
-            >
-              {cat.label}
-            </button>
-          ))}
-        </div>
-
-        {!expanded ? (
-          <button type="button" className="finance-expand-btn" onClick={() => setExpanded(true)}>
-            More categories
-          </button>
-        ) : (
-          <>
-            {vendorTags.length > 0 && (
-              <div className="finance-vendor-row">
-                {vendorTags.map((tag) => (
-                  <button
-                    key={tag.slug}
-                    type="button"
-                    className={`finance-cat-btn finance-cat-btn--vendor${
-                      pendingVendorTag === tag.slug ? ' is-active' : ''
-                    }`}
-                    disabled={busyId === selectedTxn.id}
-                    onClick={() => setPendingVendorTag(tag.slug)}
-                  >
-                    {tag.label}
-                  </button>
-                ))}
-              </div>
-            )}
-            <div className="finance-category-grid">
-              {rest.map((cat) => (
-                <button
-                  key={cat.id}
-                  type="button"
-                  className={`finance-cat-btn finance-cat-btn--secondary${
-                    cat.slug === 'oops-splurge' ? ' finance-cat-btn--oops' : ''
-                  }`}
-                  disabled={busyId === selectedTxn.id}
-                  onClick={() => pickCategory(cat.id)}
-                >
-                  {cat.label}
-                </button>
-              ))}
-            </div>
-          </>
-        )}
+        <FinanceCategoryPicker
+          categories={categories}
+          vendorTags={vendorTags}
+          pendingVendorTag={pendingVendorTag}
+          disabled={busyId === selectedTxn.id}
+          onPickCategory={pickCategory}
+          onPickVendorTag={setPendingVendorTag}
+        />
       </div>
     );
   }
@@ -470,6 +415,23 @@ function FinanceReportPage() {
               {renderRows(report.income, { onOpen: openCategory })}
             </section>
           )}
+
+          {/* Review ignored transfers / payoffs without counting them in spending. */}
+          <section className="finance-report-section">
+            <h3 className="finance-report-subtitle">Ignored</h3>
+            <p className="finance-muted finance-report-ignored-note">
+              Not counted in spending
+              {report.ignoredTotal != null
+                ? ` · ${formatMoney(report.ignoredTotal)} total`
+                : ''}
+              . Tap to verify or recategorize.
+            </p>
+            {!report.ignored?.length ? (
+              <p className="finance-muted">Nothing ignored in this period.</p>
+            ) : (
+              renderRows(report.ignored, { onOpen: openCategory })
+            )}
+          </section>
         </>
       )}
     </div>

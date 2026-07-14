@@ -262,6 +262,7 @@ try {
         $spending = [];
         $moved = [];
         $income = [];
+        $ignoredRows = [];
         $ignored = 0.0;
         while ($row = $res->fetch_assoc()) {
             $entry = [
@@ -271,7 +272,9 @@ try {
                 'total' => (float) $row['total'],
                 'txnCount' => (int) $row['txn_count'],
             ];
-            if ($row['exclude_from_reports']) {
+            if ($row['exclude_from_reports'] || $row['report_group'] === 'ignore') {
+                // Listed for review; not counted in spending totals.
+                $ignoredRows[] = $entry;
                 $ignored += $entry['total'];
             } elseif ($row['report_group'] === 'moved') {
                 $moved[] = $entry;
@@ -323,6 +326,7 @@ try {
             'spending' => $spending,
             'moved' => $moved,
             'income' => $income,
+            'ignored' => $ignoredRows,
             'vendors' => $vendors,
             'spendingTotal' => $spendingTotal,
             'incomeTotal' => $incomeTotal,

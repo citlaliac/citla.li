@@ -233,16 +233,19 @@ export function financeFetchReport(rangeOrMonth) {
     const spendingMap = new Map();
     const movedMap = new Map();
     const incomeMap = new Map();
+    const ignoredMap = new Map();
     for (const txn of demoCategorized) {
       if (!inWindow(txn.date)) continue;
       const cat = DEMO_CATEGORIES.find((c) => c.id === txn.categoryId);
-      if (!cat || cat.excludeFromReports) continue;
+      if (!cat) continue;
       const map =
-        cat.reportGroup === 'moved'
-          ? movedMap
-          : cat.reportGroup === 'income'
-            ? incomeMap
-            : spendingMap;
+        cat.excludeFromReports || cat.reportGroup === 'ignore'
+          ? ignoredMap
+          : cat.reportGroup === 'moved'
+            ? movedMap
+            : cat.reportGroup === 'income'
+              ? incomeMap
+              : spendingMap;
       const prev = map.get(cat.id) || {
         categoryId: cat.id,
         label: cat.label,
@@ -256,6 +259,7 @@ export function financeFetchReport(rangeOrMonth) {
     const spending = [...spendingMap.values()].sort((a, b) => b.total - a.total);
     const moved = [...movedMap.values()].sort((a, b) => b.total - a.total);
     const income = [...incomeMap.values()].sort((a, b) => b.total - a.total);
+    const ignored = [...ignoredMap.values()].sort((a, b) => b.total - a.total);
     const vendorMap = new Map();
     for (const txn of demoCategorized) {
       if (!inWindow(txn.date) || !txn.vendorTag) continue;
@@ -281,10 +285,11 @@ export function financeFetchReport(rangeOrMonth) {
       spending,
       moved,
       income,
+      ignored,
       vendors,
       spendingTotal: spending.reduce((s, r) => s + r.total, 0),
       incomeTotal: income.reduce((s, r) => s + r.total, 0),
-      ignoredTotal: 0,
+      ignoredTotal: ignored.reduce((s, r) => s + r.total, 0),
     });
   }
 

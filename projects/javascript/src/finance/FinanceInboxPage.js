@@ -8,12 +8,12 @@ import {
   financeFlipTransactionAmount,
   financeSync,
 } from './financeApi';
+import FinanceCategoryPicker from './FinanceCategoryPicker';
 
 function FinanceInboxPage() {
   const [transactions, setTransactions] = useState([]);
   const [categories, setCategories] = useState([]);
   const [vendorTags, setVendorTags] = useState([]);
-  const [expanded, setExpanded] = useState(false);
   const [pendingVendorTag, setPendingVendorTag] = useState(null);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
@@ -57,8 +57,6 @@ function FinanceInboxPage() {
     };
   }, [load]);
 
-  const pinned = categories.filter((c) => c.isPinned);
-  const rest = categories.filter((c) => !c.isPinned);
   const activeTxn = transactions.find((t) => t.id === activeId) || transactions[0];
   const pendingVendorLabel =
     vendorTags.find((t) => t.slug === pendingVendorTag)?.label || pendingVendorTag;
@@ -74,7 +72,6 @@ function FinanceInboxPage() {
       const next = transactions.filter((t) => t.id !== activeTxn.id);
       setTransactions(next);
       setActiveId(next[0]?.id ?? null);
-      setExpanded(false);
       setPendingVendorTag(null);
     } catch (err) {
       setError(err.message || 'Could not save category');
@@ -86,7 +83,6 @@ function FinanceInboxPage() {
   // Amazon (and future stores): pick tag first, then a real spend category.
   const startVendorTag = (slug) => {
     setPendingVendorTag(slug);
-    setExpanded(true);
   };
 
   const clearVendorTag = () => setPendingVendorTag(null);
@@ -184,64 +180,14 @@ function FinanceInboxPage() {
             </div>
           )}
 
-          <div className="finance-category-grid finance-category-grid--pinned">
-            {pinned.map((cat) => (
-              <button
-                key={cat.id}
-                type="button"
-                className="finance-cat-btn"
-                disabled={busyId === activeTxn.id}
-                onClick={() => pickCategory(cat.id)}
-              >
-                {cat.label}
-              </button>
-            ))}
-          </div>
-
-          {!expanded ? (
-            <button
-              type="button"
-              className="finance-expand-btn"
-              onClick={() => setExpanded(true)}
-            >
-              More categories
-            </button>
-          ) : (
-            <>
-              {vendorTags.length > 0 && (
-                <div className="finance-vendor-row">
-                  {vendorTags.map((tag) => (
-                    <button
-                      key={tag.slug}
-                      type="button"
-                      className={`finance-cat-btn finance-cat-btn--vendor${
-                        pendingVendorTag === tag.slug ? ' is-active' : ''
-                      }`}
-                      disabled={busyId === activeTxn.id}
-                      onClick={() => startVendorTag(tag.slug)}
-                    >
-                      {tag.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-              <div className="finance-category-grid">
-                {rest.map((cat) => (
-                  <button
-                    key={cat.id}
-                    type="button"
-                    className={`finance-cat-btn finance-cat-btn--secondary${
-                      cat.slug === 'oops-splurge' ? ' finance-cat-btn--oops' : ''
-                    }`}
-                    disabled={busyId === activeTxn.id}
-                    onClick={() => pickCategory(cat.id)}
-                  >
-                    {cat.label}
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
+          <FinanceCategoryPicker
+            categories={categories}
+            vendorTags={vendorTags}
+            pendingVendorTag={pendingVendorTag}
+            disabled={busyId === activeTxn.id}
+            onPickCategory={pickCategory}
+            onPickVendorTag={startVendorTag}
+          />
 
           {transactions.length > 1 && (
             <ul className="finance-queue">
@@ -252,7 +198,6 @@ function FinanceInboxPage() {
                     className={`finance-queue-item${t.id === activeId ? ' is-active' : ''}`}
                     onClick={() => {
                       setActiveId(t.id);
-                      setExpanded(false);
                       setPendingVendorTag(null);
                     }}
                   >
