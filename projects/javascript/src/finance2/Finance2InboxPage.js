@@ -202,12 +202,26 @@ function Finance2InboxPage() {
             </div>
           )}
 
+          {transactions.length > 1 && (
+            <ul className="finance-queue finance2-queue">
+              {transactions.slice(1, 6).map((t) => (
+                <li key={t.id}>
+                  <div className="finance-queue-item finance-queue-item--static">
+                    <span>{t.merchantName}</span>
+                    <span>{formatMoney(t.amount)}</span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {/* Quiet footer control — kept below the wheel + queue. */}
           <button
             type="button"
             className="finance2-all-cats-btn"
             onClick={() => setShowAllCategories((v) => !v)}
           >
-            {showAllCategories ? 'Hide all categories' : 'All categories'}
+            {showAllCategories ? 'Hide categories' : 'All categories'}
           </button>
 
           {showAllCategories && (
@@ -221,19 +235,6 @@ function Finance2InboxPage() {
                 onPickVendorTag={startVendorTag}
               />
             </div>
-          )}
-
-          {transactions.length > 1 && (
-            <ul className="finance-queue finance2-queue">
-              {transactions.slice(1, 6).map((t) => (
-                <li key={t.id}>
-                  <div className="finance-queue-item finance-queue-item--static">
-                    <span>{t.merchantName}</span>
-                    <span>{formatMoney(t.amount)}</span>
-                  </div>
-                </li>
-              ))}
-            </ul>
           )}
         </>
       )}

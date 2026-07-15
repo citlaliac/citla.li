@@ -1,6 +1,5 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { formatMoney } from '../finance/financeConfig';
-import { financeChipStyle } from '../finance/financeCategoryUi';
 
 /** Categories shown on the outer wheel (matches the rough draft layout). */
 export const FINANCE2_WHEEL_SLUGS = [
@@ -26,13 +25,29 @@ const WHEEL_SHORT_LABEL = {
   rent: 'Rent',
 };
 
+/** Soft pastel rainbow — less neon, more Tinder-warm. */
+const WHEEL_RAINBOW = [
+  '#ff8fab', // blush rose
+  '#ffb347', // soft orange
+  '#ffe066', // warm yellow
+  '#8fd9a8', // mint
+  '#7ec8e3', // sky
+  '#a78bfa', // soft violet
+  '#e879f9', // orchid
+  '#fb7185', // coral pink
+];
+
 const VIEW = 320;
 const CX = VIEW / 2;
 const CY = VIEW / 2;
-const OUTER_R = 148;
-const INNER_R = 78;
-/** Drop must land in the colored ring (beyond this radius from center). */
-const DROP_MIN_R = (INNER_R + OUTER_R) / 2 - 8;
+// Thicker ring + smaller hole → more swipe surface toward categories.
+const OUTER_R = 155;
+const INNER_R = 62;
+/** Accept a drop once the charge enters the colored ring. */
+const DROP_MIN_R = INNER_R + 6;
+/** Pointer movement below this (viewBox units) counts as a tap, not a swipe. */
+const TAP_MOVE_MAX = 14;
+const DOUBLE_TAP_MS = 380;
 
 /**
  * Build an SVG donut-slice path from startAngle→endAngle (degrees, 0 = top, clockwise).
@@ -65,7 +80,8 @@ function angleToIndex(dx, dy, count) {
 }
 
 /**
- * Swipe-to-category wheel: drag the charge into a colored ring segment (or tap a wedge).
+ * Swipe-to-category wheel: drag the charge into a rainbow ring segment (or tap a wedge).
+ * Double-tap the amount to flip +/− (single tap does nothing).
  */
 function Finance2SwipeWheel({
   transaction,
@@ -80,6 +96,9 @@ function Finance2SwipeWheel({
   const [drag, setDrag] = useState({ active: false, x: 0, y: 0 });
   const [hoverIndex, setHoverIndex] = useState(-1);
   const pointerIdRef = useRef(null);
+  const dragOriginRef = useRef({ x: 0, y: 0 });
+  const dragMovedRef = useRef(false);
+  const lastTapAtRef = useRef(0);
 
   const wedges = useMemo(() => {
     const bySlug = Object.fromEntries((categories || []).map((c) => [c.slug, c]));
@@ -101,7 +120,7 @@ function Finance2SwipeWheel({
         labelX: CX + labelR * Math.cos(toRad(mid)),
         labelY: CY + labelR * Math.sin(toRad(mid)),
         shortLabel: WHEEL_SHORT_LABEL[slug] || slug,
-        color: financeChipStyle(slug).backgroundColor,
+        color: WHEEL_RAINBOW[i % WHEEL_RAINBOW.length],
       };
     }).filter((w) => w.category);
   }, [categories]);
@@ -126,33 +145,52 @@ function Finance2SwipeWheel({
       }
       const { x, y } = localPoint(clientX, clientY);
       const dist = Math.hypot(x, y);
+      const travel = Math.hypot(x - dragOriginRef.current.x, y - dragOriginRef.current.y);
       const idx = angleToIndex(x, y, wedges.length);
+      const wasTap = !dragMovedRef.current && travel < TAP_MOVE_MAX;
+
       setDrag({ active: false, x: 0, y: 0 });
       setHoverIndex(-1);
+
+      // Double-tap anywhere on the charge (without swiping) flips +/−.
+      if (wasTap) {
+        const now = Date.now();
+        if (now - lastTapAtRef.current <= DOUBLE_TAP_MS) {
+          lastTapAtRef.current = 0;
+          onFlipAmount?.();
+          return;
+        }
+        lastTapAtRef.current = now;
+        return;
+      }
+
       if (dist >= DROP_MIN_R && wedges[idx]?.category) {
         onAssign?.(wedges[idx].category.id);
       }
     },
-    [drag.active, disabled, transaction, localPoint, wedges, onAssign]
+    [drag.active, disabled, transaction, localPoint, wedges, onAssign, onFlipAmount]
   );
 
   const onPointerDown = (e) => {
     if (disabled || !transaction) return;
-    // Don’t start a swipe when tapping the +/- control.
-    if (e.target.closest('.finance2-wheel-flip')) return;
     e.currentTarget.setPointerCapture(e.pointerId);
     pointerIdRef.current = e.pointerId;
+    dragMovedRef.current = false;
     const { x, y } = localPoint(e.clientX, e.clientY);
+    dragOriginRef.current = { x, y };
     setDrag({ active: true, x, y });
-    setHoverIndex(angleToIndex(x, y, wedges.length));
+    setHoverIndex(-1);
   };
 
   const onPointerMove = (e) => {
     if (!drag.active || pointerIdRef.current !== e.pointerId) return;
     const { x, y } = localPoint(e.clientX, e.clientY);
+    const travel = Math.hypot(x - dragOriginRef.current.x, y - dragOriginRef.current.y);
+    if (travel >= TAP_MOVE_MAX) dragMovedRef.current = true;
     setDrag({ active: true, x, y });
     const dist = Math.hypot(x, y);
-    setHoverIndex(dist >= INNER_R * 0.85 ? angleToIndex(x, y, wedges.length) : -1);
+    // Highlight earlier so the hit area feels bigger while dragging.
+    setHoverIndex(dist >= INNER_R * 0.55 ? angleToIndex(x, y, wedges.length) : -1);
   };
 
   const onPointerUp = (e) => {
@@ -163,9 +201,11 @@ function Finance2SwipeWheel({
 
   if (!transaction) return null;
 
+  // Soft Tinder-like tilt while dragging; snaps back with CSS when released.
+  const tilt = drag.active ? drag.x * 0.07 : 0;
   const cardTransform = drag.active
-    ? `translate(${drag.x}px, ${drag.y}px)`
-    : 'translate(0, 0)';
+    ? `translate(${drag.x}px, ${drag.y}px) rotate(${tilt}deg) scale(1.05)`
+    : 'translate(0, 0) rotate(0deg) scale(1)';
 
   return (
     <div className="finance2-wheel-wrap">
@@ -187,45 +227,57 @@ function Finance2SwipeWheel({
           aria-label="Category wheel — swipe charge into a segment"
         >
           <defs>
-            {/* Soft radial wash so segment colors read as one gradient ring. */}
-            <radialGradient id="finance2-wheel-sheen" cx="50%" cy="40%" r="65%">
-              <stop offset="0%" stopColor="#ffffff" stopOpacity="0.35" />
-              <stop offset="55%" stopColor="#ffffff" stopOpacity="0.05" />
-              <stop offset="100%" stopColor="#000000" stopOpacity="0.12" />
+            {/* Soft sheen + circular clip so the ring feels like a single soft puck. */}
+            <radialGradient id="finance2-wheel-sheen" cx="42%" cy="32%" r="70%">
+              <stop offset="0%" stopColor="#ffffff" stopOpacity="0.42" />
+              <stop offset="45%" stopColor="#ffffff" stopOpacity="0.08" />
+              <stop offset="100%" stopColor="#1a1020" stopOpacity="0.1" />
             </radialGradient>
+            <clipPath id="finance2-wheel-clip">
+              <circle cx={CX} cy={CY} r={OUTER_R} />
+            </clipPath>
           </defs>
 
-          {wedges.map((w, i) => (
-            <g key={w.slug}>
-              <path
-                className={`finance2-wheel-wedge${hoverIndex === i ? ' is-hot' : ''}`}
-                d={w.path}
-                fill={w.color}
-                onClick={() => !disabled && onAssign?.(w.category.id)}
-              />
-              <text
-                className="finance2-wheel-label"
-                x={w.labelX}
-                y={w.labelY}
-                textAnchor="middle"
-                dominantBaseline="middle"
-                transform={`rotate(${w.mid}, ${w.labelX}, ${w.labelY})`}
-                pointerEvents="none"
-              >
-                {w.shortLabel}
-              </text>
-            </g>
-          ))}
+          <g clipPath="url(#finance2-wheel-clip)">
+            {wedges.map((w, i) => (
+              <g key={w.slug}>
+                <path
+                  className={`finance2-wheel-wedge${hoverIndex === i ? ' is-hot' : ''}`}
+                  d={w.path}
+                  fill={w.color}
+                  onClick={() => !disabled && onAssign?.(w.category.id)}
+                />
+                <text
+                  className="finance2-wheel-label"
+                  x={w.labelX}
+                  y={w.labelY}
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  transform={`rotate(${w.mid}, ${w.labelX}, ${w.labelY})`}
+                  pointerEvents="none"
+                >
+                  {w.shortLabel}
+                </text>
+              </g>
+            ))}
+            <circle
+              cx={CX}
+              cy={CY}
+              r={OUTER_R}
+              fill="url(#finance2-wheel-sheen)"
+              pointerEvents="none"
+            />
+          </g>
 
+          {/* Soft center well for the swipe card */}
+          <circle cx={CX} cy={CY} r={INNER_R} className="finance2-wheel-hole" />
           <circle
             cx={CX}
             cy={CY}
-            r={OUTER_R}
-            fill="url(#finance2-wheel-sheen)"
-            pointerEvents="none"
+            r={INNER_R - 1}
+            className="finance2-wheel-hole-ring"
+            fill="none"
           />
-          {/* Hollow center for the charge card */}
-          <circle cx={CX} cy={CY} r={INNER_R} className="finance2-wheel-hole" />
         </svg>
 
         <div
@@ -237,20 +289,10 @@ function Finance2SwipeWheel({
           onPointerCancel={onPointerUp}
         >
           <p className="finance2-wheel-merchant">{transaction.merchantName}</p>
-          <button
-            type="button"
-            className="finance2-wheel-flip"
-            onClick={(e) => {
-              e.stopPropagation();
-              onFlipAmount?.();
-            }}
-            disabled={disabled}
-            title="Tap to flip + / −"
-            aria-label="Flip amount sign"
-          >
+          <p className="finance2-wheel-amount" aria-live="polite">
             {formatMoney(transaction.amount)}
-            <span className="finance2-wheel-flip-hint">+/−</span>
-          </button>
+          </p>
+          <p className="finance2-wheel-flip-hint">double-tap +/−</p>
           <p className="finance2-wheel-date">{transaction.date}</p>
         </div>
       </div>
