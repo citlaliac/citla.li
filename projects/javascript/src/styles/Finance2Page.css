@@ -18,12 +18,21 @@
     #faf7f4;
 }
 
+.finance2-page .finance-bottom-nav {
+  /* Stay above the More categories pill if layout still races. */
+  z-index: 30;
+}
+
 /* Use nearly the full viewport — default finance-main is capped at 26rem. */
 .finance2-page .finance-main {
   max-width: min(100vw, 42rem);
   width: 100%;
-  padding: 0.35rem 0.5rem 5.25rem;
+  /* Clear the fixed bottom nav so More categories sits above Inbox / Report / Settings. */
+  padding: 0.35rem 0.5rem calc(5.5rem + env(safe-area-inset-bottom, 0px));
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .finance2-playground-banner {
@@ -101,10 +110,12 @@
 .finance2-inbox {
   display: flex;
   flex-direction: column;
-  /* Fill everything above the bottom nav. */
-  min-height: calc(100dvh - 4.75rem);
-  height: calc(100dvh - 4.75rem);
-  padding-bottom: 0.25rem;
+  /* Fill finance-main only — do not use 100dvh or this paints over the bottom nav. */
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+  max-height: 100%;
+  padding-bottom: 0.35rem;
   box-sizing: border-box;
 }
 
@@ -338,8 +349,9 @@
   justify-content: center;
   gap: 0.1rem;
   width: min(58%, 14rem);
-  /* Gap under the wheel so the dock doesn’t crash into the ring. */
-  margin: 0.85rem auto 0;
+  /* Gap under the wheel; stay clear of the fixed bottom nav. */
+  margin: 0.65rem auto 0.85rem;
+  flex: 0 0 auto;
   min-height: 3.15rem;
   padding: 0.6rem 1rem 0.7rem;
   border: none;
