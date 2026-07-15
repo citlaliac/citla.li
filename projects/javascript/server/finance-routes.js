@@ -712,16 +712,21 @@ function registerFinanceRoutes(app, getConnection) {
         params.push(Number(body.amount));
       }
 
-      if (body.categoryId != null) {
-        const categoryId = parseInt(body.categoryId, 10);
-        if (!categoryId) return jsonError(res, 'Invalid category');
-        const [cats] = await req.financeDb.execute(
-          'SELECT id FROM finance_categories WHERE id = ? LIMIT 1',
-          [categoryId]
-        );
-        if (!cats[0]) return jsonError(res, 'Category not found', 404);
-        sets.push('category_id = ?', 'categorized_at = NOW()');
-        params.push(categoryId);
+      // categoryId: number assigns; null clears (undo / restore to inbox).
+      if (Object.prototype.hasOwnProperty.call(body, 'categoryId')) {
+        if (body.categoryId === null || body.categoryId === '') {
+          sets.push('category_id = NULL', 'categorized_at = NULL');
+        } else {
+          const categoryId = parseInt(body.categoryId, 10);
+          if (!categoryId) return jsonError(res, 'Invalid category');
+          const [cats] = await req.financeDb.execute(
+            'SELECT id FROM finance_categories WHERE id = ? LIMIT 1',
+            [categoryId]
+          );
+          if (!cats[0]) return jsonError(res, 'Category not found', 404);
+          sets.push('category_id = ?', 'categorized_at = NOW()');
+          params.push(categoryId);
+        }
       }
 
       if (Object.prototype.hasOwnProperty.call(body, 'vendorTag')) {

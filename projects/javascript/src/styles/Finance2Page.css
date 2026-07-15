@@ -23,3 +23,240 @@
 .finance2-playground-banner-link:focus-visible {
   color: #fff;
 }
+
+/* —— Swipe wheel inbox —— */
+.finance2-inbox {
+  padding-bottom: 1.25rem;
+}
+
+.finance2-wheel-wrap {
+  position: relative;
+  margin: 0.35rem auto 0.5rem;
+  max-width: 22rem;
+}
+
+.finance2-undo {
+  position: absolute;
+  top: 0;
+  right: 0.15rem;
+  z-index: 3;
+  min-height: 2.25rem;
+  min-width: 3.25rem;
+  padding: 0.35rem 0.65rem;
+  border: none;
+  border-radius: 999px;
+  background: rgba(44, 36, 24, 0.08);
+  color: #2c2418;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.finance2-undo:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.finance2-undo:not(:disabled):active {
+  background: rgba(44, 36, 24, 0.16);
+}
+
+.finance2-wheel-shell {
+  position: relative;
+  width: min(100%, 20.5rem);
+  margin: 0.5rem auto 0;
+  aspect-ratio: 1;
+  touch-action: none;
+  user-select: none;
+}
+
+.finance2-wheel-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  filter: drop-shadow(0 8px 18px rgba(44, 36, 24, 0.12));
+}
+
+.finance2-wheel-wedge {
+  cursor: pointer;
+  stroke: rgba(255, 255, 255, 0.55);
+  stroke-width: 1.25;
+  transition: filter 0.15s ease, opacity 0.15s ease;
+}
+
+.finance2-wheel-wedge.is-hot {
+  filter: brightness(1.08) saturate(1.15);
+  stroke: #fff;
+  stroke-width: 2;
+}
+
+.finance2-wheel-label {
+  fill: #2a241c;
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  opacity: 0.88;
+}
+
+.finance2-wheel-hole {
+  fill: #f7f4ef;
+}
+
+.finance2-wheel-charge {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 42%;
+  aspect-ratio: 1;
+  margin-left: -21%;
+  margin-top: -21%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  padding: 0.55rem 0.45rem;
+  box-sizing: border-box;
+  border-radius: 50%;
+  background: #fff;
+  border: 1.5px dashed rgba(44, 36, 24, 0.35);
+  box-shadow: 0 4px 14px rgba(44, 36, 24, 0.1);
+  cursor: grab;
+  touch-action: none;
+  transition: box-shadow 0.15s ease;
+  z-index: 2;
+}
+
+.finance2-wheel-charge.is-dragging {
+  cursor: grabbing;
+  box-shadow: 0 10px 28px rgba(44, 36, 24, 0.22);
+  border-style: solid;
+  z-index: 4;
+}
+
+.finance2-wheel-merchant {
+  margin: 0;
+  max-width: 100%;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #3a3530;
+  text-align: center;
+  line-height: 1.2;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.finance2-wheel-flip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.05rem;
+  margin: 0.1rem 0 0;
+  padding: 0.15rem 0.35rem;
+  border: none;
+  border-radius: 0.45rem;
+  background: transparent;
+  color: #1a1a1a;
+  font-size: 1.05rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.finance2-wheel-flip:active {
+  background: rgba(44, 36, 24, 0.06);
+}
+
+.finance2-wheel-flip-hint {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #8a847c;
+  letter-spacing: 0.04em;
+}
+
+.finance2-wheel-date {
+  margin: 0;
+  font-size: 0.62rem;
+  color: #8a847c;
+}
+
+.finance2-wheel-hint {
+  margin: 0.55rem 0 0;
+  text-align: center;
+  font-size: 0.78rem;
+  color: #8a847c;
+}
+
+.finance2-all-cats-btn {
+  display: flex;
+  width: 100%;
+  max-width: 20.5rem;
+  margin: 0.85rem auto 0;
+  min-height: 3rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0.7rem 1rem;
+  border: 1px solid rgba(44, 36, 24, 0.14);
+  border-radius: 0.85rem;
+  background: #fff;
+  color: #2c2418;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.finance2-all-cats-btn:active {
+  background: #f3efe8;
+}
+
+.finance2-all-cats-panel {
+  margin-top: 0.65rem;
+  padding-top: 0.25rem;
+  animation: finance2-sheet-in 0.22s ease;
+}
+
+@keyframes finance2-sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.4rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.finance2-queue {
+  margin-top: 1rem;
+}
+
+.finance-queue-item--static {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.55rem 0.15rem;
+  font-size: 0.85rem;
+  color: #6b6560;
+}
+
+@media (max-width: 380px) {
+  .finance2-wheel-label {
+    font-size: 9.5px;
+  }
+
+  .finance2-wheel-merchant {
+    font-size: 0.65rem;
+  }
+
+  .finance2-wheel-flip {
+    font-size: 0.95rem;
+  }
+}

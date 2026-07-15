@@ -191,14 +191,20 @@ try {
         }
 
         if (array_key_exists('categoryId', $body)) {
-            $categoryId = (int) $body['categoryId'];
-            if ($categoryId <= 0) {
-                finance_json_error('Invalid category');
+            // null / empty clears category so undo can restore inbox items.
+            if ($body['categoryId'] === null || $body['categoryId'] === '') {
+                $sets[] = 'category_id = NULL';
+                $sets[] = 'categorized_at = NULL';
+            } else {
+                $categoryId = (int) $body['categoryId'];
+                if ($categoryId <= 0) {
+                    finance_json_error('Invalid category');
+                }
+                $sets[] = 'category_id = ?';
+                $sets[] = 'categorized_at = NOW()';
+                $types .= 'i';
+                $params[] = $categoryId;
             }
-            $sets[] = 'category_id = ?';
-            $sets[] = 'categorized_at = NOW()';
-            $types .= 'i';
-            $params[] = $categoryId;
         }
 
         if (array_key_exists('vendorTag', $body)) {

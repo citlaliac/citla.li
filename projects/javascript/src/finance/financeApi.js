@@ -208,12 +208,16 @@ export function financeFetchTransactions(statusOrFilters = 'uncategorized') {
 
 export function financeCategorizeTransaction(id, categoryId, { vendorTag } = {}) {
   if (isFinanceDemo) {
+    const fromInbox = demoInbox.find((t) => t.id === id);
     demoInbox = demoInbox.filter((t) => t.id !== id);
-    const fromCategorized = demoCategorized.find((t) => t.id === id);
-    if (fromCategorized) {
-      fromCategorized.categoryId = categoryId;
-      if (vendorTag !== undefined) fromCategorized.vendorTag = vendorTag || null;
+    let row = demoCategorized.find((t) => t.id === id);
+    if (!row && fromInbox) {
+      row = { ...fromInbox, categoryId };
+      demoCategorized = [row, ...demoCategorized];
+    } else if (row) {
+      row.categoryId = categoryId;
     }
+    if (row && vendorTag !== undefined) row.vendorTag = vendorTag || null;
     return demoDelay({ success: true, id, categoryId, vendorTag: vendorTag || null });
   }
   const body = { categoryId };
@@ -221,6 +225,25 @@ export function financeCategorizeTransaction(id, categoryId, { vendorTag } = {})
   return financeRequest(financeApiUrl('transactions', { id }), {
     method: 'PATCH',
     body: JSON.stringify(body),
+  });
+}
+
+/** Clear category so a charge returns to the uncategorized inbox (undo). */
+export function financeUncategorizeTransaction(id) {
+  if (isFinanceDemo) {
+    const fromCategorized = demoCategorized.find((t) => t.id === id);
+    if (fromCategorized) {
+      demoCategorized = demoCategorized.filter((t) => t.id !== id);
+      const restored = { ...fromCategorized };
+      delete restored.categoryId;
+      delete restored.vendorTag;
+      demoInbox = [restored, ...demoInbox.filter((t) => t.id !== id)];
+    }
+    return demoDelay({ success: true, id, categoryId: null });
+  }
+  return financeRequest(financeApiUrl('transactions', { id }), {
+    method: 'PATCH',
+    body: JSON.stringify({ categoryId: null }),
   });
 }
 
