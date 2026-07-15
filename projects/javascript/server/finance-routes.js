@@ -594,6 +594,63 @@ function registerFinanceRoutes(app, getConnection) {
     }
   });
 
+  // Create a user-defined category (label required; slug auto from label if omitted).
+  router.post('/categories', async (req, res) => {
+    try {
+      const label = String(req.body?.label || '').trim().slice(0, 96);
+      if (!label) return jsonError(res, 'label is required');
+      let slug = String(req.body?.slug || '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 48);
+      if (!slug) {
+        slug = label
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-+|-+$/g, '')
+          .slice(0, 48) || 'custom';
+      }
+      const reportGroup = ['spending', 'income', 'moved', 'ignore'].includes(req.body?.reportGroup)
+        ? req.body.reportGroup
+        : 'spending';
+      const exclude = reportGroup === 'ignore' ? 1 : 0;
+
+      // Avoid colliding with reserved / existing slugs.
+      let unique = slug;
+      let n = 2;
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const [existing] = await req.financeDb.execute(
+          'SELECT id FROM finance_categories WHERE slug = ? LIMIT 1',
+          [unique]
+        );
+        if (!existing.length) break;
+        unique = `${slug.slice(0, 40)}-${n}`;
+        n += 1;
+        if (n > 50) return jsonError(res, 'Could not allocate a unique slug', 409);
+      }
+
+      const [maxRows] = await req.financeDb.execute(
+        'SELECT COALESCE(MAX(sort_order), 0) AS m FROM finance_categories'
+      );
+      const sortOrder = Number(maxRows[0]?.m || 0) + 1;
+
+      const [result] = await req.financeDb.execute(
+        `INSERT INTO finance_categories (slug, label, sort_order, is_pinned, exclude_from_reports, report_group)
+         VALUES (?, ?, ?, 0, ?, ?)`,
+        [unique, label, sortOrder, exclude, reportGroup]
+      );
+      const [rows] = await req.financeDb.execute(
+        'SELECT * FROM finance_categories WHERE id = ? LIMIT 1',
+        [result.insertId]
+      );
+      jsonOk(res, { category: categoryFromRow(rows[0]) });
+    } catch (err) {
+      jsonError(res, err.message || 'Failed to create category', 500);
+    }
+  });
+
   router.post('/plaid/link-token', async (req, res) => {
     try {
       const data = await createLinkToken({ clientUserId: 'citlali-finance-admin' });

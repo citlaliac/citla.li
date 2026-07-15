@@ -57,6 +57,74 @@ try {
             $vendorTags[] = ['slug' => $tag[0], 'label' => $tag[1]];
         }
         finance_json_ok(['categories' => $categories, 'vendorTags' => $vendorTags]);
+    } elseif ($resource === 'categories' && $method === 'POST') {
+        $body = finance_read_json_body();
+        $label = trim((string) ($body['label'] ?? ''));
+        if ($label === '') {
+            finance_json_error('label is required');
+        }
+        if (strlen($label) > 96) {
+            $label = substr($label, 0, 96);
+        }
+        $slug = strtolower(trim((string) ($body['slug'] ?? '')));
+        $slug = preg_replace('/[^a-z0-9]+/', '-', $slug);
+        $slug = trim($slug, '-');
+        if ($slug === '') {
+            $slug = strtolower(preg_replace('/[^a-z0-9]+/', '-', $label));
+            $slug = trim($slug, '-');
+        }
+        if ($slug === '') {
+            $slug = 'custom';
+        }
+        if (strlen($slug) > 48) {
+            $slug = substr($slug, 0, 48);
+        }
+        $reportGroup = $body['reportGroup'] ?? 'spending';
+        if (!in_array($reportGroup, ['spending', 'income', 'moved', 'ignore'], true)) {
+            $reportGroup = 'spending';
+        }
+        $exclude = $reportGroup === 'ignore' ? 1 : 0;
+
+        $unique = $slug;
+        $n = 2;
+        while ($n <= 50) {
+            $check = $conn->prepare('SELECT id FROM finance_categories WHERE slug = ? LIMIT 1');
+            $check->bind_param('s', $unique);
+            $check->execute();
+            $exists = $check->get_result()->fetch_assoc();
+            $check->close();
+            if (!$exists) {
+                break;
+            }
+            $unique = substr($slug, 0, 40) . '-' . $n;
+            $n++;
+        }
+        if ($n > 50) {
+            finance_json_error('Could not allocate a unique slug', 409);
+        }
+
+        $maxRes = $conn->query('SELECT COALESCE(MAX(sort_order), 0) AS m FROM finance_categories');
+        $maxRow = $maxRes ? $maxRes->fetch_assoc() : ['m' => 0];
+        $sortOrder = ((int) $maxRow['m']) + 1;
+
+        $stmt = $conn->prepare(
+            'INSERT INTO finance_categories (slug, label, sort_order, is_pinned, exclude_from_reports, report_group)
+             VALUES (?, ?, ?, 0, ?, ?)'
+        );
+        $stmt->bind_param('ssiis', $unique, $label, $sortOrder, $exclude, $reportGroup);
+        if (!$stmt->execute()) {
+            $stmt->close();
+            finance_json_error('Failed to create category', 500);
+        }
+        $newId = (int) $stmt->insert_id;
+        $stmt->close();
+
+        $get = $conn->prepare('SELECT * FROM finance_categories WHERE id = ? LIMIT 1');
+        $get->bind_param('i', $newId);
+        $get->execute();
+        $row = $get->get_result()->fetch_assoc();
+        $get->close();
+        finance_json_ok(['category' => finance_category_from_row($row)]);
     } elseif ($resource === 'plaid' && $method === 'POST' && $action === 'link-token') {
         $data = finance_plaid_request('/link/token/create', [
             'user' => ['client_user_id' => 'citlali-finance-admin'],

@@ -31,6 +31,14 @@ export const DEMO_TRANSACTIONS = [
   { id: 103, merchantName: 'Amazon', amount: 32.15, date: '2026-07-04', pending: false },
   { id: 104, merchantName: 'Sweetgreen', amount: 14.75, date: '2026-07-04', pending: false },
   { id: 105, merchantName: 'Target', amount: 61.03, date: '2026-07-03', pending: false },
+  // Extra playground cards for /finance2 swipe practice.
+  { id: 106, merchantName: 'Netflix', amount: 15.99, date: '2026-07-02', pending: false },
+  { id: 107, merchantName: 'ConEd', amount: 92.4, date: '2026-07-01', pending: false },
+  { id: 108, merchantName: 'Landlord', amount: 2100, date: '2026-07-01', pending: false },
+  { id: 109, merchantName: 'Sephora', amount: 48.2, date: '2026-07-06', pending: false },
+  { id: 110, merchantName: 'AMC Theatres', amount: 28.5, date: '2026-07-07', pending: false },
+  { id: 111, merchantName: 'Chipotle', amount: 13.65, date: '2026-07-07', pending: false },
+  { id: 112, merchantName: 'IKEA', amount: 89.0, date: '2026-07-08', pending: false },
 ];
 
 /** Categorized sample rows for report drill-down in demo mode. */

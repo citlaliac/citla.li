@@ -10,7 +10,7 @@ import {
   financeFetchPlaidItems,
 } from '../finance/financeApi';
 
-function FinanceSettingsPage() {
+function Finance2SettingsPage() {
   const navigate = useNavigate();
   const [items, setItems] = useState([]);
   const [linkToken, setLinkToken] = useState(null);
@@ -106,6 +106,20 @@ function FinanceSettingsPage() {
       {error && <p className="finance-error">{error}</p>}
 
       <section className="finance-settings-block">
+        <h3 className="finance-settings-label">Inbox wheel</h3>
+        <p className="finance-muted">
+          Pick which categories sit on the swipe ring, edit the bench, or add your own category.
+        </p>
+        <button
+          type="button"
+          className="finance-btn finance-btn--primary"
+          onClick={() => navigate('/finance2/settings/view')}
+        >
+          View
+        </button>
+      </section>
+
+      <section className="finance-settings-block">
         <h3 className="finance-settings-label">Linked accounts</h3>
         {items.length === 0 ? (
           <p className="finance-muted">No accounts linked yet.</p>
@@ -169,4 +183,4 @@ function FinanceSettingsPage() {
   );
 }
 
-export default FinanceSettingsPage;
+export default Finance2SettingsPage;

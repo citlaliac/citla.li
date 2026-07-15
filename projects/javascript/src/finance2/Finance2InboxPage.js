@@ -1,6 +1,5 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { formatMoney } from '../finance/financeConfig';
 import {
   financeCategorizeTransaction,
   financeFetchCategories,
@@ -11,10 +10,17 @@ import {
 } from '../finance/financeApi';
 import Finance2CategoryPicker from './Finance2CategoryPicker';
 import Finance2SwipeWheel from './Finance2SwipeWheel';
+import { mergeFinanceCategoryLists } from './finance2CustomCategories';
+import {
+  FINANCE2_WHEEL_CHANGED_EVENT,
+  buildWheelCatalog,
+  loadWheelSlugs,
+  partitionWheelCategories,
+} from './finance2WheelPrefs';
 
 /**
  * Finance2 inbox — swipe-wheel categorization playground.
- * Live /finance inbox stays on the grid picker.
+ * Wheel + “More” lists use the same partition helper as Settings → View.
  */
 function Finance2InboxPage() {
   const [transactions, setTransactions] = useState([]);
@@ -26,8 +32,20 @@ function Finance2InboxPage() {
   const [error, setError] = useState('');
   const [busyId, setBusyId] = useState(null);
   const [showAllCategories, setShowAllCategories] = useState(false);
-  // Stack of recently assigned txns for undo (client + server uncategorize).
   const [undoStack, setUndoStack] = useState([]);
+  const [wheelSlugs, setWheelSlugs] = useState(() => loadWheelSlugs());
+
+  // Keep wheel prefs in sync with Settings → View (same tab + remount).
+  useEffect(() => {
+    const syncPrefs = () => setWheelSlugs(loadWheelSlugs());
+    syncPrefs();
+    window.addEventListener('focus', syncPrefs);
+    window.addEventListener(FINANCE2_WHEEL_CHANGED_EVENT, syncPrefs);
+    return () => {
+      window.removeEventListener('focus', syncPrefs);
+      window.removeEventListener(FINANCE2_WHEEL_CHANGED_EVENT, syncPrefs);
+    };
+  }, []);
 
   const load = useCallback(async () => {
     setError('');
@@ -36,9 +54,11 @@ function Finance2InboxPage() {
         financeFetchCategories(),
         financeFetchTransactions('uncategorized'),
       ]);
-      setCategories(catRes.categories || []);
+      // Same merge as Settings → View so catalogues match 1:1.
+      setCategories(mergeFinanceCategoryLists(catRes.categories || []));
       setVendorTags(catRes.vendorTags || []);
       setTransactions(txnRes.transactions || []);
+      setWheelSlugs(loadWheelSlugs());
     } catch (err) {
       setError(err.message || 'Could not load inbox');
     } finally {
@@ -67,6 +87,16 @@ function Finance2InboxPage() {
   const activeTxn = transactions[0];
   const pendingVendorLabel =
     vendorTags.find((t) => t.slug === pendingVendorTag)?.label || pendingVendorTag;
+
+  // Identical split to Settings → View (categories + Amazon / vendors).
+  const { onWheelSlugs, benchCategories, benchVendors } = useMemo(
+    () => partitionWheelCategories(categories, wheelSlugs, vendorTags),
+    [categories, wheelSlugs, vendorTags]
+  );
+  const wheelCatalog = useMemo(
+    () => buildWheelCatalog(categories, vendorTags),
+    [categories, vendorTags]
+  );
 
   const pickCategory = async (categoryId, { vendorTag } = {}) => {
     if (!activeTxn || busyId) return;
@@ -108,6 +138,7 @@ function Finance2InboxPage() {
 
   const startVendorTag = (slug) => {
     setPendingVendorTag(slug);
+    setShowAllCategories(true);
   };
 
   const clearVendorTag = () => setPendingVendorTag(null);
@@ -183,12 +214,18 @@ function Finance2InboxPage() {
         <>
           <Finance2SwipeWheel
             transaction={activeTxn}
-            categories={categories}
+            categories={wheelCatalog}
+            wheelSlugs={onWheelSlugs}
             disabled={busyId === activeTxn.id}
             onAssign={pickCategory}
+            onPickVendor={startVendorTag}
             onFlipAmount={flipAmount}
             onUndo={handleUndo}
+            onOpenAll={(forceOpen) =>
+              setShowAllCategories((v) => (forceOpen === true ? true : !v))
+            }
             canUndo={undoStack.length > 0}
+            allOpen={showAllCategories}
           />
 
           {pendingVendorTag && (
@@ -202,38 +239,42 @@ function Finance2InboxPage() {
             </div>
           )}
 
-          {transactions.length > 1 && (
-            <ul className="finance-queue finance2-queue">
-              {transactions.slice(1, 6).map((t) => (
-                <li key={t.id}>
-                  <div className="finance-queue-item finance-queue-item--static">
-                    <span>{t.merchantName}</span>
-                    <span>{formatMoney(t.amount)}</span>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-
-          {/* Quiet footer control — kept below the wheel + queue. */}
-          <button
-            type="button"
-            className="finance2-all-cats-btn"
-            onClick={() => setShowAllCategories((v) => !v)}
-          >
-            {showAllCategories ? 'Hide categories' : 'All categories'}
-          </button>
-
           {showAllCategories && (
-            <div className="finance2-all-cats-panel">
-              <Finance2CategoryPicker
-                categories={categories}
-                vendorTags={vendorTags}
-                pendingVendorTag={pendingVendorTag}
-                disabled={busyId === activeTxn.id}
-                onPickCategory={pickCategory}
-                onPickVendorTag={startVendorTag}
+            <div className="finance2-all-sheet" role="dialog" aria-label="More categories">
+              <button
+                type="button"
+                className="finance2-all-sheet-backdrop"
+                aria-label="Close categories"
+                onClick={() => setShowAllCategories(false)}
               />
+              <div className="finance2-all-sheet-panel">
+                <div className="finance2-all-sheet-grab" aria-hidden />
+                <header className="finance2-all-sheet-head">
+                  <h3 className="finance2-all-sheet-title">More categories</h3>
+                  <button
+                    type="button"
+                    className="finance2-all-cats-close"
+                    onClick={() => setShowAllCategories(false)}
+                  >
+                    Close
+                  </button>
+                </header>
+                {benchCategories.length === 0 && benchVendors.length === 0 ? (
+                  <p className="finance-muted">
+                    Everything is already on the wheel. Move some off in Settings → View.
+                  </p>
+                ) : (
+                  <Finance2CategoryPicker
+                    categories={benchCategories}
+                    vendorTags={benchVendors}
+                    pendingVendorTag={pendingVendorTag}
+                    disabled={busyId === activeTxn.id}
+                    onPickCategory={pickCategory}
+                    onPickVendorTag={startVendorTag}
+                    layout="bench"
+                  />
+                )}
+              </div>
             </div>
           )}
         </>

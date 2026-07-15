@@ -1,73 +1,77 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { formatMoney } from '../finance/financeConfig';
-
-/** Categories shown on the outer wheel (matches the rough draft layout). */
-export const FINANCE2_WHEEL_SLUGS = [
-  'utilities',
-  'groceries',
-  'entertainment',
-  'subscriptions',
-  'oops-splurge',
-  'restaurants',
-  'home-goods',
-  'rent',
-];
-
-/** Short wedge labels that fit in a segment. */
-const WHEEL_SHORT_LABEL = {
-  utilities: 'Utilities',
-  groceries: 'Grocery',
-  entertainment: 'Entertain.',
-  subscriptions: 'Subs',
-  'oops-splurge': 'Oops',
-  restaurants: 'Restaurants',
-  'home-goods': 'House',
-  rent: 'Rent',
-};
-
-/** Soft pastel rainbow — less neon, more Tinder-warm. */
-const WHEEL_RAINBOW = [
-  '#ff8fab', // blush rose
-  '#ffb347', // soft orange
-  '#ffe066', // warm yellow
-  '#8fd9a8', // mint
-  '#7ec8e3', // sky
-  '#a78bfa', // soft violet
-  '#e879f9', // orchid
-  '#fb7185', // coral pink
-];
+import {
+  FINANCE2_DEFAULT_WHEEL_SLUGS,
+  FINANCE2_WHEEL_RAINBOW,
+  wheelShortLabel,
+} from './finance2WheelPrefs';
 
 const VIEW = 320;
 const CX = VIEW / 2;
 const CY = VIEW / 2;
-// Thicker ring + smaller hole → more swipe surface toward categories.
-const OUTER_R = 155;
-const INNER_R = 62;
+/** Bigger outer ring, smaller hole → slice-forward layout. */
+const OUTER_R = 158;
+const INNER_R = 48;
+/** Round only the outer rim corners — keeps slices full-width. */
+const OUTER_CORNER_R = 18;
+/** Tiny seam so neighboring fills don’t fight (not a “skinny gap”). */
+const SEAM_DEG = 0.35;
 /** Accept a drop once the charge enters the colored ring. */
-const DROP_MIN_R = INNER_R + 6;
-/** Pointer movement below this (viewBox units) counts as a tap, not a swipe. */
+const DROP_MIN_R = INNER_R + 4;
 const TAP_MOVE_MAX = 14;
 const DOUBLE_TAP_MS = 380;
 
+function toRad(deg) {
+  return ((deg - 90) * Math.PI) / 180;
+}
+
+function polar(r, deg) {
+  const a = toRad(deg);
+  return { x: CX + r * Math.cos(a), y: CY + r * Math.sin(a) };
+}
+
 /**
- * Build an SVG donut-slice path from startAngle→endAngle (degrees, 0 = top, clockwise).
+ * Full-width annular sector with soft rounded *outer* corners only.
+ * Spokes stay nearly full so slices don’t look skinny.
  */
-function wedgePath(startDeg, endDeg, innerR, outerR) {
-  const toRad = (d) => ((d - 90) * Math.PI) / 180;
-  const sx = CX + outerR * Math.cos(toRad(startDeg));
-  const sy = CY + outerR * Math.sin(toRad(startDeg));
-  const ex = CX + outerR * Math.cos(toRad(endDeg));
-  const ey = CY + outerR * Math.sin(toRad(endDeg));
-  const ix = CX + innerR * Math.cos(toRad(endDeg));
-  const iy = CY + innerR * Math.sin(toRad(endDeg));
-  const jx = CX + innerR * Math.cos(toRad(startDeg));
-  const jy = CY + innerR * Math.sin(toRad(startDeg));
-  const large = endDeg - startDeg > 180 ? 1 : 0;
+function wedgePathRoundedOuter(startDeg, endDeg, innerR, outerR, cornerR) {
+  const a0 = startDeg + SEAM_DEG;
+  const a1 = endDeg - SEAM_DEG;
+  const span = a1 - a0;
+  const outerInset = (cornerR / outerR) * (180 / Math.PI);
+
+  if (outerInset * 2 >= span * 0.85 || cornerR <= 0) {
+    const s = polar(outerR, a0);
+    const e = polar(outerR, a1);
+    const i = polar(innerR, a1);
+    const j = polar(innerR, a0);
+    const large = span > 180 ? 1 : 0;
+    return [
+      `M ${s.x} ${s.y}`,
+      `A ${outerR} ${outerR} 0 ${large} 1 ${e.x} ${e.y}`,
+      `L ${i.x} ${i.y}`,
+      `A ${innerR} ${innerR} 0 ${large} 0 ${j.x} ${j.y}`,
+      'Z',
+    ].join(' ');
+  }
+
+  const rSpoke = outerR - cornerR;
+  const oStart = polar(outerR, a0 + outerInset);
+  const oEnd = polar(outerR, a1 - outerInset);
+  const spokeStart = polar(rSpoke, a0);
+  const spokeEnd = polar(rSpoke, a1);
+  const iEnd = polar(innerR, a1);
+  const iStart = polar(innerR, a0);
+  const large = a1 - a0 - outerInset * 2 > 180 ? 1 : 0;
+  const largeInner = span > 180 ? 1 : 0;
+
   return [
-    `M ${sx} ${sy}`,
-    `A ${outerR} ${outerR} 0 ${large} 1 ${ex} ${ey}`,
-    `L ${ix} ${iy}`,
-    `A ${innerR} ${innerR} 0 ${large} 0 ${jx} ${jy}`,
+    `M ${spokeStart.x} ${spokeStart.y}`,
+    `A ${cornerR} ${cornerR} 0 0 1 ${oStart.x} ${oStart.y}`,
+    `A ${outerR} ${outerR} 0 ${large} 1 ${oEnd.x} ${oEnd.y}`,
+    `A ${cornerR} ${cornerR} 0 0 1 ${spokeEnd.x} ${spokeEnd.y}`,
+    `L ${iEnd.x} ${iEnd.y}`,
+    `A ${innerR} ${innerR} 0 ${largeInner} 0 ${iStart.x} ${iStart.y}`,
     'Z',
   ].join(' ');
 }
@@ -80,50 +84,59 @@ function angleToIndex(dx, dy, count) {
 }
 
 /**
- * Swipe-to-category wheel: drag the charge into a rainbow ring segment (or tap a wedge).
- * Double-tap the amount to flip +/− (single tap does nothing).
+ * Swipe-to-category wheel: drag into a rainbow segment, or drag down to “All categories”.
+ * Double-tap flips +/−.
  */
 function Finance2SwipeWheel({
   transaction,
   categories,
+  wheelSlugs = FINANCE2_DEFAULT_WHEEL_SLUGS,
   disabled = false,
   onAssign,
+  onPickVendor,
   onFlipAmount,
   onUndo,
+  onOpenAll,
   canUndo = false,
+  allOpen = false,
 }) {
   const shellRef = useRef(null);
+  const allSliceRef = useRef(null);
   const [drag, setDrag] = useState({ active: false, x: 0, y: 0 });
   const [hoverIndex, setHoverIndex] = useState(-1);
+  const [hoverAll, setHoverAll] = useState(false);
   const pointerIdRef = useRef(null);
   const dragOriginRef = useRef({ x: 0, y: 0 });
   const dragMovedRef = useRef(false);
   const lastTapAtRef = useRef(0);
 
   const wedges = useMemo(() => {
+    // Exact same partition as Settings → View (no silent default fallback).
     const bySlug = Object.fromEntries((categories || []).map((c) => [c.slug, c]));
-    const step = 360 / FINANCE2_WHEEL_SLUGS.length;
-    return FINANCE2_WHEEL_SLUGS.map((slug, i) => {
+    const active = (wheelSlugs || []).filter((s) => bySlug[s]);
+    if (active.length === 0) return [];
+    const step = 360 / active.length;
+    return active.map((slug, i) => {
       const cat = bySlug[slug];
       const start = i * step;
       const end = (i + 1) * step;
       const mid = start + step / 2;
-      const labelR = (INNER_R + OUTER_R) / 2;
-      const toRad = (d) => ((d - 90) * Math.PI) / 180;
+      const labelR = INNER_R + (OUTER_R - INNER_R) * 0.58;
+      const labelPos = polar(labelR, mid);
       return {
         slug,
         category: cat,
         start,
         end,
         mid,
-        path: wedgePath(start, end, INNER_R, OUTER_R),
-        labelX: CX + labelR * Math.cos(toRad(mid)),
-        labelY: CY + labelR * Math.sin(toRad(mid)),
-        shortLabel: WHEEL_SHORT_LABEL[slug] || slug,
-        color: WHEEL_RAINBOW[i % WHEEL_RAINBOW.length],
+        path: wedgePathRoundedOuter(start, end, INNER_R, OUTER_R, OUTER_CORNER_R),
+        labelX: labelPos.x,
+        labelY: labelPos.y,
+        shortLabel: wheelShortLabel(slug, cat),
+        color: FINANCE2_WHEEL_RAINBOW[i % FINANCE2_WHEEL_RAINBOW.length],
       };
-    }).filter((w) => w.category);
-  }, [categories]);
+    });
+  }, [categories, wheelSlugs]);
 
   const localPoint = useCallback((clientX, clientY) => {
     const el = shellRef.current;
@@ -136,11 +149,25 @@ function Finance2SwipeWheel({
     };
   }, []);
 
+  const isOverAllSlice = useCallback((clientX, clientY) => {
+    const el = allSliceRef.current;
+    if (!el) return false;
+    const rect = el.getBoundingClientRect();
+    // Generous pad so “slide to the bottom” is easy to hit.
+    return (
+      clientY >= rect.top - 28 &&
+      clientY <= rect.bottom + 12 &&
+      clientX >= rect.left - 16 &&
+      clientX <= rect.right + 16
+    );
+  }, []);
+
   const endDrag = useCallback(
     (clientX, clientY) => {
       if (!drag.active || disabled || !transaction) {
         setDrag({ active: false, x: 0, y: 0 });
         setHoverIndex(-1);
+        setHoverAll(false);
         return;
       }
       const { x, y } = localPoint(clientX, clientY);
@@ -148,11 +175,12 @@ function Finance2SwipeWheel({
       const travel = Math.hypot(x - dragOriginRef.current.x, y - dragOriginRef.current.y);
       const idx = angleToIndex(x, y, wedges.length);
       const wasTap = !dragMovedRef.current && travel < TAP_MOVE_MAX;
+      const openAll = isOverAllSlice(clientX, clientY) || y > OUTER_R * 0.92;
 
       setDrag({ active: false, x: 0, y: 0 });
       setHoverIndex(-1);
+      setHoverAll(false);
 
-      // Double-tap anywhere on the charge (without swiping) flips +/−.
       if (wasTap) {
         const now = Date.now();
         if (now - lastTapAtRef.current <= DOUBLE_TAP_MS) {
@@ -164,11 +192,34 @@ function Finance2SwipeWheel({
         return;
       }
 
+      if (openAll) {
+        // Dragging onto the bottom slice always opens the full picker.
+        onOpenAll?.(true);
+        return;
+      }
+
       if (dist >= DROP_MIN_R && wedges[idx]?.category) {
-        onAssign?.(wedges[idx].category.id);
+        const cat = wedges[idx].category;
+        // Vendor slices (Amazon) need a follow-up spend category.
+        if (cat.isVendor) {
+          onPickVendor?.(cat.slug);
+        } else {
+          onAssign?.(cat.id);
+        }
       }
     },
-    [drag.active, disabled, transaction, localPoint, wedges, onAssign, onFlipAmount]
+    [
+      drag.active,
+      disabled,
+      transaction,
+      localPoint,
+      wedges,
+      onAssign,
+      onPickVendor,
+      onFlipAmount,
+      onOpenAll,
+      isOverAllSlice,
+    ]
   );
 
   const onPointerDown = (e) => {
@@ -180,6 +231,7 @@ function Finance2SwipeWheel({
     dragOriginRef.current = { x, y };
     setDrag({ active: true, x, y });
     setHoverIndex(-1);
+    setHoverAll(false);
   };
 
   const onPointerMove = (e) => {
@@ -188,8 +240,14 @@ function Finance2SwipeWheel({
     const travel = Math.hypot(x - dragOriginRef.current.x, y - dragOriginRef.current.y);
     if (travel >= TAP_MOVE_MAX) dragMovedRef.current = true;
     setDrag({ active: true, x, y });
+
+    const overAll = isOverAllSlice(e.clientX, e.clientY) || y > OUTER_R * 0.85;
+    setHoverAll(overAll);
+    if (overAll) {
+      setHoverIndex(-1);
+      return;
+    }
     const dist = Math.hypot(x, y);
-    // Highlight earlier so the hit area feels bigger while dragging.
     setHoverIndex(dist >= INNER_R * 0.55 ? angleToIndex(x, y, wedges.length) : -1);
   };
 
@@ -201,10 +259,10 @@ function Finance2SwipeWheel({
 
   if (!transaction) return null;
 
-  // Soft Tinder-like tilt while dragging; snaps back with CSS when released.
+  // Shrink slightly when “picked up” (Tinder-style grab feedback).
   const tilt = drag.active ? drag.x * 0.07 : 0;
   const cardTransform = drag.active
-    ? `translate(${drag.x}px, ${drag.y}px) rotate(${tilt}deg) scale(1.05)`
+    ? `translate(${drag.x}px, ${drag.y}px) rotate(${tilt}deg) scale(0.84)`
     : 'translate(0, 0) rotate(0deg) scale(1)';
 
   return (
@@ -227,61 +285,77 @@ function Finance2SwipeWheel({
           aria-label="Category wheel — swipe charge into a segment"
         >
           <defs>
-            {/* Soft sheen + circular clip so the ring feels like a single soft puck. */}
             <radialGradient id="finance2-wheel-sheen" cx="42%" cy="32%" r="70%">
-              <stop offset="0%" stopColor="#ffffff" stopOpacity="0.42" />
-              <stop offset="45%" stopColor="#ffffff" stopOpacity="0.08" />
-              <stop offset="100%" stopColor="#1a1020" stopOpacity="0.1" />
+              <stop offset="0%" stopColor="#ffffff" stopOpacity="0.28" />
+              <stop offset="55%" stopColor="#ffffff" stopOpacity="0.04" />
+              <stop offset="100%" stopColor="#1a1020" stopOpacity="0.06" />
             </radialGradient>
-            <clipPath id="finance2-wheel-clip">
-              <circle cx={CX} cy={CY} r={OUTER_R} />
-            </clipPath>
           </defs>
 
-          <g clipPath="url(#finance2-wheel-clip)">
-            {wedges.map((w, i) => (
-              <g key={w.slug}>
-                <path
-                  className={`finance2-wheel-wedge${hoverIndex === i ? ' is-hot' : ''}`}
-                  d={w.path}
-                  fill={w.color}
-                  onClick={() => !disabled && onAssign?.(w.category.id)}
-                />
-                <text
-                  className="finance2-wheel-label"
-                  x={w.labelX}
-                  y={w.labelY}
-                  textAnchor="middle"
-                  dominantBaseline="middle"
-                  transform={`rotate(${w.mid}, ${w.labelX}, ${w.labelY})`}
-                  pointerEvents="none"
-                >
-                  {w.shortLabel}
-                </text>
-              </g>
-            ))}
-            <circle
-              cx={CX}
-              cy={CY}
-              r={OUTER_R}
-              fill="url(#finance2-wheel-sheen)"
-              pointerEvents="none"
+          {wedges.map((w, i) => (
+            <path
+              key={w.slug}
+              className={`finance2-wheel-wedge${hoverIndex === i ? ' is-hot' : ''}${
+                drag.active && hoverIndex !== i && !hoverAll ? ' is-dim' : ''
+              }`}
+              d={w.path}
+              fill={w.color}
+              onClick={() => {
+                if (disabled) return;
+                if (w.category.isVendor) onPickVendor?.(w.category.slug);
+                else onAssign?.(w.category.id);
+              }}
             />
-          </g>
+          ))}
 
-          {/* Soft center well for the swipe card */}
+          {wedges.map((w) => (
+            <text
+              key={`${w.slug}-label`}
+              className="finance2-wheel-label"
+              x={w.labelX}
+              y={w.labelY}
+              textAnchor="middle"
+              dominantBaseline="middle"
+              pointerEvents="none"
+            >
+              {w.shortLabel}
+            </text>
+          ))}
+
+          {wedges.length === 0 && (
+            <text
+              className="finance2-wheel-empty-label"
+              x={CX}
+              y={CY - INNER_R - 28}
+              textAnchor="middle"
+              dominantBaseline="middle"
+              pointerEvents="none"
+            >
+              Empty — use More
+            </text>
+          )}
+
+          <circle
+            cx={CX}
+            cy={CY}
+            r={OUTER_R}
+            fill="url(#finance2-wheel-sheen)"
+            pointerEvents="none"
+          />
           <circle cx={CX} cy={CY} r={INNER_R} className="finance2-wheel-hole" />
           <circle
             cx={CX}
             cy={CY}
-            r={INNER_R - 1}
+            r={INNER_R - 0.5}
             className="finance2-wheel-hole-ring"
             fill="none"
           />
         </svg>
 
         <div
-          className={`finance2-wheel-charge${drag.active ? ' is-dragging' : ''}`}
+          className={`finance2-wheel-charge${drag.active ? ' is-dragging' : ''}${
+            hoverAll ? ' is-toward-all' : ''
+          }`}
           style={{ transform: cardTransform }}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
@@ -297,7 +371,22 @@ function Finance2SwipeWheel({
         </div>
       </div>
 
-      <p className="finance2-wheel-hint">Swipe into a category · or tap a wedge</p>
+      {/* Bottom “slice” — tap or drag the charge onto it to open all categories. */}
+      <button
+        ref={allSliceRef}
+        type="button"
+        className={`finance2-all-slice${hoverAll || allOpen ? ' is-hot' : ''}`}
+        onClick={() => onOpenAll?.()}
+        disabled={disabled}
+        aria-expanded={allOpen}
+      >
+        <span className="finance2-all-slice-label">
+          {allOpen ? 'Hide categories' : 'More categories'}
+        </span>
+        <span className="finance2-all-slice-hint">slide card down</span>
+      </button>
+
+      <p className="finance2-wheel-hint">Swipe a category · or slide down for more</p>
     </div>
   );
 }

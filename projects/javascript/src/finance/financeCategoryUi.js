@@ -12,8 +12,12 @@ const COLOR_BY_SLUG = {
   ...Object.fromEntries(FINANCE_VENDOR_TAGS.map((t) => [t.slug, t.color])),
 };
 
-/** Inline style for a colored category or vendor button. */
-export function financeChipStyle(slug) {
-  const backgroundColor = COLOR_BY_SLUG[slug] || '#efe9df';
+/**
+ * Inline style for a colored category or vendor button.
+ * Pass the category object when it carries a custom `color` (user-made cats).
+ */
+export function financeChipStyle(slug, category) {
+  const backgroundColor =
+    (category && category.color) || COLOR_BY_SLUG[slug] || '#efe9df';
   return { backgroundColor };
 }

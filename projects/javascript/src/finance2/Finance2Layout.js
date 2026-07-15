@@ -5,6 +5,7 @@ import Finance2LoginPage from './Finance2LoginPage';
 import Finance2InboxPage from './Finance2InboxPage';
 import Finance2ReportPage from './Finance2ReportPage';
 import Finance2SettingsPage from './Finance2SettingsPage';
+import Finance2ViewPage from './Finance2ViewPage';
 import { useSEO } from '../hooks/useSEO';
 // Start from the live finance styles; override / experiment in Finance2Page.css.
 import '../styles/FinancePage.css';
@@ -45,6 +46,7 @@ function Finance2AuthedLayout() {
           <Route path="inbox" element={<Finance2InboxPage />} />
           <Route path="report" element={<Finance2ReportPage />} />
           <Route path="settings" element={<Finance2SettingsPage />} />
+          <Route path="settings/view" element={<Finance2ViewPage />} />
           <Route path="*" element={<Navigate to="inbox" replace />} />
         </Routes>
       </main>

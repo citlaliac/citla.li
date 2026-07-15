@@ -12,6 +12,48 @@ import {
   DEMO_VENDOR_TAGS,
 } from './financeDemoData';
 
+/** Soft pastel for demo-only custom categories (kept in this module to avoid finance→finance2 imports). */
+const DEMO_CUSTOM_PALETTE = [
+  '#f8bbd0',
+  '#ffcc80',
+  '#fff59d',
+  '#c8e6c9',
+  '#80deea',
+  '#90caf9',
+  '#b39ddb',
+  '#ce93d8',
+];
+
+function hydrateDemoCustomsFromStorage() {
+  try {
+    const raw = localStorage.getItem('finance2_custom_categories_v1');
+    if (!raw) return;
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return;
+    for (const meta of parsed) {
+      if (!meta?.slug || demoCategories.some((c) => c.slug === meta.slug)) continue;
+      const id = meta.id != null ? Number(meta.id) : nextDemoCategoryId;
+      if (meta.id == null) nextDemoCategoryId += 1;
+      else if (id >= nextDemoCategoryId) nextDemoCategoryId = id + 1;
+      let hash = 0;
+      for (let i = 0; i < meta.slug.length; i += 1) hash = (hash * 31 + meta.slug.charCodeAt(i)) >>> 0;
+      demoCategories.push({
+        id,
+        slug: meta.slug,
+        label: meta.label || meta.slug,
+        sortOrder: 200,
+        isPinned: false,
+        excludeFromReports: meta.reportGroup === 'ignore',
+        reportGroup: meta.reportGroup || 'spending',
+        color: meta.color || DEMO_CUSTOM_PALETTE[hash % DEMO_CUSTOM_PALETTE.length],
+        isCustom: true,
+      });
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
 const TOKEN_KEY = 'finance_auth_token';
 /** How long “keep me signed in” lasts on the server (days). */
 export const FINANCE_REMEMBER_DAYS = 30;
@@ -22,6 +64,9 @@ export const isFinanceDemo = process.env.REACT_APP_FINANCE_DEMO === 'true';
 let demoInbox = [...DEMO_TRANSACTIONS];
 /** Mutable categorized list for demo report drill-down + recategorize. */
 let demoCategorized = DEMO_CATEGORIZED.map((t) => ({ ...t }));
+/** Mutable category list so demo mode can add custom categories. */
+let demoCategories = DEMO_CATEGORIES.map((c) => ({ ...c }));
+let nextDemoCategoryId = 900;
 
 function demoDelay(data, ms = 180) {
   return new Promise((resolve) => {
@@ -113,13 +158,66 @@ export function financeLogin(password, opts = {}) {
 
 export function financeFetchCategories() {
   if (isFinanceDemo) {
+    hydrateDemoCustomsFromStorage();
     return demoDelay({
       success: true,
-      categories: DEMO_CATEGORIES,
+      categories: demoCategories.map((c) => ({ ...c })),
       vendorTags: DEMO_VENDOR_TAGS,
     });
   }
   return financeRequest(financeApiUrl('categories'));
+}
+
+/**
+ * Create a custom spend category. Demo persists in-memory + caller may mirror to localStorage.
+ * @param {{ label: string, slug?: string, reportGroup?: string, color?: string }} input
+ */
+export function financeCreateCategory(input) {
+  const label = String(input?.label || '').trim().slice(0, 96);
+  if (!label) {
+    return Promise.reject(new Error('Category name is required'));
+  }
+  const reportGroup = ['spending', 'income', 'moved', 'ignore'].includes(input?.reportGroup)
+    ? input.reportGroup
+    : 'spending';
+  const slugRaw = String(input?.slug || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 48);
+  const slug = slugRaw || label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 48) || 'custom';
+  const color = input?.color || undefined;
+
+  if (isFinanceDemo) {
+    let unique = slug;
+    let n = 2;
+    while (demoCategories.some((c) => c.slug === unique)) {
+      unique = `${slug.slice(0, 40)}-${n}`;
+      n += 1;
+      if (n > 50) {
+        return Promise.reject(new Error('That category already exists'));
+      }
+    }
+    const category = {
+      id: nextDemoCategoryId,
+      slug: unique,
+      label,
+      sortOrder: 200 + (nextDemoCategoryId - 900),
+      isPinned: false,
+      excludeFromReports: reportGroup === 'ignore',
+      reportGroup,
+      color,
+      isCustom: true,
+    };
+    nextDemoCategoryId += 1;
+    demoCategories = [...demoCategories, category];
+    return demoDelay({ success: true, category });
+  }
+
+  return financeRequest(financeApiUrl('categories'), {
+    method: 'POST',
+    body: JSON.stringify({ label, slug, reportGroup }),
+  });
 }
 
 export function financeCreateLinkToken() {
@@ -292,7 +390,7 @@ export function financeFetchReport(rangeOrMonth) {
     const ignoredMap = new Map();
     for (const txn of demoCategorized) {
       if (!inWindow(txn.date)) continue;
-      const cat = DEMO_CATEGORIES.find((c) => c.id === txn.categoryId);
+      const cat = demoCategories.find((c) => c.id === txn.categoryId);
       if (!cat) continue;
       const map =
         cat.excludeFromReports || cat.reportGroup === 'ignore'
@@ -339,7 +437,7 @@ export function financeFetchReport(rangeOrMonth) {
 
     /** Demo spend rule: only report_group === spending (not income / investments / ignore). */
     const isSpendTxn = (txn) => {
-      const cat = DEMO_CATEGORIES.find((c) => c.id === txn.categoryId);
+      const cat = demoCategories.find((c) => c.id === txn.categoryId);
       return cat && !cat.excludeFromReports && cat.reportGroup === 'spending';
     };
 
@@ -479,7 +577,7 @@ export function financeFetchReport(rangeOrMonth) {
       for (const txn of demoCategorized) {
         const d = String(txn.date).slice(0, 10);
         if (d < start || d > end || !isSpendTxn(txn)) continue;
-        const cat = DEMO_CATEGORIES.find((c) => c.id === txn.categoryId);
+        const cat = demoCategories.find((c) => c.id === txn.categoryId);
         if (!cat) continue;
         const prev = map.get(cat.id) || {
           categoryId: cat.id,
