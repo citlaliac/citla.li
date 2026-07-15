@@ -1,0 +1,25 @@
+/**
+ * Playground-only styles for /finance2.
+ * Tweak freely — live /finance keeps using FinancePage.css alone.
+ */
+
+.finance2-playground-banner {
+  margin: 0;
+  padding: 0.45rem 0.85rem;
+  background: #2c2418;
+  color: #f7f4ef;
+  font-size: 0.75rem;
+  letter-spacing: 0.01em;
+  text-align: center;
+}
+
+.finance2-playground-banner-link {
+  color: #e8d5b5;
+  text-decoration: underline;
+  text-underline-offset: 0.12em;
+}
+
+.finance2-playground-banner-link:hover,
+.finance2-playground-banner-link:focus-visible {
+  color: #fff;
+}
