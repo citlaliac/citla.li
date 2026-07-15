@@ -114,6 +114,7 @@ function Finance2InboxPage() {
       setShowAllCategories(false);
     } catch (err) {
       setError(err.message || 'Could not save category');
+      throw err;
     } finally {
       setBusyId(null);
     }

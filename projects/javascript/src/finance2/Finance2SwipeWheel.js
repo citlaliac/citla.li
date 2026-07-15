@@ -20,6 +20,15 @@ const SEAM_DEG = 0.35;
 const DROP_MIN_R = INNER_R + 4;
 const TAP_MOVE_MAX = 14;
 const DOUBLE_TAP_MS = 380;
+/** How long the “sucked into slice” animation runs before assigning. */
+const SWALLOW_MS = 220;
+
+/** CSS-pixel target: middle of a wedge ring (where the card gets “eaten”). */
+function wedgeMidCss(midDeg, scale) {
+  const r = ((INNER_R + OUTER_R) * 0.58) * scale;
+  const a = ((midDeg - 90) * Math.PI) / 180;
+  return { x: r * Math.cos(a), y: r * Math.sin(a) };
+}
 
 function toRad(deg) {
   return ((deg - 90) * Math.PI) / 180;
@@ -86,7 +95,7 @@ function angleToIndex(dx, dy, count) {
 
 /**
  * Swipe-to-category wheel: drag into a rainbow segment, or drag down to “All categories”.
- * Double-tap flips +/−. Pointer tracking uses CSS-pixel shell coords so mobile drag highlight works.
+ * Successful drop plays a short “swallowed by the slice” animation before assigning.
  */
 function Finance2SwipeWheel({
   transaction,
@@ -106,12 +115,16 @@ function Finance2SwipeWheel({
   const [drag, setDrag] = useState({ active: false, x: 0, y: 0 });
   const [hoverIndex, setHoverIndex] = useState(-1);
   const [hoverAll, setHoverAll] = useState(false);
+  // Card flying into a wedge mid-point (consumed).
+  const [swallow, setSwallow] = useState(null);
   const pointerIdRef = useRef(null);
   const dragOriginRef = useRef({ x: 0, y: 0 });
   const dragMovedRef = useRef(false);
   const lastTapAtRef = useRef(0);
   const dragActiveRef = useRef(false);
   const listenersRef = useRef(null);
+  const swallowTimerRef = useRef(null);
+  const swallowingRef = useRef(false);
 
   const wedges = useMemo(() => {
     const bySlug = Object.fromEntries((categories || []).map((c) => [c.slug, c]));
@@ -143,7 +156,6 @@ function Finance2SwipeWheel({
   const wedgesRef = useRef(wedges);
   wedgesRef.current = wedges;
 
-  /** Shell metrics: CSS px from center (matches card transform) + scale to VIEW units. */
   const shellMetrics = useCallback(() => {
     const el = shellRef.current;
     if (!el) {
@@ -158,7 +170,6 @@ function Finance2SwipeWheel({
     };
   }, []);
 
-  /** Finger → CSS px relative to wheel center (same space as translate()). */
   const localPointCss = useCallback(
     (clientX, clientY) => {
       const { cx, cy } = shellMetrics();
@@ -190,7 +201,6 @@ function Finance2SwipeWheel({
         return;
       }
       const dist = Math.hypot(cssX, cssY);
-      // Light up a slice as soon as the finger leaves the hole (mobile needs early feedback).
       const hoverMin = INNER_R * scale * 0.35;
       if (dist < hoverMin) {
         setHoverIndex(-1);
@@ -210,10 +220,80 @@ function Finance2SwipeWheel({
     listenersRef.current = null;
   }, []);
 
+  useEffect(
+    () => () => {
+      clearWindowListeners();
+      if (swallowTimerRef.current) window.clearTimeout(swallowTimerRef.current);
+    },
+    [clearWindowListeners]
+  );
+
+  // Next inbox card — reset swallow leftovers.
+  useEffect(() => {
+    if (swallowTimerRef.current) {
+      window.clearTimeout(swallowTimerRef.current);
+      swallowTimerRef.current = null;
+    }
+    swallowingRef.current = false;
+    setSwallow(null);
+    setDrag({ active: false, x: 0, y: 0 });
+    setHoverIndex(-1);
+    setHoverAll(false);
+  }, [transaction?.id]);
+
+  /**
+   * Suck the charge into a wedge, pulse that slice, then run the real assign callback.
+   */
+  const consumeIntoSlice = useCallback(
+    (idx, fromX, fromY, commit) => {
+      const wedge = wedgesRef.current[idx];
+      if (!wedge || swallowingRef.current) return;
+      swallowingRef.current = true;
+      const { scale } = shellMetrics();
+      const target = wedgeMidCss(wedge.mid, scale);
+      setDrag({ active: false, x: fromX, y: fromY });
+      setHoverIndex(idx);
+      setHoverAll(false);
+      window.requestAnimationFrame(() => {
+        setSwallow({ index: idx, x: target.x, y: target.y });
+      });
+      if (swallowTimerRef.current) window.clearTimeout(swallowTimerRef.current);
+      swallowTimerRef.current = window.setTimeout(async () => {
+        swallowTimerRef.current = null;
+        try {
+          await Promise.resolve(commit?.());
+        } catch {
+          /* parent may surface the error */
+        } finally {
+          swallowingRef.current = false;
+          // Success swaps the txn (effect clears swallow). Failure → restore card.
+          window.setTimeout(() => {
+            setSwallow((prev) => {
+              if (!prev) return null;
+              setDrag({ active: false, x: 0, y: 0 });
+              setHoverIndex(-1);
+              return null;
+            });
+          }, 320);
+        }
+      }, SWALLOW_MS);
+    },
+    [shellMetrics]
+  );
+
+  const assignWedge = useCallback(
+    (wedge) => {
+      if (!wedge?.category) return undefined;
+      if (wedge.category.isVendor) return onPickVendor?.(wedge.category.slug);
+      return onAssign?.(wedge.category.id);
+    },
+    [onAssign, onPickVendor]
+  );
+
   const endDrag = useCallback(
     (clientX, clientY) => {
       clearWindowListeners();
-      if (!dragActiveRef.current || disabled || !transaction) {
+      if (!dragActiveRef.current || disabled || !transaction || swallowingRef.current) {
         dragActiveRef.current = false;
         setDrag({ active: false, x: 0, y: 0 });
         setHoverIndex(-1);
@@ -232,11 +312,11 @@ function Finance2SwipeWheel({
         isOverAllSlice(clientX, clientY) || y > OUTER_R * scale * 0.92;
 
       dragActiveRef.current = false;
-      setDrag({ active: false, x: 0, y: 0 });
-      setHoverIndex(-1);
-      setHoverAll(false);
 
       if (wasTap) {
+        setDrag({ active: false, x: 0, y: 0 });
+        setHoverIndex(-1);
+        setHoverAll(false);
         const now = Date.now();
         if (now - lastTapAtRef.current <= DOUBLE_TAP_MS) {
           lastTapAtRef.current = 0;
@@ -248,18 +328,22 @@ function Finance2SwipeWheel({
       }
 
       if (openAll) {
+        setDrag({ active: false, x: 0, y: 0 });
+        setHoverIndex(-1);
+        setHoverAll(false);
         onOpenAll?.(true);
         return;
       }
 
       if (distView >= DROP_MIN_R && currentWedges[idx]?.category) {
-        const cat = currentWedges[idx].category;
-        if (cat.isVendor) {
-          onPickVendor?.(cat.slug);
-        } else {
-          onAssign?.(cat.id);
-        }
+        // Stay at release spot, then fly into the slice (readable “consumed” beat).
+        consumeIntoSlice(idx, x, y, () => assignWedge(currentWedges[idx]));
+        return;
       }
+
+      setDrag({ active: false, x: 0, y: 0 });
+      setHoverIndex(-1);
+      setHoverAll(false);
     },
     [
       clearWindowListeners,
@@ -268,21 +352,21 @@ function Finance2SwipeWheel({
       shellMetrics,
       localPointCss,
       isOverAllSlice,
-      onAssign,
-      onPickVendor,
+      consumeIntoSlice,
+      assignWedge,
       onFlipAmount,
       onOpenAll,
     ]
   );
 
   const onPointerDown = (e) => {
-    if (disabled || !transaction) return;
+    if (disabled || !transaction || swallowingRef.current || swallow) return;
     e.preventDefault();
     e.stopPropagation();
     try {
       e.currentTarget.setPointerCapture(e.pointerId);
     } catch {
-      /* some browsers reject capture */
+      /* capture optional */
     }
     pointerIdRef.current = e.pointerId;
     dragMovedRef.current = false;
@@ -293,7 +377,6 @@ function Finance2SwipeWheel({
     setHoverIndex(-1);
     setHoverAll(false);
 
-    // Window listeners — iOS often drops move events once the finger leaves the card.
     const pointerId = e.pointerId;
     const onMove = (ev) => {
       if (ev.pointerId !== pointerId || !dragActiveRef.current) return;
@@ -318,14 +401,28 @@ function Finance2SwipeWheel({
     window.addEventListener('pointercancel', onUp);
   };
 
-  useEffect(() => () => clearWindowListeners(), [clearWindowListeners]);
+  const onWedgeTap = (idx) => {
+    if (disabled || swallowingRef.current || swallow) return;
+    const wedge = wedges[idx];
+    if (!wedge) return;
+    consumeIntoSlice(idx, 0, 0, () => assignWedge(wedge));
+  };
 
   if (!transaction) return null;
 
-  const tilt = drag.active ? drag.x * 0.04 : 0;
-  const cardTransform = drag.active
-    ? `translate(${drag.x}px, ${drag.y}px) rotate(${tilt}deg) scale(0.84)`
-    : 'translate(0, 0) rotate(0deg) scale(1)';
+  const swallowing = !!swallow;
+  const gulpIndex = swallow?.index ?? -1;
+
+  let cardTransform = 'translate(0, 0) rotate(0deg) scale(1)';
+  if (swallow) {
+    cardTransform = `translate(${swallow.x}px, ${swallow.y}px) rotate(12deg) scale(0.08)`;
+  } else if (drag.active) {
+    const tilt = drag.x * 0.04;
+    cardTransform = `translate(${drag.x}px, ${drag.y}px) rotate(${tilt}deg) scale(0.84)`;
+  } else if (drag.x !== 0 || drag.y !== 0) {
+    // Held at release frame for one tick before swallow tween kicks in.
+    cardTransform = `translate(${drag.x}px, ${drag.y}px) rotate(0deg) scale(0.84)`;
+  }
 
   return (
     <div className="finance2-wheel-wrap">
@@ -333,13 +430,13 @@ function Finance2SwipeWheel({
         type="button"
         className="finance2-undo"
         onClick={onUndo}
-        disabled={!canUndo || disabled}
+        disabled={!canUndo || disabled || swallowing}
         aria-label="Undo last category"
       >
         undo
       </button>
 
-      <div className="finance2-wheel-shell" ref={shellRef}>
+      <div className={`finance2-wheel-shell${swallowing ? ' is-swallowing' : ''}`} ref={shellRef}>
         <svg
           className="finance2-wheel-svg"
           viewBox={`0 0 ${VIEW} ${VIEW}`}
@@ -357,16 +454,14 @@ function Finance2SwipeWheel({
           {wedges.map((w, i) => (
             <path
               key={w.slug}
-              className={`finance2-wheel-wedge${hoverIndex === i ? ' is-hot' : ''}${
-                drag.active && hoverIndex !== i && !hoverAll ? ' is-dim' : ''
-              }`}
+              className={`finance2-wheel-wedge${
+                gulpIndex === i || (!swallowing && hoverIndex === i) ? ' is-hot' : ''
+              }${
+                drag.active && hoverIndex !== i && !hoverAll && !swallowing ? ' is-dim' : ''
+              }${gulpIndex === i ? ' is-gulp' : ''}`}
               d={w.path}
               fill={w.color}
-              onClick={() => {
-                if (disabled) return;
-                if (w.category.isVendor) onPickVendor?.(w.category.slug);
-                else onAssign?.(w.category.id);
-              }}
+              onClick={() => onWedgeTap(i)}
             />
           ))}
 
@@ -415,10 +510,16 @@ function Finance2SwipeWheel({
         </svg>
 
         <div
-          className={`finance2-wheel-charge${drag.active ? ' is-dragging' : ''}${
+          /* Remount per charge so entrance always pops from center, not the last slice. */
+          key={transaction.id}
+          className={`finance2-wheel-charge is-emerging${drag.active ? ' is-dragging' : ''}${
             hoverAll ? ' is-toward-all' : ''
-          }`}
-          style={{ transform: cardTransform }}
+          }${swallowing ? ' is-swallowing' : ''}`}
+          style={
+            drag.active || swallowing || drag.x !== 0 || drag.y !== 0
+              ? { transform: cardTransform, animation: 'none' }
+              : undefined
+          }
           onPointerDown={onPointerDown}
         >
           <p className="finance2-wheel-merchant">{transaction.merchantName}</p>
@@ -435,7 +536,7 @@ function Finance2SwipeWheel({
         type="button"
         className={`finance2-all-slice${hoverAll || allOpen ? ' is-hot' : ''}`}
         onClick={() => onOpenAll?.()}
-        disabled={disabled}
+        disabled={disabled || swallowing}
         aria-expanded={allOpen}
       >
         <span className="finance2-all-slice-label">

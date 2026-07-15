@@ -293,6 +293,61 @@
     0 8px 16px rgba(90, 120, 220, 0.12);
 }
 
+/* Card sucked into a category slice — shrink + fade into the wedge. */
+.finance2-wheel-charge.is-swallowing {
+  pointer-events: none;
+  opacity: 0;
+  transition:
+    transform 0.22s cubic-bezier(0.55, 0.05, 0.9, 0.4),
+    opacity 0.18s ease-in;
+  box-shadow: none;
+  z-index: 6;
+  animation: none;
+}
+
+/* New charge pops out of the center hole (not from the last slice). */
+.finance2-wheel-charge.is-emerging {
+  animation: finance2-charge-emerge 0.36s cubic-bezier(0.22, 1.4, 0.36, 1) both;
+  transform-origin: center center;
+}
+
+@keyframes finance2-charge-emerge {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.12);
+  }
+  62% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1.08);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+/* Slice “gulps” the charge — brief pop + flash. */
+.finance2-wheel-wedge.is-gulp {
+  animation: finance2-slice-gulp 0.22s ease-out;
+  filter: brightness(0.5) saturate(1.25);
+  stroke: rgba(42, 31, 40, 0.5);
+  stroke-width: 3.5;
+  transform-origin: center;
+  transform-box: fill-box;
+}
+
+@keyframes finance2-slice-gulp {
+  0% {
+    filter: brightness(0.72) saturate(1.1);
+  }
+  45% {
+    filter: brightness(0.4) saturate(1.35);
+  }
+  100% {
+    filter: brightness(0.55) saturate(1.2);
+  }
+}
+
 .finance2-wheel-merchant {
   margin: 0;
   max-width: 100%;
