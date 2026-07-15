@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { formatMoney } from '../finance/financeConfig';
 import {
   FINANCE2_DEFAULT_WHEEL_SLUGS,
@@ -16,7 +16,7 @@ const INNER_R = 48;
 const OUTER_CORNER_R = 18;
 /** Tiny seam so neighboring fills don’t fight (not a “skinny gap”). */
 const SEAM_DEG = 0.35;
-/** Accept a drop once the charge enters the colored ring. */
+/** Accept a drop once the charge enters the colored ring (VIEW units). */
 const DROP_MIN_R = INNER_R + 4;
 const TAP_MOVE_MAX = 14;
 const DOUBLE_TAP_MS = 380;
@@ -78,6 +78,7 @@ function wedgePathRoundedOuter(startDeg, endDeg, innerR, outerR, cornerR) {
 
 /** Pointer angle → wheel segment index (0 at top, clockwise). */
 function angleToIndex(dx, dy, count) {
+  if (count <= 0) return -1;
   let deg = (Math.atan2(dy, dx) * 180) / Math.PI + 90;
   deg = ((deg % 360) + 360) % 360;
   return Math.min(count - 1, Math.floor(deg / (360 / count)));
@@ -85,7 +86,7 @@ function angleToIndex(dx, dy, count) {
 
 /**
  * Swipe-to-category wheel: drag into a rainbow segment, or drag down to “All categories”.
- * Double-tap flips +/−.
+ * Double-tap flips +/−. Pointer tracking uses CSS-pixel shell coords so mobile drag highlight works.
  */
 function Finance2SwipeWheel({
   transaction,
@@ -109,9 +110,10 @@ function Finance2SwipeWheel({
   const dragOriginRef = useRef({ x: 0, y: 0 });
   const dragMovedRef = useRef(false);
   const lastTapAtRef = useRef(0);
+  const dragActiveRef = useRef(false);
+  const listenersRef = useRef(null);
 
   const wedges = useMemo(() => {
-    // Exact same partition as Settings → View (no silent default fallback).
     const bySlug = Object.fromEntries((categories || []).map((c) => [c.slug, c]));
     const active = (wheelSlugs || []).filter((s) => bySlug[s]);
     if (active.length === 0) return [];
@@ -138,22 +140,37 @@ function Finance2SwipeWheel({
     });
   }, [categories, wheelSlugs]);
 
-  const localPoint = useCallback((clientX, clientY) => {
+  const wedgesRef = useRef(wedges);
+  wedgesRef.current = wedges;
+
+  /** Shell metrics: CSS px from center (matches card transform) + scale to VIEW units. */
+  const shellMetrics = useCallback(() => {
     const el = shellRef.current;
-    if (!el) return { x: 0, y: 0 };
+    if (!el) {
+      return { scale: 1, cx: 0, cy: 0, width: VIEW };
+    }
     const rect = el.getBoundingClientRect();
-    const scale = VIEW / rect.width;
     return {
-      x: (clientX - rect.left) * scale - CX,
-      y: (clientY - rect.top) * scale - CY,
+      scale: rect.width / VIEW,
+      cx: rect.left + rect.width / 2,
+      cy: rect.top + rect.height / 2,
+      width: rect.width,
     };
   }, []);
+
+  /** Finger → CSS px relative to wheel center (same space as translate()). */
+  const localPointCss = useCallback(
+    (clientX, clientY) => {
+      const { cx, cy } = shellMetrics();
+      return { x: clientX - cx, y: clientY - cy };
+    },
+    [shellMetrics]
+  );
 
   const isOverAllSlice = useCallback((clientX, clientY) => {
     const el = allSliceRef.current;
     if (!el) return false;
     const rect = el.getBoundingClientRect();
-    // Generous pad so “slide to the bottom” is easy to hit.
     return (
       clientY >= rect.top - 28 &&
       clientY <= rect.bottom + 12 &&
@@ -162,21 +179,59 @@ function Finance2SwipeWheel({
     );
   }, []);
 
+  const updateHoverFromPoint = useCallback(
+    (clientX, clientY, cssX, cssY) => {
+      const { scale } = shellMetrics();
+      const overAll =
+        isOverAllSlice(clientX, clientY) || cssY > OUTER_R * scale * 0.85;
+      setHoverAll(overAll);
+      if (overAll || wedgesRef.current.length === 0) {
+        setHoverIndex(-1);
+        return;
+      }
+      const dist = Math.hypot(cssX, cssY);
+      // Light up a slice as soon as the finger leaves the hole (mobile needs early feedback).
+      const hoverMin = INNER_R * scale * 0.35;
+      if (dist < hoverMin) {
+        setHoverIndex(-1);
+        return;
+      }
+      setHoverIndex(angleToIndex(cssX, cssY, wedgesRef.current.length));
+    },
+    [isOverAllSlice, shellMetrics]
+  );
+
+  const clearWindowListeners = useCallback(() => {
+    const bag = listenersRef.current;
+    if (!bag) return;
+    window.removeEventListener('pointermove', bag.move);
+    window.removeEventListener('pointerup', bag.up);
+    window.removeEventListener('pointercancel', bag.up);
+    listenersRef.current = null;
+  }, []);
+
   const endDrag = useCallback(
     (clientX, clientY) => {
-      if (!drag.active || disabled || !transaction) {
+      clearWindowListeners();
+      if (!dragActiveRef.current || disabled || !transaction) {
+        dragActiveRef.current = false;
         setDrag({ active: false, x: 0, y: 0 });
         setHoverIndex(-1);
         setHoverAll(false);
         return;
       }
-      const { x, y } = localPoint(clientX, clientY);
-      const dist = Math.hypot(x, y);
-      const travel = Math.hypot(x - dragOriginRef.current.x, y - dragOriginRef.current.y);
-      const idx = angleToIndex(x, y, wedges.length);
-      const wasTap = !dragMovedRef.current && travel < TAP_MOVE_MAX;
-      const openAll = isOverAllSlice(clientX, clientY) || y > OUTER_R * 0.92;
+      const { scale } = shellMetrics();
+      const { x, y } = localPointCss(clientX, clientY);
+      const distView = Math.hypot(x, y) / scale;
+      const travelCss = Math.hypot(x - dragOriginRef.current.x, y - dragOriginRef.current.y);
+      const travelView = travelCss / scale;
+      const currentWedges = wedgesRef.current;
+      const idx = angleToIndex(x, y, currentWedges.length);
+      const wasTap = !dragMovedRef.current && travelView < TAP_MOVE_MAX;
+      const openAll =
+        isOverAllSlice(clientX, clientY) || y > OUTER_R * scale * 0.92;
 
+      dragActiveRef.current = false;
       setDrag({ active: false, x: 0, y: 0 });
       setHoverIndex(-1);
       setHoverAll(false);
@@ -193,14 +248,12 @@ function Finance2SwipeWheel({
       }
 
       if (openAll) {
-        // Dragging onto the bottom slice always opens the full picker.
         onOpenAll?.(true);
         return;
       }
 
-      if (dist >= DROP_MIN_R && wedges[idx]?.category) {
-        const cat = wedges[idx].category;
-        // Vendor slices (Amazon) need a follow-up spend category.
+      if (distView >= DROP_MIN_R && currentWedges[idx]?.category) {
+        const cat = currentWedges[idx].category;
         if (cat.isVendor) {
           onPickVendor?.(cat.slug);
         } else {
@@ -209,58 +262,67 @@ function Finance2SwipeWheel({
       }
     },
     [
-      drag.active,
+      clearWindowListeners,
       disabled,
       transaction,
-      localPoint,
-      wedges,
+      shellMetrics,
+      localPointCss,
+      isOverAllSlice,
       onAssign,
       onPickVendor,
       onFlipAmount,
       onOpenAll,
-      isOverAllSlice,
     ]
   );
 
   const onPointerDown = (e) => {
     if (disabled || !transaction) return;
-    e.currentTarget.setPointerCapture(e.pointerId);
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {
+      /* some browsers reject capture */
+    }
     pointerIdRef.current = e.pointerId;
     dragMovedRef.current = false;
-    const { x, y } = localPoint(e.clientX, e.clientY);
+    dragActiveRef.current = true;
+    const { x, y } = localPointCss(e.clientX, e.clientY);
     dragOriginRef.current = { x, y };
     setDrag({ active: true, x, y });
     setHoverIndex(-1);
     setHoverAll(false);
+
+    // Window listeners — iOS often drops move events once the finger leaves the card.
+    const pointerId = e.pointerId;
+    const onMove = (ev) => {
+      if (ev.pointerId !== pointerId || !dragActiveRef.current) return;
+      ev.preventDefault();
+      const pt = localPointCss(ev.clientX, ev.clientY);
+      const { scale } = shellMetrics();
+      const travelView =
+        Math.hypot(pt.x - dragOriginRef.current.x, pt.y - dragOriginRef.current.y) / scale;
+      if (travelView >= TAP_MOVE_MAX) dragMovedRef.current = true;
+      setDrag({ active: true, x: pt.x, y: pt.y });
+      updateHoverFromPoint(ev.clientX, ev.clientY, pt.x, pt.y);
+    };
+    const onUp = (ev) => {
+      if (ev.pointerId !== pointerId) return;
+      pointerIdRef.current = null;
+      endDrag(ev.clientX, ev.clientY);
+    };
+    clearWindowListeners();
+    listenersRef.current = { move: onMove, up: onUp };
+    window.addEventListener('pointermove', onMove, { passive: false });
+    window.addEventListener('pointerup', onUp);
+    window.addEventListener('pointercancel', onUp);
   };
 
-  const onPointerMove = (e) => {
-    if (!drag.active || pointerIdRef.current !== e.pointerId) return;
-    const { x, y } = localPoint(e.clientX, e.clientY);
-    const travel = Math.hypot(x - dragOriginRef.current.x, y - dragOriginRef.current.y);
-    if (travel >= TAP_MOVE_MAX) dragMovedRef.current = true;
-    setDrag({ active: true, x, y });
-
-    const overAll = isOverAllSlice(e.clientX, e.clientY) || y > OUTER_R * 0.85;
-    setHoverAll(overAll);
-    if (overAll) {
-      setHoverIndex(-1);
-      return;
-    }
-    const dist = Math.hypot(x, y);
-    setHoverIndex(dist >= INNER_R * 0.55 ? angleToIndex(x, y, wedges.length) : -1);
-  };
-
-  const onPointerUp = (e) => {
-    if (pointerIdRef.current !== e.pointerId) return;
-    pointerIdRef.current = null;
-    endDrag(e.clientX, e.clientY);
-  };
+  useEffect(() => () => clearWindowListeners(), [clearWindowListeners]);
 
   if (!transaction) return null;
 
-  // Shrink slightly when “picked up” (Tinder-style grab feedback).
-  const tilt = drag.active ? drag.x * 0.07 : 0;
+  const tilt = drag.active ? drag.x * 0.04 : 0;
   const cardTransform = drag.active
     ? `translate(${drag.x}px, ${drag.y}px) rotate(${tilt}deg) scale(0.84)`
     : 'translate(0, 0) rotate(0deg) scale(1)';
@@ -358,9 +420,6 @@ function Finance2SwipeWheel({
           }`}
           style={{ transform: cardTransform }}
           onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerUp}
-          onPointerCancel={onPointerUp}
         >
           <p className="finance2-wheel-merchant">{transaction.merchantName}</p>
           <p className="finance2-wheel-amount" aria-live="polite">
@@ -371,7 +430,6 @@ function Finance2SwipeWheel({
         </div>
       </div>
 
-      {/* Bottom “slice” — tap or drag the charge onto it to open all categories. */}
       <button
         ref={allSliceRef}
         type="button"

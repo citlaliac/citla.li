@@ -5,7 +5,9 @@ import {
   financeLogin,
   isFinanceDemo,
   setFinanceToken,
+  shouldUseFinanceDemoData,
 } from '../finance/financeApi';
+import { isFinance2FakeDataEnabled } from './finance2FakeData';
 
 function FinanceLoginPage() {
   const [password, setPassword] = useState('');
@@ -14,6 +16,7 @@ function FinanceLoginPage() {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const navigate = useNavigate();
+  const demoUi = isFinanceDemo || isFinance2FakeDataEnabled() || shouldUseFinanceDemoData();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -38,8 +41,8 @@ function FinanceLoginPage() {
     <div className="finance-login">
       <h1 className="finance-login-title">Oops</h1>
       <p className="finance-login-copy">Sort your spending</p>
-      {isFinanceDemo && (
-        <p className="finance-demo-banner">Demo mode — type any password to preview the UI</p>
+      {demoUi && (
+        <p className="finance-demo-banner">Demo / fake data — type any password to preview the UI</p>
       )}
       <form className="finance-login-form" onSubmit={handleSubmit}>
         <label className="finance-label" htmlFor="finance-password">

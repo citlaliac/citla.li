@@ -37,6 +37,56 @@
   backdrop-filter: blur(8px);
 }
 
+.finance2-page.is-fake-data .finance2-playground-banner {
+  background: rgba(90, 55, 20, 0.88);
+}
+
+.finance2-data-mode {
+  margin: 0.45rem 0.15rem 0.55rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(90, 70, 80, 0.12);
+  box-shadow: 0 6px 16px rgba(44, 36, 24, 0.06);
+}
+
+.finance2-data-mode.is-on {
+  background: rgba(255, 236, 210, 0.95);
+  border-color: rgba(200, 140, 40, 0.35);
+}
+
+.finance2-data-mode-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  cursor: pointer;
+  margin: 0;
+}
+
+.finance2-data-mode-label input {
+  margin-top: 0.2rem;
+  width: 1.15rem;
+  height: 1.15rem;
+  flex: 0 0 auto;
+  accent-color: #c47a2c;
+}
+
+.finance2-data-mode-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  color: #5a4a56;
+}
+
+.finance2-data-mode-copy strong {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #2a1f28;
+}
+
 .finance2-playground-banner-link {
   color: #f7c6d0;
   text-decoration: underline;
@@ -142,15 +192,17 @@
   transition: filter 0.14s ease, opacity 0.14s ease;
 }
 
-/* Target drop slice — darken so it’s obvious where the card will land. */
+/* Target drop slice — darken hard so mobile drag feedback is obvious. */
 .finance2-wheel-wedge.is-hot {
-  filter: brightness(0.78) saturate(1.05);
+  filter: brightness(0.58) saturate(1.2);
+  stroke: rgba(42, 31, 40, 0.45);
+  stroke-width: 3;
 }
 
 /* Soften non-target slices while dragging for clearer contrast. */
 .finance2-wheel-wedge.is-dim {
-  filter: brightness(1.04) saturate(0.9);
-  opacity: 0.88;
+  filter: brightness(1.08) saturate(0.75);
+  opacity: 0.72;
 }
 
 /* Clean upright labels — no outline stroke. */
@@ -360,7 +412,9 @@
   position: relative;
   z-index: 1;
   pointer-events: auto;
-  max-height: min(58dvh, 28rem);
+  /* Tall sheet so categories are easy to browse on phones. */
+  height: 75dvh;
+  max-height: 75dvh;
   overflow: auto;
   padding: 0.55rem 0.85rem calc(0.85rem + env(safe-area-inset-bottom));
   border-radius: 1.35rem 1.35rem 0 0;

@@ -61,6 +61,30 @@ const DEMO_TOKEN = 'demo-local-preview';
 
 export const isFinanceDemo = process.env.REACT_APP_FINANCE_DEMO === 'true';
 
+/**
+ * Demo data for CRA env demo OR finance2 “Use fake data” toggle on /finance2 only.
+ * Live /finance never reads the finance2 toggle.
+ */
+export function shouldUseFinanceDemoData() {
+  if (isFinanceDemo) return true;
+  try {
+    if (typeof window === 'undefined') return false;
+    if (!window.location.pathname.startsWith('/finance2')) return false;
+    return localStorage.getItem('finance2_use_fake_data_v1') === '1';
+  } catch {
+    return false;
+  }
+}
+
+/** Reset in-memory demo queues (used when turning finance2 fake data on). */
+export function resetFinanceDemoState() {
+  demoInbox = DEMO_TRANSACTIONS.map((t) => ({ ...t }));
+  demoCategorized = DEMO_CATEGORIZED.map((t) => ({ ...t }));
+  demoCategories = DEMO_CATEGORIES.map((c) => ({ ...c }));
+  nextDemoCategoryId = 900;
+  hydrateDemoCustomsFromStorage();
+}
+
 let demoInbox = [...DEMO_TRANSACTIONS];
 /** Mutable categorized list for demo report drill-down + recategorize. */
 let demoCategorized = DEMO_CATEGORIZED.map((t) => ({ ...t }));
@@ -139,7 +163,7 @@ async function financeRequest(url, options = {}) {
 export function financeLogin(password, opts = {}) {
   const rememberMe = opts.rememberMe !== false;
   const rememberDays = opts.rememberDays ?? (rememberMe ? FINANCE_REMEMBER_DAYS : 1);
-  if (isFinanceDemo) {
+  if (shouldUseFinanceDemoData()) {
     if (!password) return Promise.reject(new Error('Password is required'));
     return demoDelay({
       success: true,
@@ -157,7 +181,7 @@ export function financeLogin(password, opts = {}) {
 }
 
 export function financeFetchCategories() {
-  if (isFinanceDemo) {
+  if (shouldUseFinanceDemoData()) {
     hydrateDemoCustomsFromStorage();
     return demoDelay({
       success: true,
@@ -188,7 +212,7 @@ export function financeCreateCategory(input) {
   const slug = slugRaw || label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 48) || 'custom';
   const color = input?.color || undefined;
 
-  if (isFinanceDemo) {
+  if (shouldUseFinanceDemoData()) {
     let unique = slug;
     let n = 2;
     while (demoCategories.some((c) => c.slug === unique)) {
@@ -221,14 +245,14 @@ export function financeCreateCategory(input) {
 }
 
 export function financeCreateLinkToken() {
-  if (isFinanceDemo) {
+  if (shouldUseFinanceDemoData()) {
     return Promise.reject(new Error('Plaid Link is disabled in demo mode'));
   }
   return financeRequest(financeApiUrl('plaid', { action: 'link-token' }), { method: 'POST' });
 }
 
 export function financeExchangePublicToken(publicToken, institutionName) {
-  if (isFinanceDemo) {
+  if (shouldUseFinanceDemoData()) {
     return Promise.reject(new Error('Plaid Link is disabled in demo mode'));
   }
   return financeRequest(financeApiUrl('plaid', { action: 'exchange' }), {
@@ -238,7 +262,7 @@ export function financeExchangePublicToken(publicToken, institutionName) {
 }
 
 export function financeFetchPlaidItems() {
-  if (isFinanceDemo) {
+  if (shouldUseFinanceDemoData()) {
     return demoDelay({
       success: true,
       items: [
@@ -254,7 +278,7 @@ export function financeFetchPlaidItems() {
 }
 
 export function financeSync() {
-  if (isFinanceDemo) {
+  if (shouldUseFinanceDemoData()) {
     return demoDelay({ success: true, added: 0, modified: 0 });
   }
   return financeRequest(financeApiUrl('sync'), { method: 'POST' });
@@ -279,7 +303,7 @@ export function financeFetchTransactions(statusOrFilters = 'uncategorized') {
     return d >= window.start && d <= window.end;
   };
 
-  if (isFinanceDemo) {
+  if (shouldUseFinanceDemoData()) {
     let list = [];
     if (filters.status === 'uncategorized') {
       list = [...demoInbox];
@@ -305,7 +329,7 @@ export function financeFetchTransactions(statusOrFilters = 'uncategorized') {
 }
 
 export function financeCategorizeTransaction(id, categoryId, { vendorTag } = {}) {
-  if (isFinanceDemo) {
+  if (shouldUseFinanceDemoData()) {
     const fromInbox = demoInbox.find((t) => t.id === id);
     demoInbox = demoInbox.filter((t) => t.id !== id);
     let row = demoCategorized.find((t) => t.id === id);
@@ -328,7 +352,7 @@ export function financeCategorizeTransaction(id, categoryId, { vendorTag } = {})
 
 /** Clear category so a charge returns to the uncategorized inbox (undo). */
 export function financeUncategorizeTransaction(id) {
-  if (isFinanceDemo) {
+  if (shouldUseFinanceDemoData()) {
     const fromCategorized = demoCategorized.find((t) => t.id === id);
     if (fromCategorized) {
       demoCategorized = demoCategorized.filter((t) => t.id !== id);
@@ -347,7 +371,7 @@ export function financeUncategorizeTransaction(id) {
 
 /** Flip transaction amount sign (+/−). Survives sync via amount_manual on the server. */
 export function financeFlipTransactionAmount(id) {
-  if (isFinanceDemo) {
+  if (shouldUseFinanceDemoData()) {
     const flipIn = (list) => {
       const row = list.find((t) => t.id === id);
       if (row) {
@@ -378,7 +402,7 @@ export function financeFetchReport(rangeOrMonth) {
       : { range: 'month', ...rangeOrMonth };
   const window = resolveReportWindow(opts.range, opts.month);
 
-  if (isFinanceDemo) {
+  if (shouldUseFinanceDemoData()) {
     // Rebuild spending totals from mutable demoCategorized so recategorize updates the report.
     const inWindow = (date) => {
       const d = String(date).slice(0, 10);
@@ -638,7 +662,7 @@ export function financeFetchReport(rangeOrMonth) {
 }
 
 export function financeExportMonth(month, { download = false } = {}) {
-  if (isFinanceDemo) {
+  if (shouldUseFinanceDemoData()) {
     if (download) {
       const csv = 'date,merchant,amount,category\n2026-07-05,Trader Joe\'s,47.82,Groceries\n';
       const blob = new Blob([csv], { type: 'text/csv' });
