@@ -15,6 +15,13 @@ function buildUrl(resource, { action = '', query = {} } = {}) {
     if (resource === 'pope') {
       return `${cecApiBase()}/pope`;
     }
+    if (resource === 'faction') {
+      const qs = new URLSearchParams(query).toString();
+      return `${cecApiBase()}/faction${action ? `/${action}` : ''}${qs ? `?${qs}` : ''}`;
+    }
+    if (resource === 'reward') {
+      return `${cecApiBase()}/reward`;
+    }
     if (resource === 'names') {
       const qs = new URLSearchParams(query).toString();
       return `${cecApiBase()}/names/check${qs ? `?${qs}` : ''}`;
@@ -88,13 +95,46 @@ export function cecSyncAccount(token, worshiper) {
     method: 'PATCH',
     headers: { Authorization: `Bearer ${token}` },
     body: JSON.stringify({
+      // PP and cooldowns are intentionally excluded: the server owns progress.
       displayName: worshiper.displayName,
       avatarId: worshiper.avatarId,
-      pontifexPoints: worshiper.pontifexPoints,
-      completedActions: worshiper.completedActions,
-      actionLastDone: worshiper.actionLastDone,
-      lastSpinDate: worshiper.lastSpinDate,
     }),
+  });
+}
+
+export function cecFetchFaction(token) {
+  return request(buildUrl('faction'), {
+    headers: { Authorization: `Bearer ${token}` },
+  }).then((data) => data.faction);
+}
+
+export function cecPreviewSponsor(token, code) {
+  return request(buildUrl('faction', { action: 'preview', query: { code } }), {
+    headers: { Authorization: `Bearer ${token}` },
+  }).then((data) => data.preview);
+}
+
+export function cecFoundFaction(token) {
+  return request(buildUrl('faction', { action: 'found' }), {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: '{}',
+  }).then((data) => data.faction);
+}
+
+export function cecJoinFaction(token, code) {
+  return request(buildUrl('faction', { action: 'join' }), {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ code }),
+  }).then((data) => data.faction);
+}
+
+export function cecClaimReward(token, rewardType, actionId = '') {
+  return request(buildUrl('reward'), {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ rewardType, actionId }),
   });
 }
 

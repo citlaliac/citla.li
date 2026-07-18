@@ -49,6 +49,9 @@ function cec_accounts_ensure_tables($conn) {
         action_last_done JSON NULL,
         last_spin_date DATE NULL,
         last_active_at DATETIME NULL,
+        pp_milli_remainder INT NOT NULL DEFAULT 0,
+        next_smite_at DATETIME NULL,
+        debuff_until DATETIME NULL,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         UNIQUE KEY uk_cec_account_email (email),
@@ -67,6 +70,50 @@ function cec_accounts_ensure_tables($conn) {
         INDEX idx_cec_session_account (account_id),
         INDEX idx_cec_session_expires (expires_at)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+    // Additive congregation tables; existing accounts and PP are never recreated.
+    $conn->query("CREATE TABLE IF NOT EXISTS cec_factions (
+        founder_account_id INT PRIMARY KEY,
+        status VARCHAR(16) NOT NULL DEFAULT 'active',
+        frozen_at DATETIME NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_cec_faction_status (status, frozen_at)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+    $conn->query("CREATE TABLE IF NOT EXISTS cec_faction_memberships (
+        account_id INT PRIMARY KEY,
+        sponsor_account_id INT NULL,
+        faction_founder_id INT NOT NULL,
+        joined_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        switched_at DATETIME NULL,
+        INDEX idx_cec_membership_sponsor (sponsor_account_id),
+        INDEX idx_cec_membership_faction (faction_founder_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+    $conn->query("CREATE TABLE IF NOT EXISTS cec_pp_events (
+        id BIGINT AUTO_INCREMENT PRIMARY KEY,
+        event_key VARCHAR(128) NOT NULL,
+        actor_account_id INT NOT NULL,
+        beneficiary_account_id INT NOT NULL,
+        event_type VARCHAR(32) NOT NULL,
+        base_pp INT NOT NULL DEFAULT 0,
+        awarded_pp INT NOT NULL DEFAULT 0,
+        metadata_json JSON NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY uk_cec_pp_event_key_beneficiary (event_key, beneficiary_account_id),
+        INDEX idx_cec_pp_event_actor (actor_account_id, created_at),
+        INDEX idx_cec_pp_event_beneficiary (beneficiary_account_id, created_at)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+    // Ledger seed records the pre-feature balance without awarding or removing PP.
+    $conn->query(
+        "INSERT IGNORE INTO cec_pp_events
+           (event_key, actor_account_id, beneficiary_account_id, event_type, base_pp, awarded_pp)
+         SELECT CONCAT('opening-balance:', id), id, id, 'opening_balance', pontifex_points, 0
+         FROM cec_accounts
+         WHERE email IS NOT NULL"
+    );
 }
 
 function cec_rank_from_points($pp) {
@@ -107,11 +154,12 @@ function cec_get_reigning_pope($conn) {
     $months = cec_pope_inactivity_months();
     $stmt = $conn->prepare(
         'SELECT id, display_name, pontifex_points
-         FROM cec_accounts
-         WHERE email IS NOT NULL
-           AND pontifex_points >= ?
-           AND last_active_at >= DATE_SUB(NOW(), INTERVAL ? MONTH)
-         ORDER BY pontifex_points DESC, id ASC
+         FROM cec_accounts a
+         JOIN cec_factions f ON f.founder_account_id = a.id AND f.status = \'active\'
+         WHERE a.email IS NOT NULL
+           AND a.pontifex_points >= ?
+           AND a.last_active_at >= DATE_SUB(NOW(), INTERVAL ? MONTH)
+         ORDER BY a.pontifex_points DESC, a.id ASC
          LIMIT 1'
     );
     $stmt->bind_param('ii', $min, $months);
@@ -119,7 +167,23 @@ function cec_get_reigning_pope($conn) {
     $row = $stmt->get_result()->fetch_assoc();
     $stmt->close();
     if (!$row) {
-        return null;
+        // Backward-compatible bridge until the first eligible Pope founds a congregation.
+        $stmt = $conn->prepare(
+            'SELECT id, display_name, pontifex_points
+             FROM cec_accounts
+             WHERE email IS NOT NULL
+               AND pontifex_points >= ?
+               AND last_active_at >= DATE_SUB(NOW(), INTERVAL ? MONTH)
+             ORDER BY pontifex_points DESC, id ASC
+             LIMIT 1'
+        );
+        $stmt->bind_param('ii', $min, $months);
+        $stmt->execute();
+        $row = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+        if (!$row) {
+            return null;
+        }
     }
     return [
         'accountId' => (int) $row['id'],
@@ -176,6 +240,8 @@ function cec_worshiper_from_row($row, $reigningPope = null) {
         'completedActions' => $completed,
         'actionLastDone' => $actionLast,
         'lastSpinDate' => $row['last_spin_date'] ?: null,
+        'nextSmiteAt' => $row['next_smite_at'] ?: null,
+        'debuffUntil' => $row['debuff_until'] ?: null,
     ];
 }
 
@@ -232,6 +298,15 @@ function cec_accounts_migrate_schema($conn) {
     @$conn->query('ALTER TABLE cec_accounts MODIFY email VARCHAR(255) NULL');
     @$conn->query('ALTER TABLE cec_accounts MODIFY password_hash VARCHAR(255) NULL');
     @$conn->query('ALTER TABLE cec_accounts ADD COLUMN last_active_at DATETIME NULL AFTER last_spin_date');
+    @$conn->query(
+        'ALTER TABLE cec_accounts ADD COLUMN pp_milli_remainder INT NOT NULL DEFAULT 0 AFTER last_active_at'
+    );
+    @$conn->query(
+        'ALTER TABLE cec_accounts ADD COLUMN next_smite_at DATETIME NULL AFTER pp_milli_remainder'
+    );
+    @$conn->query(
+        'ALTER TABLE cec_accounts ADD COLUMN debuff_until DATETIME NULL AFTER next_smite_at'
+    );
     @$conn->query(
         'UPDATE cec_accounts SET last_active_at = COALESCE(updated_at, created_at) WHERE last_active_at IS NULL'
     );

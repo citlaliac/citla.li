@@ -5175,3 +5175,343 @@
   background: transparent;
   color: rgba(245, 237, 216, 0.72);
 }
+
+/* Congregations stay compact in the worshiper card and expand into a touch-safe sheet. */
+.cec-worshiper-stage-congregation {
+  display: grid;
+  gap: 0.12rem;
+  width: 100%;
+  margin: 0.55rem 0 0;
+  padding: 0.45rem 0.65rem;
+  border: 1px solid rgba(115, 73, 42, 0.32);
+  border-radius: 0.45rem;
+  background: rgba(255, 249, 229, 0.74);
+  color: #522b1d;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.cec-worshiper-stage-congregation span {
+  font-size: 0.7rem;
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+.cec-faction-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 4300;
+  display: grid;
+  place-items: center;
+  padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right))
+    max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
+  background: rgba(16, 8, 25, 0.72);
+  backdrop-filter: blur(6px);
+}
+
+.cec-faction-panel {
+  position: relative;
+  width: min(100%, 36rem);
+  max-height: min(86dvh, 44rem);
+  overflow-y: auto;
+  padding: clamp(1.15rem, 4vw, 2rem);
+  border: 2px solid #aa8746;
+  border-radius: 1rem;
+  background: linear-gradient(165deg, #fff9e8, #eee0bd);
+  color: #41241a;
+  box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.46);
+}
+
+.cec-faction-panel h2 {
+  margin: 0 0 1rem;
+  font-family: Georgia, serif;
+  font-size: clamp(1.65rem, 7vw, 2.25rem);
+}
+
+.cec-faction-kicker {
+  margin: 0;
+  color: #8b5e28;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.cec-faction-close {
+  position: absolute;
+  top: 0.65rem;
+  right: 0.65rem;
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(65, 36, 26, 0.1);
+  color: #41241a;
+  font-size: 1.7rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.cec-faction-summary {
+  padding: 0.9rem;
+  border: 1px solid rgba(65, 36, 26, 0.18);
+  border-radius: 0.7rem;
+  background: rgba(255, 255, 255, 0.42);
+}
+
+.cec-faction-summary p {
+  margin: 0.45rem 0;
+}
+
+.cec-faction-status {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.cec-faction-status--active {
+  color: #427039;
+}
+
+.cec-faction-status--frozen,
+.cec-faction-warning,
+.cec-faction-error {
+  color: #9b2f2f;
+}
+
+.cec-faction-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+  margin: 0.85rem 0;
+}
+
+.cec-faction-stats span {
+  display: grid;
+  padding: 0.55rem;
+  border-radius: 0.45rem;
+  background: rgba(98, 63, 33, 0.08);
+  font-size: 0.76rem;
+}
+
+.cec-faction-stats strong {
+  font-size: 1.15rem;
+}
+
+.cec-faction-code,
+.cec-faction-cooldown,
+.cec-faction-preview {
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.cec-faction-join {
+  margin-top: 1rem;
+}
+
+.cec-faction-join label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.cec-faction-join div {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.cec-faction-join input {
+  min-width: 0;
+  flex: 1;
+  padding: 0.7rem 0.75rem;
+  border: 1px solid rgba(65, 36, 26, 0.4);
+  border-radius: 0.45rem;
+  font: inherit;
+  font-size: 1rem;
+}
+
+.cec-faction-join button,
+.cec-faction-primary {
+  min-height: 2.75rem;
+  padding: 0.65rem 0.9rem;
+  border: 1px solid #6b4425;
+  border-radius: 0.45rem;
+  background: #6b4425;
+  color: #fff9e8;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.cec-faction-primary {
+  width: 100%;
+  margin-top: 0.75rem;
+}
+
+.cec-faction-join button:disabled,
+.cec-faction-primary:disabled {
+  cursor: wait;
+  opacity: 0.58;
+}
+
+.cec-smite-notice {
+  position: fixed;
+  z-index: 4400;
+  right: max(1rem, env(safe-area-inset-right));
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  width: min(22rem, calc(100vw - 2rem));
+  padding: 0.9rem;
+  border: 2px solid #9b2f2f;
+  border-radius: 0.7rem;
+  background: #fff1e2;
+  color: #5c211e;
+  box-shadow: 0 0.8rem 2rem rgba(0, 0, 0, 0.35);
+  font-size: 0.85rem;
+}
+
+.cec-smite-notice strong {
+  display: block;
+}
+
+.cec-smite-notice button {
+  margin-top: 0.6rem;
+}
+
+.cec-game-error {
+  position: fixed;
+  z-index: 4450;
+  top: max(1rem, env(safe-area-inset-top));
+  left: 50%;
+  display: flex;
+  width: min(24rem, calc(100vw - 2rem));
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid #9b2f2f;
+  border-radius: 0.55rem;
+  background: #fff1e2;
+  color: #5c211e;
+  box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.3);
+  font-size: 0.8rem;
+  transform: translateX(-50%);
+}
+
+.cec-game-error button {
+  min-width: 2rem;
+  min-height: 2rem;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(92, 33, 30, 0.1);
+  color: inherit;
+  font-size: 1.1rem;
+}
+
+.cec-rules-link {
+  display: block;
+  width: max-content;
+  margin: 0.65rem auto 0;
+  color: inherit;
+  font-size: 0.7rem;
+  opacity: 0.68;
+}
+
+/* Rules use the same visual world while remaining readable on narrow screens. */
+.cec-rules-page {
+  min-height: 100vh;
+  background: linear-gradient(#cae4f4, #f7eed2);
+}
+
+.cec-rules-main {
+  width: min(46rem, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: clamp(6rem, 13vw, 8rem) 0 3rem;
+  color: #3d281e;
+}
+
+.cec-rules-brand {
+  margin: 0;
+  color: #795730;
+  font-size: 0.8rem;
+}
+
+.cec-rules-main h1 {
+  margin: 0.2rem 0 1.25rem;
+  font-family: Georgia, serif;
+  font-size: clamp(2rem, 8vw, 3.4rem);
+}
+
+.cec-rules-main section {
+  margin: 0.8rem 0;
+  padding: clamp(0.9rem, 4vw, 1.4rem);
+  border: 1px solid rgba(75, 49, 30, 0.2);
+  border-radius: 0.8rem;
+  background: rgba(255, 253, 244, 0.72);
+}
+
+.cec-rules-main h2 {
+  margin: 0 0 0.55rem;
+  font-size: 1.05rem;
+}
+
+.cec-rules-main ul {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.cec-rules-main li {
+  margin: 0.35rem 0;
+  line-height: 1.5;
+}
+
+.cec-rules-note {
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.cec-rules-back {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.45rem;
+  background: #604128;
+  color: #fff9e8;
+  text-decoration: none;
+}
+
+@media (max-width: 34rem) {
+  .cec-faction-overlay {
+    align-items: end;
+    padding: 0;
+  }
+
+  .cec-faction-panel {
+    width: 100%;
+    max-height: 88dvh;
+    padding-right: max(1rem, env(safe-area-inset-right));
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+    padding-left: max(1rem, env(safe-area-inset-left));
+    border-right: 0;
+    border-bottom: 0;
+    border-left: 0;
+    border-radius: 1rem 1rem 0 0;
+  }
+}
+
+@media (max-height: 31rem) and (orientation: landscape) {
+  .cec-faction-overlay {
+    place-items: stretch center;
+    padding-block: max(0.35rem, env(safe-area-inset-top))
+      max(0.35rem, env(safe-area-inset-bottom));
+  }
+
+  .cec-faction-panel {
+    max-height: calc(100dvh - 0.7rem);
+    padding-block: 0.85rem;
+  }
+}

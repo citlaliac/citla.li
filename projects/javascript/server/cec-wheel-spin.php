@@ -1,5 +1,7 @@
 <?php
 require_once __DIR__ . '/perspective-helper.php';
+require_once __DIR__ . '/cec-accounts-db.php';
+require_once __DIR__ . '/cec-factions.php';
 
 cec_send_json_cors('POST, OPTIONS');
 cec_handle_options();
@@ -42,12 +44,92 @@ try {
     $data = json_decode(file_get_contents('php://input'), true);
     $sessionId = trim($data['sessionId'] ?? '');
 
+    $conn = cec_db_connect($envVars);
+    cec_ensure_tables($conn);
+    cec_accounts_ensure_tables($conn);
+    $account = cec_authenticate_request($conn);
+
+    if ($account) {
+        // Authenticated spins mutate PP on the server and participate in trickle rewards.
+        $accountId = (int) $account['id'];
+        $today = date('Y-m-d');
+        $conn->begin_transaction();
+        try {
+            $stmt = $conn->prepare(
+                'SELECT last_spin_date, debuff_until FROM cec_accounts WHERE id = ? FOR UPDATE'
+            );
+            $stmt->bind_param('i', $accountId);
+            $stmt->execute();
+            $locked = $stmt->get_result()->fetch_assoc();
+            $stmt->close();
+            if ($locked && $locked['last_spin_date'] === $today) {
+                $conn->rollback();
+                $conn->close();
+                http_response_code(409);
+                echo json_encode(['success' => false, 'error' => 'Already spun today for this worshiper.']);
+                exit();
+            }
+
+            $saint = pick_weighted_saint($SAINTS);
+            $basePoints = mt_rand($saint['ppMin'], $saint['ppMax']);
+            $debuffed = $locked['debuff_until'] && strtotime($locked['debuff_until']) > time();
+            $points = $debuffed ? max(1, (int) floor($basePoints * 0.8)) : $basePoints;
+            $eventKey = 'wheel:' . $accountId . ':' . $today;
+            $stmt = $conn->prepare(
+                'UPDATE cec_accounts
+                 SET pontifex_points = pontifex_points + ?, last_spin_date = ?, last_active_at = NOW()
+                 WHERE id = ?'
+            );
+            $stmt->bind_param('isi', $points, $today, $accountId);
+            $stmt->execute();
+            $stmt->close();
+            $metadata = json_encode(['saintId' => $saint['id'], 'debuffed' => $debuffed]);
+            $stmt = $conn->prepare(
+                'INSERT INTO cec_pp_events
+                   (event_key, actor_account_id, beneficiary_account_id, event_type, base_pp, awarded_pp, metadata_json)
+                 VALUES (?, ?, ?, \'wheel\', ?, ?, ?)'
+            );
+            $stmt->bind_param(
+                'siiiis',
+                $eventKey,
+                $accountId,
+                $accountId,
+                $basePoints,
+                $points,
+                $metadata
+            );
+            $stmt->execute();
+            $stmt->close();
+            $trickle = cec_apply_trickle($conn, $accountId, $points, $eventKey);
+            $conn->commit();
+
+            $fresh = cec_fetch_account_by_id($conn, $accountId);
+            $reigningPope = cec_get_reigning_pope($conn);
+            echo json_encode([
+                'success' => true,
+                'saintId' => $saint['id'],
+                'saintLabel' => $saint['label'],
+                'blurb' => $saint['blurb'] ?? '',
+                'points' => $points,
+                'basePoints' => $basePoints,
+                'debuffed' => $debuffed,
+                'trickle' => $trickle,
+                'worshiper' => cec_worshiper_from_row($fresh, $reigningPope),
+                'reigningPope' => $reigningPope,
+                'faction' => cec_faction_summary($conn, $accountId),
+            ]);
+            $conn->close();
+            exit();
+        } catch (Exception $e) {
+            $conn->rollback();
+            throw $e;
+        }
+    }
+
+    // Legacy local worshipers may still spin, but cannot mutate account PP.
     if ($sessionId === '' || strlen($sessionId) > 36) {
         throw new Exception('Invalid session');
     }
-
-    $conn = cec_db_connect($envVars);
-    cec_ensure_tables($conn);
 
     $today = date('Y-m-d');
     $check = $conn->prepare('SELECT id FROM cec_wheel_spins WHERE session_id = ? AND spin_date = ?');

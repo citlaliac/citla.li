@@ -47,6 +47,7 @@ import NiceWorkPage from './pages/NiceWorkPage';
 import KudosPage from './pages/KudosPage';
 import MakeKudosPage from './pages/MakeKudosPage';
 import CatholiceCloudPage from './pages/CatholiceCloudPage';
+import CecRulesPage from './cec/CecRulesPage';
 import MealsLayout from './meals/MealsLayout';
 import FinanceLayout from './finance/FinanceLayout';
 // Isolated UI playground — shares finance API, not live /finance styles/structure edits.
@@ -115,6 +116,7 @@ function App() {
           {/* Short link for Catholic e Cloud */}
           <Route path="/cloud" element={<Navigate to="/catholicecloud" replace />} />
           <Route path="/catholicecloud" element={<CatholiceCloudPage />} />
+          <Route path="/catholicecloud/rules" element={<CecRulesPage />} />
           <Route path="/catholicecloudtest" element={<CatholiceCloudPage />} />
           <Route path="/meals/*" element={<MealsLayout />} />
           <Route path="/finance/*" element={<FinanceLayout />} />

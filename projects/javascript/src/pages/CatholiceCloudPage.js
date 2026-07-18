@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { useSEO } from '../hooks/useSEO';
@@ -15,6 +16,7 @@ import CecShootingStars from '../cec/CecShootingStars';
 import CecSeasonAmbience from '../cec/CecSeasonAmbience';
 import CecSeasonDebugPicker from '../cec/CecSeasonDebugPicker';
 import CecRotateOverlay from '../cec/CecRotateOverlay';
+import CecFactionPanel from '../cec/CecFactionPanel';
 import {
   useCecLandscapeLockOnPlay,
   useCecRotateGate,
@@ -38,7 +40,6 @@ import {
   applyReigningPope,
   getAuthToken,
   setAuthToken,
-  saveWorshiper,
   saveWorshiperLocal,
   normalizeWorshiper,
   receivePortraitCommunion,
@@ -52,6 +53,7 @@ import {
   cecFetchAccount,
   cecFetchReigningPope,
   cecCheckUsernameAvailable,
+  cecClaimReward,
 } from '../cec/cecApi';
 import '../styles/CatholiceCloudPage.css';
 
@@ -115,6 +117,10 @@ function CatholiceCloudPage() {
   const [aspergillumSplash, setAspergillumSplash] = useState(false);
   const pendingAspergillumSplashRef = useRef(false);
   const [portraitCommunion, setPortraitCommunion] = useState(null);
+  const [faction, setFaction] = useState(null);
+  const [showFaction, setShowFaction] = useState(false);
+  const [smiteNotice, setSmiteNotice] = useState(null);
+  const [gameError, setGameError] = useState('');
   const { data: liturgical } = useEcclesiasticalTime();
   const [seasonOverride, setSeasonOverride] = useState(() => readSeasonThemeOverride());
   const liturgicalThemeId = liturgical.themeId ?? 'ordinary';
@@ -174,21 +180,21 @@ function CatholiceCloudPage() {
     setAuthBusy(true);
     setAuthError('');
     try {
-      const { token, worshiper: accountWorshiper, reigningPope: pope } = await cecRegisterAccount({
-        email,
-        password,
-        username,
-        avatarId: skinId,
-      });
+      const {
+        token,
+        worshiper: accountWorshiper,
+        reigningPope: pope,
+        faction: accountFaction,
+      } = await cecRegisterAccount({ email, password, username, avatarId: skinId });
       setAuthToken(token);
       if (pope !== undefined) {
         setReigningPope(pope);
         setReigningPopeState(pope);
       }
-      let w = applyAccountWorshiper(accountWorshiper, pope);
-      const { worshiper: afterReg, rankUp, papacyLost } = awardPoints(w, 'register');
-      setWorshiper(afterReg);
-      if (rankUp || papacyLost) showRankToast({ pp: 0, rankUp, papacyLost });
+      // Registration PP is already present in the authoritative account response.
+      const w = applyAccountWorshiper(accountWorshiper, pope);
+      setWorshiper(saveWorshiperLocal(w));
+      setFaction(accountFaction || null);
     } catch (err) {
       setAuthError(err.message || 'Could not create account');
     } finally {
@@ -204,16 +210,23 @@ function CatholiceCloudPage() {
     setBulletinOpen(false);
     setShowWheel(false);
     setActiveLocation(null);
+    setFaction(null);
+    setShowFaction(false);
+    setSmiteNotice(null);
+    setGameError('');
   }, []);
 
   const handleLogin = async (email, password) => {
     setAuthBusy(true);
     setAuthError('');
     try {
-      const { token, worshiper: accountWorshiper, reigningPope: pope } = await cecLoginAccount({
-        email,
-        password,
-      });
+      const {
+        token,
+        worshiper: accountWorshiper,
+        reigningPope: pope,
+        faction: accountFaction,
+        smite,
+      } = await cecLoginAccount({ email, password });
       setAuthToken(token);
       if (pope !== undefined) {
         setReigningPope(pope);
@@ -221,6 +234,8 @@ function CatholiceCloudPage() {
       }
       const w = applyAccountWorshiper(accountWorshiper, pope);
       setWorshiper(saveWorshiperLocal(w));
+      setFaction(accountFaction || null);
+      if (smite?.smote) setSmiteNotice(smite);
     } catch (err) {
       setAuthError(err.message || 'Could not log in');
     } finally {
@@ -228,14 +243,58 @@ function CatholiceCloudPage() {
     }
   };
 
-  const handleAward = useCallback(
-    (actionId, { deferToast } = {}) => {
-      if (!worshiper) return { awarded: 0 };
-      const { worshiper: next, awarded, rankUp, papacyLost } = awardPoints(worshiper, actionId);
+  const applyServerReward = useCallback(
+    (data, deferToast = false) => {
+      if (!data?.worshiper || !worshiper) return { awarded: 0 };
+      if (data.reigningPope !== undefined) {
+        setReigningPope(data.reigningPope);
+        setReigningPopeState(data.reigningPope);
+      }
+      const next = saveWorshiperLocal(
+        applyAccountWorshiper(data.worshiper, data.reigningPope)
+      );
+      const rankUp =
+        next.rank.id !== worshiper.rank.id && next.rank.id !== 'cantor' ? next.rank : null;
+      const papacyLost =
+        worshiper.rank.id === 'pope' && next.rank.id !== 'pope'
+          ? {
+              reigningPopeName: data.reigningPope?.displayName || 'another worshiper',
+              pointsNeeded: Math.max(
+                0,
+                (data.reigningPope?.pontifexPoints || 3000) - next.pontifexPoints + 1
+              ),
+            }
+          : null;
+      const awarded = data.reward?.awarded || 0;
+      setFaction(data.faction || null);
       applyWorshiper(next, { awarded, rankUp, papacyLost }, deferToast);
-      return { awarded };
+      return { awarded, rankUp, papacyLost, rewardKind: data.reward?.rewardKind };
     },
     [worshiper, applyWorshiper]
+  );
+
+  const handleAward = useCallback(
+    async (actionId, { deferToast } = {}) => {
+      if (!worshiper) return { awarded: 0 };
+      const token = getAuthToken();
+      if (worshiper.accountId && token) {
+        try {
+          const data = await cecClaimReward(token, 'action', actionId);
+          return applyServerReward(data, deferToast);
+        } catch (err) {
+          setGameError(err.message || 'Could not record reward');
+          return { awarded: 0 };
+        }
+      }
+      // Local guests keep the existing non-competitive reward experience.
+      const { worshiper: next, awarded, rankUp, papacyLost } = awardPoints(
+        worshiper,
+        actionId
+      );
+      applyWorshiper(next, { awarded, rankUp, papacyLost }, deferToast);
+      return { awarded, rankUp, papacyLost };
+    },
+    [worshiper, applyServerReward, applyWorshiper]
   );
 
   const endAspergillumSplash = useCallback(() => setAspergillumSplash(false), []);
@@ -254,7 +313,7 @@ function CatholiceCloudPage() {
     setActiveLocation(loc);
   };
 
-  const dismissAmen = () => {
+  const dismissAmen = async () => {
     if (!activeLocation) return;
     const playAspergillumSplash =
       pendingAspergillumSplashRef.current && activeLocation.id === 'aspergillum';
@@ -262,47 +321,72 @@ function CatholiceCloudPage() {
       pendingAspergillumSplashRef.current = false;
     }
     setAmenSparkle(true);
-    setWorshiper((w) => {
-      if (!w) return w;
-      let next = w;
-      let amenPart = { awarded: 0, rankUp: null, papacyLost: null };
-      if (canAwardAmenDiscovery(w, activeLocation.id)) {
-        const result = awardAmenDiscovery(w, activeLocation.id);
-        next = result.worshiper;
-        amenPart = {
-          awarded: result.awarded,
-          rankUp: result.rankUp,
-          papacyLost: result.papacyLost,
-        };
+    let amenPart = { awarded: 0, rankUp: null, papacyLost: null };
+    try {
+      const token = getAuthToken();
+      if (worshiper.accountId && token) {
+        const data = await cecClaimReward(token, 'amen', activeLocation.id);
+        amenPart = applyServerReward(data, true);
+      } else if (canAwardAmenDiscovery(worshiper, activeLocation.id)) {
+        const result = awardAmenDiscovery(worshiper, activeLocation.id);
+        setWorshiper(result.worshiper);
+        amenPart = result;
       }
-      setPendingReward((prev) => {
-        const flush = mergeReward(prev, amenPart);
-        window.setTimeout(() => {
-          setActiveLocation(null);
-          setAmenSparkle(false);
-          if (playAspergillumSplash) {
-            setAspergillumSplash(true);
-          }
-          if (flush.rankUp || flush.papacyLost) {
-            showRankToast(flush);
-          }
-        }, AMEN_BURST_MS);
-        return null;
-      });
-      return next;
+    } catch (err) {
+      setGameError(err.message || 'Could not record Amen');
+    }
+    setPendingReward((prev) => {
+      const flush = mergeReward(prev, amenPart);
+      window.setTimeout(() => {
+        setActiveLocation(null);
+        setAmenSparkle(false);
+        if (playAspergillumSplash) {
+          setAspergillumSplash(true);
+        }
+        if (flush.rankUp || flush.papacyLost) {
+          showRankToast(flush);
+        }
+      }, AMEN_BURST_MS);
+      return null;
     });
   };
 
-  const handleWheelResult = (points) => {
+  const handleWheelResult = (result) => {
     if (!worshiper) return;
-    const { worshiper: next, rankUp, papacyLost } = addWheelPoints(worshiper, points);
-    applyWorshiper(next, { awarded: points, rankUp, papacyLost });
+    if (result.worshiper) {
+      applyServerReward({ ...result, reward: { awarded: result.points } });
+      return;
+    }
+    const { worshiper: next, rankUp, papacyLost } = addWheelPoints(
+      worshiper,
+      result.points
+    );
+    applyWorshiper(next, { awarded: result.points, rankUp, papacyLost });
   };
 
-  const handlePortraitCommunion = () => {
+  const handlePortraitCommunion = async () => {
     if (!worshiper || portraitCommunion) return;
-    const result = receivePortraitCommunion(worshiper);
-    setWorshiper(result.worshiper);
+    let result;
+    const token = getAuthToken();
+    if (worshiper.accountId && token) {
+      try {
+        const data = await cecClaimReward(token, 'communion');
+        const applied = applyServerReward(data);
+        result = {
+          kind: applied.rewardKind,
+          awarded: applied.awarded,
+          // The authoritative response already handled any rank transition.
+          rankUp: null,
+          papacyLost: null,
+        };
+      } catch (err) {
+        setGameError(err.message || 'Could not receive communion');
+        return;
+      }
+    } else {
+      result = receivePortraitCommunion(worshiper);
+      setWorshiper(result.worshiper);
+    }
     setPortraitCommunion({
       kind: result.kind,
       awarded: result.awarded,
@@ -365,6 +449,9 @@ function CatholiceCloudPage() {
       if (data.reigningPope !== undefined) {
         setReigningPopeState(data.reigningPope);
       }
+      if (data.faction !== undefined) {
+        setFaction(data.faction);
+      }
       setWorshiper((w) => {
         let next = w;
         if (data.worshiper && w?.accountId) {
@@ -425,13 +512,15 @@ function CatholiceCloudPage() {
     }
     let cancelled = false;
     cecFetchAccount(token)
-      .then(({ worshiper: accountWorshiper, reigningPope: pope }) => {
+      .then(({ worshiper: accountWorshiper, reigningPope: pope, faction: accountFaction, smite }) => {
         if (cancelled) return;
         if (pope !== undefined) {
           setReigningPope(pope);
           setReigningPopeState(pope);
         }
         setWorshiper(saveWorshiperLocal(applyAccountWorshiper(accountWorshiper, pope)));
+        setFaction(accountFaction || null);
+        if (smite?.smote) setSmiteNotice(smite);
       })
       .catch(() => {
         if (!cancelled) setAuthToken(null);
@@ -571,8 +660,12 @@ function CatholiceCloudPage() {
           <CecWorshiperStage
             worshiper={worshiper}
             reigningPope={reigningPope}
+            faction={faction}
             starPalette={seasonTheme.starPalette}
             onPortraitClick={handlePortraitCommunion}
+            onCongregationClick={
+              worshiper.accountId ? () => setShowFaction(true) : undefined
+            }
             onLogout={worshiper.accountId ? handleLogout : undefined}
           />
           <div className="cec-layout">
@@ -595,11 +688,11 @@ function CatholiceCloudPage() {
                 aria-live="polite"
                 aria-label={
                   reigningPope
-                    ? `Current Pope: ${reigningPope.displayName}`
-                    : `Current Pope: ${SEDE_VACANTE_LABEL}`
+                    ? `Supreme Pope: ${reigningPope.displayName}`
+                    : `Supreme Pope: ${SEDE_VACANTE_LABEL}`
                 }
               >
-                Current Pope:{' '}
+                Supreme Pope:{' '}
                 {reigningPope ? (
                   <strong>{reigningPope.displayName}</strong>
                 ) : (
@@ -610,6 +703,9 @@ function CatholiceCloudPage() {
           </div>
         </div>
         <p className="cec-bottom-tagline">Heaven on earth? This is heaven online.</p>
+        <Link className="cec-rules-link" to="/catholicecloud/rules">
+          Rules
+        </Link>
       </main>
 
       <Footer />
@@ -634,8 +730,10 @@ function CatholiceCloudPage() {
           onPartake={() => handleAward('fish_fry', { deferToast: true })}
           onRosaryComplete={() => handleAward('rosary', { deferToast: true })}
           onLightCandle={() => handleAward('candle', { deferToast: true })}
-          onActionDone={() => {
-            const { awarded } = handleAward(activeLocation.actionId, { deferToast: true });
+          onActionDone={async () => {
+            const { awarded } = await handleAward(activeLocation.actionId, {
+              deferToast: true,
+            });
             if (activeLocation.id === 'aspergillum' && awarded > 0) {
               pendingAspergillumSplashRef.current = true;
             }
@@ -655,8 +753,35 @@ function CatholiceCloudPage() {
         <CecSaintWheel
           worshiper={worshiper}
           onClose={() => setShowWheel(false)}
-          onSpinResult={(points) => handleWheelResult(points)}
+          onSpinResult={handleWheelResult}
         />
+      )}
+
+      {showFaction && (
+        <CecFactionPanel
+          initialFaction={faction}
+          onChange={setFaction}
+          onClose={() => setShowFaction(false)}
+        />
+      )}
+
+      {smiteNotice && (
+        <div className="cec-smite-notice" role="alert">
+          <strong>You were smote.</strong> You lost {smiteNotice.lostPP} PP and rewards are
+          weakened for 48 hours.
+          <button type="button" onClick={() => setSmiteNotice(null)}>
+            Amen
+          </button>
+        </div>
+      )}
+
+      {gameError && (
+        <div className="cec-game-error" role="alert">
+          {gameError}
+          <button type="button" onClick={() => setGameError('')} aria-label="Dismiss">
+            ×
+          </button>
+        </div>
       )}
 
       {portraitCommunion && (

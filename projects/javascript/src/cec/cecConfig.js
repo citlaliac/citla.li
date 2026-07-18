@@ -16,14 +16,14 @@ export const POPE_INACTIVITY_MONTHS = 3;
 
 export const SEDE_VACANTE_LABEL = 'Sede Vacante';
 
-/** Short hover bullets for reigning Pope rank. */
+/** Short hover bullets for the Supreme Pope rank. */
 export function papacyRulesBullets() {
   const pp = POPE_RANK.minPP;
   const months = POPE_INACTIVITY_MONTHS;
   return [
-    'One reigning Pope among registered accounts',
-    `Most PP (${pp}+) wins the throne`,
-    'A rival with more PP unseats you',
+    'One Supreme Pope among active congregation founders',
+    `Founders need ${pp}+ PP to remain eligible`,
+    'The eligible founder with most PP holds the throne',
     `No login or play for ${months} months — lose the Papacy`,
     `Throne empty? ${SEDE_VACANTE_LABEL}`,
   ];

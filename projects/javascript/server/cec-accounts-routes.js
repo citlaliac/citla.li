@@ -3,6 +3,14 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcryptjs');
+const {
+  factionSummary,
+  previewSponsor,
+  foundFaction,
+  joinFaction,
+  resolveDueSmite,
+  claimReward,
+} = require('./cec-factions');
 
 const RANKS = [
   { id: 'cantor', label: 'Cantor', minPP: 0 },
@@ -39,16 +47,29 @@ async function touchAccountActivity(connection, accountId) {
 }
 
 async function getReigningPope(connection) {
-  const [rows] = await connection.execute(
+  let [rows] = await connection.execute(
     `SELECT id, display_name, pontifex_points
-     FROM cec_accounts
-     WHERE email IS NOT NULL
-       AND pontifex_points >= ?
-       AND last_active_at >= DATE_SUB(NOW(), INTERVAL ? MONTH)
-     ORDER BY pontifex_points DESC, id ASC
+     FROM cec_accounts a
+     JOIN cec_factions f ON f.founder_account_id = a.id AND f.status = 'active'
+     WHERE a.email IS NOT NULL
+       AND a.pontifex_points >= ?
+       AND a.last_active_at >= DATE_SUB(NOW(), INTERVAL ? MONTH)
+     ORDER BY a.pontifex_points DESC, a.id ASC
      LIMIT 1`,
     [POPE_MIN_PP, POPE_INACTIVITY_MONTHS]
   );
+  if (!rows[0]) {
+    // Preserve the former reigning-Pope behavior until a congregation exists.
+    [rows] = await connection.execute(
+      `SELECT id, display_name, pontifex_points
+       FROM cec_accounts
+       WHERE email IS NOT NULL
+         AND pontifex_points >= ?
+         AND last_active_at >= DATE_SUB(NOW(), INTERVAL ? MONTH)
+       ORDER BY pontifex_points DESC, id ASC LIMIT 1`,
+      [POPE_MIN_PP, POPE_INACTIVITY_MONTHS]
+    );
+  }
   if (!rows[0]) return null;
   return {
     accountId: Number(rows[0].id),
@@ -89,6 +110,8 @@ function worshiperFromRow(row, reigningPope = null) {
     completedActions: Array.isArray(completedActions) ? completedActions : [],
     actionLastDone: actionLastDone && typeof actionLastDone === 'object' ? actionLastDone : {},
     lastSpinDate: row.last_spin_date || null,
+    nextSmiteAt: row.next_smite_at || null,
+    debuffUntil: row.debuff_until || null,
   };
 }
 
@@ -128,11 +151,14 @@ function normalizeLoginId(raw) {
 async function ensureCecAccountTables(connection) {
   if (tablesReady) return;
   const schemaPath = path.join(__dirname, 'schema-cec-accounts.sql');
-  const sql = fs.readFileSync(schemaPath, 'utf8');
+  // Strip line comments before splitting; otherwise a leading comment can hide a CREATE statement.
+  const sql = fs
+    .readFileSync(schemaPath, 'utf8')
+    .replace(/^\s*--.*$/gm, '');
   const statements = sql
     .split(';')
     .map((s) => s.trim())
-    .filter((s) => s && !s.startsWith('--'));
+    .filter(Boolean);
   for (const stmt of statements) {
     await connection.query(stmt);
   }
@@ -163,6 +189,26 @@ async function ensureCecAccountTables(connection) {
   } catch {
     /* ignore */
   }
+  const additiveAccountColumns = [
+    'ADD COLUMN pp_milli_remainder INT NOT NULL DEFAULT 0 AFTER last_active_at',
+    'ADD COLUMN next_smite_at DATETIME NULL AFTER pp_milli_remainder',
+    'ADD COLUMN debuff_until DATETIME NULL AFTER next_smite_at',
+  ];
+  for (const ddl of additiveAccountColumns) {
+    try {
+      await connection.query(`ALTER TABLE cec_accounts ${ddl}`);
+    } catch {
+      /* already migrated */
+    }
+  }
+  // Acknowledge existing PP without changing balances.
+  await connection.query(
+    `INSERT IGNORE INTO cec_pp_events
+       (event_key, actor_account_id, beneficiary_account_id, event_type, base_pp, awarded_pp)
+     SELECT CONCAT('opening-balance:', id), id, id, 'opening_balance', pontifex_points, 0
+     FROM cec_accounts
+     WHERE email IS NOT NULL`
+  );
   tablesReady = true;
   if (isLocalDevCec()) {
     await ensureDevCitlaliAccount(connection);
@@ -317,17 +363,29 @@ function registerCecAccountRoutes(app, getConnection) {
       }
 
       const passwordHash = await bcrypt.hash(password, 10);
+      const registeredAt = Date.now();
       const [result] = await req.cecDb.execute(
         `INSERT INTO cec_accounts (email, password_hash, display_name, avatar_id, pontifex_points, completed_actions, action_last_done)
-         VALUES (?, ?, ?, ?, 0, '[]', '{}')`,
-        [email, passwordHash, displayName, avatarId]
+         VALUES (?, ?, ?, ?, 28, '["register"]', ?)`,
+        [email, passwordHash, displayName, avatarId, JSON.stringify({ register: registeredAt })]
       );
       const accountId = result.insertId;
+      await req.cecDb.execute(
+        `INSERT IGNORE INTO cec_pp_events
+           (event_key, actor_account_id, beneficiary_account_id, event_type, base_pp, awarded_pp)
+         VALUES (?, ?, ?, 'register', 28, 28)`,
+        [`register:${accountId}`, accountId, accountId]
+      );
       await touchAccountActivity(req.cecDb, accountId);
       const row = await fetchAccountById(req.cecDb, accountId);
       const token = await issueSessionToken(req.cecDb, accountId);
       const reigningPope = await getReigningPope(req.cecDb);
-      jsonOk(res, { token, worshiper: worshiperFromRow(row, reigningPope), reigningPope });
+      jsonOk(res, {
+        token,
+        worshiper: worshiperFromRow(row, reigningPope),
+        reigningPope,
+        faction: await factionSummary(req.cecDb, accountId),
+      });
     } catch (error) {
       if (error.code === 'ER_DUP_ENTRY') {
         return jsonError(res, 'Email or username is already in use', 409);
@@ -347,7 +405,12 @@ function registerCecAccountRoutes(app, getConnection) {
         const token = await issueSessionToken(req.cecDb, row.id);
         const fresh = await fetchAccountById(req.cecDb, row.id);
         const reigningPope = await getReigningPope(req.cecDb);
-        jsonOk(res, { token, worshiper: worshiperFromRow(fresh, reigningPope), reigningPope });
+        jsonOk(res, {
+          token,
+          worshiper: worshiperFromRow(fresh, reigningPope),
+          reigningPope,
+          faction: await factionSummary(req.cecDb, row.id),
+        });
         return;
       }
 
@@ -362,11 +425,18 @@ function registerCecAccountRoutes(app, getConnection) {
       if (!row || !row.password_hash || !(await bcrypt.compare(password, row.password_hash))) {
         return jsonError(res, 'Invalid email or password', 401);
       }
+      const smite = await resolveDueSmite(req.cecDb, row.id);
       await touchAccountActivity(req.cecDb, row.id);
       const fresh = await fetchAccountById(req.cecDb, row.id);
       const token = await issueSessionToken(req.cecDb, row.id);
       const reigningPope = await getReigningPope(req.cecDb);
-      jsonOk(res, { token, worshiper: worshiperFromRow(fresh, reigningPope), reigningPope });
+      jsonOk(res, {
+        token,
+        worshiper: worshiperFromRow(fresh, reigningPope),
+        reigningPope,
+        faction: await factionSummary(req.cecDb, row.id),
+        smite,
+      });
     } catch (error) {
       jsonError(res, error.message || 'Login failed', 500);
     }
@@ -376,10 +446,16 @@ function registerCecAccountRoutes(app, getConnection) {
     try {
       const row = await authenticateRequest(req.cecDb, req);
       if (!row) return jsonError(res, 'Not authenticated', 401);
+      const smite = await resolveDueSmite(req.cecDb, row.id);
       await touchAccountActivity(req.cecDb, row.id);
       const fresh = await fetchAccountById(req.cecDb, row.id);
       const reigningPope = await getReigningPope(req.cecDb);
-      jsonOk(res, { worshiper: worshiperFromRow(fresh, reigningPope), reigningPope });
+      jsonOk(res, {
+        worshiper: worshiperFromRow(fresh, reigningPope),
+        reigningPope,
+        faction: await factionSummary(req.cecDb, row.id),
+        smite,
+      });
     } catch (error) {
       jsonError(res, error.message || 'Failed to load account', 500);
     }
@@ -395,39 +471,88 @@ function registerCecAccountRoutes(app, getConnection) {
         body.displayName != null ? String(body.displayName).trim() : row.display_name
       ).slice(0, 24);
       const avatarId = body.avatarId != null ? String(body.avatarId).trim() : row.avatar_id;
-      const pontifexPoints = Math.max(
-        Number(row.pontifex_points) || 0,
-        body.pontifexPoints != null ? parseInt(body.pontifexPoints, 10) || 0 : Number(row.pontifex_points) || 0
-      );
-      const completedActions = JSON.stringify(
-        body.completedActions != null ? body.completedActions : JSON.parse(row.completed_actions || '[]')
-      );
-      const actionLastDone = JSON.stringify(
-        body.actionLastDone != null ? body.actionLastDone : JSON.parse(row.action_last_done || '{}')
-      );
-      const lastSpinDate = body.lastSpinDate !== undefined ? body.lastSpinDate || null : row.last_spin_date;
 
+      // Account progress is server-owned; this endpoint only updates profile fields.
       await req.cecDb.execute(
         `UPDATE cec_accounts
-         SET display_name = ?, avatar_id = ?, pontifex_points = ?,
-             completed_actions = ?, action_last_done = ?, last_spin_date = ?,
-             last_active_at = NOW()
+         SET display_name = ?, avatar_id = ?, last_active_at = NOW()
          WHERE id = ?`,
-        [
-          displayName,
-          avatarId,
-          pontifexPoints,
-          completedActions,
-          actionLastDone,
-          lastSpinDate,
-          row.id,
-        ]
+        [displayName, avatarId, row.id]
       );
       const updated = await fetchAccountById(req.cecDb, row.id);
       const reigningPope = await getReigningPope(req.cecDb);
-      jsonOk(res, { worshiper: worshiperFromRow(updated, reigningPope), reigningPope });
+      jsonOk(res, {
+        worshiper: worshiperFromRow(updated, reigningPope),
+        reigningPope,
+        faction: await factionSummary(req.cecDb, row.id),
+      });
     } catch (error) {
       jsonError(res, error.message || 'Failed to save account', 500);
+    }
+  });
+
+  router.get('/faction', async (req, res) => {
+    try {
+      const row = await authenticateRequest(req.cecDb, req);
+      if (!row) return jsonError(res, 'Not authenticated', 401);
+      jsonOk(res, { faction: await factionSummary(req.cecDb, row.id) });
+    } catch (error) {
+      jsonError(res, error.message || 'Failed to load congregation', 500);
+    }
+  });
+
+  router.get('/faction/preview', async (req, res) => {
+    try {
+      const row = await authenticateRequest(req.cecDb, req);
+      if (!row) return jsonError(res, 'Not authenticated', 401);
+      const preview = await previewSponsor(req.cecDb, req.query.code);
+      if (!preview) return jsonError(res, 'No congregation member has that character name', 404);
+      jsonOk(res, { preview });
+    } catch (error) {
+      jsonError(res, error.message || 'Failed to find congregation', 500);
+    }
+  });
+
+  router.post('/faction/found', async (req, res) => {
+    try {
+      const row = await authenticateRequest(req.cecDb, req);
+      if (!row) return jsonError(res, 'Not authenticated', 401);
+      jsonOk(res, { faction: await foundFaction(req.cecDb, row.id) });
+    } catch (error) {
+      jsonError(res, error.message || 'Could not found congregation', 409);
+    }
+  });
+
+  router.post('/faction/join', async (req, res) => {
+    try {
+      const row = await authenticateRequest(req.cecDb, req);
+      if (!row) return jsonError(res, 'Not authenticated', 401);
+      jsonOk(res, { faction: await joinFaction(req.cecDb, row.id, req.body?.code) });
+    } catch (error) {
+      jsonError(res, error.message || 'Could not join congregation', 409);
+    }
+  });
+
+  router.post('/reward', async (req, res) => {
+    try {
+      const row = await authenticateRequest(req.cecDb, req);
+      if (!row) return jsonError(res, 'Not authenticated', 401);
+      const reward = await claimReward(
+        req.cecDb,
+        row.id,
+        String(req.body?.rewardType || ''),
+        String(req.body?.actionId || '')
+      );
+      const updated = await fetchAccountById(req.cecDb, row.id);
+      const reigningPope = await getReigningPope(req.cecDb);
+      jsonOk(res, {
+        reward,
+        worshiper: worshiperFromRow(updated, reigningPope),
+        reigningPope,
+        faction: await factionSummary(req.cecDb, row.id),
+      });
+    } catch (error) {
+      jsonError(res, error.message || 'Reward failed', 400);
     }
   });
 

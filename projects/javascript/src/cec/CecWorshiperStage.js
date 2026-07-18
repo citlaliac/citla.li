@@ -6,7 +6,9 @@ import { getSeasonStarNameStyle } from './cecSeasonTheme';
 function CecWorshiperStage({
   worshiper,
   reigningPope,
+  faction,
   onPortraitClick,
+  onCongregationClick,
   onLogout,
   starPalette = 'gold',
 }) {
@@ -70,6 +72,21 @@ function CecWorshiperStage({
         <span className="cec-worshiper-stage-pp-label">Pontifex Points</span>
         <strong className="cec-worshiper-stage-pp-value">{worshiper.pontifexPoints}</strong>
       </div>
+
+      {onCongregationClick && (
+        <button
+          type="button"
+          className="cec-worshiper-stage-congregation"
+          onClick={onCongregationClick}
+        >
+          Congregation
+          {faction?.joined ? (
+            <span>{faction.descendantFollowers} followers</span>
+          ) : (
+            <span>Join or found one</span>
+          )}
+        </button>
+      )}
 
       {upcoming ? (
         <p className="cec-worshiper-stage-next">

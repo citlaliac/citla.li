@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { WHEEL_SAINTS } from './cecConfig';
 import { saintImageUrl } from './cecAssets';
 import CecSaintResultPopup from './CecSaintResultPopup';
+import { cecAuthHeaders } from './cecApi';
 
 const SEGMENT_COUNT = WHEEL_SAINTS.length;
 const SLICE_DEG = 360 / SEGMENT_COUNT;
@@ -80,7 +81,7 @@ function CecSaintWheel({ worshiper, onClose, onSpinResult }) {
     try {
       const res = await fetch('/cec-wheel-spin.php', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...cecAuthHeaders() },
         body: JSON.stringify({ sessionId: worshiper.sessionId }),
       });
       const payload = await res.json();
@@ -107,7 +108,7 @@ function CecSaintWheel({ worshiper, onClose, onSpinResult }) {
 
       window.setTimeout(() => {
         setResult(data);
-        if (data.points > 0) onSpinResult(data.points, data.saintLabel);
+        if (data.points > 0) onSpinResult(data);
         setSpinning(false);
       }, 2800);
     } catch (err) {

@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/cec-accounts-db.php';
+require_once __DIR__ . '/cec-factions.php';
 
 cec_accounts_send_json_cors('GET, POST, PATCH, OPTIONS');
 cec_handle_options();
@@ -33,8 +34,12 @@ try {
         }
     } elseif ($resource === 'pope' && $method === 'GET') {
         cec_handle_pope_get($conn);
+    } elseif ($resource === 'faction') {
+        cec_handle_faction($conn, $method, $action);
+    } elseif ($resource === 'reward' && $method === 'POST') {
+        cec_handle_reward($conn);
     } else {
-        cec_accounts_json_error('Unknown resource. Use resource=auth|names|me|pope', 404);
+        cec_accounts_json_error('Unknown resource. Use resource=auth|names|me|pope|faction|reward', 404);
     }
 
     $conn->close();
@@ -74,15 +79,16 @@ function cec_handle_auth_register($conn) {
     }
 
     $hash = password_hash($password, PASSWORD_DEFAULT);
-    $emptyJson = '[]';
-    $emptyObj = '{}';
-    $zero = 0;
+    $emptyJson = '["register"]';
+    $nowMs = (int) round(microtime(true) * 1000);
+    $emptyObj = json_encode(['register' => $nowMs]);
+    $registerPP = 28;
 
     $stmt = $conn->prepare(
         'INSERT INTO cec_accounts (email, password_hash, display_name, avatar_id, pontifex_points, completed_actions, action_last_done)
          VALUES (?, ?, ?, ?, ?, ?, ?)'
     );
-    $stmt->bind_param('ssssiss', $email, $hash, $displayName, $avatarId, $zero, $emptyJson, $emptyObj);
+    $stmt->bind_param('ssssiss', $email, $hash, $displayName, $avatarId, $registerPP, $emptyJson, $emptyObj);
     if (!$stmt->execute()) {
         if ($conn->errno === 1062) {
             cec_accounts_json_error('Email or username is already in use', 409);
@@ -97,10 +103,29 @@ function cec_handle_auth_register($conn) {
     $row = cec_fetch_account_by_id($conn, $accountId);
     $token = cec_issue_session_token($conn, $accountId);
     $reigningPope = cec_get_reigning_pope($conn);
+    $eventKey = 'register:' . $accountId;
+    $eventType = 'register';
+    $stmt = $conn->prepare(
+        'INSERT IGNORE INTO cec_pp_events
+           (event_key, actor_account_id, beneficiary_account_id, event_type, base_pp, awarded_pp)
+         VALUES (?, ?, ?, ?, ?, ?)'
+    );
+    $stmt->bind_param(
+        'siisii',
+        $eventKey,
+        $accountId,
+        $accountId,
+        $eventType,
+        $registerPP,
+        $registerPP
+    );
+    $stmt->execute();
+    $stmt->close();
     cec_accounts_json_ok([
         'token' => $token,
         'worshiper' => cec_worshiper_from_row($row, $reigningPope),
         'reigningPope' => $reigningPope,
+        'faction' => cec_faction_summary($conn, $accountId),
     ]);
 }
 
@@ -126,6 +151,7 @@ function cec_handle_auth_login($conn) {
         cec_accounts_json_error('Invalid email or password', 401);
     }
 
+    $smite = cec_resolve_due_smite($conn, (int) $row['id']);
     cec_touch_account_activity($conn, (int) $row['id']);
     $row = cec_fetch_account_by_id($conn, (int) $row['id']);
     $token = cec_issue_session_token($conn, (int) $row['id']);
@@ -134,6 +160,8 @@ function cec_handle_auth_login($conn) {
         'token' => $token,
         'worshiper' => cec_worshiper_from_row($row, $reigningPope),
         'reigningPope' => $reigningPope,
+        'faction' => cec_faction_summary($conn, (int) $row['id']),
+        'smite' => $smite,
     ]);
 }
 
@@ -146,12 +174,15 @@ function cec_handle_me_get($conn) {
     if (!$row) {
         cec_accounts_json_error('Not authenticated', 401);
     }
+    $smite = cec_resolve_due_smite($conn, (int) $row['id']);
     cec_touch_account_activity($conn, (int) $row['id']);
     $row = cec_fetch_account_by_id($conn, (int) $row['id']);
     $reigningPope = cec_get_reigning_pope($conn);
     cec_accounts_json_ok([
         'worshiper' => cec_worshiper_from_row($row, $reigningPope),
         'reigningPope' => $reigningPope,
+        'faction' => cec_faction_summary($conn, (int) $row['id']),
+        'smite' => $smite,
     ]);
 }
 
@@ -170,36 +201,13 @@ function cec_handle_me_patch($conn) {
     $avatarId = array_key_exists('avatarId', $body)
         ? trim((string) $body['avatarId'])
         : $row['avatar_id'];
-    $pontifexPoints = array_key_exists('pontifexPoints', $body)
-        ? max((int) $row['pontifex_points'], max(0, (int) $body['pontifexPoints']))
-        : (int) $row['pontifex_points'];
-    $completedActions = array_key_exists('completedActions', $body)
-        ? json_encode($body['completedActions'])
-        : $row['completed_actions'];
-    $actionLastDone = array_key_exists('actionLastDone', $body)
-        ? json_encode($body['actionLastDone'])
-        : $row['action_last_done'];
-    $lastSpinDate = array_key_exists('lastSpinDate', $body)
-        ? ($body['lastSpinDate'] ?: null)
-        : $row['last_spin_date'];
-
+    // Progress is server-owned; PATCH /me remains a narrow profile update.
     $stmt = $conn->prepare(
         'UPDATE cec_accounts
-         SET display_name = ?, avatar_id = ?, pontifex_points = ?,
-             completed_actions = ?, action_last_done = ?, last_spin_date = ?,
-             last_active_at = NOW()
+         SET display_name = ?, avatar_id = ?, last_active_at = NOW()
          WHERE id = ?'
     );
-    $stmt->bind_param(
-        'ssisssi',
-        $displayName,
-        $avatarId,
-        $pontifexPoints,
-        $completedActions,
-        $actionLastDone,
-        $lastSpinDate,
-        $accountId
-    );
+    $stmt->bind_param('ssi', $displayName, $avatarId, $accountId);
     $stmt->execute();
     $stmt->close();
 
@@ -208,7 +216,70 @@ function cec_handle_me_patch($conn) {
     cec_accounts_json_ok([
         'worshiper' => cec_worshiper_from_row($updated, $reigningPope),
         'reigningPope' => $reigningPope,
+        'faction' => cec_faction_summary($conn, $accountId),
     ]);
+}
+
+function cec_handle_faction($conn, $method, $action) {
+    $row = cec_authenticate_request($conn);
+    if (!$row) {
+        cec_accounts_json_error('Not authenticated', 401);
+    }
+    $accountId = (int) $row['id'];
+    if ($method === 'GET' && $action === 'preview') {
+        $preview = cec_preview_sponsor($conn, $_GET['code'] ?? '');
+        if (!$preview) {
+            cec_accounts_json_error('No congregation member has that character name', 404);
+        }
+        cec_accounts_json_ok(['preview' => $preview]);
+    }
+    if ($method === 'GET') {
+        cec_accounts_json_ok(['faction' => cec_faction_summary($conn, $accountId)]);
+    }
+    if ($method === 'POST' && $action === 'found') {
+        try {
+            cec_accounts_json_ok(['faction' => cec_found_faction($conn, $accountId)]);
+        } catch (Exception $e) {
+            cec_accounts_json_error($e->getMessage(), 409);
+        }
+    }
+    if ($method === 'POST' && $action === 'join') {
+        $body = cec_accounts_read_json_body();
+        try {
+            cec_accounts_json_ok([
+                'faction' => cec_join_faction($conn, $accountId, $body['code'] ?? ''),
+            ]);
+        } catch (Exception $e) {
+            cec_accounts_json_error($e->getMessage(), 409);
+        }
+    }
+    cec_accounts_json_error('Unknown faction action', 404);
+}
+
+function cec_handle_reward($conn) {
+    $row = cec_authenticate_request($conn);
+    if (!$row) {
+        cec_accounts_json_error('Not authenticated', 401);
+    }
+    $body = cec_accounts_read_json_body();
+    try {
+        $reward = cec_claim_reward(
+            $conn,
+            (int) $row['id'],
+            $body['rewardType'] ?? '',
+            $body['actionId'] ?? ''
+        );
+        $updated = cec_fetch_account_by_id($conn, (int) $row['id']);
+        $reigningPope = cec_get_reigning_pope($conn);
+        cec_accounts_json_ok([
+            'reward' => $reward,
+            'worshiper' => cec_worshiper_from_row($updated, $reigningPope),
+            'reigningPope' => $reigningPope,
+            'faction' => cec_faction_summary($conn, (int) $row['id']),
+        ]);
+    } catch (Exception $e) {
+        cec_accounts_json_error($e->getMessage(), 400);
+    }
 }
 
 function cec_fetch_account_by_id($conn, $accountId) {
