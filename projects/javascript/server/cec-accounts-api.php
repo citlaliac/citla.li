@@ -227,11 +227,15 @@ function cec_handle_faction($conn, $method, $action) {
     }
     $accountId = (int) $row['id'];
     if ($method === 'GET' && $action === 'preview') {
-        $preview = cec_preview_sponsor($conn, $_GET['code'] ?? '');
-        if (!$preview) {
-            cec_accounts_json_error('No congregation member has that character name', 404);
+        try {
+            $preview = cec_preview_sponsor($conn, $_GET['code'] ?? '');
+            if (!$preview) {
+                cec_accounts_json_error('No worshiper has that character name', 404);
+            }
+            cec_accounts_json_ok(['preview' => $preview]);
+        } catch (Exception $e) {
+            cec_accounts_json_error($e->getMessage(), 409);
         }
-        cec_accounts_json_ok(['preview' => $preview]);
     }
     if ($method === 'GET') {
         cec_accounts_json_ok(['faction' => cec_faction_summary($conn, $accountId)]);

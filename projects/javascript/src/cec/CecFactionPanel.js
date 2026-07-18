@@ -26,6 +26,8 @@ function CecFactionPanel({ initialFaction, onChange, onClose }) {
   const [faction, setFaction] = useState(initialFaction);
   const [code, setCode] = useState('');
   const [preview, setPreview] = useState(null);
+  // loading = first fetch; busy = a user action. Only busy should block clicks.
+  const [loading, setLoading] = useState(() => !!getAuthToken());
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const token = getAuthToken();
@@ -35,10 +37,13 @@ function CecFactionPanel({ initialFaction, onChange, onClose }) {
     // A local guest can inspect the complete modal without a production database.
     if (!token) {
       setFaction(initialFaction);
+      setLoading(false);
       return undefined;
     }
     let cancelled = false;
-    setBusy(true);
+    setLoading(true);
+    // Fetch once when the panel opens — do not re-run when parent faction state updates,
+    // or Look up / Confirm stay disabled (cursor: not-allowed) forever.
     cecFetchFaction(token)
       .then((next) => {
         if (!cancelled) {
@@ -50,12 +55,13 @@ function CecFactionPanel({ initialFaction, onChange, onClose }) {
         if (!cancelled) setError(err.message);
       })
       .finally(() => {
-        if (!cancelled) setBusy(false);
+        if (!cancelled) setLoading(false);
       });
     return () => {
       cancelled = true;
     };
-  }, [initialFaction, onChange, token]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mount/token only
+  }, [token]);
 
   const commitFaction = (next) => {
     setFaction(next);
@@ -166,7 +172,7 @@ function CecFactionPanel({ initialFaction, onChange, onClose }) {
           <p className="cec-faction-preview-note">Local UI preview · no account changes are saved</p>
         ) : null}
 
-        {busy && !faction ? <p className="cec-faction-loading">Opening the parish books…</p> : null}
+        {loading && !faction ? <p className="cec-faction-loading">Opening the parish books…</p> : null}
 
         {faction?.joined ? (
           <div className="cec-faction-summary">
@@ -208,10 +214,17 @@ function CecFactionPanel({ initialFaction, onChange, onClose }) {
           </div>
         ) : null}
 
-        {faction?.canFound ? (
+        {faction?.canFound && faction.joined ? (
           <button type="button" className="cec-faction-primary" onClick={handleFound} disabled={busy}>
-            {faction.joined ? 'Branch into your own congregation' : 'Found a congregation'}
+            Branch into your own congregation
           </button>
+        ) : null}
+
+        {faction && !faction.joined ? (
+          <p className="cec-faction-hint">
+            Follow any worshiper with 3,000+ PP by character name. Their congregation starts when you
+            become their first follower — they do not need to tap anything.
+          </p>
         ) : null}
 
         {faction && (!faction.joined || (!faction.isFounder && faction.canSwitch)) ? (
@@ -249,7 +262,14 @@ function CecFactionPanel({ initialFaction, onChange, onClose }) {
               Follow <strong>{preview.displayName}</strong> in{' '}
               <strong>{preview.founderName}</strong>&rsquo;s congregation?
             </p>
-            <p>Your current followers will move with you.</p>
+            {preview.willAutoFound ? (
+              <p>
+                They do not have a flock yet — confirming makes you their first follower and opens
+                their congregation.
+              </p>
+            ) : (
+              <p>Your current followers will move with you.</p>
+            )}
             <button type="button" className="cec-faction-primary" onClick={handleJoin} disabled={busy}>
               Confirm
             </button>

@@ -317,16 +317,80 @@ function cec_preview_sponsor($conn, $code) {
     $stmt->execute();
     $row = $stmt->get_result()->fetch_assoc();
     $stmt->close();
-    if (!$row) {
+    if ($row) {
+        return [
+            'accountId' => (int) $row['id'],
+            'displayName' => $row['display_name'],
+            'founderAccountId' => (int) $row['faction_founder_id'],
+            'founderName' => $row['founder_name'],
+            'status' => $row['status'],
+            'willAutoFound' => false,
+        ];
+    }
+
+    // Eligible leaders do not need to tap Found — the first follower opens their congregation.
+    $stmt = $conn->prepare(
+        'SELECT id, display_name, pontifex_points
+         FROM cec_accounts
+         WHERE LOWER(display_name) = LOWER(?) AND email IS NOT NULL
+         LIMIT 1'
+    );
+    $stmt->bind_param('s', $name);
+    $stmt->execute();
+    $account = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    if (!$account) {
         return null;
     }
-    return [
-        'accountId' => (int) $row['id'],
-        'displayName' => $row['display_name'],
-        'founderAccountId' => (int) $row['faction_founder_id'],
-        'founderName' => $row['founder_name'],
-        'status' => $row['status'],
-    ];
+    if ((int) $account['pontifex_points'] >= CEC_FACTION_MIN_PP) {
+        return [
+            'accountId' => (int) $account['id'],
+            'displayName' => $account['display_name'],
+            'founderAccountId' => (int) $account['id'],
+            'founderName' => $account['display_name'],
+            'status' => 'active',
+            'willAutoFound' => true,
+        ];
+    }
+    throw new Exception(
+        $account['display_name']
+        . ' needs 3,000 PP (or must already be in a congregation) before anyone can follow them.'
+    );
+}
+
+/**
+ * Create a root congregation for an eligible account that does not have one yet.
+ * Used when their first follower joins — no manual Found step required.
+ */
+function cec_bootstrap_congregation_if_needed($conn, $accountId) {
+    $id = (int) $accountId;
+    if (cec_faction_membership($conn, $id)) {
+        return;
+    }
+    $stmt = $conn->prepare(
+        'SELECT pontifex_points FROM cec_accounts WHERE id = ? LIMIT 1'
+    );
+    $stmt->bind_param('i', $id);
+    $stmt->execute();
+    $row = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    if (!$row || (int) $row['pontifex_points'] < CEC_FACTION_MIN_PP) {
+        throw new Exception('That worshiper cannot lead a congregation yet.');
+    }
+    $stmt = $conn->prepare(
+        "INSERT INTO cec_factions (founder_account_id, status) VALUES (?, 'active')"
+    );
+    $stmt->bind_param('i', $id);
+    $stmt->execute();
+    $stmt->close();
+    $stmt = $conn->prepare(
+        'INSERT INTO cec_faction_memberships
+           (account_id, sponsor_account_id, faction_founder_id, joined_at, switched_at)
+         VALUES (?, NULL, ?, NOW(), NOW())'
+    );
+    $stmt->bind_param('ii', $id, $id);
+    $stmt->execute();
+    $stmt->close();
 }
 
 function cec_found_faction($conn, $accountId) {
@@ -400,13 +464,22 @@ function cec_join_faction($conn, $accountId, $code) {
     $id = (int) $accountId;
     $target = cec_preview_sponsor($conn, $code);
     if (!$target) {
-        throw new Exception('No active congregation member has that character name.');
+        throw new Exception('No worshiper has that character name.');
     }
     if ($target['status'] !== 'active') {
         throw new Exception('That congregation is frozen and cannot accept members.');
     }
     if ((int) $target['accountId'] === $id) {
         throw new Exception('You cannot sponsor yourself.');
+    }
+
+    // First follower of a 3,000+ PP worshiper opens their congregation automatically.
+    if (!empty($target['willAutoFound'])) {
+        cec_bootstrap_congregation_if_needed($conn, (int) $target['accountId']);
+        $target = cec_preview_sponsor($conn, $code);
+        if (!$target || !empty($target['willAutoFound'])) {
+            throw new Exception('Could not open that congregation. Try again.');
+        }
     }
 
     $current = cec_faction_membership($conn, $id);

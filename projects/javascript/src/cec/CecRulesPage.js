@@ -28,9 +28,19 @@ function CecRulesPage() {
         <section>
           <h2>Founding and following</h2>
           <ul>
-            <li>Any account with at least 3,000 Pontifex Points can found a congregation.</li>
-            <li>Anyone in a congregation can recruit followers using their character name.</li>
+            <li>
+              Anyone with at least 3,000 Pontifex Points can lead a congregation. It opens
+              automatically when their first follower joins — they do not need to tap Found.
+            </li>
+            <li>Follow someone by entering their character name.</li>
+            <li>
+              You can also follow people who are already inside a congregation (not only the founder).
+            </li>
             <li>Followers can recruit followers of their own, making one connected family tree.</li>
+            <li>
+              If you already follow someone and later reach 3,000 PP, you may branch off into your own
+              congregation (with the usual 48-hour switch wait).
+            </li>
             <li>You may change who you follow every 48 hours. Your entire follower branch moves with you.</li>
           </ul>
         </section>

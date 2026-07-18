@@ -506,10 +506,10 @@ function registerCecAccountRoutes(app, getConnection) {
       const row = await authenticateRequest(req.cecDb, req);
       if (!row) return jsonError(res, 'Not authenticated', 401);
       const preview = await previewSponsor(req.cecDb, req.query.code);
-      if (!preview) return jsonError(res, 'No congregation member has that character name', 404);
+      if (!preview) return jsonError(res, 'No worshiper has that character name', 404);
       jsonOk(res, { preview });
     } catch (error) {
-      jsonError(res, error.message || 'Failed to find congregation', 500);
+      jsonError(res, error.message || 'Failed to find congregation', 409);
     }
   });
 

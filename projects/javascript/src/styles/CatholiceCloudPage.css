@@ -5394,10 +5394,17 @@
 
 .cec-faction-code,
 .cec-faction-cooldown,
-.cec-faction-preview {
+.cec-faction-preview,
+.cec-faction-hint {
   font-size: 0.84rem;
   line-height: 1.45;
   color: rgba(245, 237, 216, 0.88);
+}
+
+.cec-faction-hint {
+  margin: 0.35rem 0 0.85rem;
+  text-align: center;
+  opacity: 0.9;
 }
 
 .cec-faction-join {

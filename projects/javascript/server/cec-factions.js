@@ -239,15 +239,61 @@ async function previewSponsor(db, code) {
     [name]
   );
   const row = rows[0];
-  return row
-    ? {
-        accountId: Number(row.id),
-        displayName: row.display_name,
-        founderAccountId: Number(row.faction_founder_id),
-        founderName: row.founder_name,
-        status: row.status,
-      }
-    : null;
+  if (row) {
+    return {
+      accountId: Number(row.id),
+      displayName: row.display_name,
+      founderAccountId: Number(row.faction_founder_id),
+      founderName: row.founder_name,
+      status: row.status,
+      willAutoFound: false,
+    };
+  }
+
+  // Eligible leaders do not need to tap Found — the first follower opens their congregation.
+  const [accounts] = await db.execute(
+    `SELECT id, display_name, pontifex_points
+     FROM cec_accounts
+     WHERE LOWER(display_name) = LOWER(?) AND email IS NOT NULL LIMIT 1`,
+    [name]
+  );
+  const account = accounts[0];
+  if (!account) return null;
+  if (Number(account.pontifex_points) >= FACTION_MIN_PP) {
+    return {
+      accountId: Number(account.id),
+      displayName: account.display_name,
+      founderAccountId: Number(account.id),
+      founderName: account.display_name,
+      status: 'active',
+      willAutoFound: true,
+    };
+  }
+  throw new Error(
+    `${account.display_name} needs 3,000 PP (or must already be in a congregation) before anyone can follow them.`
+  );
+}
+
+/** Open a root congregation when an eligible worshiper gets their first follower. */
+async function bootstrapCongregationIfNeeded(db, accountId) {
+  if (await getMembership(db, accountId)) return;
+  const [[account]] = await db.execute(
+    'SELECT pontifex_points FROM cec_accounts WHERE id = ? LIMIT 1',
+    [accountId]
+  );
+  if (!account || Number(account.pontifex_points) < FACTION_MIN_PP) {
+    throw new Error('That worshiper cannot lead a congregation yet.');
+  }
+  await db.execute(
+    "INSERT INTO cec_factions (founder_account_id, status) VALUES (?, 'active')",
+    [accountId]
+  );
+  await db.execute(
+    `INSERT INTO cec_faction_memberships
+       (account_id, sponsor_account_id, faction_founder_id, joined_at, switched_at)
+     VALUES (?, NULL, ?, NOW(), NOW())`,
+    [accountId, accountId]
+  );
 }
 
 async function foundFaction(db, accountId) {
@@ -312,12 +358,22 @@ async function foundFaction(db, accountId) {
 }
 
 async function joinFaction(db, accountId, code) {
-  const target = await previewSponsor(db, code);
-  if (!target) throw new Error('No active congregation member has that character name.');
+  let target = await previewSponsor(db, code);
+  if (!target) throw new Error('No worshiper has that character name.');
   if (target.status !== 'active') {
     throw new Error('That congregation is frozen and cannot accept members.');
   }
   if (target.accountId === Number(accountId)) throw new Error('You cannot sponsor yourself.');
+
+  // First follower of a 3,000+ PP worshiper opens their congregation automatically.
+  if (target.willAutoFound) {
+    await bootstrapCongregationIfNeeded(db, target.accountId);
+    target = await previewSponsor(db, code);
+    if (!target || target.willAutoFound) {
+      throw new Error('Could not open that congregation. Try again.');
+    }
+  }
+
   const current = await getMembership(db, accountId);
   if (current && Number(current.faction_founder_id) === Number(accountId)) {
     throw new Error('A congregation founder cannot join another congregation.');
