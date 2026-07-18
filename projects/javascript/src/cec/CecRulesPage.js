@@ -36,25 +36,63 @@ function CecRulesPage() {
         </section>
 
         <section>
-          <h2>Rewards and protection</h2>
+          <h2>Smiting</h2>
           <ul>
-            <li>Ten percent of earned PP is shared fractionally up the sponsor line.</li>
-            <li>Your own listed PP reward is not reduced to fund the share.</li>
-            <li>Larger active congregations lower each member&rsquo;s chance of being smote.</li>
-            <li>A smite removes up to 5% of PP, capped at 150 PP, and weakens rewards for 48 hours.</li>
+            <li>
+              Every few days, when you come back to play, you face a personal smite check. It is not a
+              shared timer for the whole site; each worshiper has their own next check.
+            </li>
+            <li>
+              Alone, the chance is about 30%. In a larger active congregation the chance falls (down to
+              about 5%). Bigger flocks are safer.
+            </li>
+            <li>
+              If you are smote, you lose about 5% of your PP (at least 10, at most 150). Rewards stay
+              weaker for the next 48 hours.
+            </li>
+            <li>
+              After a check resolves, your next one is scheduled a few days later. Congregation size is
+              the main defense.
+            </li>
           </ul>
         </section>
 
         <section>
-          <h2>Popes and succession</h2>
+          <h2>Trickle rewards</h2>
+          <ul>
+            <li>Ten percent of earned PP is shared fractionally up the sponsor line.</li>
+            <li>Your own listed PP reward is not reduced to fund the share.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Grace (when a founder falls below 3,000 PP)</h2>
+          <ul>
+            <li>
+              If a founder drops under 3,000 PP (for example after a smite), the congregation freezes
+              and a five-day grace period begins.
+            </li>
+            <li>
+              During grace, the flock stays together, but the congregation is frozen: it cannot take new
+              members, and frozen status does not give the same smite protection as an active flock.
+            </li>
+            <li>
+              If the founder climbs back to 3,000 PP within those five days, the congregation unfreezes
+              and life continues as before.
+            </li>
+            <li>
+              If grace ends without recovery, the eligible direct follower with the most PP (and at least
+              3,000 PP) becomes the new founder. If nobody qualifies, the congregation dissolves and
+              everyone is released.
+            </li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Popes</h2>
           <ul>
             <li>The Supreme Pope is the active congregation founder with the most PP.</li>
-            <li>If a founder falls below 3,000 PP, their congregation freezes for five days.</li>
-            <li>Recovering to 3,000 PP during grace restores the congregation.</li>
-            <li>
-              After grace, the eligible direct follower with the most PP succeeds the founder. If no direct
-              follower has 3,000 PP, the congregation dissolves.
-            </li>
+            <li>Founders need 3,000+ PP to remain eligible for that throne.</li>
           </ul>
         </section>
 

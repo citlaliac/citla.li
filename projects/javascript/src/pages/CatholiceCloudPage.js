@@ -58,6 +58,10 @@ import {
 import '../styles/CatholiceCloudPage.css';
 
 const PUB = process.env.PUBLIC_URL || '';
+// Local guests can inspect congregation UI without connecting to production MySQL.
+const CEC_LOCAL_UI_PREVIEW =
+  process.env.NODE_ENV === 'development' ||
+  (typeof window !== 'undefined' && window.location.hostname === 'localhost');
 const BG = {
   cathedral: `${PUB}/assets/catholicecloud/background/cathedral-bkg.jpg`,
   heaven: `${PUB}/assets/catholicecloud/background/heaven-bkg.jpg`,
@@ -163,10 +167,13 @@ function CatholiceCloudPage() {
     setAuthBusy(true);
     setAuthError('');
     try {
-      const available = await cecCheckUsernameAvailable(name);
-      if (!available) {
-        setAuthError('That name belongs to a registered worshiper — pick another');
-        return;
+      // Local preview has no MySQL — skip the availability check so guests can enter.
+      if (!CEC_LOCAL_UI_PREVIEW) {
+        const available = await cecCheckUsernameAvailable(name);
+        if (!available) {
+          setAuthError('That name belongs to a registered worshiper — pick another');
+          return;
+        }
       }
       setWorshiper(registerWorshiper(name, skinId));
     } catch (err) {
@@ -664,7 +671,9 @@ function CatholiceCloudPage() {
             starPalette={seasonTheme.starPalette}
             onPortraitClick={handlePortraitCommunion}
             onCongregationClick={
-              worshiper.accountId ? () => setShowFaction(true) : undefined
+              worshiper.accountId || CEC_LOCAL_UI_PREVIEW
+                ? () => setShowFaction(true)
+                : undefined
             }
             onLogout={worshiper.accountId ? handleLogout : undefined}
           />
@@ -759,7 +768,16 @@ function CatholiceCloudPage() {
 
       {showFaction && (
         <CecFactionPanel
-          initialFaction={faction}
+          initialFaction={
+            faction ||
+            (CEC_LOCAL_UI_PREVIEW
+              ? {
+                  joined: false,
+                  canFound: true,
+                  recruitmentCode: worshiper.displayName,
+                }
+              : null)
+          }
           onChange={setFaction}
           onClose={() => setShowFaction(false)}
         />

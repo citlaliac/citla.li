@@ -23,12 +23,15 @@ function CecWorshiperStage({
   const nextIsBonusLevel = upcoming?.id === 'pope';
   const isPope = worshiper.rank.id === 'pope';
   const papacyRulesId = useId();
+  const congregationTipId = useId();
   const papacyRules = papacyRulesBullets();
   const popeEligibleNotReigning =
     worshiper.accountId &&
     (worshiper.pontifexPoints ?? 0) >= POPE_RANK.minPP &&
     !isPope &&
     reigningPope;
+  // Founder name is the congregation label shown under the worshiper name.
+  const congregationName = faction?.joined ? faction.founder?.displayName : '';
 
   return (
     <aside className="cec-worshiper-stage" aria-label="Your worshiper">
@@ -37,6 +40,22 @@ function CecWorshiperStage({
       <p className="cec-worshiper-stage-name" style={nameStyle}>
         {worshiper.displayName}
       </p>
+
+      {congregationName && onCongregationClick ? (
+        <span className="cec-worshiper-stage-flock-wrap">
+          <button
+            type="button"
+            className="cec-worshiper-stage-flock"
+            onClick={onCongregationClick}
+            aria-describedby={congregationTipId}
+          >
+            of the {congregationName} Congregation
+          </button>
+          <span className="cec-worshiper-stage-flock-tip" id={congregationTipId} role="tooltip">
+            Click to change your congregation (who you follow)
+          </span>
+        </span>
+      ) : null}
 
       <button
         type="button"
@@ -73,21 +92,6 @@ function CecWorshiperStage({
         <strong className="cec-worshiper-stage-pp-value">{worshiper.pontifexPoints}</strong>
       </div>
 
-      {onCongregationClick && (
-        <button
-          type="button"
-          className="cec-worshiper-stage-congregation"
-          onClick={onCongregationClick}
-        >
-          Congregation
-          {faction?.joined ? (
-            <span>{faction.descendantFollowers} followers</span>
-          ) : (
-            <span>Join or found one</span>
-          )}
-        </button>
-      )}
-
       {upcoming ? (
         <p className="cec-worshiper-stage-next">
           {nextIsBonusLevel ? 'BONUS LEVEL' : 'Next'}: <strong>{upcoming.label}</strong>
@@ -99,6 +103,24 @@ function CecWorshiperStage({
         <p className="cec-worshiper-stage-next cec-worshiper-stage-next--max">
           {isPope ? 'Supreme pontiff' : 'Highest rank this visit'}
         </p>
+      )}
+
+      {onCongregationClick && (
+        <button
+          type="button"
+          className="cec-worshiper-stage-congregation"
+          onClick={onCongregationClick}
+          title={
+            faction?.joined
+              ? `${faction.descendantFollowers} followers`
+              : 'Join or found a congregation'
+          }
+        >
+          Congregation
+          {faction?.joined ? (
+            <span aria-hidden="true"> · {faction.descendantFollowers}</span>
+          ) : null}
+        </button>
       )}
 
       {worshiper.accountId && onLogout && (

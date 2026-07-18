@@ -20,6 +20,7 @@ function formatDate(value) {
 /**
  * Account-backed congregation controls. Sponsor preview is a deliberate
  * confirmation step because switching moves the member's whole follower tree.
+ * Visual language matches the wheel / bulletin map modals.
  */
 function CecFactionPanel({ initialFaction, onChange, onClose }) {
   const [faction, setFaction] = useState(initialFaction);
@@ -28,8 +29,14 @@ function CecFactionPanel({ initialFaction, onChange, onClose }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const token = getAuthToken();
+  const previewOnly = !token;
 
   useEffect(() => {
+    // A local guest can inspect the complete modal without a production database.
+    if (!token) {
+      setFaction(initialFaction);
+      return undefined;
+    }
     let cancelled = false;
     setBusy(true);
     cecFetchFaction(token)
@@ -48,7 +55,7 @@ function CecFactionPanel({ initialFaction, onChange, onClose }) {
     return () => {
       cancelled = true;
     };
-  }, [onChange, token]);
+  }, [initialFaction, onChange, token]);
 
   const commitFaction = (next) => {
     setFaction(next);
@@ -59,6 +66,13 @@ function CecFactionPanel({ initialFaction, onChange, onClose }) {
 
   const handlePreview = async (event) => {
     event.preventDefault();
+    if (previewOnly) {
+      setPreview({
+        displayName: code,
+        founderName: 'Sample Pope',
+      });
+      return;
+    }
     setBusy(true);
     setError('');
     try {
@@ -72,6 +86,24 @@ function CecFactionPanel({ initialFaction, onChange, onClose }) {
   };
 
   const handleJoin = async () => {
+    if (previewOnly) {
+      // Local UI preview: pretend the join succeeded so stage affiliation can be checked.
+      commitFaction({
+        joined: true,
+        isFounder: false,
+        status: 'active',
+        canFound: false,
+        canSwitch: true,
+        sponsor: { displayName: code.trim() || 'Sample Sponsor' },
+        founder: { displayName: preview?.founderName || 'Sample Pope' },
+        directFollowers: 0,
+        descendantFollowers: 0,
+        factionSize: 3,
+        smiteChancePercent: 17,
+        recruitmentCode: initialFaction?.recruitmentCode || 'Guest',
+      });
+      return;
+    }
     setBusy(true);
     setError('');
     try {
@@ -84,6 +116,24 @@ function CecFactionPanel({ initialFaction, onChange, onClose }) {
   };
 
   const handleFound = async () => {
+    if (previewOnly) {
+      const name = initialFaction?.recruitmentCode || 'Guest';
+      commitFaction({
+        joined: true,
+        isFounder: true,
+        status: 'active',
+        canFound: false,
+        canSwitch: false,
+        sponsor: null,
+        founder: { displayName: name },
+        directFollowers: 0,
+        descendantFollowers: 0,
+        factionSize: 1,
+        smiteChancePercent: 30,
+        recruitmentCode: name,
+      });
+      return;
+    }
     setBusy(true);
     setError('');
     try {
@@ -96,20 +146,32 @@ function CecFactionPanel({ initialFaction, onChange, onClose }) {
   };
 
   return (
-    <div className="cec-faction-overlay" role="dialog" aria-modal="true" aria-labelledby="cec-faction-title">
-      <section className="cec-faction-panel">
+    <div
+      className="cec-faction-overlay cec-wheel-overlay cec-wheel-overlay--map"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="cec-faction-title"
+    >
+      <section className="cec-faction-panel cec-wheel-modal">
         <button type="button" className="cec-faction-close" onClick={onClose} aria-label="Close">
           ×
         </button>
-        <p className="cec-faction-kicker">Catholic eCloud</p>
-        <h2 id="cec-faction-title">Congregations</h2>
+        <h2 id="cec-faction-title" className="cec-wheel-title">
+          Congregations
+        </h2>
+        <p className="cec-wheel-tagline">
+          Follow by character name. Your whole follower branch moves with you.
+        </p>
+        {previewOnly ? (
+          <p className="cec-faction-preview-note">Local UI preview · no account changes are saved</p>
+        ) : null}
 
-        {busy && !faction ? <p>Opening the parish books…</p> : null}
+        {busy && !faction ? <p className="cec-faction-loading">Opening the parish books…</p> : null}
 
         {faction?.joined ? (
           <div className="cec-faction-summary">
             <p className={`cec-faction-status cec-faction-status--${faction.status}`}>
-              {faction.status === 'frozen' ? 'Frozen congregation' : 'Active congregation'}
+              {faction.status === 'frozen' ? 'Frozen · grace active' : 'Active congregation'}
             </p>
             <p>
               Supreme line: <strong>{faction.founder.displayName}</strong>
@@ -123,24 +185,24 @@ function CecFactionPanel({ initialFaction, onChange, onClose }) {
             )}
             <div className="cec-faction-stats">
               <span>
-                <strong>{faction.directFollowers}</strong> direct followers
+                <strong>{faction.directFollowers}</strong> direct
               </span>
               <span>
-                <strong>{faction.descendantFollowers}</strong> total followers
+                <strong>{faction.descendantFollowers}</strong> followers
               </span>
               <span>
-                <strong>{faction.factionSize}</strong> congregation members
+                <strong>{faction.factionSize}</strong> flock
               </span>
               <span>
-                <strong>{faction.smiteChancePercent}%</strong> smite chance
+                <strong>{faction.smiteChancePercent}%</strong> smite
               </span>
             </div>
             <p className="cec-faction-code">
-              Your recruitment code is your character name: <strong>{faction.recruitmentCode}</strong>
+              Recruitment code: your character name, <strong>{faction.recruitmentCode}</strong>
             </p>
             {faction.status === 'frozen' && (
               <p className="cec-faction-warning">
-                The founder has five days to return to 3,000 PP. Grace ends {formatDate(faction.frozenUntil)}.
+                Grace: founder has until {formatDate(faction.frozenUntil)} to return to 3,000 PP.
               </p>
             )}
           </div>
@@ -177,7 +239,7 @@ function CecFactionPanel({ initialFaction, onChange, onClose }) {
 
         {faction?.joined && !faction.isFounder && !faction.canSwitch ? (
           <p className="cec-faction-cooldown">
-            Your whole follower branch can move again {formatDate(faction.canSwitchAt)}.
+            Your branch can move again {formatDate(faction.canSwitchAt)}.
           </p>
         ) : null}
 
@@ -199,6 +261,10 @@ function CecFactionPanel({ initialFaction, onChange, onClose }) {
             {error}
           </p>
         ) : null}
+
+        <button type="button" className="cec-toast-dismiss cec-wheel-amen" onClick={onClose}>
+          Amen
+        </button>
       </section>
     </div>
   );

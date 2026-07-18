@@ -1729,6 +1729,71 @@
   transition: color 0.45s ease, text-shadow 0.45s ease;
 }
 
+/* Affiliation under the name — opens the congregation panel on click. */
+.cec-worshiper-stage-flock-wrap {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin: 0.15rem 0 0;
+}
+
+.cec-worshiper-stage-flock {
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: rgba(255, 233, 168, 0.82);
+  font: inherit;
+  font-size: 0.72rem;
+  font-style: italic;
+  font-weight: 500;
+  line-height: 1.25;
+  text-align: center;
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 233, 168, 0.35);
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.cec-worshiper-stage-flock:hover,
+.cec-worshiper-stage-flock:focus-visible {
+  color: rgba(255, 233, 168, 0.98);
+  outline: none;
+}
+
+.cec-worshiper-stage-flock-tip {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 0.4rem);
+  z-index: 5;
+  width: max-content;
+  max-width: min(14rem, 70vw);
+  padding: 0.45rem 0.55rem;
+  border: 1px solid rgba(255, 232, 165, 0.28);
+  border-radius: 8px;
+  background: rgba(18, 12, 8, 0.94);
+  color: #f5edd8;
+  font-size: 0.68rem;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 1.35;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(0.15rem);
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
+}
+
+.cec-worshiper-stage-flock-wrap:hover .cec-worshiper-stage-flock-tip,
+.cec-worshiper-stage-flock-wrap:focus-within .cec-worshiper-stage-flock-tip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
 .cec-worshiper-stage-portrait-btn {
   display: flex;
   align-items: center;
@@ -5176,141 +5241,167 @@
   color: rgba(245, 237, 216, 0.72);
 }
 
-/* Congregations stay compact in the worshiper card and expand into a touch-safe sheet. */
+/* Quiet text control — sits with logout, not a full-width card. */
 .cec-worshiper-stage-congregation {
-  display: grid;
-  gap: 0.12rem;
-  width: 100%;
-  margin: 0.55rem 0 0;
-  padding: 0.45rem 0.65rem;
-  border: 1px solid rgba(115, 73, 42, 0.32);
-  border-radius: 0.45rem;
-  background: rgba(255, 249, 229, 0.74);
-  color: #522b1d;
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0.35rem auto 0;
+  padding: 0.1rem 0.25rem;
+  border: none;
+  border-radius: 0;
+  background: none;
+  color: rgba(255, 233, 168, 0.7);
   font: inherit;
-  font-weight: 700;
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-decoration: underline;
+  text-underline-offset: 2px;
   cursor: pointer;
+  transition: color 0.15s ease;
 }
 
 .cec-worshiper-stage-congregation span {
-  font-size: 0.7rem;
+  font-size: inherit;
   font-weight: 500;
-  opacity: 0.8;
+  opacity: 0.72;
+  text-decoration: none;
 }
 
+.cec-worshiper-stage-congregation:hover,
+.cec-worshiper-stage-congregation:focus-visible {
+  color: rgba(255, 233, 168, 0.98);
+  outline: none;
+}
+
+/* Congregation modal reuses wheel overlay chrome; panel content is dark-gold. */
 .cec-faction-overlay {
-  position: fixed;
-  inset: 0;
   z-index: 4300;
-  display: grid;
-  place-items: center;
-  padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right))
-    max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
-  background: rgba(16, 8, 25, 0.72);
-  backdrop-filter: blur(6px);
 }
 
 .cec-faction-panel {
   position: relative;
-  width: min(100%, 36rem);
-  max-height: min(86dvh, 44rem);
+  max-width: min(520px, calc(100vw - 1rem));
+  max-height: min(86dvh, 40rem);
+  overflow-x: hidden;
   overflow-y: auto;
-  padding: clamp(1.15rem, 4vw, 2rem);
-  border: 2px solid #aa8746;
-  border-radius: 1rem;
-  background: linear-gradient(165deg, #fff9e8, #eee0bd);
-  color: #41241a;
-  box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.46);
+  -webkit-overflow-scrolling: touch;
+  text-align: left;
 }
 
-.cec-faction-panel h2 {
-  margin: 0 0 1rem;
-  font-family: Georgia, serif;
-  font-size: clamp(1.65rem, 7vw, 2.25rem);
-}
-
-.cec-faction-kicker {
-  margin: 0;
-  color: #8b5e28;
-  font-size: 0.7rem;
-  font-weight: 800;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+.cec-faction-panel .cec-wheel-title,
+.cec-faction-panel .cec-wheel-tagline {
+  text-align: center;
 }
 
 .cec-faction-close {
   position: absolute;
-  top: 0.65rem;
-  right: 0.65rem;
-  display: grid;
-  place-items: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  border: 0;
-  border-radius: 50%;
-  background: rgba(65, 36, 26, 0.1);
-  color: #41241a;
-  font-size: 1.7rem;
+  top: 0.55rem;
+  left: 0.55rem;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  margin: 0;
+  padding: 0;
+  border: 1px solid rgba(255, 232, 165, 0.28);
+  border-radius: 8px;
+  background: rgba(24, 18, 8, 0.45);
+  color: #f5edd8;
+  font-size: 1.35rem;
   line-height: 1;
   cursor: pointer;
 }
 
+.cec-faction-close:hover,
+.cec-faction-close:focus-visible {
+  background: rgba(48, 36, 14, 0.72);
+  border-color: rgba(255, 232, 165, 0.45);
+  color: #fff8e8;
+  outline: none;
+}
+
+.cec-faction-loading {
+  margin: 0.5rem 0 0;
+  text-align: center;
+  color: rgba(245, 237, 216, 0.78);
+  font-size: 0.9rem;
+}
+
+.cec-faction-preview-note {
+  margin: -0.55rem 0 0.8rem;
+  color: rgba(255, 233, 168, 0.7);
+  font-size: 0.72rem;
+  text-align: center;
+}
+
 .cec-faction-summary {
-  padding: 0.9rem;
-  border: 1px solid rgba(65, 36, 26, 0.18);
-  border-radius: 0.7rem;
-  background: rgba(255, 255, 255, 0.42);
+  margin: 0.35rem 0 0.75rem;
+  padding: 0.85rem 0.95rem;
+  border: 1px solid rgba(255, 232, 165, 0.22);
+  border-radius: 10px;
+  background: rgba(18, 12, 8, 0.42);
+  color: #f5edd8;
 }
 
 .cec-faction-summary p {
-  margin: 0.45rem 0;
+  margin: 0.4rem 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
 }
 
 .cec-faction-status {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 800;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
 .cec-faction-status--active {
-  color: #427039;
+  color: #b7e0a2;
 }
 
 .cec-faction-status--frozen,
 .cec-faction-warning,
 .cec-faction-error {
-  color: #9b2f2f;
+  color: #f0a8a0;
 }
 
 .cec-faction-stats {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.55rem;
-  margin: 0.85rem 0;
+  gap: 0.45rem;
+  margin: 0.75rem 0;
 }
 
 .cec-faction-stats span {
   display: grid;
-  padding: 0.55rem;
-  border-radius: 0.45rem;
-  background: rgba(98, 63, 33, 0.08);
-  font-size: 0.76rem;
+  padding: 0.5rem 0.55rem;
+  border-radius: 8px;
+  background: rgba(255, 232, 165, 0.08);
+  border: 1px solid rgba(255, 232, 165, 0.14);
+  font-size: 0.74rem;
+  color: rgba(245, 237, 216, 0.82);
 }
 
 .cec-faction-stats strong {
-  font-size: 1.15rem;
+  font-size: 1.1rem;
+  color: #f5edd8;
 }
 
 .cec-faction-code,
 .cec-faction-cooldown,
 .cec-faction-preview {
-  font-size: 0.82rem;
+  font-size: 0.84rem;
   line-height: 1.45;
+  color: rgba(245, 237, 216, 0.88);
 }
 
 .cec-faction-join {
-  margin-top: 1rem;
+  margin-top: 0.85rem;
 }
 
 .cec-faction-join label {
@@ -5318,37 +5409,47 @@
   margin-bottom: 0.35rem;
   font-size: 0.8rem;
   font-weight: 700;
+  color: #f0e6c8;
 }
 
 .cec-faction-join div {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.4rem;
 }
 
 .cec-faction-join input {
   min-width: 0;
-  flex: 1;
-  padding: 0.7rem 0.75rem;
-  border: 1px solid rgba(65, 36, 26, 0.4);
-  border-radius: 0.45rem;
+  flex: 1 1 10rem;
+  min-height: 2.75rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid rgba(255, 232, 165, 0.28);
+  border-radius: 8px;
+  background: rgba(8, 4, 16, 0.45);
+  color: #fff8e8;
   font: inherit;
   font-size: 1rem;
+}
+
+.cec-faction-join input::placeholder {
+  color: rgba(245, 237, 216, 0.45);
 }
 
 .cec-faction-join button,
 .cec-faction-primary {
   min-height: 2.75rem;
-  padding: 0.65rem 0.9rem;
-  border: 1px solid #6b4425;
-  border-radius: 0.45rem;
-  background: #6b4425;
-  color: #fff9e8;
+  padding: 0.65rem 0.95rem;
+  border: 1px solid rgba(212, 175, 95, 0.55);
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(212, 175, 95, 0.32), rgba(120, 88, 36, 0.55));
+  color: #fff8e8;
   font: inherit;
   font-weight: 700;
   cursor: pointer;
 }
 
 .cec-faction-primary {
+  display: block;
   width: 100%;
   margin-top: 0.75rem;
 }
@@ -5357,6 +5458,10 @@
 .cec-faction-primary:disabled {
   cursor: wait;
   opacity: 0.58;
+}
+
+.cec-faction-panel .cec-wheel-amen {
+  margin-top: 1rem;
 }
 
 .cec-smite-notice {
@@ -5485,33 +5590,13 @@
 }
 
 @media (max-width: 34rem) {
-  .cec-faction-overlay {
-    align-items: end;
-    padding: 0;
-  }
-
   .cec-faction-panel {
-    width: 100%;
-    max-height: 88dvh;
-    padding-right: max(1rem, env(safe-area-inset-right));
-    padding-bottom: max(1rem, env(safe-area-inset-bottom));
-    padding-left: max(1rem, env(safe-area-inset-left));
-    border-right: 0;
-    border-bottom: 0;
-    border-left: 0;
-    border-radius: 1rem 1rem 0 0;
+    max-height: min(88dvh, 40rem);
   }
 }
 
 @media (max-height: 31rem) and (orientation: landscape) {
-  .cec-faction-overlay {
-    place-items: stretch center;
-    padding-block: max(0.35rem, env(safe-area-inset-top))
-      max(0.35rem, env(safe-area-inset-bottom));
-  }
-
   .cec-faction-panel {
-    max-height: calc(100dvh - 0.7rem);
-    padding-block: 0.85rem;
+    max-height: calc(100dvh - 1rem);
   }
 }
